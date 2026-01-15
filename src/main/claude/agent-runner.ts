@@ -6,6 +6,7 @@ import * as path from 'path';
 
 interface AgentRunnerOptions {
   sendToRenderer: (event: ServerEvent) => void;
+  saveMessage?: (message: Message) => void;
 }
 
 /**
@@ -24,6 +25,7 @@ interface PendingQuestion {
 
 export class ClaudeAgentRunner {
   private sendToRenderer: (event: ServerEvent) => void;
+  private saveMessage?: (message: Message) => void;
   private pathResolver: PathResolver;
   private activeControllers: Map<string, AbortController> = new Map();
   private sdkSessions: Map<string, string> = new Map(); // sessionId -> sdk session_id
@@ -81,6 +83,7 @@ export class ClaudeAgentRunner {
 
   constructor(options: AgentRunnerOptions, pathResolver: PathResolver) {
     this.sendToRenderer = options.sendToRenderer;
+    this.saveMessage = options.saveMessage;
     this.pathResolver = pathResolver;
     this.model = process.env.CLAUDE_MODEL || process.env.ANTHROPIC_DEFAULT_SONNET_MODEL || 'anthropic/claude-sonnet-4';
     
@@ -114,16 +117,17 @@ export class ClaudeAgentRunner {
       // No need to send it again from backend
 
       // Send initial thinking trace
+      const thinkingStepId = uuidv4();
       this.sendTraceStep(session.id, {
-        id: uuidv4(),
+        id: thinkingStepId,
         type: 'thinking',
         status: 'running',
         title: 'Processing request...',
         timestamp: Date.now(),
       });
 
-      const workingDir = session.cwd || process.cwd();
-      console.log('[ClaudeAgentRunner] Working directory:', workingDir);
+      const workingDir = session.cwd || undefined;
+      console.log('[ClaudeAgentRunner] Working directory:', workingDir || '(none)');
 
       // Build conversation context by prepending history to prompt
       // Build a chat-style history so Claude can continue previous turns
@@ -150,6 +154,11 @@ export class ClaudeAgentRunner {
       // SANDBOX: Path validation function
       const isPathInsideWorkspace = (targetPath: string): boolean => {
         if (!targetPath) return true;
+        
+        // If no working directory is set, deny all file access
+        if (!workingDir) {
+          return false;
+        }
         
         // Normalize paths for comparison
         const normalizedTarget = path.normalize(targetPath);
@@ -563,16 +572,13 @@ Cowork mode includes **WebFetch** and **WebSearch** tools for retrieving web con
             for (const block of content) {
               if (block.type === 'tool_result') {
                 const isError = block.is_error === true;
-                
-                this.sendTraceStep(session.id, {
-                  id: uuidv4(),
-                  type: 'tool_result',
+
+                // Update the existing tool_call trace step instead of creating a new one
+                this.sendTraceUpdate(session.id, block.tool_use_id, {
                   status: isError ? 'error' : 'completed',
-                  title: isError ? 'Tool failed' : 'Tool done',
-                  toolOutput: typeof block.content === 'string' 
-                    ? block.content.slice(0, 800) 
+                  toolOutput: typeof block.content === 'string'
+                    ? block.content.slice(0, 800)
                     : JSON.stringify(block.content).slice(0, 800),
-                  timestamp: Date.now(),
                 });
 
                 // Send tool result message
@@ -598,13 +604,10 @@ Cowork mode includes **WebFetch** and **WebSearch** tools for retrieving web con
         }
       }
 
-      // Complete
-      this.sendTraceStep(session.id, {
-        id: uuidv4(),
-        type: 'thinking',
+      // Complete - update the initial thinking step
+      this.sendTraceUpdate(session.id, thinkingStepId, {
         status: 'completed',
         title: 'Task completed',
-        timestamp: Date.now(),
       });
 
     } catch (error) {
@@ -647,7 +650,17 @@ Cowork mode includes **WebFetch** and **WebSearch** tools for retrieving web con
     this.sendToRenderer({ type: 'trace.step', payload: { sessionId, step } });
   }
 
+  private sendTraceUpdate(sessionId: string, stepId: string, updates: Partial<TraceStep>): void {
+    console.log(`[Trace] Update step ${stepId}:`, updates);
+    this.sendToRenderer({ type: 'trace.update', payload: { sessionId, stepId, updates } });
+  }
+
   private sendMessage(sessionId: string, message: Message): void {
+    // Save message to database for persistence
+    if (this.saveMessage) {
+      this.saveMessage(message);
+    }
+    // Send to renderer for UI update
     this.sendToRenderer({ type: 'stream.message', payload: { sessionId, message } });
   }
 

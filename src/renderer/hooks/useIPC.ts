@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useAppStore } from '../store';
-import type { ClientEvent, ServerEvent, PermissionResult, Session, Message, UserQuestionResponse } from '../types';
+import type { ClientEvent, ServerEvent, PermissionResult, Session, Message } from '../types';
 
 // Check if running in Electron
 const isElectron = typeof window !== 'undefined' && window.electronAPI !== undefined;
@@ -59,6 +59,10 @@ export function useIPC() {
           store.addTraceStep(event.payload.sessionId, event.payload.step);
           break;
 
+        case 'trace.update':
+          store.updateTraceStep(event.payload.sessionId, event.payload.stepId, event.payload.updates);
+          break;
+
         case 'permission.request':
           store.setPendingPermission(event.payload);
           break;
@@ -66,6 +70,15 @@ export function useIPC() {
         case 'question.request':
           console.log('[useIPC] question.request received:', event.payload);
           store.setPendingQuestion(event.payload);
+          break;
+
+        case 'config.status':
+          console.log('[useIPC] config.status received:', event.payload.isConfigured);
+          store.setIsConfigured(event.payload.isConfigured);
+          store.setAppConfig(event.payload.config);
+          if (!event.payload.isConfigured) {
+            store.setShowConfigModal(true);
+          }
           break;
 
         case 'error':
@@ -138,7 +151,11 @@ export function useIPC() {
             title: title || 'New Session',
             status: 'running',
             createdAt: Date.now(),
+            updatedAt: Date.now(),
             cwd: cwd || '',
+            mountedPaths: [],
+            allowedTools: ['read', 'glob', 'grep'],
+            memoryEnabled: false,
           };
           
           addSession(session);
@@ -293,6 +310,23 @@ export function useIPC() {
     send({ type: 'session.list', payload: {} });
   }, [send]);
 
+  // Get messages for a session (from persistent storage)
+  const getSessionMessages = useCallback(
+    async (sessionId: string): Promise<Message[]> => {
+      if (!isElectron) {
+        console.log('[useIPC] Browser mode - no persistent messages');
+        return [];
+      }
+      console.log('[useIPC] Getting messages for session:', sessionId);
+      const messages = await invoke<Message[]>({
+        type: 'session.getMessages',
+        payload: { sessionId },
+      });
+      return messages || [];
+    },
+    [invoke]
+  );
+
   const respondToPermission = useCallback(
     (toolUseId: string, result: PermissionResult) => {
       send({
@@ -331,6 +365,7 @@ export function useIPC() {
     stopSession,
     deleteSession,
     listSessions,
+    getSessionMessages,
     respondToPermission,
     respondToQuestion,
     selectFolder,

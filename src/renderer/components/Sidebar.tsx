@@ -1,19 +1,54 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useAppStore } from '../store';
 import { useIPC } from '../hooks/useIPC';
 import {
-  Plus,
-  MessageSquare,
   Trash2,
-  User,
   Sparkles,
+  Moon,
+  Sun,
+  Settings,
 } from 'lucide-react';
-import type { Session } from '../types';
 
 export function Sidebar() {
-  const { sessions, activeSessionId, setActiveSession } = useAppStore();
-  const { deleteSession } = useIPC();
+  const { sessions, activeSessionId, settings, messagesBySession, setActiveSession, setMessages, updateSettings, setShowConfigModal, isConfigured } = useAppStore();
+  const { deleteSession, getSessionMessages, isElectron } = useIPC();
   const [hoveredSession, setHoveredSession] = useState<string | null>(null);
+  const [loadingSession, setLoadingSession] = useState<string | null>(null);
+
+  // Handle session click - load messages if needed
+  const handleSessionClick = useCallback(async (sessionId: string) => {
+    if (activeSessionId === sessionId) return;
+    
+    setActiveSession(sessionId);
+    
+    // Check if we already have messages loaded for this session
+    const existingMessages = messagesBySession[sessionId];
+    if (!existingMessages || existingMessages.length === 0) {
+      // Load messages from persistent storage
+      if (isElectron) {
+        setLoadingSession(sessionId);
+        try {
+          const messages = await getSessionMessages(sessionId);
+          if (messages && messages.length > 0) {
+            setMessages(sessionId, messages);
+            console.log('[Sidebar] Loaded', messages.length, 'messages for session:', sessionId);
+          }
+        } catch (error) {
+          console.error('[Sidebar] Failed to load messages:', error);
+        } finally {
+          setLoadingSession(null);
+        }
+      }
+    }
+  }, [activeSessionId, messagesBySession, setActiveSession, setMessages, getSessionMessages, isElectron]);
+
+  const toggleTheme = () => {
+    updateSettings({ theme: settings.theme === 'dark' ? 'light' : 'dark' });
+  };
+
+  const handleOpenSettings = () => {
+    setShowConfigModal(true);
+  };
 
   const handleNewSession = () => {
     setActiveSession(null);
@@ -26,19 +61,20 @@ export function Sidebar() {
 
   return (
     <div className="w-64 bg-surface border-r border-border flex flex-col">
-      {/* Header with Tabs */}
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center gap-1 p-1 bg-surface-muted rounded-xl">
-          <button className="flex-1 px-3 py-1.5 text-sm font-medium text-text-muted rounded-lg hover:bg-surface transition-colors">
-            Chat
-          </button>
-          <button className="flex-1 px-3 py-1.5 text-sm font-medium text-text-muted rounded-lg hover:bg-surface transition-colors">
-            Code
-          </button>
-          <button className="flex-1 px-3 py-1.5 text-sm font-medium text-text-primary bg-surface rounded-lg shadow-soft">
-            Cowork
-          </button>
-        </div>
+      {/* Header with App Title and Dark Mode Toggle */}
+      <div className="px-4 pt-6 pb-4 border-b border-border flex items-center justify-between">
+        <h1 className="text-lg font-semibold text-text-primary">Cowork</h1>
+        <button
+          onClick={toggleTheme}
+          className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-hover transition-colors text-text-secondary"
+          title={settings.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {settings.theme === 'dark' ? (
+            <Sun className="w-4 h-4" />
+          ) : (
+            <Moon className="w-4 h-4" />
+          )}
+        </button>
       </div>
 
       {/* New Task Button */}
@@ -65,7 +101,7 @@ export function Sidebar() {
             sessions.map((session) => (
               <div
                 key={session.id}
-                onClick={() => setActiveSession(session.id)}
+                onClick={() => handleSessionClick(session.id)}
                 onMouseEnter={() => setHoveredSession(session.id)}
                 onMouseLeave={() => setHoveredSession(null)}
                 className={`group relative px-3 py-2.5 rounded-xl cursor-pointer transition-all ${
@@ -76,6 +112,7 @@ export function Sidebar() {
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                    loadingSession === session.id ? 'bg-accent animate-pulse' :
                     session.status === 'running' ? 'bg-accent' :
                     session.status === 'completed' ? 'bg-success' :
                     session.status === 'error' ? 'bg-error' : 'bg-border'
@@ -113,8 +150,17 @@ export function Sidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-text-primary truncate">User</p>
-            <p className="text-xs text-text-muted">Free plan</p>
+            <p className="text-xs text-text-muted">
+              {isConfigured ? 'API 已配置' : '未配置 API'}
+            </p>
           </div>
+          <button
+            onClick={handleOpenSettings}
+            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-hover text-text-muted hover:text-text-primary transition-colors"
+            title="API 设置"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </div>
