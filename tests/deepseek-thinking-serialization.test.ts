@@ -8,10 +8,14 @@ const completionsPath = path.resolve(
 const completionsSource = fs.readFileSync(completionsPath, 'utf8');
 const isPatched = completionsSource.includes('requiresThinkingInContent');
 
+if (!isPatched) {
+  throw new Error('Expected @mariozechner/pi-ai patch to be applied before running this suite');
+}
+
 const mod = await import(completionsPath);
 const { convertMessages } = mod;
 
-describe.skipIf(!isPatched)('DeepSeek thinking block serialization', () => {
+describe('DeepSeek thinking block serialization', () => {
   const baseModel = {
     id: 'deepseek-v4-pro',
     name: 'deepseek-v4-pro',
