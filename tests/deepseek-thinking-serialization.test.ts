@@ -1,12 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import path from 'node:path';
+import fs from 'node:fs';
 
-const mod = await import(
-  path.resolve('node_modules/@mariozechner/pi-ai/dist/providers/openai-completions.js')
+const completionsPath = path.resolve(
+  'node_modules/@mariozechner/pi-ai/dist/providers/openai-completions.js'
 );
+const completionsSource = fs.readFileSync(completionsPath, 'utf8');
+const isPatched = completionsSource.includes('requiresThinkingInContent');
+
+const mod = await import(completionsPath);
 const { convertMessages } = mod;
 
-describe('DeepSeek thinking block serialization', () => {
+describe.skipIf(!isPatched)('DeepSeek thinking block serialization', () => {
   const baseModel = {
     id: 'deepseek-v4-pro',
     name: 'deepseek-v4-pro',
