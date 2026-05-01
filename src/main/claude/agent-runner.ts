@@ -776,6 +776,20 @@ ${hints.join('\n')}
     return /\bsudo\b/.test(command);
   }
 
+  private getToolDisplayName(toolName: string): string {
+    if (!toolName.startsWith('mcp__')) {
+      return toolName;
+    }
+
+    const mcpTool = this.mcpManager?.getTool(toolName);
+    if (mcpTool?.originalName) {
+      return mcpTool.originalName;
+    }
+
+    const match = toolName.match(/^mcp__(.+?)__(.+)$/);
+    return match?.[2] || toolName;
+  }
+
   /**
    * Wrap the bash tool in the coding tools array to intercept sudo commands.
    * When a sudo command is detected, prompts the user for a password,
@@ -2197,11 +2211,12 @@ Tool routing:
                 const toolContent = partial?.content?.[ame.contentIndex];
                 const toolName = toolContent?.type === 'toolCall' ? toolContent.name : 'unknown';
                 const toolCallId = toolContent?.type === 'toolCall' ? toolContent.id : uuidv4();
+                const toolDisplayName = this.getToolDisplayName(toolName);
                 this.sendTraceStep(session.id, {
                   id: toolCallId,
                   type: 'tool_call',
                   status: 'running',
-                  title: toolName,
+                  title: toolDisplayName,
                   toolName,
                   toolInput:
                     toolContent?.type === 'toolCall'
@@ -2304,10 +2319,12 @@ Tool routing:
                       }
                     }
                   } else if (block.type === 'toolCall') {
+                    const displayName = this.getToolDisplayName(block.name);
                     contentBlocks.push({
                       type: 'tool_use',
                       id: block.id,
                       name: block.name,
+                      displayName,
                       input: block.arguments,
                     });
                   } else if (block.type === 'thinking') {
@@ -2372,8 +2389,10 @@ Tool routing:
               const isError = event.isError;
               const normalizedToolResult = normalizeToolExecutionResultForUi(event.result);
               const outputText = normalizedToolResult.content;
+              const toolDisplayName = this.getToolDisplayName(event.toolName);
               this.sendTraceUpdate(session.id, toolCallId, {
                 status: isError ? 'error' : 'completed',
+                title: toolDisplayName,
                 toolName: event.toolName,
                 toolOutput: sanitizeOutputPaths(outputText).slice(0, 800),
               });

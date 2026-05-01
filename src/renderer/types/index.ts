@@ -73,6 +73,7 @@ export interface ToolUseContent {
   type: 'tool_use';
   id: string;
   name: string;
+  displayName?: string;
   input: Record<string, unknown>;
 }
 
