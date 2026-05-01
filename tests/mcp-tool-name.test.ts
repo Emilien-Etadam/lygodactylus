@@ -207,12 +207,12 @@ describe('MCP tool name parsing', () => {
       listTools: vi.fn().mockResolvedValue({
         tools: [
           {
-            name: 'browser.context',
+            name: 'browser:context',
             description: '',
             inputSchema: { type: 'object', properties: {} },
           },
           {
-            name: 'browser:context',
+            name: 'browser.context',
             description: '',
             inputSchema: { type: 'object', properties: {} },
           },
@@ -236,10 +236,90 @@ describe('MCP tool name parsing', () => {
 
     await manager.refreshTools();
 
-    const toolNames = manager.getTools().map((tool) => tool.name);
-    expect(toolNames).toEqual([
+    const tools = manager.getTools();
+    expect(tools.map((tool) => tool.originalName)).toEqual(['browser.context', 'browser:context']);
+    expect(tools.map((tool) => tool.name)).toEqual([
       'mcp__Browser_Context__browser_context',
       'mcp__Browser_Context__browser_context_2',
     ]);
+  });
+
+  it('keeps sanitized MCP tool names within provider length limits', async () => {
+    const manager = new MCPManager();
+    const testManager = asTestManager(manager);
+    const originalToolName = 'browser.' + 'context-'.repeat(10);
+    const mockClient = {
+      listTools: vi.fn().mockResolvedValue({
+        tools: [
+          {
+            name: originalToolName,
+            description: '',
+            inputSchema: { type: 'object', properties: {} },
+          },
+        ],
+      }),
+      callTool: vi.fn().mockResolvedValue({ ok: true }),
+    };
+
+    testManager.clients = new Map([['server-1', mockClient]]);
+    testManager.serverConfigs = new Map([
+      [
+        'server-1',
+        {
+          id: 'server-1',
+          name: 'Browser Context Server With A Very Long Display Name',
+          type: 'stdio',
+          enabled: true,
+        },
+      ],
+    ]);
+
+    await manager.refreshTools();
+
+    const [tool] = manager.getTools();
+    expect(tool.name.length).toBeLessThanOrEqual(64);
+
+    await manager.callTool(tool.name, { url: 'https://example.com' });
+
+    expect(mockClient.callTool).toHaveBeenCalledWith({
+      name: originalToolName,
+      arguments: { url: 'https://example.com' },
+    });
+  });
+
+  it('falls back to tool when the original tool name sanitizes to an empty string', async () => {
+    const manager = new MCPManager();
+    const testManager = asTestManager(manager);
+    const mockClient = {
+      listTools: vi.fn().mockResolvedValue({
+        tools: [
+          {
+            name: '!!!',
+            description: '',
+            inputSchema: { type: 'object', properties: {} },
+          },
+        ],
+      }),
+      callTool: vi.fn().mockResolvedValue({ ok: true }),
+    };
+
+    testManager.clients = new Map([['server-1', mockClient]]);
+    testManager.serverConfigs = new Map([
+      [
+        'server-1',
+        {
+          id: 'server-1',
+          name: 'Browser Context',
+          type: 'stdio',
+          enabled: true,
+        },
+      ],
+    ]);
+
+    await manager.refreshTools();
+
+    const [tool] = manager.getTools();
+    expect(tool.name).toBe('mcp__Browser_Context__tool');
+    expect(tool.originalName).toBe('!!!');
   });
 });
