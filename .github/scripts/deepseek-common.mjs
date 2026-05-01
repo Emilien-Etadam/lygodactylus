@@ -213,6 +213,71 @@ export async function callDeepSeekJson({
   };
 }
 
+function isRetryableDeepSeekOutputError(error) {
+  const message = String(error?.message || error)
+  return (
+    message.includes('DeepSeek API returned no message content') ||
+    message.includes('DeepSeek returned non-JSON content') ||
+    message.includes('Model returned an empty body.')
+  )
+}
+
+export function assertNonEmptyParsedString(parsed, fieldName = 'body') {
+  const value = parsed && typeof parsed === 'object' ? parsed[fieldName] : undefined
+  if (typeof value === 'string' && value.trim()) {
+    return value.trim()
+  }
+
+  let serialized = ''
+  try {
+    serialized = JSON.stringify(parsed)
+  } catch {
+    serialized = String(parsed)
+  }
+  throw new Error(
+    `Model returned an empty ${fieldName}. Parsed payload: ${truncate(serialized, 1000, 'parsed payload')}`
+  )
+}
+
+export async function callDeepSeekJsonWithRetries(options) {
+  const { maxAttempts = 3, fieldName = 'body', userPrompt, ...requestOptions } = options
+  let lastError = null
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const attemptPrompt =
+      attempt === 1
+        ? userPrompt
+        : [
+            userPrompt,
+            '',
+            'AUTOMATION RETRY NOTE:',
+            '- Your previous response was invalid for automation.',
+            '- Return ONLY valid JSON.',
+            `- The JSON MUST include a non-empty string field named "${fieldName}".`,
+            '- Do not wrap the JSON in code fences.',
+            `- Do not return an empty, null, or missing "${fieldName}" field.`,
+          ].join('\n')
+
+    try {
+      const result = await callDeepSeekJson({
+        ...requestOptions,
+        userPrompt: attemptPrompt,
+      })
+      assertNonEmptyParsedString(result.parsed, fieldName)
+      return result
+    } catch (error) {
+      lastError = error
+      if (attempt >= maxAttempts || !isRetryableDeepSeekOutputError(error)) {
+        throw error
+      }
+      console.warn(
+        `DeepSeek output invalid on attempt ${attempt}/${maxAttempts}: ${error.message}`
+      )
+    }
+  }
+
+  throw lastError || new Error('DeepSeek output validation failed after retries.')
+}
 export function ensureBotSignature(body) {
   const trimmed = body.trim();
   if (!trimmed) {
