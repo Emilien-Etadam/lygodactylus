@@ -204,7 +204,83 @@ describe('MCPManager', () => {
       vi.useRealTimers();
     });
 
-    it('retries slow tool calls with a five-minute timeout per attempt', async () => {
+    it('does not let a slow server block fast server tool discovery', async () => {
+      vi.useFakeTimers();
+      const testManager = asTestManager(manager);
+      const slowClient: TestMCPClient = {
+        listTools: vi.fn(
+          () =>
+            new Promise<{
+              tools: Array<{
+                name: string;
+                inputSchema: { type: string; properties: Record<string, never> };
+              }>;
+            }>(() => {})
+        ),
+      };
+      const fastClient: TestMCPClient = {
+        listTools: vi.fn().mockResolvedValue({
+          tools: [
+            {
+              name: 'inspect',
+              description: 'Fast tool',
+              inputSchema: { type: 'object', properties: {} },
+            },
+          ],
+        }),
+      };
+
+      testManager.clients = new Map([
+        ['slow-server', slowClient],
+        ['fast-server', fastClient],
+      ]);
+      testManager.serverConfigs = new Map([
+        [
+          'slow-server',
+          {
+            id: 'slow-server',
+            name: 'Slow Server',
+            type: 'stdio',
+            command: 'slow-server',
+            enabled: true,
+          },
+        ],
+        [
+          'fast-server',
+          {
+            id: 'fast-server',
+            name: 'Fast Server',
+            type: 'stdio',
+            command: 'fast-server',
+            enabled: true,
+          },
+        ],
+      ]);
+
+      const refreshPromise = manager.refreshTools();
+      await Promise.resolve();
+
+      expect(manager.getTools()).toEqual([]);
+
+      await vi.advanceTimersByTimeAsync(300000);
+      await refreshPromise;
+
+      expect(fastClient.listTools).toHaveBeenCalledTimes(1);
+      expect(slowClient.listTools).toHaveBeenCalledTimes(1);
+      expect(manager.getTools()).toEqual([
+        {
+          name: 'mcp__Fast_Server__inspect',
+          originalName: 'inspect',
+          description: 'Fast tool',
+          inputSchema: { type: 'object', properties: {}, required: undefined },
+          serverId: 'fast-server',
+          serverName: 'Fast Server',
+        },
+      ]);
+      vi.useRealTimers();
+    });
+
+    it('applies a shared five-minute deadline across tool-call retries', async () => {
       vi.useFakeTimers();
       const testManager = asTestManager(manager);
       const mockClient: TestMCPClient = {
@@ -234,9 +310,9 @@ describe('MCPManager', () => {
       await Promise.resolve();
       expect(settled).toBe(false);
 
-      await vi.advanceTimersByTimeAsync(605001);
+      await vi.advanceTimersByTimeAsync(1);
       await expect(callPromise).rejects.toThrow('Tool call timeout after 300000ms');
-      expect(mockClient.callTool).toHaveBeenCalledTimes(3);
+      expect(mockClient.callTool).toHaveBeenCalledTimes(1);
       vi.useRealTimers();
     });
   });
