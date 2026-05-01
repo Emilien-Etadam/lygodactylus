@@ -64,8 +64,25 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Node.js for DeepSeek issue response
+        if: steps.check_bot.outputs.has_bot != 'true' && contains(secrets.OPENAI_BASE_URL, 'api.deepseek.com')
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "20"
+
+      - name: Run DeepSeek for Issue Auto Response
+        if: steps.check_bot.outputs.has_bot != 'true' && contains(secrets.OPENAI_BASE_URL, 'api.deepseek.com')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
+          DEEPSEEK_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DEEPSEEK_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+          DEEPSEEK_MODEL: ${{ vars.OPENAI_MODEL || 'deepseek-v4-pro' }}
+          DEEPSEEK_EFFORT: ${{ vars.OPENAI_EFFORT || 'high' }}
+        run: node .github/scripts/deepseek-issue-response.mjs
+
       - name: Run Codex for Issue Auto Response
-        if: steps.check_bot.outputs.has_bot != 'true'
+        if: steps.check_bot.outputs.has_bot != 'true' && !contains(secrets.OPENAI_BASE_URL, 'api.deepseek.com')
         uses: openai/codex-action@v1
         env:
           GH_TOKEN: ${{ github.token }}
