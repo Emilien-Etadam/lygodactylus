@@ -111,6 +111,12 @@ describe('ClaudeAgentRunner pi-coding-agent integration', () => {
     expect(agentRunnerContent).not.toContain(": JSON.stringify(event.result || '');");
   });
 
+  it('persists assistant model metadata for pi-ai thinking replay', () => {
+    expect(agentRunnerContent).toContain('api: piModel.api');
+    expect(agentRunnerContent).toContain('provider: piModel.provider');
+    expect(agentRunnerContent).toContain('model: piModel.id');
+  });
+
   it('does not reference removed AskUserQuestion or TodoWrite tools', () => {
     expect(agentRunnerContent).not.toContain('AskUserQuestion');
     expect(agentRunnerContent).not.toContain('TodoWrite');

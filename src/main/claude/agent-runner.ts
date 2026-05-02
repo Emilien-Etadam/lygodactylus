@@ -527,7 +527,9 @@ ${hints.join('\n')}
   }
 
   private async resolveSkillPaths(sessionId?: string): Promise<string[]> {
-    const basePaths = this._skillsAdapter ? this._skillsAdapter.getSkillPaths() : this.legacySkillPaths();
+    const basePaths = this._skillsAdapter
+      ? this._skillsAdapter.getSkillPaths()
+      : this.legacySkillPaths();
     const mergedPaths = new Set(
       basePaths.filter((item): item is string => Boolean(item && fs.existsSync(item)))
     );
@@ -1566,7 +1568,10 @@ ${hints.join('\n')}
         try {
           cachedSession.session.dispose();
         } catch (disposeError) {
-          logWarn('[ClaudeAgentRunner] dispose error while recreating pi session for skills:', disposeError);
+          logWarn(
+            '[ClaudeAgentRunner] dispose error while recreating pi session for skills:',
+            disposeError
+          );
         }
         this.piSessions.delete(session.id);
         cachedSession = undefined;
@@ -2338,6 +2343,9 @@ Tool routing:
                     role: 'assistant',
                     content: contentBlocks,
                     timestamp: Date.now(),
+                    api: piModel.api,
+                    provider: piModel.provider,
+                    model: piModel.id,
                     tokenUsage,
                   };
                   this.sendMessage(session.id, assistantMsg);
