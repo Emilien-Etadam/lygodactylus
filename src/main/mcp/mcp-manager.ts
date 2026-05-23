@@ -22,6 +22,13 @@ import path from 'path';
 import { log, logError, logWarn, logCtx, logCtxError, logTiming } from '../utils/logger';
 import { getDefaultShell } from '../utils/shell-resolver';
 
+const MCP_LIST_TOOLS_TIMEOUT_MS = 5 * 60 * 1000;
+const MCP_TOOL_CALL_TIMEOUT_MS = 5 * 60 * 1000;
+
+type RefreshToolsResult =
+  | { kind: 'success'; serverId: string; tools: MCPTool[] }
+  | { kind: 'error'; serverId: string; error: unknown };
+
 /**
  * MCP Server Configuration
  */
@@ -128,6 +135,24 @@ function createUniqueMcpToolName(baseName: string, usedNames: Set<string>): stri
   usedNames.add(candidate);
   return candidate;
 }
+
+async function raceWithTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  timeoutMessage: string
+): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
+  });
+
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    clearTimeout(timeoutId!);
+  }
+}
+
 
 function getTrustedWindowsNpxDirectories(
   env: Record<string, string | undefined> = process.env
@@ -1391,99 +1416,105 @@ export class MCPManager {
    */
   async refreshTools(): Promise<void> {
     log('[MCPManager] Refreshing tools from all servers');
-    const newTools = new Map<string, MCPTool>();
-    const usedToolNames = new Set<string>();
 
-    for (const [serverId, client] of this.clients.entries()) {
-      try {
+    const toolResults: RefreshToolsResult[] = await Promise.all(
+      Array.from(this.clients.entries()).map(async ([serverId, client]) => {
         const config = this.serverConfigs.get(serverId);
-        if (!config) continue;
+        if (!config) {
+          return { kind: 'success', serverId, tools: [] as MCPTool[] };
+        }
 
-        // Add timeout for listTools call to prevent hanging
-        const timeoutMs = 10000; // 10 second timeout
-        const listToolsPromise = client.listTools();
-        let timeoutId: ReturnType<typeof setTimeout>;
-        const timeoutPromise = new Promise<never>((_, reject) => {
-          timeoutId = setTimeout(() => reject(new Error('listTools timeout after 10s')), timeoutMs);
-        });
-
+        const timeoutMs = MCP_LIST_TOOLS_TIMEOUT_MS;
         log(`[MCPManager] Fetching tools from ${config.name} (timeout: ${timeoutMs}ms)...`);
 
-        let listToolsResult;
         try {
-          listToolsResult = await Promise.race([listToolsPromise, timeoutPromise]);
-          clearTimeout(timeoutId!);
-        } catch (error) {
-          clearTimeout(timeoutId!);
-          throw error;
-        }
-
-        log(`[MCPManager] Raw tools from ${config.name}:`, listToolsResult);
-
-        const sortedTools = [...listToolsResult.tools].sort((left, right) => {
-          const leftName = left.name || '';
-          const rightName = right.name || '';
-          if (leftName < rightName) {
-            return -1;
-          }
-          if (leftName > rightName) {
-            return 1;
-          }
-          return 0;
-        });
-
-        for (const tool of sortedTools) {
-          // OpenAI-compatible providers reject tool names that contain punctuation
-          // like dots or colons, so we expose a sanitized model-facing name while
-          // preserving the original MCP tool name for the actual call.
-          const serverKey = sanitizeMcpToolSegment(config.name, 'server');
-          const originalToolName =
-            typeof tool.name === 'string' && tool.name.trim().length > 0 ? tool.name : 'tool';
-          const sanitizedToolName = sanitizeMcpToolSegment(originalToolName, 'tool');
-          const prefixedName = createUniqueMcpToolName(
-            `mcp__${serverKey}__${sanitizedToolName}`,
-            usedToolNames
+          const listToolsResult = await raceWithTimeout(
+            client.listTools(),
+            timeoutMs,
+            `listTools timeout after ${timeoutMs}ms`
           );
 
-          newTools.set(prefixedName, {
-            name: prefixedName,
-            originalName: originalToolName,
-            description: tool.description || '',
-            inputSchema: {
-              type: 'object',
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              properties: (tool.inputSchema as any)?.properties || {},
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              required: (tool.inputSchema as any)?.required,
-            },
-            serverId,
-            serverName: config.name,
+          log(`[MCPManager] Raw tools from ${config.name}:`, listToolsResult);
+
+          // Sort alphabetically so dedup suffix assignment is deterministic
+          // across reconnects (otherwise session history can reference a name
+          // that later changes if the server returns tools in a new order).
+          const sortedTools = [...listToolsResult.tools].sort((left, right) => {
+            const leftName = left.name || '';
+            const rightName = right.name || '';
+            if (leftName < rightName) return -1;
+            if (leftName > rightName) return 1;
+            return 0;
+          });
+
+          // OpenAI-compatible providers reject tool names that contain
+          // punctuation like dots or colons, so we expose a sanitized
+          // model-facing name while preserving the original MCP tool name
+          // for the actual call.
+          const serverKey = sanitizeMcpToolSegment(config.name, 'server');
+          const usedToolNames = new Set<string>();
+          const tools = sortedTools.map((tool) => {
+            const originalToolName =
+              typeof tool.name === 'string' && tool.name.trim().length > 0
+                ? tool.name
+                : 'tool';
+            const sanitizedToolName = sanitizeMcpToolSegment(originalToolName, 'tool');
+            const prefixedName = createUniqueMcpToolName(
+              `mcp__${serverKey}__${sanitizedToolName}`,
+              usedToolNames
+            );
+            return {
+              name: prefixedName,
+              originalName: originalToolName,
+              description: tool.description || '',
+              inputSchema: {
+                type: 'object',
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                properties: (tool.inputSchema as any)?.properties || {},
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                required: (tool.inputSchema as any)?.required,
+              },
+              serverId,
+              serverName: config.name,
+            } satisfies MCPTool;
+          });
+
+          log(`[MCPManager] ✓ Loaded ${tools.length} tools from ${config.name}`);
+          return { kind: 'success' as const, serverId, tools };
+        } catch (error) {
+          return { kind: 'error' as const, serverId, error };
+        }
+      })
+    );
+
+    const newTools = new Map<string, MCPTool>();
+    for (const result of toolResults) {
+      if (result.kind === 'success') {
+        for (const tool of result.tools) {
+          newTools.set(tool.name, tool);
+        }
+        continue;
+      }
+
+      const error = result.error;
+      const errMsg = error instanceof Error ? error.message : String(error);
+      logError(`[MCPManager] ❌ Error listing tools from ${result.serverId}:`, errMsg);
+
+      try {
+        const win = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed());
+        if (win) {
+          win.webContents.send('server-event', {
+            type: 'mcp:tools-refresh-error',
+            payload: { serverId: result.serverId, error: errMsg },
           });
         }
+      } catch (_notifyErr) {
+        // Best-effort notification; logging already happened above
+      }
 
-        log(`[MCPManager] ✓ Loaded ${listToolsResult.tools.length} tools from ${config.name}`);
-      } catch (error: unknown) {
-        const errMsg = error instanceof Error ? error.message : String(error);
-        logError(`[MCPManager] ❌ Error listing tools from ${serverId}:`, errMsg);
-
-        // Notify renderer that tools refresh failed for this server
-        try {
-          const win = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed());
-          if (win) {
-            win.webContents.send('server-event', {
-              type: 'mcp:tools-refresh-error',
-              payload: { serverId, error: errMsg },
-            });
-          }
-        } catch (_notifyErr) {
-          // Best-effort notification; logging already happened above
-        }
-
-        // If Chrome server, try to reconnect
-        const config = this.serverConfigs.get(serverId);
-        if (config && config.name.toLowerCase().includes('chrome')) {
-          log(`[MCPManager] Chrome server may need reconnection. Trying to refresh...`);
-        }
+      const config = this.serverConfigs.get(result.serverId);
+      if (config && config.name.toLowerCase().includes('chrome')) {
+        log(`[MCPManager] Chrome server may need reconnection. Trying to refresh...`);
       }
     }
 
@@ -1532,6 +1563,7 @@ export class MCPManager {
     const maxRetries = 2;
     let lastError: unknown;
     let compatHotReloadTried = false;
+    const deadline = Date.now() + MCP_TOOL_CALL_TIMEOUT_MS;
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       // Re-lookup tool on every iteration: after reconnect the registry is refreshed
@@ -1542,26 +1574,20 @@ export class MCPManager {
           throw new Error(`MCP server not connected: ${currentTool.serverId}`);
         }
 
-        // Add timeout for tool call
-        const timeoutMs = 30000; // 30 second timeout
+        const remainingMs = deadline - Date.now();
+        if (remainingMs <= 0) {
+          throw new Error(`Tool call timeout after ${MCP_TOOL_CALL_TIMEOUT_MS}ms`);
+        }
+
         const callPromise = client.callTool({
           name: actualToolName,
           arguments: args,
         });
-        let callTimeoutId: ReturnType<typeof setTimeout>;
-        const timeoutPromise = new Promise<never>((_, reject) => {
-          callTimeoutId = setTimeout(
-            () => reject(new Error(`Tool call timeout after ${timeoutMs}ms`)),
-            timeoutMs
-          );
-        });
-
-        let result;
-        try {
-          result = await Promise.race([callPromise, timeoutPromise]);
-        } finally {
-          clearTimeout(callTimeoutId!);
-        }
+        const result = await raceWithTimeout(
+          callPromise,
+          remainingMs,
+          `Tool call timeout after ${MCP_TOOL_CALL_TIMEOUT_MS}ms`
+        );
 
         const toolErrorMessage = extractStructuredToolErrorMessage(result);
         if (shouldReconnectOnStructuredToolError(toolErrorMessage)) {
@@ -1619,9 +1645,16 @@ export class MCPManager {
         }
 
         if (errorMsg.includes('timeout')) {
-          log(`[MCPManager] Tool call timeout detected, retrying after backoff...`);
+          if (attempt >= maxRetries || deadline - Date.now() <= 0) {
+            break;
+          }
+          log(`[MCPManager] Tool call timeout detected, retrying within shared deadline...`);
           const delay = Math.min(2000 * Math.pow(1.5, attempt), 10000);
-          await new Promise((resolve) => setTimeout(resolve, delay));
+          const remainingAfterDelay = deadline - Date.now();
+          if (remainingAfterDelay <= 0) {
+            break;
+          }
+          await new Promise((resolve) => setTimeout(resolve, Math.min(delay, remainingAfterDelay)));
           continue;
         }
 
