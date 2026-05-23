@@ -285,7 +285,7 @@ function buildMcpCustomTools(mcpManager: MCPManager): ToolDefinition[] {
 
     const toolDef: ToolDefinition<TSchema, unknown> = {
       name: mcpTool.name,
-      label: mcpTool.name.replace(/^mcp__/, '').replace(/__/g, ' → '),
+      label: `${mcpTool.serverName} → ${mcpTool.originalName || mcpTool.name}`,
       description: mcpTool.description || `MCP tool from ${mcpTool.serverName}`,
       parameters,
       async execute(_toolCallId, params, _signal, _onUpdate, _ctx) {
@@ -438,6 +438,7 @@ export class ClaudeAgentRunner {
   private extensionManager?: AgentRuntimeExtensionManager;
   private activeControllers: Map<string, AbortController> = new Map();
   private piSessions: Map<string, CachedPiSession> = new Map();
+  private toolDisplayNameCache: Map<string, string> = new Map();
   private static readonly MAX_CACHED_SESSIONS = 50;
 
   // Per-instance caches — invalidated when the underlying config changes.
@@ -774,6 +775,30 @@ ${hints.join('\n')}
    */
   private static isSudoCommand(command: string): boolean {
     return /\bsudo\b/.test(command);
+  }
+
+  private getToolDisplayName(toolName: string): string {
+    const cached = this.toolDisplayNameCache.get(toolName);
+    if (cached) {
+      return cached;
+    }
+
+    let displayName = toolName;
+    if (!toolName.startsWith('mcp__')) {
+      this.toolDisplayNameCache.set(toolName, displayName);
+      return displayName;
+    }
+
+    const mcpTool = this.mcpManager?.getTool(toolName);
+    if (mcpTool?.originalName) {
+      displayName = mcpTool.originalName;
+    } else {
+      const match = toolName.match(/^mcp__(.+?)__(.+)$/);
+      displayName = match?.[2] || toolName;
+    }
+
+    this.toolDisplayNameCache.set(toolName, displayName);
+    return displayName;
   }
 
   /**
@@ -2197,11 +2222,12 @@ Tool routing:
                 const toolContent = partial?.content?.[ame.contentIndex];
                 const toolName = toolContent?.type === 'toolCall' ? toolContent.name : 'unknown';
                 const toolCallId = toolContent?.type === 'toolCall' ? toolContent.id : uuidv4();
+                const toolDisplayName = this.getToolDisplayName(toolName);
                 this.sendTraceStep(session.id, {
                   id: toolCallId,
                   type: 'tool_call',
                   status: 'running',
-                  title: toolName,
+                  title: toolDisplayName,
                   toolName,
                   toolInput:
                     toolContent?.type === 'toolCall'
@@ -2304,10 +2330,12 @@ Tool routing:
                       }
                     }
                   } else if (block.type === 'toolCall') {
+                    const displayName = this.getToolDisplayName(block.name);
                     contentBlocks.push({
                       type: 'tool_use',
                       id: block.id,
                       name: block.name,
+                      displayName,
                       input: block.arguments,
                     });
                   } else if (block.type === 'thinking') {
@@ -2372,8 +2400,10 @@ Tool routing:
               const isError = event.isError;
               const normalizedToolResult = normalizeToolExecutionResultForUi(event.result);
               const outputText = normalizedToolResult.content;
+              const toolDisplayName = this.getToolDisplayName(event.toolName);
               this.sendTraceUpdate(session.id, toolCallId, {
                 status: isError ? 'error' : 'completed',
+                title: toolDisplayName,
                 toolName: event.toolName,
                 toolOutput: sanitizeOutputPaths(outputText).slice(0, 800),
               });

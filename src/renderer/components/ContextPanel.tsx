@@ -30,7 +30,8 @@ import {
   Copy,
   Layers,
 } from 'lucide-react';
-import type { TraceStep, MCPServerInfo } from '../types';
+import type { TraceStep, MCPServerInfo, ContentBlock, ToolUseContent } from '../types';
+import { getMcpToolDisplayName } from './message/toolHelpers';
 
 const EMPTY_STEPS: TraceStep[] = [];
 
@@ -123,6 +124,41 @@ export function ContextPanel() {
     () => steps.reduce((n, s) => n + (s.status === 'completed' ? 1 : 0), 0),
     [steps]
   );
+
+  const mcpToolDisplayNames = useMemo(() => {
+    const displayNames = new Map<string, string>();
+
+    for (const msg of messages) {
+      if (!Array.isArray(msg.content)) {
+        continue;
+      }
+
+      for (const block of msg.content as ContentBlock[]) {
+        if (block.type !== 'tool_use') {
+          continue;
+        }
+
+        const toolUse = block as ToolUseContent;
+        if (!toolUse.name.startsWith('mcp__')) {
+          continue;
+        }
+
+        displayNames.set(toolUse.name, getMcpToolDisplayName(toolUse.name, toolUse.displayName));
+      }
+    }
+
+    for (const step of steps) {
+      if (step.type !== 'tool_call' || !step.toolName?.startsWith('mcp__')) {
+        continue;
+      }
+
+      if (!displayNames.has(step.toolName)) {
+        displayNames.set(step.toolName, getMcpToolDisplayName(step.toolName, step.title));
+      }
+    }
+
+    return displayNames;
+  }, [messages, steps]);
 
   useEffect(() => {
     if (contextPanelCollapsed) {
@@ -276,7 +312,8 @@ export function ContextPanel() {
             </span>
             {tokenUsage.total > 0 && (
               <span className="ml-auto text-text-muted/70">
-                {t('context.inputTokens')} {formatTokenCount(tokenUsage.input)} · {t('context.outputTokens')} {formatTokenCount(tokenUsage.output)}
+                {t('context.inputTokens')} {formatTokenCount(tokenUsage.input)} ·{' '}
+                {t('context.outputTokens')} {formatTokenCount(tokenUsage.output)}
               </span>
             )}
           </div>
@@ -475,6 +512,7 @@ export function ContextPanel() {
                   key={server.id}
                   server={server}
                   steps={steps}
+                  mcpToolDisplayNames={mcpToolDisplayNames}
                   expanded={expandedConnector === server.id}
                   onToggle={() =>
                     setExpandedConnector(expandedConnector === server.id ? null : server.id)
@@ -492,11 +530,13 @@ export function ContextPanel() {
 function ConnectorItem({ 
   server, 
   steps, 
+  mcpToolDisplayNames,
   expanded, 
   onToggle 
 }: { 
   server: MCPServerInfo; 
   steps: TraceStep[];
+  mcpToolDisplayNames: Map<string, string>;
   expanded: boolean;
   onToggle: () => void;
 }) {
@@ -572,9 +612,8 @@ function ConnectorItem({
               <p className="text-xs text-text-muted px-2 py-1">{t('context.toolsUsedLabel')}</p>
               {mcpToolsUsed.map((toolName, index) => {
                 const count = steps.filter(s => s.toolName === toolName).length;
-                // Extract readable tool name - remove mcp__ServerName__ prefix
-                const match = toolName.match(/^mcp__(.+?)__(.+)$/);
-                const readableName = match ? match[2] : toolName;
+                const readableName =
+                  mcpToolDisplayNames.get(toolName) || getMcpToolDisplayName(toolName);
                 
                 return (
                   <div
