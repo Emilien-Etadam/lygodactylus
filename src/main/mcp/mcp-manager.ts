@@ -15,6 +15,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { createHash } from 'crypto';
 import { app, BrowserWindow } from 'electron';
 
 import path from 'path';
@@ -42,6 +43,7 @@ export interface MCPServerConfig {
  */
 export interface MCPTool {
   name: string;
+  originalName?: string;
   description: string;
   inputSchema: {
     type: string;
@@ -52,12 +54,79 @@ export interface MCPTool {
   serverName: string;
 }
 
+const MAX_MODEL_TOOL_NAME_LENGTH = 64;
+const MCP_TOOL_NAME_HASH_LENGTH = 8;
+
 function normalizeWindowsPathForComparison(candidate: string): string {
   return path.win32.normalize(candidate).replace(/\//g, '\\').toLowerCase();
 }
 
 function normalizeWindowsDirectoryForComparison(candidate: string): string {
   return normalizeWindowsPathForComparison(candidate).replace(/[\\/]+$/, '');
+}
+
+function sanitizeMcpToolSegment(segment: string, fallback: string): string {
+  const sanitized = segment
+    .trim()
+    .replace(/\s+/g, '_')
+    .replace(/[^a-zA-Z0-9_-]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  return sanitized || fallback;
+}
+
+function truncateMcpToolName(baseName: string, maxLength: number): string {
+  if (baseName.length <= maxLength) {
+    return baseName;
+  }
+
+  if (maxLength <= 0) {
+    return '';
+  }
+
+  if (maxLength <= MCP_TOOL_NAME_HASH_LENGTH) {
+    return createHash('sha256').update(baseName).digest('hex').slice(0, maxLength);
+  }
+
+  const hashLength = Math.min(MCP_TOOL_NAME_HASH_LENGTH, maxLength - 2);
+  const hash = createHash('sha256').update(baseName).digest('hex').slice(0, hashLength);
+  const prefixLength = Math.max(1, maxLength - hash.length - 1);
+
+  return `${baseName.slice(0, prefixLength)}_${hash}`;
+}
+
+export function formatMcpToolName(baseName: string, suffix: string | null): string {
+  const suffixPart = suffix === null ? '' : `_${suffix}`;
+  const availableBaseLength = MAX_MODEL_TOOL_NAME_LENGTH - suffixPart.length;
+
+  if (availableBaseLength <= 0) {
+    return truncateMcpToolName(
+      `tool_${createHash('sha256').update(`${baseName}${suffixPart}`).digest('hex')}`,
+      MAX_MODEL_TOOL_NAME_LENGTH
+    );
+  }
+
+  const truncatedBase = truncateMcpToolName(baseName, availableBaseLength);
+
+  return `${truncatedBase}${suffixPart}`;
+}
+
+function createUniqueMcpToolName(baseName: string, usedNames: Set<string>): string {
+  const firstCandidate = formatMcpToolName(baseName, null);
+  if (!usedNames.has(firstCandidate)) {
+    usedNames.add(firstCandidate);
+    return firstCandidate;
+  }
+
+  let suffix = 2;
+  let candidate = formatMcpToolName(baseName, String(suffix));
+  while (usedNames.has(candidate)) {
+    suffix += 1;
+    candidate = formatMcpToolName(baseName, String(suffix));
+  }
+
+  usedNames.add(candidate);
+  return candidate;
 }
 
 function getTrustedWindowsNpxDirectories(
@@ -1323,6 +1392,7 @@ export class MCPManager {
   async refreshTools(): Promise<void> {
     log('[MCPManager] Refreshing tools from all servers');
     const newTools = new Map<string, MCPTool>();
+    const usedToolNames = new Set<string>();
 
     for (const [serverId, client] of this.clients.entries()) {
       try {
@@ -1350,15 +1420,34 @@ export class MCPManager {
 
         log(`[MCPManager] Raw tools from ${config.name}:`, listToolsResult);
 
-        for (const tool of listToolsResult.tools) {
-          // Prefix tool name with server name to avoid conflicts
-          // Format: mcp__<ServerName>__<toolName> (double underscores, preserve case)
-          // Sanitize: collapse whitespace and collapse any accidental __ sequences
-          const serverKey = config.name.replace(/\s+/g, '_').replace(/__/g, '_');
-          const prefixedName = `mcp__${serverKey}__${tool.name}`;
+        const sortedTools = [...listToolsResult.tools].sort((left, right) => {
+          const leftName = left.name || '';
+          const rightName = right.name || '';
+          if (leftName < rightName) {
+            return -1;
+          }
+          if (leftName > rightName) {
+            return 1;
+          }
+          return 0;
+        });
+
+        for (const tool of sortedTools) {
+          // OpenAI-compatible providers reject tool names that contain punctuation
+          // like dots or colons, so we expose a sanitized model-facing name while
+          // preserving the original MCP tool name for the actual call.
+          const serverKey = sanitizeMcpToolSegment(config.name, 'server');
+          const originalToolName =
+            typeof tool.name === 'string' && tool.name.trim().length > 0 ? tool.name : 'tool';
+          const sanitizedToolName = sanitizeMcpToolSegment(originalToolName, 'tool');
+          const prefixedName = createUniqueMcpToolName(
+            `mcp__${serverKey}__${sanitizedToolName}`,
+            usedToolNames
+          );
 
           newTools.set(prefixedName, {
             name: prefixedName,
+            originalName: originalToolName,
             description: tool.description || '',
             inputSchema: {
               type: 'object',
@@ -1426,9 +1515,10 @@ export class MCPManager {
       throw new Error(`MCP tool not found: ${toolName}`);
     }
 
-    // 提取实际工具名（格式：mcp__<ServerName>__<toolName>）
-    let actualToolName = toolName;
-    if (toolName.startsWith('mcp__')) {
+    // Prefer the original MCP tool name when present so sanitized model-facing
+    // names can still map back to the true server tool.
+    let actualToolName = tool.originalName || toolName;
+    if (!tool.originalName && toolName.startsWith('mcp__')) {
       const remainder = toolName.slice('mcp__'.length);
       const separatorIndex = remainder.indexOf('__');
       if (separatorIndex !== -1) {
