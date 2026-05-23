@@ -2350,6 +2350,9 @@ Tool routing:
                     role: 'assistant',
                     content: contentBlocks,
                     timestamp: Date.now(),
+                    api: piModel.api,
+                    provider: piModel.provider,
+                    model: piModel.id,
                     tokenUsage,
                   };
                   this.sendMessage(session.id, assistantMsg);
