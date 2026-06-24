@@ -14,7 +14,10 @@ import {
   profileKeyToProvider,
 } from '../src/renderer/hooks/useApiConfigState';
 
-const hookPath = path.resolve(process.cwd(), 'src/renderer/hooks/useApiConfigState.ts');
+const hookPath = path.resolve(
+  process.cwd(),
+  'src/renderer/hooks/api-config/use-api-config-state-hook.ts'
+);
 
 describe('api config state helpers', () => {
   it('maps provider/protocol to profile key and back', () => {
