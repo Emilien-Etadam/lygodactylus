@@ -1,162 +1,117 @@
-/**
- * @module main/session/session-manager
- *
- * Session lifecycle manager (957 lines).
- *
- * Responsibilities:
- * - Session CRUD: create, continue, stop, delete, list
- * - Chat history persistence to SQLite via DatabaseInstance
- * - Workspace-scoped sessions with sandbox integration
- * - Delegates AI execution to ClaudeAgentRunner
- *
- * Dependencies: database, agent-runner, config-store, mcp-manager, sandbox-adapter
- */
-import { v4 as uuidv4 } from 'uuid';
-import * as fs from 'fs';
-import * as path from 'path';
 import type {
-  Session,
-  Message,
-  ServerEvent,
-  PermissionResult,
   ContentBlock,
-  TextContent,
+  Message,
+  PermissionResult,
+  ServerEvent,
+  Session,
   TraceStep,
-  FileAttachmentContent,
 } from '../../renderer/types';
-import type { DatabaseInstance, TraceStepRow } from '../db/database';
-import { PathResolver } from '../sandbox/path-resolver';
-import {
-  SandboxAdapter,
-  getSandboxAdapter,
-  initializeSandbox,
-  reinitializeSandbox,
-} from '../sandbox/sandbox-adapter';
-import { SandboxSync } from '../sandbox/sandbox-sync';
+import type { DatabaseInstance } from '../db/database';
 import { ClaudeAgentRunner } from '../claude/agent-runner';
+import { generateTitleWithClaudeSdk } from '../claude/claude-sdk-one-shot';
 import { configStore } from '../config/config-store';
-import { MCPManager } from '../mcp/mcp-manager';
-import { mcpConfigStore } from '../mcp/mcp-config-store';
-import { PluginRuntimeService } from '../skills/plugin-runtime-service';
 import { AgentRuntimeExtensionManager } from '../extensions/agent-runtime-extension-manager';
-import { forgetSessionPermissions } from '../config/permission-rules-store';
+import { mcpConfigStore } from '../mcp/mcp-config-store';
+import { MCPManager } from '../mcp/mcp-manager';
+import { PathResolver } from '../sandbox/path-resolver';
+import { SandboxAdapter, getSandboxAdapter } from '../sandbox/sandbox-adapter';
+import { PluginRuntimeService } from '../skills/plugin-runtime-service';
+import { log, logError } from '../utils/logger';
+import { processFileAttachments } from './session-manager-attachments';
 import {
-  log,
-  logError,
-  logWarn,
-  logCtx,
-  logCtxError,
-  runWithLogContext,
-  generateTraceId,
-} from '../utils/logger';
-import { maybeGenerateSessionTitle } from './session-title-flow';
+  SessionManagerFacadeSupport,
+  type SessionManagerFacadeAgentRunner,
+} from './session-manager-facade-support';
+import {
+  enqueuePrompt as enqueueSessionPrompt,
+  processPrompt as processSessionPrompt,
+  processQueue as processSessionQueue,
+  type PromptQueues,
+} from './session-manager-queue';
+import { SessionManagerStore } from './session-manager-store';
 import {
   buildTitlePrompt,
   getDefaultTitleFromPrompt,
   normalizeGeneratedTitle,
 } from './session-title-utils';
-import { generateTitleWithClaudeSdk } from '../claude/claude-sdk-one-shot';
 import { buildScheduledTaskTitle } from '../../shared/schedule/task-title';
-import {
-  buildCompactionHandoffPrompt,
-  buildCompactionSessionTitle,
-} from '../../shared/compaction-handoff';
-
-interface AgentRunner {
-  run(session: Session, prompt: string, existingMessages: Message[]): Promise<void>;
-  cancel(sessionId: string): void;
-  compactSession?(
-    session: Session,
-    customInstructions?: string
-  ): Promise<{ summary: string; tokensBefore: number }>;
-  summarizeForHandoff?(
-    session: Session,
-    messages: Message[],
-    customInstructions?: string
-  ): Promise<{ summary: string; tokensBefore: number }>;
-  clearSdkSession?(sessionId: string): void;
-  clearAllSdkSessions?(): void;
-}
 
 const WORKSPACE_MOUNT_VIRTUAL_PATH = '/mnt/workspace';
-const TITLE_GENERATION_TIMEOUT_MS = 20000;
+type AgentRunner = SessionManagerFacadeAgentRunner;
 
 export class SessionManager {
-  private db: DatabaseInstance;
-  private sendToRenderer: (event: ServerEvent) => void;
-  private pathResolver: PathResolver;
-  private sandboxAdapter: SandboxAdapter;
+  private readonly store: SessionManagerStore;
+  private readonly facadeSupport: SessionManagerFacadeSupport;
+  private readonly sendToRenderer: (event: ServerEvent) => void;
+  private readonly pathResolver = new PathResolver();
+  private readonly mcpManager = new MCPManager();
+  private sandboxAdapter: SandboxAdapter = getSandboxAdapter();
   private agentRunner!: AgentRunner;
-  private mcpManager: MCPManager;
-  private pluginRuntimeService?: PluginRuntimeService;
-  private extensionManager?: AgentRuntimeExtensionManager;
-  private activeSessions: Map<string, AbortController> = new Map();
-  private promptQueues: Map<string, Array<{ prompt: string; content?: ContentBlock[] }>> =
-    new Map();
-  private pendingPermissions: Map<string, (result: PermissionResult) => void> = new Map();
-  private pendingSudoPasswords: Map<
+  private readonly activeSessions = new Map<string, AbortController>();
+  private readonly promptQueues: PromptQueues = new Map();
+  private readonly pendingPermissions = new Map<string, (result: PermissionResult) => void>();
+  private readonly pendingSudoPasswords = new Map<
     string,
     { sessionId: string; resolve: (password: string | null) => void }
-  > = new Map();
-  private sandboxInitPromises: Map<string, Promise<void>> = new Map();
-  private sessionTitleAttempts: Set<string> = new Set();
-  private titleGenerationTokens: Map<string, symbol> = new Map();
-  private messageCache: Map<string, Message[]> = new Map();
-  private static readonly MAX_CACHE_SIZE = 100;
+  >();
+  private readonly sandboxInitPromises = new Map<string, Promise<void>>();
+  private readonly sessionTitleAttempts = new Set<string>();
+  private readonly titleGenerationTokens = new Map<string, symbol>();
 
   constructor(
     db: DatabaseInstance,
     sendToRenderer: (event: ServerEvent) => void,
-    pluginRuntimeService?: PluginRuntimeService,
-    extensionManager?: AgentRuntimeExtensionManager
+    private readonly pluginRuntimeService?: PluginRuntimeService,
+    private readonly extensionManager?: AgentRuntimeExtensionManager
   ) {
-    this.db = db;
+    this.store = new SessionManagerStore(db);
     this.sendToRenderer = (event) => {
       if (event.type === 'trace.step') {
-        this.saveTraceStep(event.payload.sessionId, event.payload.step);
+        this.store.saveTraceStep(event.payload.sessionId, event.payload.step);
       }
       if (event.type === 'trace.update') {
-        this.updateTraceStep(event.payload.stepId, event.payload.updates);
+        this.store.updateTraceStep(event.payload.stepId, event.payload.updates);
       }
       sendToRenderer(event);
     };
-    this.pathResolver = new PathResolver();
-    this.sandboxAdapter = getSandboxAdapter();
-    this.pluginRuntimeService = pluginRuntimeService;
-    this.extensionManager = extensionManager;
+    this.facadeSupport = new SessionManagerFacadeSupport({
+      db,
+      store: this.store,
+      sendToRenderer: this.sendToRenderer,
+      getAgentRunner: () => this.agentRunner,
+      activeSessions: this.activeSessions,
+      promptQueues: this.promptQueues,
+      pendingSudoPasswords: this.pendingSudoPasswords,
+      sandboxInitPromises: this.sandboxInitPromises,
+      sessionTitleAttempts: this.sessionTitleAttempts,
+      titleGenerationTokens: this.titleGenerationTokens,
+      getSandboxAdapter: () => this.sandboxAdapter,
+      setSandboxAdapter: (adapter) => {
+        this.sandboxAdapter = adapter;
+      },
+      loadSession: (sessionId) => this.loadSession(sessionId),
+      getMessages: (sessionId) => this.getMessages(sessionId),
+      saveMessage: (message) => this.saveMessage(message),
+      startSession: (title, prompt, cwd, allowedTools, content, memoryEnabled) =>
+        this.startSession(title, prompt, cwd, allowedTools, content, memoryEnabled),
+      extensionManager: this.extensionManager,
+      workspaceMountVirtualPath: WORKSPACE_MOUNT_VIRTUAL_PATH,
+    });
 
-    // Initialize MCP Manager
-    this.mcpManager = new MCPManager();
     this.initializeMCP();
-
-    // Create agent runner based on current config
     this.createAgentRunner();
-
     log('[SessionManager] Initialized with persistent database and MCP support');
   }
 
-  /**
-   * Create agent runner based on current config
-   * Can be called to recreate runner when config changes
-   */
   private createAgentRunner(): void {
-    this.agentRunner = this.createClaudeAgentRunner();
-    log('[SessionManager] Using Open Cowork agent runner');
-  }
-
-  private createClaudeAgentRunner(): ClaudeAgentRunner {
-    return new ClaudeAgentRunner(
+    this.agentRunner = new ClaudeAgentRunner(
       {
         sendToRenderer: this.sendToRenderer,
-        saveMessage: (message: Message) => this.saveMessage(message),
-        requestSudoPassword: (sessionId: string, toolUseId: string, command: string) =>
+        saveMessage: (message) => this.saveMessage(message),
+        requestSudoPassword: (sessionId, toolUseId, command) =>
           this.requestSudoPassword(sessionId, toolUseId, command),
-        requestPermission: (
-          sessionId: string,
-          toolUseId: string,
-          toolName: string,
-          input: Record<string, unknown>
-        ) => this.requestPermission(sessionId, toolUseId, toolName, input),
+        requestPermission: (sessionId, toolUseId, toolName, input) =>
+          this.requestPermission(sessionId, toolUseId, toolName, input),
       },
       this.pathResolver,
       this.mcpManager,
@@ -164,69 +119,34 @@ export class SessionManager {
       undefined,
       this.extensionManager
     );
+    log('[SessionManager] Using Open Cowork agent runner');
   }
 
-  /**
-   * Notify that API config changed.
-   * Model/apiKey/baseUrl changes are picked up per-query via configStore.getAll()
-   * and hot-swapped via piSession.setModel(). No need to recreate the runner.
-   */
   reloadConfig(): void {
     log('[SessionManager] API config changed — will apply on next query');
   }
 
-  /**
-   * Reinitialize MCP servers (call only when MCP config actually changes)
-   */
   async reloadMCP(): Promise<void> {
     log('[SessionManager] Reloading MCP servers');
     await this.initializeMCP();
   }
 
-  /**
-   * Invalidate cached MCP servers config so the next query rebuilds tools.
-   * Call after MCP server add/update/delete.
-   */
   invalidateMcpServersCache(): void {
-    if (this.agentRunner && 'invalidateMcpServersCache' in this.agentRunner) {
+    if ('invalidateMcpServersCache' in this.agentRunner) {
       (this.agentRunner as ClaudeAgentRunner).invalidateMcpServersCache();
     }
   }
 
-  /**
-   * Invalidate skills setup so the next query re-links skills.
-   * Call after skill install/uninstall/toggle.
-   */
   invalidateSkillsSetup(): void {
-    if (this.agentRunner && 'invalidateSkillsSetup' in this.agentRunner) {
+    if ('invalidateSkillsSetup' in this.agentRunner) {
       (this.agentRunner as ClaudeAgentRunner).invalidateSkillsSetup();
     }
   }
 
-  /**
-   * Reinitialize sandbox adapter (call only when sandbox config changes)
-   */
   async reloadSandbox(): Promise<void> {
-    await this.reinitializeSandboxAsync();
+    await this.facadeSupport.reloadSandbox();
   }
 
-  /**
-   * Reinitialize sandbox adapter asynchronously
-   */
-  private async reinitializeSandboxAsync(): Promise<void> {
-    try {
-      log('[SessionManager] Reinitializing sandbox adapter...');
-      await reinitializeSandbox();
-      this.sandboxAdapter = getSandboxAdapter();
-      log('[SessionManager] Sandbox adapter reinitialized, mode:', this.sandboxAdapter.mode);
-    } catch (error) {
-      logError('[SessionManager] Failed to reinitialize sandbox:', error);
-    }
-  }
-
-  /**
-   * Initialize MCP servers from configuration
-   */
   private async initializeMCP(): Promise<void> {
     try {
       const servers = mcpConfigStore.getEnabledServers();
@@ -243,21 +163,14 @@ export class SessionManager {
     }
   }
 
-  /**
-   * Get MCP manager instance
-   */
   getMCPManager(): MCPManager {
     return this.mcpManager;
   }
 
-  /**
-   * Get sandbox adapter instance
-   */
   getSandboxAdapter(): SandboxAdapter {
     return this.sandboxAdapter;
   }
 
-  // Create and start a new session
   async startSession(
     title: string,
     prompt: string,
@@ -267,172 +180,26 @@ export class SessionManager {
     memoryEnabled?: boolean
   ): Promise<Session> {
     log('[SessionManager] Starting new session:', title);
-
-    const session = this.createSession(title, cwd, allowedTools, memoryEnabled);
-
-    // Save to database
-    this.saveSession(session);
-
-    // Start processing the prompt with content blocks
+    const session = this.facadeSupport.createSession(title, cwd, allowedTools, memoryEnabled);
+    this.store.saveSession(session);
     this.enqueuePrompt(session, prompt, content);
-
     return session;
   }
 
-  // Create a new session object
-  private buildMountedPaths(cwd?: string): Session['mountedPaths'] {
-    if (!cwd) {
-      return [];
-    }
-    return [{ virtual: WORKSPACE_MOUNT_VIRTUAL_PATH, real: cwd }];
-  }
-
-  private createSession(
-    title: string,
-    cwd?: string,
-    allowedTools?: string[],
-    memoryEnabled?: boolean
-  ): Session {
-    const now = Date.now();
-    // Prefer frontend-provided cwd; fallback to env vars if provided
-    const envCwd = process.env.COWORK_WORKDIR || process.env.WORKDIR || process.env.DEFAULT_CWD;
-    const effectiveCwd = cwd || envCwd;
-    const resolvedMemoryEnabled =
-      typeof memoryEnabled === 'boolean'
-        ? memoryEnabled
-        : configStore.get('memoryEnabled') !== false;
-    return {
-      id: uuidv4(),
-      title,
-      status: 'idle',
-      cwd: effectiveCwd,
-      mountedPaths: this.buildMountedPaths(effectiveCwd),
-      allowedTools: allowedTools || [
-        'askuserquestion',
-        'todowrite',
-        'todoread',
-        'webfetch',
-        'websearch',
-        'read',
-        'write',
-        'edit',
-        'list_directory',
-        'glob',
-        'grep',
-      ],
-      memoryEnabled: resolvedMemoryEnabled,
-      model: configStore.get('model') || undefined,
-      createdAt: now,
-      updatedAt: now,
-    };
-  }
-
-  // Save session to database
-  private saveSession(session: Session) {
-    this.db.sessions.create({
-      id: session.id,
-      title: session.title,
-      claude_session_id: session.claudeSessionId || null,
-      openai_thread_id: session.openaiThreadId || null,
-      status: session.status,
-      cwd: session.cwd || null,
-      mounted_paths: JSON.stringify(session.mountedPaths),
-      allowed_tools: JSON.stringify(session.allowedTools),
-      memory_enabled: session.memoryEnabled ? 1 : 0,
-      model: session.model || null,
-      created_at: session.createdAt,
-      updated_at: session.updatedAt,
-    });
-  }
-
-  // Load session from database
-  private loadSession(sessionId: string): Session | null {
-    const row = this.db.sessions.get(sessionId);
-    if (!row) return null;
-
-    let mountedPaths;
-    try {
-      mountedPaths = JSON.parse(row.mounted_paths);
-    } catch (e) {
-      logError('[SessionManager] Failed to parse mounted_paths:', e);
-      mountedPaths = [];
-    }
-
-    let allowedTools;
-    try {
-      allowedTools = JSON.parse(row.allowed_tools);
-    } catch (e) {
-      logError('[SessionManager] Failed to parse allowed_tools:', e);
-      allowedTools = [];
-    }
-
-    return {
-      id: row.id,
-      title: row.title,
-      claudeSessionId: row.claude_session_id || undefined,
-      openaiThreadId: row.openai_thread_id || undefined,
-      status: row.status as Session['status'],
-      cwd: row.cwd || undefined,
-      mountedPaths,
-      allowedTools,
-      memoryEnabled: row.memory_enabled === 1,
-      model: row.model || undefined,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-    };
-  }
-
-  // List all sessions
   listSessions(): Session[] {
-    const rows = this.db.sessions.getAll();
-
-    return rows.map((row) => {
-      let mountedPaths;
-      try {
-        mountedPaths = JSON.parse(row.mounted_paths);
-      } catch (e) {
-        logError('[SessionManager] Failed to parse mounted_paths:', e);
-        mountedPaths = [];
-      }
-
-      let allowedTools;
-      try {
-        allowedTools = JSON.parse(row.allowed_tools);
-      } catch (e) {
-        logError('[SessionManager] Failed to parse allowed_tools:', e);
-        allowedTools = [];
-      }
-
-      return {
-        id: row.id,
-        title: row.title,
-        claudeSessionId: row.claude_session_id || undefined,
-        openaiThreadId: row.openai_thread_id || undefined,
-        status: row.status as Session['status'],
-        cwd: row.cwd || undefined,
-        mountedPaths,
-        allowedTools,
-        memoryEnabled: row.memory_enabled === 1,
-        model: row.model || undefined,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
-      };
-    });
+    return this.store.listSessions();
   }
 
-  // Continue an existing session
   async continueSession(
     sessionId: string,
     prompt: string,
     content?: ContentBlock[]
   ): Promise<void> {
     log('[SessionManager] Continuing session:', sessionId);
-
     const session = this.loadSession(sessionId);
     if (!session) {
       throw new Error(`Session not found: ${sessionId}`);
     }
-
     this.enqueuePrompt(session, prompt, content);
   }
 
@@ -440,55 +207,7 @@ export class SessionManager {
     sessionId: string,
     customInstructions?: string
   ): Promise<{ success: boolean; errorKey?: string; error?: string }> {
-    log('[SessionManager] Manual compaction requested for session:', sessionId);
-
-    const session = this.loadSession(sessionId);
-    if (!session) {
-      throw new Error(`Session not found: ${sessionId}`);
-    }
-
-    if (this.activeSessions.has(sessionId)) {
-      this.stopSession(sessionId);
-    }
-
-    if (!this.agentRunner.compactSession) {
-      return { success: false, errorKey: 'errCompactFailed' };
-    }
-
-    try {
-      const result = await this.agentRunner.compactSession(session, customInstructions);
-      const compactionMessage: Message = {
-        id: uuidv4(),
-        sessionId,
-        role: 'system',
-        content: [
-          {
-            type: 'compaction_summary',
-            summary: result.summary,
-            tokensBefore: result.tokensBefore,
-            customInstructions,
-          },
-        ],
-        timestamp: Date.now(),
-      };
-      this.saveMessage(compactionMessage);
-      this.sendToRenderer({
-        type: 'stream.message',
-        payload: { sessionId, message: compactionMessage },
-      });
-      return { success: true };
-    } catch (error) {
-      const errorKey =
-        error instanceof Error && error.message.startsWith('errCompact')
-          ? error.message
-          : undefined;
-      logError('[SessionManager] Manual compaction failed:', error);
-      return {
-        success: false,
-        errorKey,
-        error: error instanceof Error ? error.message : String(error),
-      };
-    }
+    return this.facadeSupport.compactSession(sessionId, customInstructions);
   }
 
   async handoffSession(
@@ -501,74 +220,7 @@ export class SessionManager {
     errorKey?: string;
     error?: string;
   }> {
-    log('[SessionManager] Handoff to new session requested for:', sessionId);
-
-    const session = this.loadSession(sessionId);
-    if (!session) {
-      throw new Error(`Session not found: ${sessionId}`);
-    }
-
-    if (this.activeSessions.has(sessionId)) {
-      this.stopSession(sessionId);
-    }
-
-    const messages = this.getMessages(sessionId);
-    const hasConversation = messages.some(
-      (message) => message.role === 'user' || message.role === 'assistant'
-    );
-    if (!hasConversation) {
-      return { success: false, errorKey: 'errHandoffNothingToSummarize' };
-    }
-
-    if (!this.agentRunner.summarizeForHandoff) {
-      return { success: false, errorKey: 'errHandoffFailed' };
-    }
-
-    try {
-      const result = await this.agentRunner.summarizeForHandoff(
-        session,
-        messages,
-        customInstructions
-      );
-      const handoffPrompt = buildCompactionHandoffPrompt({
-        summary: result.summary,
-        sourceTitle: session.title,
-        tokensBefore: result.tokensBefore,
-        customInstructions,
-      });
-      const content: ContentBlock[] = [
-        {
-          type: 'compaction_summary',
-          summary: result.summary,
-          tokensBefore: result.tokensBefore,
-          customInstructions,
-          sourceTitle: session.title,
-        },
-        { type: 'text', text: handoffPrompt },
-      ];
-
-      const newSession = await this.startSession(
-        buildCompactionSessionTitle(session.title),
-        handoffPrompt,
-        session.cwd,
-        session.allowedTools,
-        content,
-        session.memoryEnabled
-      );
-
-      return { success: true, newSession, initialContent: content };
-    } catch (error) {
-      const errorKey =
-        error instanceof Error && error.message.startsWith('errHandoff')
-          ? error.message
-          : undefined;
-      logError('[SessionManager] Handoff failed:', error);
-      return {
-        success: false,
-        errorKey: errorKey || 'errHandoffFailed',
-        error: error instanceof Error ? error.message : String(error),
-      };
-    }
+    return this.facadeSupport.handoffSession(sessionId, customInstructions);
   }
 
   async generateSessionTitleFromPrompt(prompt: string): Promise<string> {
@@ -576,383 +228,192 @@ export class SessionManager {
     if (!normalizedPrompt) {
       return 'New Session';
     }
-
     const generated = await this.withTimeout(
       this.generateTitleWithConfig(buildTitlePrompt(normalizedPrompt)),
-      TITLE_GENERATION_TIMEOUT_MS,
+      20000,
       'session-title-preview'
     );
-    const normalizedGenerated = normalizeGeneratedTitle(generated);
-    return normalizedGenerated ?? getDefaultTitleFromPrompt(normalizedPrompt);
+    return normalizeGeneratedTitle(generated) ?? getDefaultTitleFromPrompt(normalizedPrompt);
   }
 
   async generateScheduledTaskTitle(prompt: string): Promise<string> {
-    const sessionTitle = await this.generateSessionTitleFromPrompt(prompt);
-    return buildScheduledTaskTitle(sessionTitle);
+    return buildScheduledTaskTitle(await this.generateSessionTitleFromPrompt(prompt));
   }
 
-  /**
-   * Ensure sandbox is initialized for the session's workspace
-   */
-  private async ensureSandboxInitialized(session: Session): Promise<void> {
-    if (!session.cwd) {
-      log('[SessionManager] No workspace directory, skipping sandbox init');
-      return;
+  stopSession(sessionId: string): void {
+    this.facadeSupport.stopSession(sessionId);
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    await this.facadeSupport.deleteSession(sessionId);
+  }
+
+  async batchDeleteSessions(sessionIds: string[]): Promise<void> {
+    await this.facadeSupport.batchDeleteSessions(sessionIds);
+  }
+
+  updateSessionCwd(sessionId: string, cwd: string): void {
+    this.facadeSupport.updateSessionCwd(sessionId, cwd);
+  }
+
+  clearAllCachedAgentSessions(): void {
+    this.agentRunner.clearAllSdkSessions?.();
+  }
+
+  saveMessage(message: Message): void {
+    this.store.saveMessage(message);
+  }
+
+  getMessages(sessionId: string): Message[] {
+    return this.store.getMessages(sessionId);
+  }
+
+  getTraceSteps(sessionId: string): TraceStep[] {
+    return this.store.getTraceSteps(sessionId);
+  }
+
+  handlePermissionResponse(toolUseId: string, result: PermissionResult): void {
+    const resolver = this.pendingPermissions.get(toolUseId);
+    if (resolver) {
+      resolver(result);
+      this.pendingPermissions.delete(toolUseId);
     }
+  }
 
-    // Check if already initialized with this exact workspace
-    if (this.sandboxAdapter.initialized && this.sandboxAdapter.workspacePath === session.cwd) {
-      return;
-    }
+  async requestPermission(
+    sessionId: string,
+    toolUseId: string,
+    toolName: string,
+    input: Record<string, unknown>
+  ): Promise<PermissionResult> {
+    return new Promise((resolve) => {
+      const timeoutId = setTimeout(() => {
+        this.pendingPermissions.delete(toolUseId);
+        resolve('deny');
+        this.sendToRenderer({ type: 'permission.dismiss', payload: { toolUseId } });
+      }, 60_000);
 
-    // Check if initialization is already in progress
-    const existingPromise = this.sandboxInitPromises.get(session.cwd);
-    if (existingPromise) {
-      await existingPromise;
-      return;
-    }
-
-    // Initialize sandbox with workspace
-    const initPromise = initializeSandbox({
-      workspacePath: session.cwd,
-      mainWindow: null, // Will show dialogs globally
-    }).then(() => {
-      /* void */
-    });
-
-    this.sandboxInitPromises.set(session.cwd, initPromise);
-
-    try {
-      await initPromise;
-      log('[SessionManager] Sandbox initialized for workspace:', session.cwd);
-      log('[SessionManager] Sandbox mode:', this.sandboxAdapter.mode);
-    } catch (error) {
-      logError('[SessionManager] Failed to initialize sandbox:', error);
+      this.pendingPermissions.set(toolUseId, (result) => {
+        clearTimeout(timeoutId);
+        resolve(result);
+      });
       this.sendToRenderer({
-        type: 'error',
-        payload: {
-          message: `Failed to initialize sandbox: ${error instanceof Error ? error.message : String(error)}`,
+        type: 'permission.request',
+        payload: { toolUseId, toolName, input, sessionId },
+      });
+    });
+  }
+
+  async requestSudoPassword(
+    sessionId: string,
+    toolUseId: string,
+    command: string
+  ): Promise<string | null> {
+    return new Promise((resolve) => {
+      const timeoutId = setTimeout(() => {
+        this.pendingSudoPasswords.delete(toolUseId);
+        resolve(null);
+        this.sendToRenderer({ type: 'sudo.password.dismiss', payload: { toolUseId } });
+      }, 60_000);
+
+      this.pendingSudoPasswords.set(toolUseId, {
+        sessionId,
+        resolve: (password) => {
+          clearTimeout(timeoutId);
+          resolve(password);
         },
       });
-      // Continue anyway - sandbox adapter will fallback to native
-    } finally {
-      this.sandboxInitPromises.delete(session.cwd);
+      this.sendToRenderer({
+        type: 'sudo.password.request',
+        payload: { toolUseId, command, sessionId },
+      });
+    });
+  }
+
+  handleSudoPasswordResponse(toolUseId: string, password: string | null): void {
+    const entry = this.pendingSudoPasswords.get(toolUseId);
+    if (entry) {
+      entry.resolve(password);
+      this.pendingSudoPasswords.delete(toolUseId);
     }
   }
 
-  // Helper: Copy files to session's .tmp directory and sync to sandbox if needed
-  private async processFileAttachments(
+  private loadSession(sessionId: string): Session | null {
+    return this.store.loadSession(sessionId);
+  }
+
+  private updateSessionStatus(sessionId: string, status: Session['status']): void {
+    this.facadeSupport.updateSessionStatus(sessionId, status);
+  }
+
+  private updateSessionModel(session: Session, model: string): void {
+    this.facadeSupport.updateSessionModel(session, model);
+  }
+
+  private async ensureSandboxInitialized(session: Session): Promise<void> {
+    await this.facadeSupport.ensureSandboxInitialized(session);
+  }
+
+  private processFileAttachments(
     session: Session,
     content: ContentBlock[]
   ): Promise<ContentBlock[]> {
-    const processedContent: ContentBlock[] = [];
-
-    for (const block of content) {
-      if (block.type === 'file_attachment') {
-        const fileBlock = block as FileAttachmentContent;
-
-        try {
-          // Create .tmp directory if it doesn't exist
-          const tmpDir = path.join(session.cwd || process.cwd(), '.tmp');
-          if (!fs.existsSync(tmpDir)) {
-            fs.mkdirSync(tmpDir, { recursive: true });
-            log('[SessionManager] Created .tmp directory:', tmpDir);
-          }
-
-          // Get source file path from the file attachment
-          const sourcePath = (fileBlock.relativePath || '').trim(); // This is the full path from Electron
-          // IMPORTANT: Use path.basename() to extract only the filename, not the full path
-          const fallbackFilename = fileBlock.filename || sourcePath || `attachment-${Date.now()}`;
-          const destFilename = path.basename(fallbackFilename);
-          if (!destFilename) continue;
-          const destPath = path.join(tmpDir, destFilename);
-          let actualSize = 0;
-
-          // Copy file to .tmp directory
-          if (sourcePath && fs.existsSync(sourcePath)) {
-            fs.copyFileSync(sourcePath, destPath);
-
-            // Get actual file size
-            const stats = fs.statSync(destPath);
-            actualSize = stats.size;
-
-            log(
-              '[SessionManager] Copied file:',
-              sourcePath,
-              '->',
-              destPath,
-              `(${actualSize} bytes)`
-            );
-          } else if (fileBlock.inlineDataBase64) {
-            const buffer = Buffer.from(fileBlock.inlineDataBase64, 'base64');
-            fs.writeFileSync(destPath, buffer);
-            actualSize = buffer.length;
-            log('[SessionManager] Wrote file from inline data:', destPath, `(${actualSize} bytes)`);
-          } else {
-            logError(
-              '[SessionManager] Source file not found and inline data missing:',
-              sourcePath || '(empty path)'
-            );
-            // Skip this file attachment
-            continue;
-          }
-
-          // If sandbox is already initialized, sync the file to sandbox as well
-          // This handles the case where user attaches files in subsequent messages
-          const sandboxPath = SandboxSync.getSandboxPath(session.id);
-          if (sandboxPath) {
-            const sandboxRelativePath = `.tmp/${destFilename}`;
-            log('[SessionManager] Syncing attached file to sandbox:', sandboxRelativePath);
-            const syncResult = await SandboxSync.syncFileToSandbox(
-              session.id,
-              destPath,
-              sandboxRelativePath
-            );
-            if (syncResult.success) {
-              log('[SessionManager] File synced to sandbox:', syncResult.sandboxPath);
-            } else {
-              logError('[SessionManager] Failed to sync file to sandbox:', syncResult.error);
-              // Continue anyway - file is in Windows .tmp, agent might still work via /mnt/
-            }
-          } else {
-            // Check for Lima sandbox
-            const { LimaSync } = await import('../sandbox/lima-sync');
-            const limaSandboxPath = LimaSync.getSandboxPath(session.id);
-            if (limaSandboxPath) {
-              const sandboxRelativePath = `.tmp/${destFilename}`;
-              log('[SessionManager] Syncing attached file to Lima sandbox:', sandboxRelativePath);
-              const syncResult = await LimaSync.syncFileToSandbox(
-                session.id,
-                destPath,
-                sandboxRelativePath
-              );
-              if (syncResult.success) {
-                log('[SessionManager] File synced to Lima sandbox:', syncResult.sandboxPath);
-              } else {
-                logError('[SessionManager] Failed to sync file to Lima sandbox:', syncResult.error);
-                // Continue anyway - file is in macOS .tmp, agent might still work via direct access
-              }
-            }
-          }
-
-          // Update the content block with the new relative path and actual size
-          const relativePathFromCwd = path.join('.tmp', destFilename);
-          const restFileBlock = { ...fileBlock };
-          delete restFileBlock.inlineDataBase64;
-          processedContent.push({
-            ...restFileBlock,
-            relativePath: relativePathFromCwd,
-            size: actualSize,
-          });
-        } catch (error) {
-          logError('[SessionManager] Error copying file:', error);
-          this.sendToRenderer({
-            type: 'error',
-            payload: {
-              message: `Failed to process file attachment: ${error instanceof Error ? error.message : String(error)}`,
-            },
-          });
-          // Skip this file attachment
-        }
-      } else {
-        // Keep other content blocks as-is
-        processedContent.push(block);
-      }
-    }
-
-    return processedContent;
+    return processFileAttachments({ session, content, sendToRenderer: this.sendToRenderer });
   }
 
-  // Process a prompt using ClaudeAgentRunner
-  private async processPrompt(
-    session: Session,
-    prompt: string,
-    content?: ContentBlock[]
-  ): Promise<void> {
-    const traceId = generateTraceId();
-    return runWithLogContext({ sessionId: session.id, traceId }, async () => {
-      logCtx('[SessionManager] Processing prompt for session:', session.id, 'traceId:', traceId);
-      logCtx(
-        '[SessionManager] Received content:',
-        content
-          ? JSON.stringify(
-              content.map((c) => ({
-                type: c.type,
-                hasData: !!(c as { source?: { data?: unknown } }).source?.data,
-              }))
-            )
-          : 'none'
-      );
-
-      // Ensure sandbox is initialized for this workspace
-      await this.ensureSandboxInitialized(session);
-
-      try {
-        // Use provided content blocks or fall back to simple text
-        let messageContent: ContentBlock[] =
-          content && content.length > 0 ? content : [{ type: 'text', text: prompt } as TextContent];
-
-        // Process file attachments - copy to .tmp directory
-        messageContent = await this.processFileAttachments(session, messageContent);
-
-        logCtx(
-          '[SessionManager] Final message content types:',
-          messageContent.map((c) => c.type)
-        );
-
-        // Build enhanced prompt with file information
-        let enhancedPrompt = prompt;
-        const fileAttachments = messageContent.filter(
-          (c) => c.type === 'file_attachment'
-        ) as FileAttachmentContent[];
-        if (fileAttachments.length > 0) {
-          const fileInfo = fileAttachments
-            .map(
-              (f) => `- ${f.filename} (${(f.size / 1024).toFixed(1)} KB) at path: ${f.relativePath}`
-            )
-            .join('\n');
-          enhancedPrompt = `${prompt}\n\n[Attached files - use Read tool to access them]:\n${fileInfo}`;
-          logCtx('[SessionManager] Enhanced prompt with file info:', enhancedPrompt);
-        }
-
-        // Save user message to database for persistence
-        const existingMessages = this.getMessages(session.id);
-        const userMessage: Message = {
-          id: uuidv4(),
-          sessionId: session.id,
-          role: 'user',
-          content: messageContent, // Save full content including images and files
-          timestamp: Date.now(),
-        };
-        this.saveMessage(userMessage);
-        logCtx(
-          '[SessionManager] User message saved:',
-          userMessage.id,
-          'with',
-          messageContent.length,
-          'content blocks'
-        );
-        const messagesForContext = [...existingMessages, userMessage];
-
-        // Update session model to match current config (may have changed since session creation)
-        const currentModel = configStore.get('model');
-        if (currentModel && currentModel !== session.model) {
-          session.model = currentModel;
-          this.db.sessions.update(session.id, { model: currentModel });
-          this.sendToRenderer({
-            type: 'session.update',
-            payload: { sessionId: session.id, updates: { model: currentModel } },
-          });
-        }
-
-        // Run the agent
-        await this.agentRunner.run(session, enhancedPrompt, messagesForContext);
-
-        if (this.extensionManager) {
-          const stableMessages = this.getMessages(session.id);
-          this.extensionManager
-            .afterSessionRun({
-              session,
-              prompt: enhancedPrompt,
-              messages: stableMessages,
-            })
-            .catch((error) =>
-              logCtxError('[SessionManager] Runtime extension post-run hook failed:', error)
-            );
-        }
-
-        // 标题生成不再与首轮对话并发，避免与主请求竞争同一上游配额/通道导致体感变慢。
-        this.runSessionTitleGeneration(session, prompt, existingMessages).catch((err) =>
-          logCtxError('[SessionManager] Title generation failed:', err)
-        );
-      } catch (error) {
-        logCtxError('[SessionManager] Error processing prompt:', error);
-        const errorText = error instanceof Error ? error.message : 'Unknown error';
-        const alreadyReportedToUser = Boolean(
-          error &&
-          typeof error === 'object' &&
-          (error as { alreadyReportedToUser?: boolean }).alreadyReportedToUser
-        );
-        if (!alreadyReportedToUser) {
-          const assistantMessage: Message = {
-            id: uuidv4(),
-            sessionId: session.id,
-            role: 'assistant',
-            content: [{ type: 'text', text: `**Error**: ${errorText}` }],
-            timestamp: Date.now(),
-          };
-          this.saveMessage(assistantMessage);
-          this.sendToRenderer({
-            type: 'stream.message',
-            payload: { sessionId: session.id, message: assistantMessage },
-          });
-        }
-        this.sendToRenderer({
-          type: 'error',
-          payload: { message: errorText },
-        });
-      }
-    }); // end runWithLogContext
+  private processPrompt(session: Session, prompt: string, content?: ContentBlock[]): Promise<void> {
+    return processSessionPrompt({
+      session,
+      prompt,
+      content,
+      agentRunner: this.agentRunner,
+      extensionManager: this.extensionManager,
+      ensureSandboxInitialized: (currentSession) => this.ensureSandboxInitialized(currentSession),
+      processFileAttachments: (currentSession, blocks) =>
+        this.processFileAttachments(currentSession, blocks),
+      getMessages: (sessionId) => this.getMessages(sessionId),
+      saveMessage: (message) => this.saveMessage(message),
+      updateSessionModel: (currentSession, model) => this.updateSessionModel(currentSession, model),
+      sendToRenderer: this.sendToRenderer,
+      runSessionTitleGeneration: (currentSession, currentPrompt, existingMessages) =>
+        this.facadeSupport.runSessionTitleGeneration(
+          currentSession,
+          currentPrompt,
+          existingMessages
+        ),
+    });
   }
 
-  private async runSessionTitleGeneration(
-    session: Session,
-    prompt: string,
-    existingMessages: Message[]
-  ): Promise<void> {
-    const token = Symbol(`title:${session.id}`);
-    this.titleGenerationTokens.set(session.id, token);
-    const shouldAbort = () => {
-      if (this.titleGenerationTokens.get(session.id) !== token) {
-        return true;
-      }
-      return !this.db.sessions.get(session.id);
-    };
-    const userMessageCount =
-      existingMessages.filter((message) => message.role === 'user').length + 1;
-    try {
-      await maybeGenerateSessionTitle({
-        sessionId: session.id,
-        prompt,
-        userMessageCount,
-        currentTitle: session.title,
-        hasAttempted: this.sessionTitleAttempts.has(session.id),
-        generateTitle: async (titlePrompt) => {
-          if (shouldAbort()) {
-            return null;
-          }
-          const title = await this.withTimeout(
-            this.generateTitleWithConfig(titlePrompt),
-            TITLE_GENERATION_TIMEOUT_MS,
-            session.id
-          );
-          return normalizeGeneratedTitle(title);
-        },
-        getLatestTitle: () => this.db.sessions.get(session.id)?.title ?? null,
-        markAttempt: () => {
-          this.sessionTitleAttempts.add(session.id);
-        },
-        updateTitle: async (title) => {
-          if (shouldAbort()) {
-            log('[SessionTitle] Skip update: session no longer active', session.id);
-            return false;
-          }
-          const updated = this.updateSessionTitle(session.id, title);
-          if (updated) {
-            session.title = title;
-          }
-          return updated;
-        },
-        shouldAbort,
-        log,
-      });
-    } catch (error) {
-      logError('[SessionTitle] Unexpected error', session.id, error);
-    } finally {
-      if (this.titleGenerationTokens.get(session.id) === token) {
-        this.titleGenerationTokens.delete(session.id);
-      }
-    }
+  private enqueuePrompt(session: Session, prompt: string, content?: ContentBlock[]): void {
+    enqueueSessionPrompt(
+      {
+        activeSessions: this.activeSessions,
+        promptQueues: this.promptQueues,
+        processQueue: (queuedSession) => this.processQueue(queuedSession),
+        processPrompt: (queuedSession, queuedPrompt, queuedContent) =>
+          this.processPrompt(queuedSession, queuedPrompt, queuedContent),
+        loadSession: (sessionId) => this.loadSession(sessionId),
+        updateSessionStatus: (sessionId, status) => this.updateSessionStatus(sessionId, status),
+      },
+      session,
+      prompt,
+      content
+    );
+  }
+
+  private processQueue(session: Session): Promise<void> {
+    return processSessionQueue(
+      {
+        activeSessions: this.activeSessions,
+        promptQueues: this.promptQueues,
+        processQueue: (queuedSession) => this.processQueue(queuedSession),
+        processPrompt: (queuedSession, queuedPrompt, queuedContent) =>
+          this.processPrompt(queuedSession, queuedPrompt, queuedContent),
+        loadSession: (sessionId) => this.loadSession(sessionId),
+        updateSessionStatus: (sessionId, status) => this.updateSessionStatus(sessionId, status),
+      },
+      session
+    );
   }
 
   private async withTimeout<T>(
@@ -979,458 +440,8 @@ export class SessionManager {
   }
 
   private async generateTitleWithConfig(titlePrompt: string): Promise<string | null> {
-    // Always use pi-ai SDK for title generation
     return normalizeGeneratedTitle(
       await generateTitleWithClaudeSdk(titlePrompt, configStore.getAll())
     );
-  }
-
-  private enqueuePrompt(session: Session, prompt: string, content?: ContentBlock[]): void {
-    const queue = this.promptQueues.get(session.id) || [];
-    queue.push({ prompt, content });
-    this.promptQueues.set(session.id, queue);
-
-    if (!this.activeSessions.has(session.id)) {
-      this.processQueue(session).catch((err) => {
-        logError('[SessionManager] Queue processing error:', err);
-        this.sendToRenderer({
-          type: 'error',
-          payload: {
-            message: `Failed to process message: ${err instanceof Error ? err.message : String(err)}`,
-          },
-        });
-      });
-    } else {
-      log('[SessionManager] Session running, queued prompt:', session.id);
-    }
-  }
-
-  private async processQueue(session: Session): Promise<void> {
-    if (this.activeSessions.has(session.id)) return;
-
-    const controller = new AbortController();
-    this.activeSessions.set(session.id, controller);
-    this.updateSessionStatus(session.id, 'running');
-
-    try {
-      // Outer loop: after the inner loop drains, re-check for items that
-      // arrived while processPrompt was awaited. This keeps the session in
-      // activeSessions the entire time, preventing enqueuePrompt from
-      // spawning a duplicate processQueue during the gap that previously
-      // existed between activeSessions.delete and the restart call.
-      let shouldContinue = true;
-      while (shouldContinue) {
-        while (!controller.signal.aborted) {
-          const queue = this.promptQueues.get(session.id);
-          if (!queue || queue.length === 0) break;
-
-          const item = queue.shift();
-          if (!item) continue;
-
-          const latestSession = this.loadSession(session.id);
-          if (!latestSession) {
-            log('[SessionManager] Session removed while processing queue:', session.id);
-            return; // finally handles cleanup
-          }
-
-          await this.processPrompt(latestSession, item.prompt, item.content);
-
-          if (controller.signal.aborted) return; // finally handles cleanup
-        }
-
-        // If aborted, exit immediately — finally handles cleanup.
-        if (controller.signal.aborted) {
-          shouldContinue = false;
-          continue;
-        }
-
-        // Re-check: items may have been enqueued during the last processPrompt await.
-        const pendingQueue = this.promptQueues.get(session.id);
-        if (!pendingQueue || pendingQueue.length === 0) {
-          shouldContinue = false;
-          continue;
-        }
-
-        // Reload session before continuing with newly arrived prompts.
-        const latestSession = this.loadSession(session.id);
-        if (!latestSession) {
-          this.promptQueues.delete(session.id);
-          shouldContinue = false;
-          continue;
-        }
-        session = latestSession;
-        log('[SessionManager] Continuing queue with newly arrived prompts:', session.id);
-      }
-    } finally {
-      // Only clean up here — no restart logic needed since the outer loop
-      // already handles re-checking. activeSessions is only deleted once
-      // there are truly no pending items remaining.
-      this.activeSessions.delete(session.id);
-      const queue = this.promptQueues.get(session.id);
-      if (queue && queue.length === 0) {
-        this.promptQueues.delete(session.id);
-      }
-      this.updateSessionStatus(session.id, 'idle');
-    }
-  }
-
-  // Stop a running session
-  stopSession(sessionId: string): void {
-    log('[SessionManager] Stopping session:', sessionId);
-    this.titleGenerationTokens.delete(sessionId);
-    this.agentRunner.cancel(sessionId);
-    // Cancel any pending sudo password requests for this session
-    for (const [toolUseId, entry] of this.pendingSudoPasswords) {
-      if (entry.sessionId === sessionId) {
-        entry.resolve(null);
-        this.pendingSudoPasswords.delete(toolUseId);
-        this.sendToRenderer({ type: 'sudo.password.dismiss', payload: { toolUseId } });
-      }
-    }
-    // Also abort any pending controller we tracked
-    const controller = this.activeSessions.get(sessionId);
-    if (controller) {
-      controller.abort();
-    }
-    this.promptQueues.delete(sessionId);
-    this.messageCache.delete(sessionId);
-    this.updateSessionStatus(sessionId, 'idle');
-  }
-
-  // Delete a session
-  async deleteSession(sessionId: string): Promise<void> {
-    const existingSession = this.loadSession(sessionId);
-
-    // Stop if running
-    this.stopSession(sessionId);
-
-    // Sync and cleanup sandbox if it exists for this session
-    if (SandboxSync.hasSession(sessionId)) {
-      log('[SessionManager] Cleaning up sandbox for session:', sessionId);
-      try {
-        await SandboxSync.syncAndCleanup(sessionId);
-        log('[SessionManager] Sandbox cleanup complete for session:', sessionId);
-      } catch (error) {
-        logError('[SessionManager] Failed to cleanup sandbox:', error);
-        // Continue with session deletion even if sandbox cleanup fails
-      }
-    }
-
-    // Delete from database (messages will be deleted automatically via CASCADE)
-    this.db.sessions.delete(sessionId);
-    this.messageCache.delete(sessionId);
-    this.sessionTitleAttempts.delete(sessionId);
-    this.titleGenerationTokens.delete(sessionId);
-    if (this.extensionManager) {
-      await this.extensionManager.onSessionDeleted({
-        sessionId,
-        session: existingSession,
-      });
-    }
-    forgetSessionPermissions(sessionId);
-
-    log('[SessionManager] Session deleted:', sessionId);
-  }
-
-  async batchDeleteSessions(sessionIds: string[]): Promise<void> {
-    const sessionsById = new Map(
-      sessionIds.map((sessionId) => [sessionId, this.loadSession(sessionId)] as const)
-    );
-    // Stop sessions and clean up sandboxes first (async, cannot run inside SQLite transaction)
-    for (const sessionId of sessionIds) {
-      this.stopSession(sessionId);
-      if (SandboxSync.hasSession(sessionId)) {
-        try {
-          await SandboxSync.syncAndCleanup(sessionId);
-        } catch (error) {
-          logError('[SessionManager] Failed to cleanup sandbox during batch delete:', error);
-        }
-      }
-    }
-
-    // Perform all SQLite deletions atomically
-    this.db.raw.transaction(() => {
-      for (const sessionId of sessionIds) {
-        this.db.sessions.delete(sessionId);
-        this.messageCache.delete(sessionId);
-        this.sessionTitleAttempts.delete(sessionId);
-        this.titleGenerationTokens.delete(sessionId);
-        forgetSessionPermissions(sessionId);
-      }
-    })();
-
-    if (this.extensionManager) {
-      for (const sessionId of sessionIds) {
-        await this.extensionManager.onSessionDeleted({
-          sessionId,
-          session: sessionsById.get(sessionId) || null,
-        });
-      }
-    }
-
-    log('[SessionManager] Batch deleted sessions:', sessionIds.length);
-  }
-
-  // Update session status
-  private updateSessionStatus(sessionId: string, status: Session['status']): void {
-    this.db.sessions.update(sessionId, { status, updated_at: Date.now() });
-
-    this.sendToRenderer({
-      type: 'session.status',
-      payload: { sessionId, status },
-    });
-  }
-
-  private updateSessionTitle(sessionId: string, title: string): boolean {
-    const existing = this.db.sessions.get(sessionId);
-    if (!existing) {
-      log('[SessionTitle] Skip title update for deleted session:', sessionId);
-      return false;
-    }
-    this.db.sessions.update(sessionId, { title });
-    this.sendToRenderer({
-      type: 'session.update',
-      payload: { sessionId, updates: { title } },
-    });
-    return true;
-  }
-
-  // Update session's working directory
-  // Also clears SDK session cache because Claude SDK sessions are bound to cwd
-  updateSessionCwd(sessionId: string, cwd: string): void {
-    if (this.activeSessions.has(sessionId)) {
-      logWarn(
-        '[SessionManager] CWD change requested while session running; stopping active run first',
-        { sessionId, cwd }
-      );
-      this.stopSession(sessionId);
-    }
-    const mountedPaths = this.buildMountedPaths(cwd);
-    // Clear claude_session_id in DB so next query creates a new SDK session
-    // (Claude SDK sessions cannot change cwd mid-session)
-    this.db.sessions.update(sessionId, {
-      cwd,
-      mounted_paths: JSON.stringify(mountedPaths),
-      claude_session_id: null,
-      openai_thread_id: null,
-      updated_at: Date.now(),
-    });
-
-    // Also clear the in-memory SDK session cache
-    if (this.agentRunner?.clearSdkSession) {
-      this.agentRunner.clearSdkSession(sessionId);
-    }
-
-    this.sendToRenderer({
-      type: 'session.update',
-      payload: { sessionId, updates: { cwd, mountedPaths } },
-    });
-
-    log('[SessionManager] Session cwd updated:', sessionId, '->', cwd, '(SDK session cleared)');
-  }
-
-  clearAllCachedAgentSessions(): void {
-    this.agentRunner?.clearAllSdkSessions?.();
-  }
-
-  // Save message to database
-  saveMessage(message: Message): void {
-    this.db.messages.create({
-      id: message.id,
-      session_id: message.sessionId,
-      role: message.role,
-      content: JSON.stringify(message.content),
-      timestamp: message.timestamp,
-      token_usage: message.tokenUsage ? JSON.stringify(message.tokenUsage) : null,
-      execution_time_ms: message.executionTimeMs ?? null,
-    });
-    const cached = this.messageCache.get(message.sessionId);
-    if (cached) {
-      cached.push(message);
-    } else {
-      // Only evict when the cache could actually grow (i.e. the session is
-      // not cached yet). Evicting on every saveMessage call is wrong because
-      // the Map size didn't increase — we just appended to an existing array —
-      // and the oldest entry could be the very session we just updated.
-      if (this.messageCache.size > SessionManager.MAX_CACHE_SIZE) {
-        const firstKey = this.messageCache.keys().next().value;
-        if (firstKey) this.messageCache.delete(firstKey);
-      }
-      this.messageCache.set(message.sessionId, [message]);
-    }
-
-    log('[SessionManager] Message saved:', message.id, 'role:', message.role);
-  }
-
-  // Get messages for a session
-  getMessages(sessionId: string): Message[] {
-    const cached = this.messageCache.get(sessionId);
-    if (cached) {
-      return [...cached];
-    }
-
-    const rows = this.db.messages.getBySessionId(sessionId);
-    const messages = rows.map((row) => ({
-      id: row.id,
-      sessionId: row.session_id,
-      role: row.role as Message['role'],
-      content: this.normalizeContent(row.content),
-      timestamp: row.timestamp,
-      tokenUsage: row.token_usage ? JSON.parse(row.token_usage) : undefined,
-      executionTimeMs: row.execution_time_ms ?? undefined,
-    }));
-    this.messageCache.set(sessionId, messages);
-    return [...messages];
-  }
-
-  private normalizeContent(raw: string): ContentBlock[] {
-    try {
-      const parsed = JSON.parse(raw) as unknown;
-      if (Array.isArray(parsed)) {
-        return parsed as ContentBlock[];
-      }
-      if (
-        typeof parsed === 'object' &&
-        parsed !== null &&
-        'type' in parsed &&
-        typeof (parsed as { type: unknown }).type === 'string'
-      ) {
-        return [parsed as ContentBlock];
-      }
-      if (typeof parsed === 'string') {
-        return [{ type: 'text', text: parsed } as TextContent];
-      }
-      return [{ type: 'text', text: String(parsed) } as TextContent];
-    } catch {
-      return [{ type: 'text', text: raw } as TextContent];
-    }
-  }
-
-  getTraceSteps(sessionId: string): TraceStep[] {
-    const rows = this.db.traceSteps.getBySessionId(sessionId);
-    const parseToolInput = (value: string | null): Record<string, unknown> | undefined => {
-      if (!value) return undefined;
-      try {
-        return JSON.parse(value) as Record<string, unknown>;
-      } catch {
-        return undefined;
-      }
-    };
-    return rows.map((row) => ({
-      id: row.id,
-      type: row.type as TraceStep['type'],
-      status: row.status as TraceStep['status'],
-      title: row.title,
-      content: row.content || undefined,
-      toolName: row.tool_name || undefined,
-      toolInput: parseToolInput(row.tool_input),
-      toolOutput: row.tool_output || undefined,
-      isError: row.is_error === 1 ? true : undefined,
-      timestamp: row.timestamp,
-      duration: row.duration ?? undefined,
-    }));
-  }
-
-  // Handle permission response
-  handlePermissionResponse(toolUseId: string, result: PermissionResult): void {
-    const resolver = this.pendingPermissions.get(toolUseId);
-    if (resolver) {
-      resolver(result);
-      this.pendingPermissions.delete(toolUseId);
-    }
-  }
-
-  // Request permission for a tool
-  async requestPermission(
-    sessionId: string,
-    toolUseId: string,
-    toolName: string,
-    input: Record<string, unknown>
-  ): Promise<PermissionResult> {
-    return new Promise((resolve) => {
-      const timeoutId = setTimeout(() => {
-        this.pendingPermissions.delete(toolUseId);
-        resolve('deny');
-        this.sendToRenderer({ type: 'permission.dismiss', payload: { toolUseId } });
-      }, 60_000);
-      this.pendingPermissions.set(toolUseId, (result: PermissionResult) => {
-        clearTimeout(timeoutId);
-        resolve(result);
-      });
-      this.sendToRenderer({
-        type: 'permission.request',
-        payload: { toolUseId, toolName, input, sessionId },
-      });
-    });
-  }
-
-  // Request sudo password from the user
-  async requestSudoPassword(
-    sessionId: string,
-    toolUseId: string,
-    command: string
-  ): Promise<string | null> {
-    return new Promise((resolve) => {
-      const timeout = setTimeout(() => {
-        this.pendingSudoPasswords.delete(toolUseId);
-        resolve(null);
-        this.sendToRenderer({ type: 'sudo.password.dismiss', payload: { toolUseId } });
-      }, 60_000);
-      this.pendingSudoPasswords.set(toolUseId, {
-        sessionId,
-        resolve: (password: string | null) => {
-          clearTimeout(timeout);
-          resolve(password);
-        },
-      });
-      this.sendToRenderer({
-        type: 'sudo.password.request',
-        payload: { toolUseId, command, sessionId },
-      });
-    });
-  }
-
-  // Handle sudo password response from renderer
-  handleSudoPasswordResponse(toolUseId: string, password: string | null): void {
-    const entry = this.pendingSudoPasswords.get(toolUseId);
-    if (entry) {
-      entry.resolve(password);
-      this.pendingSudoPasswords.delete(toolUseId);
-    }
-  }
-
-  private saveTraceStep(sessionId: string, step: TraceStep): void {
-    this.db.traceSteps.create({
-      id: step.id,
-      session_id: sessionId,
-      type: step.type,
-      status: step.status,
-      title: step.title,
-      content: step.content ?? null,
-      tool_name: step.toolName ?? null,
-      tool_input: step.toolInput ? JSON.stringify(step.toolInput) : null,
-      tool_output: step.toolOutput ?? null,
-      is_error: step.isError ? 1 : null,
-      timestamp: step.timestamp,
-      duration: step.duration ?? null,
-    });
-  }
-
-  private updateTraceStep(stepId: string, updates: Partial<TraceStep>): void {
-    const rowUpdates: Partial<TraceStepRow> = {};
-    if (updates.type !== undefined) rowUpdates.type = updates.type;
-    if (updates.status !== undefined) rowUpdates.status = updates.status;
-    if (updates.title !== undefined) rowUpdates.title = updates.title;
-    if (updates.content !== undefined) rowUpdates.content = updates.content;
-    if (updates.toolName !== undefined) rowUpdates.tool_name = updates.toolName;
-    if (updates.toolInput !== undefined) {
-      rowUpdates.tool_input = updates.toolInput ? JSON.stringify(updates.toolInput) : null;
-    }
-    if (updates.toolOutput !== undefined) rowUpdates.tool_output = updates.toolOutput;
-    if (updates.isError !== undefined) rowUpdates.is_error = updates.isError ? 1 : 0;
-    if (updates.timestamp !== undefined) rowUpdates.timestamp = updates.timestamp;
-    if (updates.duration !== undefined) rowUpdates.duration = updates.duration;
-
-    this.db.traceSteps.update(stepId, rowUpdates);
   }
 }
