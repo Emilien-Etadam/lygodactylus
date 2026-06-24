@@ -31,7 +31,7 @@
 
 - **12 langues** — fr, en, zh, es, de, it, uk, pl, sv, no, nl, ro — avec localisation backend (erreurs, dialogues)
 - **Thème VS Code** — alternative au thème Claude par défaut (Réglages → Apparence)
-- **Copier / coller** — menu contextuel et raccourcis natifs sur Windows et Linux
+- **Copier / coller** — menu contextuel et raccourcis natifs sur Windows
 - **Toggle sandbox** — activation/désactivation restaurée dans Réglages → Sandbox
 - **pi-coding-agent 0.73.1** — migration agent récente + correctifs de compaction du contexte
 
