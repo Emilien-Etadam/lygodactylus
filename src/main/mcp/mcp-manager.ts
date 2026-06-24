@@ -26,8 +26,8 @@ import {
   updateServer,
   type MCPServerLifecycleContext,
 } from './mcp-server-lifecycle.js';
+import { callTool } from './mcp-tool-call.js';
 import {
-  callTool,
   getTool,
   getTools,
   refreshTools,

@@ -28,6 +28,14 @@ const agentRunnerStreamEventsPath = path.resolve(
   process.cwd(),
   'src/main/claude/agent-runner-stream-events.ts'
 );
+const agentRunnerStreamMessageEventsPath = path.resolve(
+  process.cwd(),
+  'src/main/claude/agent-runner-stream-message-events.ts'
+);
+const agentRunnerStreamToolEventsPath = path.resolve(
+  process.cwd(),
+  'src/main/claude/agent-runner-stream-tool-events.ts'
+);
 const agentRunnerHistoryPath = path.resolve(
   process.cwd(),
   'src/main/claude/agent-runner-history.ts'
@@ -44,6 +52,16 @@ const agentRunnerPromptsContent = readFileSync(agentRunnerPromptsPath, 'utf8');
 const agentRunnerMcpServersContent = readFileSync(agentRunnerMcpServersPath, 'utf8');
 const agentRunnerStreamHandlerContent = readFileSync(agentRunnerStreamHandlerPath, 'utf8');
 const agentRunnerStreamEventsContent = readFileSync(agentRunnerStreamEventsPath, 'utf8');
+const agentRunnerStreamMessageEventsContent = readFileSync(
+  agentRunnerStreamMessageEventsPath,
+  'utf8'
+);
+const agentRunnerStreamToolEventsContent = readFileSync(agentRunnerStreamToolEventsPath, 'utf8');
+const agentRunnerStreamCombinedContent = [
+  agentRunnerStreamEventsContent,
+  agentRunnerStreamMessageEventsContent,
+  agentRunnerStreamToolEventsContent,
+].join('\n');
 const agentRunnerHistoryContent = readFileSync(agentRunnerHistoryPath, 'utf8');
 const agentRunnerMcpBridgeContent = readFileSync(agentRunnerMcpBridgePath, 'utf8');
 
@@ -117,17 +135,17 @@ describe('ClaudeAgentRunner Open Cowork SDK integration', () => {
     expect(agentRunnerStreamEventsContent).toContain(
       'messageUpdateCounts: deps.getStreamEventSummary()'
     );
-    expect(agentRunnerStreamEventsContent).toContain(
+    expect(agentRunnerStreamMessageEventsContent).toContain(
       "if (process.env.COWORK_LOG_SDK_MESSAGES_FULL === '1') {"
     );
-    expect(agentRunnerStreamEventsContent).toContain(
+    expect(agentRunnerStreamMessageEventsContent).toContain(
       "'[ClaudeAgentRunner] message_end raw message:'"
     );
   });
 
   it('reuses the shared user-facing error helper', () => {
     expect(agentRunnerRunContent).toContain("from './agent-runner-message-end'");
-    expect(agentRunnerStreamEventsContent).toContain('resolveMessageEndPayload');
+    expect(agentRunnerStreamMessageEventsContent).toContain('resolveMessageEndPayload');
     expect(agentRunnerStreamEventsContent).toContain('toUserFacingErrorText');
     expect(agentRunnerRunContent).toContain('toUserFacingErrorText');
     expect(agentRunnerRunContent).toContain('const errorText = toUserFacingErrorText(');
@@ -188,17 +206,21 @@ describe('ClaudeAgentRunner Open Cowork SDK integration', () => {
     expect(agentRunnerMcpBridgeContent).toContain(
       'const normalizedResult = normalizeMcpToolResultForModel(result);'
     );
-    expect(agentRunnerStreamEventsContent).toContain(
+    expect(agentRunnerStreamToolEventsContent).toContain(
       'const normalizedToolResult = normalizeToolExecutionResultForUi(event.result);'
     );
     expect(agentRunnerMcpBridgeContent).not.toContain('else textParts.push(JSON.stringify(part));');
-    expect(agentRunnerStreamEventsContent).not.toContain(": JSON.stringify(event.result || '');");
+    expect(agentRunnerStreamToolEventsContent).not.toContain(
+      ": JSON.stringify(event.result || '');"
+    );
   });
 
   it('persists assistant model metadata for pi-ai thinking replay', () => {
-    expect(agentRunnerStreamEventsContent).toContain('api: deps.piSetup.piModel.api');
-    expect(agentRunnerStreamEventsContent).toContain('provider: deps.piSetup.piModel.provider');
-    expect(agentRunnerStreamEventsContent).toContain('model: deps.piSetup.piModel.id');
+    expect(agentRunnerStreamMessageEventsContent).toContain('api: deps.piSetup.piModel.api');
+    expect(agentRunnerStreamMessageEventsContent).toContain(
+      'provider: deps.piSetup.piModel.provider'
+    );
+    expect(agentRunnerStreamMessageEventsContent).toContain('model: deps.piSetup.piModel.id');
   });
 
   it('does not reference removed AskUserQuestion or TodoWrite tools', () => {
@@ -212,8 +234,8 @@ describe('ClaudeAgentRunner Open Cowork SDK integration', () => {
     expect(agentRunnerPromptsContent).not.toContain('TodoWrite');
     expect(agentRunnerStreamHandlerContent).not.toContain('AskUserQuestion');
     expect(agentRunnerStreamHandlerContent).not.toContain('TodoWrite');
-    expect(agentRunnerStreamEventsContent).not.toContain('AskUserQuestion');
-    expect(agentRunnerStreamEventsContent).not.toContain('TodoWrite');
+    expect(agentRunnerStreamCombinedContent).not.toContain('AskUserQuestion');
+    expect(agentRunnerStreamCombinedContent).not.toContain('TodoWrite');
   });
 
   it('chat-first behavioral rules are present', () => {
