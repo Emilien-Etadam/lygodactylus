@@ -17,7 +17,6 @@ type TestManagerInternals = {
   clients: Map<string, unknown>;
   tools: Map<string, unknown>;
   serverConfigs: Map<string, unknown>;
-  reconnectServer: ReturnType<typeof vi.fn>;
 };
 
 function asTestManager(manager: MCPManager): MCPManager & TestManagerInternals {
@@ -104,11 +103,24 @@ describe('MCP tool name parsing', () => {
         },
       ],
     ]);
-    testManager.reconnectServer = vi.fn().mockResolvedValue(true);
+    testManager.serverConfigs = new Map([
+      [
+        'server-1',
+        {
+          id: 'server-1',
+          name: 'GUI_Operate',
+          type: 'stdio',
+          enabled: true,
+        },
+      ],
+    ]);
+    vi.spyOn(manager, 'disconnectServer').mockResolvedValue(undefined);
+    vi.spyOn(manager, 'connectServer').mockResolvedValue(undefined);
+    vi.spyOn(manager, 'refreshTools').mockResolvedValue(undefined);
 
     const result = await manager.callTool(toolName, { display_index: 0 });
 
-    expect(testManager.reconnectServer).toHaveBeenCalledWith('server-1');
+    expect(manager.disconnectServer).toHaveBeenCalledWith('server-1');
     expect(mockClient.callTool).toHaveBeenCalledTimes(2);
     expect(result).toEqual({ ok: true });
   });
@@ -141,11 +153,11 @@ describe('MCP tool name parsing', () => {
         },
       ],
     ]);
-    testManager.reconnectServer = vi.fn().mockResolvedValue(true);
+    const disconnectSpy = vi.spyOn(manager, 'disconnectServer').mockResolvedValue(undefined);
 
     const result = await manager.callTool(toolName, { display_index: 0 });
 
-    expect(testManager.reconnectServer).not.toHaveBeenCalled();
+    expect(disconnectSpy).not.toHaveBeenCalled();
     expect(mockClient.callTool).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       content: [
