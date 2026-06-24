@@ -48,10 +48,12 @@ describe('memory integration wiring', () => {
   });
 
   it('defaults new sessions to the global memory toggle', () => {
-    const sessionFacade = readProjectFile('src/main/session/session-manager-facade-support.ts');
+    const sessionLifecycle = readProjectFile(
+      'src/main/session/session-manager-session-lifecycle.ts'
+    );
     const sessionQueue = readProjectFile('src/main/session/session-manager-queue.ts');
-    expect(sessionFacade).toContain("configStore.get('memoryEnabled') !== false");
-    expect(sessionFacade).toContain('memoryEnabled?: boolean');
+    expect(sessionLifecycle).toContain("configStore.get('memoryEnabled') !== false");
+    expect(sessionLifecycle).toContain('memoryEnabled?: boolean');
     expect(sessionQueue).toContain('afterSessionRun');
   });
 
