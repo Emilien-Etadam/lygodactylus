@@ -4,11 +4,14 @@ import path from 'node:path';
 
 describe('scheduled task session title wiring', () => {
   it('routes schedule title generation through SessionManager flow', () => {
-    const indexPath = path.resolve(process.cwd(), 'src/main/index.ts');
-    const content = readFileSync(indexPath, 'utf8');
-    expect(content).toContain('async function resolveScheduledTaskTitle(');
-    expect(content).toContain('sessionManager.generateScheduledTaskTitle');
-    expect(content).toContain("ipcMain.handle('schedule.create', async");
-    expect(content).toContain("ipcMain.handle('schedule.update', async");
+    const titlePath = path.resolve(process.cwd(), 'src/main/main-scheduled-task-title.ts');
+    const ipcPath = path.resolve(process.cwd(), 'src/main/ipc/ipc-remote-schedule-memory.ts');
+    const titleContent = readFileSync(titlePath, 'utf8');
+    const ipcContent = readFileSync(ipcPath, 'utf8');
+
+    expect(titleContent).toContain('export async function resolveScheduledTaskTitle(');
+    expect(titleContent).toContain('sessionManager.generateScheduledTaskTitle');
+    expect(ipcContent).toContain("ipcMain.handle('schedule.create', async");
+    expect(ipcContent).toContain("ipcMain.handle('schedule.update', async");
   });
 });

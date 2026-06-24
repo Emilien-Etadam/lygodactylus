@@ -2,22 +2,22 @@ import { describe, it, expect } from 'vitest';
 import path from 'node:path';
 import fs from 'node:fs';
 
-const indexPath = path.resolve(process.cwd(), 'src/main/index.ts');
+const bootstrapPath = path.resolve(process.cwd(), 'src/main/main-app-bootstrap.ts');
+const clientEventsPath = path.resolve(process.cwd(), 'src/main/main-client-events.ts');
 
 describe('Main process window/config behavior', () => {
   it('second-instance path focuses existing window and only recreates when none found', () => {
-    const source = fs.readFileSync(indexPath, 'utf8');
+    const source = fs.readFileSync(bootstrapPath, 'utf8');
     const secondInstanceBlock =
-      source.match(/app\.on\('second-instance'[\s\S]*?\n {2}}\);\n}/)?.[0] || '';
+      source.match(/app\.on\('second-instance'[\s\S]*?\n {4}}\);\n {2}}/)?.[0] || '';
 
     expect(secondInstanceBlock).toContain('BrowserWindow.getAllWindows()');
     expect(secondInstanceBlock).toContain('focused existing window');
-    // createWindow is allowed as a fallback when no existing window is found
     expect(secondInstanceBlock).toContain('No existing window found');
   });
 
   it('session.start blocked by active set emits structured error without forcing config.status', () => {
-    const source = fs.readFileSync(indexPath, 'utf8');
+    const source = fs.readFileSync(clientEventsPath, 'utf8');
     const sessionStartGuard =
       source.match(/if \(\s*\(event\.type === 'session\.start'[\s\S]*?return null;\n {2}}/)?.[0] ||
       '';

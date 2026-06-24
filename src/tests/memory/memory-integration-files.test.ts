@@ -9,12 +9,13 @@ function readProjectFile(relativePath: string): string {
 describe('memory integration wiring', () => {
   it('registers the memory extension in the main process and exposes IPC handlers', () => {
     const mainIndex = readProjectFile('src/main/index.ts');
-    expect(mainIndex).toContain('new MemoryExtension(memoryService)');
-    expect(mainIndex).toContain("ipcMain.handle('memory.getOverview'");
-    expect(mainIndex).toContain("'memory.search'");
-    expect(mainIndex).toContain("'memory.listFiles'");
-    expect(mainIndex).toContain("'memory.inspectSession'");
-    expect(mainIndex).toContain("ipcMain.handle('memory.setEnabled'");
+    const ipcSource = readProjectFile('src/main/ipc/ipc-remote-schedule-memory.ts');
+    expect(mainIndex).toContain('new MemoryExtension(mainAppState.memoryService)');
+    expect(ipcSource).toContain("ipcMain.handle('memory.getOverview'");
+    expect(ipcSource).toContain("'memory.search'");
+    expect(ipcSource).toContain("'memory.listFiles'");
+    expect(ipcSource).toContain("'memory.inspectSession'");
+    expect(ipcSource).toContain("ipcMain.handle('memory.setEnabled'");
   });
 
   it('injects runtime plugin skill paths and extension hooks into the agent runner', () => {
@@ -37,10 +38,10 @@ describe('memory integration wiring', () => {
     expect(preload).toContain('memory: {');
     expect(preload).toContain("ipcRenderer.invoke('memory.search'");
     expect(preload).toContain("ipcRenderer.invoke('memory.listFiles')");
-    expect(memorySettings).toContain("window.electronAPI.memory.search");
-    expect(memorySettings).toContain("window.electronAPI.memory.readFile");
-    expect(memorySettings).toContain("window.electronAPI.memory.inspectSession");
-    expect(memorySettings).toContain("window.electronAPI.memory.rebuildWorkspace");
+    expect(memorySettings).toContain('window.electronAPI.memory.search');
+    expect(memorySettings).toContain('window.electronAPI.memory.readFile');
+    expect(memorySettings).toContain('window.electronAPI.memory.inspectSession');
+    expect(memorySettings).toContain('window.electronAPI.memory.rebuildWorkspace');
     expect(memorySettings).toContain('evalEnabled: source.evalEnabled');
     expect(memorySettings).toContain('promptIterationRounds');
   });
