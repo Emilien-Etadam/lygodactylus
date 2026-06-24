@@ -3,24 +3,28 @@ import path from 'node:path';
 import fs from 'node:fs';
 
 const mainIndexPath = path.resolve(process.cwd(), 'src/main/index.ts');
+const windowPath = path.resolve(process.cwd(), 'src/main/main-app-window.ts');
+const clientEventsPath = path.resolve(process.cwd(), 'src/main/main-client-events.ts');
 const useIPCPath = path.resolve(process.cwd(), 'src/renderer/hooks/useIPC.ts');
 const storePath = path.resolve(process.cwd(), 'src/renderer/store/index.ts');
 
 describe('theme settings persistence', () => {
   it('persists theme updates in the main process and applies them to native window state', () => {
-    const source = fs.readFileSync(mainIndexPath, 'utf8');
+    const windowSource = fs.readFileSync(windowPath, 'utf8');
+    const clientEventsSource = fs.readFileSync(clientEventsPath, 'utf8');
+    const indexSource = fs.readFileSync(mainIndexPath, 'utf8');
 
-    expect(source).toContain('const WINDOW_BACKGROUNDS');
-    expect(source).toContain("default: { dark: '#171614', light: '#f5f3ee' }");
-    expect(source).toContain('configStore.update({ theme: nextTheme });');
-    expect(source).toContain('configStore.update({ themePreset:');
-    expect(source).toContain('getWindowBackground(');
-    expect(source).toContain("vscode: { dark: '#1e1e1e', light: '#ffffff' }");
-    expect(source).toContain('nativeTheme.themeSource = theme;');
-    expect(source).toContain('mainWindow.setBackgroundColor(');
-    expect(source).toContain("getSavedThemePreference() === 'system'");
-    expect(source).toContain('getWindowBackground(preset, effectiveTheme)');
-    expect(source).not.toContain(
+    expect(windowSource).toContain('const WINDOW_BACKGROUNDS');
+    expect(windowSource).toContain("default: { dark: '#171614', light: '#f5f3ee' }");
+    expect(clientEventsSource).toContain('configStore.update({ theme: nextTheme });');
+    expect(clientEventsSource).toContain('configStore.update({ themePreset:');
+    expect(windowSource).toContain('getWindowBackground(');
+    expect(windowSource).toContain("vscode: { dark: '#1e1e1e', light: '#ffffff' }");
+    expect(windowSource).toContain('nativeTheme.themeSource = theme;');
+    expect(windowSource).toContain('setBackgroundColor(');
+    expect(indexSource).toContain("getSavedThemePreference() === 'system'");
+    expect(windowSource).toContain('getWindowBackground(preset, effectiveTheme)');
+    expect(clientEventsSource).not.toContain(
       "case 'settings.update':\n      // TODO: Implement settings update"
     );
   });
