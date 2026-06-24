@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.3.1-EE4.4] - 2026-06-24
+
+### Added
+
+- Marketplace unifiée **curated strict** (Skills + MCP + Plugins) dans l’onglet Extensions
+- `catalog/manifest.json` : whitelist vérifiée avec résolution builtin, preset, MCP Registry et GitHub
+- Backend marketplace : agrégateur, install resolver, store des extensions installées
+- Mise à jour OTA du catalogue avec indicateur source remote/bundled
+- Validation CI du manifest catalogue
+
+### Changed
+
+- Onglet Settings **Extensions** remplace les anciens onglets Skills / Connectors
+- MCP manuel déplacé dans la section avancée (`MarketplaceMcpAdvanced`)
+
+### Removed
+
+- Scrape Anthropic legacy (`PluginCatalogService`) et installation via Claude CLI
+- Handlers IPC `plugins.listCatalog` / `plugins.install`
+- Composants UI legacy `SettingsSkills` / `SettingsConnectors`
+- Clés i18n orphelines `skills.plugin*` (22 clés × 11 locales)
+
+### Tests
+
+- Suite CI : **1035** tests unitaires/intégration
+- Tests de validation `catalog/manifest.json`
+
 ## [3.3.1-EE4.3] - 2026-06-24
 
 ### Changed
