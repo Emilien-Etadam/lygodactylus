@@ -33,7 +33,7 @@
   - **#41** : suppression complète du module contrôle à distance (gateway, Slack, tunnel, UI)
   - **#42** : simplification config API — deux fournisseurs (OpenAI-compatible + Anthropic-compatible)
   - **#44** : chat LAN — UI web locale avec permissions (LAN / WireGuard)
-  - **#36** : supersédée par EE4.91 (à fermer manuellement sur GitHub)
+  - **#36** : auto-update Windows (drafts + bouton) — **mergée / fermée** (contenu dans EE4.91)
 - **EE4.9** :
   - Fix blocage chat infini « Traitement… » (timeout `preparePiSessionRun` / `resourceLoader.reload`, cycle `activeTurn`, reset sessions `running` orphelines)
   - Commandes slash : rejet des inconnues, normalisation `/plugin:cmd` → `/cmd`
@@ -92,7 +92,7 @@ Current stable fork baseline: **`3.3.1-EE4.91`** — [release](https://github.co
 ### Near-term (EE5 / v3.4.0)
 
 - **Sandbox Hardening**: VM sandbox reliability, startup performance, cross-platform consistency (Lima, WSL2); incremental sync follow-ups
-- **App Slimming**: Reduce installer from ~156 MB to ~80 MB — on-demand Python/Node.js download, lazy-load Feishu SDK, strip unused files
+- **App Slimming**: Reduce installer from ~156 MB to ~80 MB — on-demand Python/Node.js download, lazy-load SDKs, strip unused files (Feishu SDK retiré #40)
 - **Naming Standardization**: Clean up legacy references (`claude-sdk`, `claude-sandbox`, `claude-plugin`, `pi-coding-agent`) to consistent Open Cowork naming
 - **Tool Completeness**: Native TodoWrite, AskUserQuestion, Glob, Grep, WebFetch, WebSearch tool schemas + handlers for API key users
 - **Memory System Enhancements**: Prompt injection controls, cross-session retrieval UX, memory source inspection, reranking quality
