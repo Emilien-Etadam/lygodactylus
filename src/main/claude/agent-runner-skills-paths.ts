@@ -7,6 +7,7 @@ import { log, logWarn } from '../utils/logger';
 import type { PluginRuntimeService } from '../skills/plugin-runtime-service';
 import type { SkillsAdapter } from '../skills/skills-adapter';
 import { getBundledNodePaths, resolveBundledPythonBinDir } from './agent-runner-path-env';
+import type { PluginSlashCommandInfo } from '../../shared/plugin-slash-commands';
 import { discoverPluginPromptTemplatePaths } from '../skills/plugin-command-catalog';
 
 export interface AgentRunnerSkillsPathsContext {
@@ -28,6 +29,10 @@ export class AgentRunnerSkillsPaths {
 
   invalidatePluginPathsCache(): void {
     this.cachedPluginPaths = null;
+  }
+
+  listPluginSlashCommands(): PluginSlashCommandInfo[] {
+    return this.ctx.pluginRuntimeService?.listAvailableCommands() ?? [];
   }
 
   /**
