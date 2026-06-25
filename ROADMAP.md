@@ -21,19 +21,18 @@
 - **Dependency Policy**: Tiered management strategy with Dependabot grouping
 - **Memory System Foundation**: Unified storage with core/experience memory and source-aware retrieval workflow
 
-### EE fork (`3.3.1-EE1` → `3.3.1-EE4.91`)
+### EE fork (`3.3.1-EE1` → `3.3.1-EE4.92`)
 
-- **EE4.91** (release publiée, Latest) :
+- **EE4.92** (release publiée, Latest) :
+  - **Chat LAN** : serveur web local, UI `resources/chat-lan/`, onglet Paramètres (#44)
+  - **Config API** : deux fournisseurs (OpenAI-compatible + Anthropic-compatible), migration auto (#42)
+  - **Suppression** Feishu (#40) et module contrôle à distance complet (#41)
+  - App allégée (~7k lignes remote retirées, `@larksuiteoapi/node-sdk` supprimé)
+- **EE4.91** :
   - Hotfix bouton « Vérifier les mises à jour » (`Cannot set properties of undefined (setting 'allowPrerelease')`)
   - Chargement `electron-updater` via `createRequire` (interop CJS — `autoUpdater` absent en `import()` ESM)
   - Repli API GitHub Releases si `electron-updater` indisponible (macOS/Linux + secours Windows)
   - `allowPrerelease = false` pour ignorer les releases draft/prerelease sur le feed GitHub
-- **Post-EE4.91 merges** (2026-06-25, intégrés dans `main`) :
-  - **#40** : suppression intégration Feishu (Slack only pour le remote restant)
-  - **#41** : suppression complète du module contrôle à distance (gateway, Slack, tunnel, UI)
-  - **#42** : simplification config API — deux fournisseurs (OpenAI-compatible + Anthropic-compatible)
-  - **#44** : chat LAN — UI web locale avec permissions (LAN / WireGuard)
-  - **#36** : auto-update Windows (drafts + bouton) — **mergée / fermée** (contenu dans EE4.91)
 - **EE4.9** :
   - Fix blocage chat infini « Traitement… » (timeout `preparePiSessionRun` / `resourceLoader.reload`, cycle `activeTurn`, reset sessions `running` orphelines)
   - Commandes slash : rejet des inconnues, normalisation `/plugin:cmd` → `/cmd`
@@ -63,7 +62,8 @@
 
 | Tag              | Date       | Highlights                                                                 |
 | ---------------- | ---------- | -------------------------------------------------------------------------- |
-| `v3.3.1-EE4.91`  | 2026-06-25 | **Latest** — hotfix vérification mises à jour, `createRequire`, GitHub API   |
+| `v3.3.1-EE4.92`  | 2026-06-25 | **Latest** — chat LAN, 2 providers API, suppression remote/Feishu        |
+| `v3.3.1-EE4.91`  | 2026-06-25 | Hotfix vérification mises à jour, `createRequire`, GitHub API              |
 | `v3.3.1-EE4.9`   | 2026-06-25 | Fix chat « Traitement… », slash plugin, CI release                         |
 | `v3.3.1-EE4.8`   | 2026-06-25 | Mises à jour EE4.8, fix chat bloqué, slash plugin (non publiée — draft)   |
 | `v3.3.1-EE4.7`   | 2026-06-25 | Fix fond opaque menu slash                                                 |
@@ -76,16 +76,15 @@
 | `v3.3.1-EE4`   | 2026-06-23 | Slash autocomplete, agent-runner split (phase 1)            |
 | `v3.3.1-EE3.x` | 2026-06    | Security, WSL sandbox, Windows perf, pi-agent migration     |
 
-Current stable fork baseline: **`3.3.1-EE4.91`** — [release](https://github.com/Emilien-Etadam/open-cowork/releases/tag/v3.3.1-EE4.91) · [CHANGELOG](CHANGELOG.md)
+Current stable fork baseline: **`3.3.1-EE4.92`** — [release](https://github.com/Emilien-Etadam/open-cowork/releases/tag/v3.3.1-EE4.92) · [CHANGELOG](CHANGELOG.md)
 
 ## 🚧 In Progress
 
-### Validation post-merge (main)
+### Validation EE4.92
 
-- Smoke test EE4.91 : bouton « Vérifier les mises à jour » (Windows + macOS)
-- Régression chat LAN (#44) : serveur local, permissions, UI web `resources/chat-lan/`
-- Régression config API (#42) : migration profils → deux fournisseurs
-- Vérifier absence de régression après suppression remote control (#40, #41)
+- Smoke test chat LAN : serveur local, permissions, UI web
+- Migration config API → deux fournisseurs
+- Régression : chat principal, slash commands, vérification mises à jour (EE4.91)
 
 ## 📋 Planned
 
@@ -115,5 +114,5 @@ Current stable fork baseline: **`3.3.1-EE4.91`** — [release](https://github.co
 
 ---
 
-_Last updated: 2026-06-25 (merges #40–#44, baseline EE4.91)_  
+_Last updated: 2026-06-25 (release EE4.92)_  
 _Want to contribute? Check [CONTRIBUTING.md](CONTRIBUTING.md)._

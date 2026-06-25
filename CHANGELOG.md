@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.3.1-EE4.92] - 2026-06-25
+
 ### Added
 
 - **Chat LAN** : serveur web local avec UI (`resources/chat-lan/`), permissions et onglet Paramètres dédié (#44)
