@@ -2,12 +2,19 @@
  * Forward HTTP/HTTPS proxy on the Windows host so WSL sandbox shells can reach
  * LAN services (192.168.x.x, etc.) through the host network stack.
  */
+import * as crypto from 'crypto';
 import * as http from 'http';
 import * as https from 'https';
 import * as net from 'net';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { log, logError } from '../utils/logger';
+import {
+  assertAllowedSandboxProxyTarget,
+  isAllowedSandboxProxyTarget,
+  normalizeNetworkHost,
+} from './sandbox-network-target';
+import { buildSandboxLanNetworkBashSetup } from './sandbox-network-bash';
 
 const execFileAsync = promisify(execFile);
 
@@ -45,14 +52,36 @@ function writeProxyError(res: http.ServerResponse, status: number, message: stri
   if (res.headersSent) {
     return;
   }
+  if (status === 407) {
+    res.writeHead(status, {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Proxy-Authenticate': 'Bearer realm="lygodactylus-sandbox-lan"',
+    });
+    res.end(message);
+    return;
+  }
   res.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' });
   res.end(message);
+}
+
+function isProxyAuthorized(req: http.IncomingMessage, expectedToken: string): boolean {
+  const authHeader = req.headers['proxy-authorization'];
+  const auth = Array.isArray(authHeader) ? authHeader[0] : authHeader;
+  if (!auth?.startsWith('Bearer ')) {
+    return false;
+  }
+  return auth.slice('Bearer '.length).trim() === expectedToken;
+}
+
+function generateProxyToken(): string {
+  return crypto.randomBytes(24).toString('hex');
 }
 
 export class SandboxNetworkProxy {
   private server: http.Server | null = null;
   private listenHost: string | null = null;
   private port = 0;
+  private authToken: string | null = null;
   private refCount = 0;
 
   getPort(): number {
@@ -63,11 +92,24 @@ export class SandboxNetworkProxy {
     return this.listenHost;
   }
 
+  getAuthToken(): string | null {
+    return this.authToken;
+  }
+
   getProxyUrl(): string | null {
     if (!this.listenHost || !this.port) {
       return null;
     }
     return `http://${this.listenHost}:${this.port}`;
+  }
+
+  buildBashSetupScript(): string | null {
+    const proxyUrl = this.getProxyUrl();
+    const token = this.authToken;
+    if (!proxyUrl || !token) {
+      return null;
+    }
+    return buildSandboxLanNetworkBashSetup({ proxyUrl, token });
   }
 
   async acquire(distro: string): Promise<string | null> {
@@ -98,11 +140,12 @@ export class SandboxNetworkProxy {
       return;
     }
 
+    const authToken = generateProxyToken();
     const server = http.createServer((req, res) => {
-      void this.handleHttpRequest(req, res);
+      void this.handleHttpRequest(req, res, authToken);
     });
     server.on('connect', (req, clientSocket, head) => {
-      this.handleConnect(req, clientSocket, head);
+      this.handleConnect(req, clientSocket, head, authToken);
     });
     server.on('error', (error) => {
       logError('[SandboxNetworkProxy] Server error:', error);
@@ -119,14 +162,41 @@ export class SandboxNetworkProxy {
     const address = server.address();
     this.port = typeof address === 'object' && address ? address.port : 0;
     this.listenHost = hostIp;
+    this.authToken = authToken;
     this.server = server;
-    log(`[SandboxNetworkProxy] Listening on ${hostIp}:${this.port} for WSL sandbox traffic`);
+    log(`[SandboxNetworkProxy] Listening on ${hostIp}:${this.port} (LAN-only, authenticated)`);
+  }
+
+  private ensureAuthorized(
+    req: http.IncomingMessage,
+    res: http.ServerResponse | net.Socket,
+    authToken: string,
+    useSocket = false
+  ): boolean {
+    if (isProxyAuthorized(req, authToken)) {
+      return true;
+    }
+
+    if (useSocket && res instanceof net.Socket) {
+      res.end('HTTP/1.1 407 Proxy Authentication Required\r\n\r\n');
+      return false;
+    }
+
+    if (res instanceof http.ServerResponse) {
+      writeProxyError(res, 407, 'Proxy authentication required');
+    }
+    return false;
   }
 
   private async handleHttpRequest(
     req: http.IncomingMessage,
-    res: http.ServerResponse
+    res: http.ServerResponse,
+    authToken: string
   ): Promise<void> {
+    if (!this.ensureAuthorized(req, res, authToken)) {
+      return;
+    }
+
     const targetUrl = req.url?.trim();
     if (!targetUrl || !/^https?:\/\//i.test(targetUrl)) {
       writeProxyError(res, 400, 'Absolute http/https URL required');
@@ -141,10 +211,16 @@ export class SandboxNetworkProxy {
       return;
     }
 
+    if (!isAllowedSandboxProxyTarget(parsed.hostname)) {
+      writeProxyError(res, 403, 'Target is outside the sandbox LAN allowlist');
+      return;
+    }
+
     const headers = { ...req.headers };
     delete headers.host;
     delete headers.connection;
     delete headers['proxy-connection'];
+    delete headers['proxy-authorization'];
 
     const requestFn = parsed.protocol === 'https:' ? https.request : http.request;
     const proxyReq = requestFn(
@@ -166,7 +242,16 @@ export class SandboxNetworkProxy {
     req.pipe(proxyReq);
   }
 
-  private handleConnect(req: http.IncomingMessage, clientSocket: net.Socket, head: Buffer): void {
+  private handleConnect(
+    req: http.IncomingMessage,
+    clientSocket: net.Socket,
+    head: Buffer,
+    authToken: string
+  ): void {
+    if (!this.ensureAuthorized(req, clientSocket, authToken, true)) {
+      return;
+    }
+
     const target = req.url?.trim();
     if (!target) {
       clientSocket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
@@ -180,7 +265,20 @@ export class SandboxNetworkProxy {
       return;
     }
 
-    const serverSocket = net.connect(port, host, () => {
+    const normalizedHost = normalizeNetworkHost(host);
+    if (!isAllowedSandboxProxyTarget(normalizedHost)) {
+      clientSocket.end('HTTP/1.1 403 Forbidden\r\n\r\n');
+      return;
+    }
+
+    try {
+      assertAllowedSandboxProxyTarget(normalizedHost);
+    } catch {
+      clientSocket.end('HTTP/1.1 403 Forbidden\r\n\r\n');
+      return;
+    }
+
+    const serverSocket = net.connect(port, normalizedHost, () => {
       clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
       if (head.length > 0) {
         serverSocket.write(head);
@@ -202,6 +300,7 @@ export class SandboxNetworkProxy {
     this.server = null;
     this.port = 0;
     this.listenHost = null;
+    this.authToken = null;
     if (!server) {
       return;
     }

@@ -5,6 +5,7 @@ import {
   shellEscapePosixPath,
 } from '../sandbox/sandbox-workspace-path';
 import { getSandboxNetworkProxy } from '../sandbox/sandbox-network-proxy';
+import { configStore } from '../config/config-store';
 
 const MARKER_DONE = '__OCOWORK_BASH_DONE__';
 const MARKER_EXIT_PREFIX = '__OCOWORK_BASH_EXIT:';
@@ -251,19 +252,23 @@ class WslSandboxBashSession {
   }
 
   private async ensureSandboxNetworkProxy(): Promise<void> {
-    if (this.proxyConfigured || process.platform !== 'win32' || !this.child?.stdin) {
+    if (
+      this.proxyConfigured ||
+      process.platform !== 'win32' ||
+      !configStore.get('sandboxLanNetworkEnabled') ||
+      !this.child?.stdin
+    ) {
       return;
     }
 
-    const proxyUrl = await getSandboxNetworkProxy().acquire(this.options.distro);
-    if (!proxyUrl || !this.child?.stdin) {
+    const proxy = getSandboxNetworkProxy();
+    const proxyUrl = await proxy.acquire(this.options.distro);
+    const setupScript = proxy.buildBashSetupScript();
+    if (!proxyUrl || !setupScript || !this.child?.stdin) {
       return;
     }
 
-    const escaped = shellEscapePosixPath(proxyUrl);
-    this.child.stdin.write(
-      `export http_proxy='${escaped}' https_proxy='${escaped}' HTTP_PROXY='${escaped}' HTTPS_PROXY='${escaped}'\n`
-    );
+    this.child.stdin.write(`${setupScript}\n`);
     this.proxyConfigured = true;
   }
 

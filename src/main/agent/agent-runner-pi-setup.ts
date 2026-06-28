@@ -330,7 +330,8 @@ export async function preparePiSessionRun({
     ctx,
     workingDir,
     sandboxPath,
-    useSandboxIsolation
+    useSandboxIsolation,
+    configStore.get('sandboxLanNetworkEnabled') === true
   );
   const mcpCustomTools = ctx.mcpManager ? buildMcpCustomTools(ctx.mcpManager) : [];
   const webSearchCustomTools = buildWebSearchCustomTools();
