@@ -21,7 +21,8 @@ export function buildCoworkAppendPrompt(
   ctx: AgentRunnerRunContext,
   workingDir: string | undefined,
   sandboxPath: string | null,
-  useSandboxIsolation: boolean
+  useSandboxIsolation: boolean,
+  sandboxLanNetworkEnabled: boolean
 ): string[] {
   const workspaceInfoPrompt = buildWorkspaceInfoPrompt(
     workingDir,
@@ -29,14 +30,19 @@ export function buildCoworkAppendPrompt(
     useSandboxIsolation
   );
 
-  const sandboxNetworkPrompt = useSandboxIsolation
-    ? `<sandbox_network>
+  const sandboxNetworkPrompt =
+    useSandboxIsolation && sandboxLanNetworkEnabled
+      ? `<sandbox_network>
 WSL sandbox file commands run in an isolated Linux environment. For HTTP/API calls to local network services (192.168.x.x, 10.x, host LAN APIs):
 - Prefer http_request (or web_fetch with headers) — these use the host network stack and support Authorization/custom headers.
-- bash curl also works: a host HTTP proxy is injected automatically for LAN/private targets.
+- bash curl/wget to LAN IPs also works: a host HTTP proxy is injected automatically (LAN-only, internet stays direct).
 Do not disable sandbox for network access.
 </sandbox_network>`
-    : '';
+      : useSandboxIsolation
+        ? `<sandbox_network>
+LAN network access from the sandbox is disabled in Settings. Enable "Sandbox LAN network access" to reach local services from bash, or use http_request (host network) for authenticated APIs.
+</sandbox_network>`
+        : '';
 
   return [
     'You are an Lygodactylus assistant. Be concise, accurate, and tool-capable.',

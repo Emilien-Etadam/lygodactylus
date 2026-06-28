@@ -52,11 +52,13 @@ describe('agent-runner native tools', () => {
   it('documents sandbox network routing in prompts', () => {
     expect(promptsContent).toContain('<sandbox_network>');
     expect(promptsContent).toContain('http_request');
+    expect(promptsContent).toContain('sandboxLanNetworkEnabled');
   });
 
   it('injects host HTTP proxy env into WSL bash sessions', () => {
     expect(wslSessionContent).toContain('getSandboxNetworkProxy');
     expect(wslSessionContent).toContain('ensureSandboxNetworkProxy');
-    expect(wslSessionContent).toContain('http_proxy');
+    expect(wslSessionContent).toContain('sandboxLanNetworkEnabled');
+    expect(wslSessionContent).toContain('buildBashSetupScript');
   });
 });
