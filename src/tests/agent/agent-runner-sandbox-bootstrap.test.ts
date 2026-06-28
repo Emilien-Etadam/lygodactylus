@@ -110,7 +110,7 @@ describe('bootstrapSandboxEnvironment', () => {
   it('initializes WSL sandbox isolation on successful sync', async () => {
     sandboxSyncInit.mockResolvedValue({
       success: true,
-      sandboxPath: '/home/user/.opencowork/sandboxes/session-1',
+      sandboxPath: '/home/user/.lygodactylus/sandbox/session-1',
       fileCount: 12,
       totalSize: 4096,
     });
@@ -126,7 +126,7 @@ describe('bootstrapSandboxEnvironment', () => {
     const result = await bootstrapSandboxEnvironment(deps);
 
     expect(result).toEqual({
-      sandboxPath: '/home/user/.opencowork/sandboxes/session-1',
+      sandboxPath: '/home/user/.lygodactylus/sandbox/session-1',
       useSandboxIsolation: true,
       aborted: false,
     });

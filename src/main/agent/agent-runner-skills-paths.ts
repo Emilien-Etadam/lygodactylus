@@ -13,6 +13,11 @@ import {
   getBuiltinSkillsPath as resolveBuiltinSkillsPath,
   listBuiltinSkillRoots,
 } from '../skills/builtin-skills-paths';
+import {
+  getAppAgentDataDir as resolveAppAgentDataDir,
+  getRuntimeSkillsDir as resolveRuntimeSkillsDir,
+  getUserClaudeSkillsDir as resolveUserClaudeSkillsDir,
+} from '../paths/app-data-paths';
 
 export interface AgentRunnerSkillsPathsContext {
   skillsAdapter?: SkillsAdapter;
@@ -182,12 +187,21 @@ ${hints.join('\n')}
     return resolveBuiltinSkillsPath();
   }
 
+  /** @deprecated Use getAppAgentDataDir() */
   getAppClaudeDir(): string {
-    return path.join(app.getPath('userData'), 'claude');
+    return resolveAppAgentDataDir();
+  }
+
+  getAppAgentDataDir(): string {
+    return resolveAppAgentDataDir();
   }
 
   getRuntimeSkillsDir(): string {
-    return path.join(this.getAppClaudeDir(), 'skills');
+    return resolveRuntimeSkillsDir();
+  }
+
+  getUserClaudeSkillsDir(): string {
+    return resolveUserClaudeSkillsDir();
   }
 
   getConfiguredGlobalSkillsDir(): string {
@@ -217,10 +231,6 @@ ${hints.join('\n')}
     }
 
     return this.getRuntimeSkillsDir();
-  }
-
-  getUserClaudeSkillsDir(): string {
-    return path.join(app.getPath('home'), '.claude', 'skills');
   }
 
   syncUserSkillsToAppDir(appSkillsDir: string): void {

@@ -68,7 +68,8 @@
 
 | Tag             | Date       | Highlights                                                                                 |
 | --------------- | ---------- | ------------------------------------------------------------------------------------------ |
-| `v5.4.0`        | 2026-06-28 | **Latest** — skills split on-demand (docx/pptx), lazy-load SDKs, ~2.7 MB installer savings |
+| `v5.5.0`        | 2026-06-28 | **Latest** — naming standardization (paths agent, sandbox, Lima)                             |
+| `v5.4.0`        | 2026-06-28 | skills split on-demand (docx/pptx), lazy-load SDKs, ~2.7 MB installer savings              |
 | `v5.3.0`        | 2026-06-28 | slimming on-demand (Node, Python, cliclick), 1086 tests                                    |
 | `v5.1.0`        | 2026-06-27 | Hardening v5 (phases 0–3), pi-agent 0.80.2, Node 22.19, slimming quick wins                |
 | `v5.0.0`        | 2026-06-27 | logo gecko Lygodactylus, série v5, rebranding complet                                      |
@@ -92,7 +93,7 @@
 | `v3.3.1-EE4`    | 2026-06-23 | Slash autocomplete, agent-runner split (phase 1)                                           |
 | `v3.3.1-EE3.x`  | 2026-06    | Security, WSL sandbox, Windows perf, pi-agent migration                                    |
 
-Current stable fork baseline: **`5.4.0`** — [release](https://github.com/Emilien-Etadam/lygodactylus/releases/tag/v5.4.0) · [CHANGELOG](CHANGELOG.md)
+Current stable fork baseline: **`5.5.0`** — [CHANGELOG](CHANGELOG.md)
 
 ### v5.x hardening
 
@@ -103,7 +104,7 @@ Current stable fork baseline: **`5.4.0`** — [release](https://github.com/Emili
 - **Phase 2**: extracted `command-sandbox-validation`, `skills-frontmatter`, `use-ipc-stream-batching`; expanded tool-executor tests; CI coverage floor 40%
 - **Phase 3**: migration `@earendil-works/pi-ai` / `@earendil-works/pi-coding-agent` ^0.80.2 (0 CVE runtime), compat entrypoint for legacy API, DeepSeek V4 thinking patch ported
 - **v5.1 prep**: Node `>=22.19.0`, installer slimming (@img removed, MCP minify, locales win/linux), legacy rename `src/main/claude/` → `src/main/agent/`, `pi-ai-one-shot`, `AgentRunner`
-- **v5.4 slimming**: skills core (pdf/xlsx/skill-creator) + docx/pptx on-demand, lazy-load OpenAI/Anthropic SDKs
+- **v5.5 naming**: `userData/skills`, `lygodactylus-sandbox`, `~/.lygodactylus/sandbox`, sync manifest Lygodactylus
 - **Validation v5.1.0** (2026-06-27) : smoke tests Chat LAN, migration config deux fournisseurs, régression chat/slash/auto-update — validés
 
 ## 📋 Planned
@@ -111,8 +112,8 @@ Current stable fork baseline: **`5.4.0`** — [release](https://github.com/Emili
 ### Near-term (v5.2+)
 
 - **Sandbox Hardening**: VM sandbox reliability, startup performance, cross-platform consistency (Lima, WSL2); incremental sync follow-ups
-- **App Slimming**: Node.js on-demand — **done v5.2**; Python + cliclick on-demand — **done v5.3**; skills split (docx/pptx on-demand) — **done v5.4**; target ~80 MB with naming cleanup next
-- **Naming Standardization**: Clean up legacy references (`claude-sdk`, `claude-sandbox`, `claude-plugin`, `pi-coding-agent`) to consistent Lygodactylus naming
+- **App Slimming**: Node.js on-demand — **done v5.2**; Python + cliclick on-demand — **done v5.3**; skills split (docx/pptx on-demand) — **done v5.4**; naming cleanup — **done v5.5**
+- **Schema naming**: `claude_session_id`, `claudeCodePath`, `claudeCodeAvailable` → agent-prefixed fields (SQLite + config migration)
 - **Tool Completeness**: Native TodoWrite, AskUserQuestion, Glob, Grep, WebFetch, WebSearch tool schemas + handlers for API key users
 - **Memory System Enhancements**: Prompt injection controls, cross-session retrieval UX, memory source inspection, reranking quality
 - **Scheduled Tasks**: Cron-like scheduling with UI management (backend exists; polish UX and edge cases)
@@ -134,5 +135,5 @@ Current stable fork baseline: **`5.4.0`** — [release](https://github.com/Emili
 
 ---
 
-_Last updated: 2026-06-28 (v5.4.0 release)_  
+_Last updated: 2026-06-28 (v5.5.0 release)_  
 _Want to contribute? Check [CONTRIBUTING.md](CONTRIBUTING.md)._
