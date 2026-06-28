@@ -230,7 +230,7 @@ export async function preparePiSessionRun({
         : workingDir || process.cwd();
 
   await ensureSkillsSetup(ctx);
-  log('[AgentRunner] App claude dir:', ctx.skillsPaths.getAppClaudeDir());
+  log('[AgentRunner] Runtime skills dir:', ctx.skillsPaths.getRuntimeSkillsDir());
   log('[AgentRunner] User working directory:', workingDir);
 
   logTiming('before building conversation context', runStartTime);

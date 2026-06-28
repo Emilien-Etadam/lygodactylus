@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.5.0] - 2026-06-28
+
+### Changed
+
+- **Chemins agent** : `userData/claude/{skills,plugins}` → `userData/{skills,plugins}` avec migration automatique au démarrage
+- **Sandbox VM** : `~/.claude/sandbox` → `~/.lygodactylus/sandbox` (sessions legacy conservées)
+- **Lima** : instance `claude-sandbox` → `lygodactylus-sandbox` (détection des deux noms)
+- **Manifeste sync** : `.opencowork-sync.json` → `.lygodactylus-sync.json` (lecture legacy)
+- Préfixes temporaires `opencowork-*` → `lygodactylus-*` (plugins, export logs)
+- Skills sandbox : `{sandbox}/skills` au lieu de `{sandbox}/.claude/skills`
+- **Schéma** : colonne SQLite `agent_session_id` (migration depuis `claude_session_id`) ; config `agentCliPath` (migration depuis `claudeCodePath`)
+
 ## [5.4.0] - 2026-06-28
 
 ### Added
@@ -20,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Skills core** : seuls `pdf`, `xlsx`, `skill-creator` embarqués via `resources/skills-core/`
 - Migration automatique depuis les anciens bundles `extraResources/skills` complets (docx/pptx inclus)
 - Preflight : avertissement si skills lourds pas encore téléchargés
+
 
 ## [5.3.0] - 2026-06-28
 
@@ -394,7 +407,8 @@ First stable release of the 3.3.x series. Graduated from 9 beta releases with 30
 
 - Initial release of Lygodactylus — open-source AI agent desktop app with one-click install for Windows and macOS
 
-[Unreleased]: https://github.com/Emilien-Etadam/lygodactylus/compare/v5.4.0...HEAD
+[Unreleased]: https://github.com/Emilien-Etadam/lygodactylus/compare/v5.5.0...HEAD
+[5.5.0]: https://github.com/Emilien-Etadam/lygodactylus/compare/v5.4.0...v5.5.0
 [5.4.0]: https://github.com/Emilien-Etadam/lygodactylus/compare/v5.3.0...v5.4.0
 [5.3.0]: https://github.com/Emilien-Etadam/lygodactylus/compare/v5.1.0...v5.3.0
 [5.1.0]: https://github.com/Emilien-Etadam/lygodactylus/releases/tag/v5.1.0

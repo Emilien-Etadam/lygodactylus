@@ -53,11 +53,6 @@ export async function ensureSkillsSetup(ctx: AgentRunnerRunContext): Promise<voi
 
   ctx.setSkillsSetupDone(true);
 
-  const userClaudeDir = ctx.skillsPaths.getAppClaudeDir();
-  if (!fs.existsSync(userClaudeDir)) {
-    fs.mkdirSync(userClaudeDir, { recursive: true });
-  }
-
   const appSkillsDir = ctx.skillsPaths.getRuntimeSkillsDir();
   if (!fs.existsSync(appSkillsDir)) {
     fs.mkdirSync(appSkillsDir, { recursive: true });
