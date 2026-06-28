@@ -68,7 +68,8 @@
 
 | Tag             | Date       | Highlights                                                                    |
 | --------------- | ---------- | ----------------------------------------------------------------------------- |
-| `v5.6.0`        | 2026-06-28 | **Latest** — memory UX + injection controls, Linux AppImage CI releases       |
+| `v5.7.0`        | 2026-06-28 | **Latest** — Tool Completeness (glob/grep/web/todo/ask), LiteLLM/Qwen schemas |
+| `v5.6.0`        | 2026-06-28 | memory UX + injection controls, Linux AppImage CI releases                    |
 | `v5.5.0`        | 2026-06-28 | naming standardization (paths agent, sandbox, Lima)                           |
 | `v5.4.0`        | 2026-06-28 | skills split on-demand (docx/pptx), lazy-load SDKs, ~2.7 MB installer savings |
 | `v5.3.0`        | 2026-06-28 | slimming on-demand (Node, Python, cliclick), 1086 tests                       |
