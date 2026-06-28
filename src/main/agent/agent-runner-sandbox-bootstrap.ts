@@ -10,6 +10,7 @@ import type { SandboxAdapter } from '../sandbox/sandbox-adapter';
 import { SandboxSync } from '../sandbox/sandbox-sync';
 import { pathConverter } from '../sandbox/wsl-bridge';
 import { log, logError } from '../utils/logger';
+import { getCachedLimaInstanceName, SANDBOX_SKILLS_DIR } from '../paths/sandbox-paths';
 
 export interface SandboxBootstrapDeps {
   sessionId: string;
@@ -104,7 +105,7 @@ async function bootstrapWslSandbox(
       const builtinSkillsPath = deps.getBuiltinSkillsPath();
       try {
         const distro = sandbox.wslStatus!.distro!;
-        const sandboxSkillsPath = `${result.sandboxPath}/.claude/skills`;
+        const sandboxSkillsPath = `${result.sandboxPath}/${SANDBOX_SKILLS_DIR}`;
 
         execFileSync('wsl', ['-d', distro, '-e', 'mkdir', '-p', sandboxSkillsPath], {
           encoding: 'utf-8',
@@ -259,12 +260,13 @@ async function bootstrapLimaSandbox(
 
     if (isNewLimaSession) {
       const builtinSkillsPath = deps.getBuiltinSkillsPath();
+      const limaInstance = getCachedLimaInstanceName();
       try {
-        const sandboxSkillsPath = `${result.sandboxPath}/.claude/skills`;
+        const sandboxSkillsPath = `${result.sandboxPath}/${SANDBOX_SKILLS_DIR}`;
 
         execFileSync(
           'limactl',
-          ['shell', 'claude-sandbox', '--', 'mkdir', '-p', sandboxSkillsPath],
+          ['shell', limaInstance, '--', 'mkdir', '-p', sandboxSkillsPath],
           {
             encoding: 'utf-8',
             timeout: 10000,
@@ -280,7 +282,7 @@ async function bootstrapLimaSandbox(
             'limactl',
             [
               'shell',
-              'claude-sandbox',
+              limaInstance,
               '--',
               'rsync',
               '-av',
@@ -310,7 +312,7 @@ async function bootstrapLimaSandbox(
             'limactl',
             [
               'shell',
-              'claude-sandbox',
+              limaInstance,
               '--',
               'rsync',
               '-avL',
@@ -326,7 +328,7 @@ async function bootstrapLimaSandbox(
 
         const copiedSkills = execFileSync(
           'limactl',
-          ['shell', 'claude-sandbox', '--', 'ls', sandboxSkillsPath],
+          ['shell', limaInstance, '--', 'ls', sandboxSkillsPath],
           {
             encoding: 'utf-8',
             timeout: 10000,

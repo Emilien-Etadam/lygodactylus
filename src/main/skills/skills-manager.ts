@@ -21,6 +21,7 @@ import { log, logError, logWarn } from '../utils/logger';
 import { isPathWithinRoot } from '../tools/path-containment';
 import { isDanglingSymlink, readSkillMetadata, validateSkillName } from './skills-frontmatter';
 import { listBuiltinSkillRoots } from './builtin-skills-paths';
+import { getRuntimeSkillsDir } from '../paths/app-data-paths';
 
 interface McpServerConfig {
   command: string;
@@ -65,7 +66,7 @@ export interface SetGlobalSkillsPathResult {
  *
  * Skills loading priority:
  * 1. Project-level: <project>/.skills/ or <project>/skills/
- * 2. Global: <userData>/claude/skills/ (includes ~/.claude/skills read-only)
+ * 2. Global: <userData>/skills/ (includes ~/.claude/skills read-only import)
  * 3. Built-in skills
  *
  * MCP connectors are managed via mcp-config-store / marketplace — not per-skill processes here.
@@ -151,7 +152,7 @@ export class SkillsManager {
   }
 
   private getDefaultGlobalSkillsPath(): string {
-    return path.join(app.getPath('userData'), 'claude', 'skills');
+    return getRuntimeSkillsDir();
   }
 
   getGlobalSkillsPath(): string {

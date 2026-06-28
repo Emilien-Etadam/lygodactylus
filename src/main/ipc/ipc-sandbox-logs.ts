@@ -274,7 +274,7 @@ export function registerSandboxLogsIpc(): void {
 
       const result = await dialog.showSaveDialog(mainAppState.mainWindow!, {
         title: 'Export Logs',
-        defaultPath: `opencowork-logs-${new Date().toISOString().split('T')[0]}.zip`,
+        defaultPath: `lygodactylus-logs-${new Date().toISOString().split('T')[0]}.zip`,
         filters: [
           { name: 'ZIP Archive', extensions: ['zip'] },
           { name: 'All Files', extensions: ['*'] },
