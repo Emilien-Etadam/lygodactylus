@@ -19,15 +19,15 @@ vi.mock('../src/main/catalog/marketplace-installed-store', () => ({
 import { InstallResolver } from '../src/main/catalog/install-resolver';
 
 const githubSkillEntry: CatalogEntry = {
-  id: 'ocr-and-documents-skill',
+  id: 'requesting-code-review-skill',
   type: 'skill',
-  name: 'OCR & Documents',
-  description: 'Extract text/markdown from PDF, DOCX, PPTX, XLSX, images (marker-based).',
+  name: 'Requesting Code Review',
+  description: 'Pre-commit review: security scan, quality gates, auto-fix.',
   verified: true,
   resolve: {
     via: 'github',
     repo: 'NousResearch/hermes-agent',
-    subdir: 'skills/productivity/ocr-and-documents',
+    subdir: 'skills/software-development/requesting-code-review',
     ref: 'main',
   },
 };
@@ -52,8 +52,11 @@ describe('InstallResolver github routing', () => {
   });
 
   it('installs github skill entries via skillsManager.installSkill', async () => {
-    downloadGithubSubdir.mockResolvedValue('/tmp/ocr-skill');
-    const installSkill = vi.fn(async () => ({ id: 'skill-ocr', name: 'OCR & Documents' }));
+    downloadGithubSubdir.mockResolvedValue('/tmp/requesting-code-review-skill');
+    const installSkill = vi.fn(async () => ({
+      id: 'skill-code-review',
+      name: 'Requesting Code Review',
+    }));
     const installFromDirectory = vi.fn();
 
     const resolver = new InstallResolver(
@@ -75,22 +78,22 @@ describe('InstallResolver github routing', () => {
 
     expect(downloadGithubSubdir).toHaveBeenCalledWith(
       'NousResearch/hermes-agent',
-      'skills/productivity/ocr-and-documents',
+      'skills/software-development/requesting-code-review',
       'main'
     );
-    expect(installSkill).toHaveBeenCalledWith('/tmp/ocr-skill');
+    expect(installSkill).toHaveBeenCalledWith('/tmp/requesting-code-review-skill');
     expect(installFromDirectory).not.toHaveBeenCalled();
     expect(marketplaceSave).toHaveBeenCalledWith({
-      catalogId: 'ocr-and-documents-skill',
+      catalogId: 'requesting-code-review-skill',
       type: 'skill',
-      installedRef: 'skill-ocr',
+      installedRef: 'skill-code-review',
       installedAt: expect.any(Number),
     });
     expect(result).toEqual({
-      catalogId: 'ocr-and-documents-skill',
+      catalogId: 'requesting-code-review-skill',
       type: 'skill',
-      name: 'OCR & Documents',
-      installedRef: 'skill-ocr',
+      name: 'Requesting Code Review',
+      installedRef: 'skill-code-review',
       warnings: [],
     });
   });
