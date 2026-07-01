@@ -216,6 +216,19 @@
         "subdir": "skills/software-development/requesting-code-review",
         "ref": "main"
       }
+    },
+    {
+      "id": "skill-creator-skill",
+      "type": "skill",
+      "name": "Skill Creator",
+      "description": "Create, edit, and evaluate agent skills (SKILL.md).",
+      "verified": true,
+      "resolve": {
+        "via": "github",
+        "repo": "anthropics/skills",
+        "subdir": "skills/skill-creator",
+        "ref": "main"
+      }
     }
   ]
 }
