@@ -7,7 +7,6 @@ import type { MCPManager } from '../mcp/mcp-manager';
 import type { PathResolver } from '../sandbox/path-resolver';
 import { log, logWarn } from '../utils/logger';
 import { mt } from '../i18n';
-import { ensureHeavySkills } from '../runtime/skills-bundle-runtime';
 import { listBuiltinSkillRoots } from '../skills/builtin-skills-paths';
 import type { CachedPiSession } from './agent-runner-pi-session';
 import { AgentRunnerRenderer } from './agent-runner-renderer-events';
@@ -62,12 +61,6 @@ export async function ensureSkillsSetup(ctx: AgentRunnerRunContext): Promise<voi
   const appSkillsDir = ctx.skillsPaths.getRuntimeSkillsDir();
   if (!fs.existsSync(appSkillsDir)) {
     fs.mkdirSync(appSkillsDir, { recursive: true });
-  }
-
-  try {
-    await ensureHeavySkills();
-  } catch (error) {
-    logWarn('[AgentRunner] Heavy skills download deferred:', error);
   }
 
   const linkedSkills = new Set<string>();
