@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lygodactylus Web</title>
+    <link rel="stylesheet" href="sidebar.css" />
+  </head>
+  <body>
+    <header class="header">
+      <h1>Lygodactylus Web</h1>
+      <button type="button" id="open-options" class="link-btn" title="Options">⚙</button>
+    </header>
+
+    <section class="actions">
+      <button type="button" data-action="translate" class="action-btn">Traduire</button>
+      <button type="button" data-action="summarize" class="action-btn">Résumer</button>
+      <button type="button" data-action="extract" class="action-btn">Extraire</button>
+      <button type="button" data-action="custom" class="action-btn">Prompt libre</button>
+    </section>
+
+    <section class="field" id="target-lang-section">
+      <label for="target-lang">Langue cible</label>
+      <input id="target-lang" type="text" placeholder="fr" autocomplete="off" />
+    </section>
+
+    <section class="field hidden" id="prompt-section">
+      <label for="prompt-input" id="prompt-label">Prompt</label>
+      <textarea id="prompt-input" rows="4" placeholder="Décrivez ce que vous voulez extraire ou demander…"></textarea>
+    </section>
+
+    <section class="controls">
+      <button type="button" id="run-action" class="primary-btn">Lancer</button>
+      <button type="button" id="cancel-action" class="secondary-btn" disabled>Annuler</button>
+    </section>
+
+    <section class="result-section">
+      <div class="result-header">
+        <h2>Résultat</h2>
+        <button type="button" id="copy-result" class="link-btn" disabled>Copier</button>
+      </div>
+      <div id="status" class="status" aria-live="polite"></div>
+      <pre id="result" class="result"></pre>
+      <ul id="warnings" class="warnings hidden"></ul>
+    </section>
+
+    <script src="sidebar.js"></script>
+  </body>
+</html>
