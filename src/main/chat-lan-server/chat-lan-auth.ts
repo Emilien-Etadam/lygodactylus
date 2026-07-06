@@ -3,17 +3,19 @@ import type { IncomingMessage, ServerResponse } from 'http';
 import type { URL } from 'url';
 import { chatLanConfigStore } from './chat-lan-config-store';
 
-export function timingSafeEqualString(provided: string, expected: string): boolean {
+export function timingSafeEqualString(
+  provided: string | undefined,
+  expected: string | undefined
+): boolean {
+  if (typeof provided !== 'string' || typeof expected !== 'string') {
+    return false;
+  }
   if (!provided || !expected) {
     return false;
   }
-  const providedBuf = Buffer.from(provided, 'utf8');
-  const expectedBuf = Buffer.from(expected, 'utf8');
-  if (providedBuf.length !== expectedBuf.length) {
-    crypto.timingSafeEqual(providedBuf, providedBuf);
-    return false;
-  }
-  return crypto.timingSafeEqual(providedBuf, expectedBuf);
+  const providedDigest = crypto.createHash('sha256').update(provided, 'utf8').digest();
+  const expectedDigest = crypto.createHash('sha256').update(expected, 'utf8').digest();
+  return crypto.timingSafeEqual(providedDigest, expectedDigest);
 }
 
 export function getBearerTokenFromRequest(req: IncomingMessage): string | null {

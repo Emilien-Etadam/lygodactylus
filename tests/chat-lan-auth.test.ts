@@ -27,14 +27,28 @@ function makeRequest(headers: Record<string, string | string[] | undefined> = {}
 }
 
 describe('chat-lan-auth', () => {
-  it('compares tokens in constant time when lengths match', () => {
-    expect(timingSafeEqualString('secret-token', 'secret-token')).toBe(true);
-    expect(timingSafeEqualString('secret-token', 'wrong-token')).toBe(false);
-  });
+  describe('timingSafeEqualString', () => {
+    it('returns false for empty tokens', () => {
+      expect(timingSafeEqualString('', 'secret-token')).toBe(false);
+      expect(timingSafeEqualString('secret-token', '')).toBe(false);
+      expect(timingSafeEqualString('', '')).toBe(false);
+    });
 
-  it('rejects tokens with different lengths without leaking equality', () => {
-    expect(timingSafeEqualString('short', 'much-longer-token')).toBe(false);
-    expect(timingSafeEqualString('', 'secret-token')).toBe(false);
+    it('returns false for undefined or non-string values', () => {
+      expect(timingSafeEqualString(undefined, 'secret-token')).toBe(false);
+      expect(timingSafeEqualString('secret-token', undefined)).toBe(false);
+      expect(timingSafeEqualString(null as unknown as string, 'secret-token')).toBe(false);
+      expect(timingSafeEqualString('secret-token', 42 as unknown as string)).toBe(false);
+    });
+
+    it('returns false for tokens with different lengths', () => {
+      expect(timingSafeEqualString('short', 'much-longer-token')).toBe(false);
+    });
+
+    it('returns true for matching valid tokens', () => {
+      expect(timingSafeEqualString('secret-token', 'secret-token')).toBe(true);
+      expect(timingSafeEqualString('secret-token', 'wrong-token')).toBe(false);
+    });
   });
 
   it('accepts bearer authorization header for chat LAN token', () => {
