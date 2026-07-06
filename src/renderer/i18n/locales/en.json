@@ -126,6 +126,10 @@
     "regenerateToken": "Regenerate token",
     "tokenCopied": "Token copied",
     "tokenRegenerated": "New token generated",
+    "extensionToken": "Extension token",
+    "regenerateExtensionToken": "Regenerate extension token",
+    "extensionTokenCopied": "Extension token copied",
+    "extensionTokenRegenerated": "New extension token generated",
     "urls": "Open in browser (local network)",
     "wireguardHint": "Recommended: access via your WireGuard tunnel (not public Wi‑Fi). The token is sent in the Authorization header, not the URL.",
     "saved": "Settings saved"

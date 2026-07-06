@@ -1,11 +1,34 @@
+import * as crypto from 'crypto';
 import type { IncomingMessage, ServerResponse } from 'http';
 import type { URL } from 'url';
 import { chatLanConfigStore } from './chat-lan-config-store';
 
-export function getTokenFromRequest(req: IncomingMessage, url: URL): string | null {
+export function timingSafeEqualString(provided: string, expected: string): boolean {
+  if (!provided || !expected) {
+    return false;
+  }
+  const providedBuf = Buffer.from(provided, 'utf8');
+  const expectedBuf = Buffer.from(expected, 'utf8');
+  if (providedBuf.length !== expectedBuf.length) {
+    crypto.timingSafeEqual(providedBuf, providedBuf);
+    return false;
+  }
+  return crypto.timingSafeEqual(providedBuf, expectedBuf);
+}
+
+export function getBearerTokenFromRequest(req: IncomingMessage): string | null {
   const auth = req.headers.authorization;
-  if (auth?.startsWith('Bearer ')) {
-    return auth.slice('Bearer '.length).trim();
+  if (!auth?.startsWith('Bearer ')) {
+    return null;
+  }
+  const token = auth.slice('Bearer '.length).trim();
+  return token || null;
+}
+
+export function getTokenFromRequest(req: IncomingMessage, url: URL): string | null {
+  const bearer = getBearerTokenFromRequest(req);
+  if (bearer) {
+    return bearer;
   }
   const queryToken = url.searchParams.get('token');
   return queryToken?.trim() || null;
@@ -14,7 +37,13 @@ export function getTokenFromRequest(req: IncomingMessage, url: URL): string | nu
 export function isChatLanAuthorized(req: IncomingMessage, url: URL): boolean {
   const expected = chatLanConfigStore.getAll().token;
   const provided = getTokenFromRequest(req, url);
-  return Boolean(provided && expected && provided === expected);
+  return Boolean(provided && expected && timingSafeEqualString(provided, expected));
+}
+
+export function isWebActionAuthorized(req: IncomingMessage): boolean {
+  const expected = chatLanConfigStore.getAll().extensionToken;
+  const provided = getBearerTokenFromRequest(req);
+  return Boolean(provided && expected && timingSafeEqualString(provided, expected));
 }
 
 export function applyChatLanSecurityHeaders(res: ServerResponse): void {

@@ -19,6 +19,7 @@ import { getWorkingDir, getWorkspacePathUnsupportedReason } from '../main-workin
 import { chatLanConfigStore } from './chat-lan-config-store';
 import { subscribeChatLanEvents } from './chat-lan-event-bus';
 import { applyChatLanSecurityHeaders, isChatLanAuthorized } from './chat-lan-auth';
+import { handleWebAction } from './web-action';
 
 const BIND_HOST = '0.0.0.0';
 const MAX_BODY_BYTES = 1024 * 1024;
@@ -275,6 +276,11 @@ async function onRequest(req: IncomingMessage, res: ServerResponse): Promise<voi
 
     if (url.pathname === '/' || url.pathname === '/index.html') {
       serveChatUi(res);
+      return;
+    }
+
+    if (url.pathname === '/api/web-action') {
+      await handleWebAction(req, res, url);
       return;
     }
 
