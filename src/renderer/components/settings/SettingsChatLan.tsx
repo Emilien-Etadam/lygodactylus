@@ -6,6 +6,7 @@ interface ChatLanConfig {
   enabled: boolean;
   port: number;
   token: string;
+  extensionToken: string;
 }
 
 interface ChatLanStatus {
@@ -64,10 +65,30 @@ export function SettingsChatLan() {
     }
   };
 
+  const regenerateExtensionToken = async () => {
+    setIsSaving(true);
+    try {
+      const result = await window.electronAPI.chatLan.regenerateExtensionToken();
+      setConfig((current) =>
+        current ? { ...current, extensionToken: result.extensionToken } : current
+      );
+      setStatus(result.status);
+      setMessage(t('chatLan.extensionTokenRegenerated'));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const copyToken = async () => {
     if (!config?.token) return;
     await navigator.clipboard.writeText(config.token);
     setMessage(t('chatLan.tokenCopied'));
+  };
+
+  const copyExtensionToken = async () => {
+    if (!config?.extensionToken) return;
+    await navigator.clipboard.writeText(config.extensionToken);
+    setMessage(t('chatLan.extensionTokenCopied'));
   };
 
   if (!config) {
@@ -143,6 +164,33 @@ export function SettingsChatLan() {
             onClick={() => void regenerateToken()}
             className="p-2 rounded-lg border border-border"
             title={t('chatLan.regenerateToken')}
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      <div className="space-y-2 max-w-xl">
+        <label className="text-xs text-text-muted">{t('chatLan.extensionToken')}</label>
+        <div className="flex gap-2">
+          <input
+            readOnly
+            value={config.extensionToken}
+            className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-text-primary font-mono text-xs"
+          />
+          <button
+            type="button"
+            onClick={() => void copyExtensionToken()}
+            className="p-2 rounded-lg border border-border"
+          >
+            <Copy className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            disabled={isSaving}
+            onClick={() => void regenerateExtensionToken()}
+            className="p-2 rounded-lg border border-border"
+            title={t('chatLan.regenerateExtensionToken')}
           >
             <RefreshCw className="w-4 h-4" />
           </button>

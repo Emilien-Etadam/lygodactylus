@@ -9,6 +9,7 @@ export interface ChatLanConfig {
   enabled: boolean;
   port: number;
   token: string;
+  extensionToken: string;
 }
 
 const DEFAULT_PORT = 19890;
@@ -27,12 +28,16 @@ class ChatLanConfigStore {
         enabled: false,
         port: DEFAULT_PORT,
         token: generateToken(),
+        extensionToken: generateToken(),
       },
       logPrefix: '[ChatLanConfigStore]',
     }) as unknown as Store<ChatLanConfig>;
 
     if (!this.store.get('token')) {
       this.store.set('token', generateToken());
+    }
+    if (!this.store.get('extensionToken')) {
+      this.store.set('extensionToken', generateToken());
     }
   }
 
@@ -41,6 +46,7 @@ class ChatLanConfigStore {
       enabled: Boolean(this.store.get('enabled')),
       port: Number(this.store.get('port')) || DEFAULT_PORT,
       token: String(this.store.get('token') || generateToken()),
+      extensionToken: String(this.store.get('extensionToken') || generateToken()),
     };
   }
 
@@ -59,6 +65,12 @@ class ChatLanConfigStore {
     const token = generateToken();
     this.store.set('token', token);
     return token;
+  }
+
+  regenerateExtensionToken(): string {
+    const extensionToken = generateToken();
+    this.store.set('extensionToken', extensionToken);
+    return extensionToken;
   }
 }
 

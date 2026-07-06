@@ -126,6 +126,10 @@
     "regenerateToken": "Régénérer le token",
     "tokenCopied": "Token copié",
     "tokenRegenerated": "Nouveau token généré",
+    "extensionToken": "Token extension",
+    "regenerateExtensionToken": "Régénérer le token extension",
+    "extensionTokenCopied": "Token extension copié",
+    "extensionTokenRegenerated": "Nouveau token extension généré",
     "urls": "Ouvrir dans le navigateur (réseau local)",
     "wireguardHint": "Recommandé : accédez via votre tunnel WireGuard (pas le Wi‑Fi public). Le jeton passe dans l’en-tête Authorization, pas dans l’URL.",
     "saved": "Paramètres enregistrés"

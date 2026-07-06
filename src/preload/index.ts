@@ -318,7 +318,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
 
   chatLan: {
-    getConfig: (): Promise<{ enabled: boolean; port: number; token: string }> =>
+    getConfig: (): Promise<{ enabled: boolean; port: number; token: string; extensionToken: string }> =>
       ipcRenderer.invoke('chatLan.getConfig'),
     getStatus: (): Promise<{
       running: boolean;
@@ -332,12 +332,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
     }): Promise<{
       ok: boolean;
       status: { running: boolean; port: number; enabled: boolean; urls: string[] };
-      config: { enabled: boolean; port: number; token: string };
+      config: { enabled: boolean; port: number; token: string; extensionToken: string };
     }> => ipcRenderer.invoke('chatLan.setConfig', payload),
     regenerateToken: (): Promise<{
       token: string;
       status: { running: boolean; port: number; enabled: boolean; urls: string[] };
     }> => ipcRenderer.invoke('chatLan.regenerateToken'),
+    regenerateExtensionToken: (): Promise<{
+      extensionToken: string;
+      status: { running: boolean; port: number; enabled: boolean; urls: string[] };
+    }> => ipcRenderer.invoke('chatLan.regenerateExtensionToken'),
   },
 
   memory: {
@@ -560,7 +564,7 @@ declare global {
         runNow: (id: string) => Promise<ScheduleTask | null>;
       };
       chatLan: {
-        getConfig: () => Promise<{ enabled: boolean; port: number; token: string }>;
+        getConfig: () => Promise<{ enabled: boolean; port: number; token: string; extensionToken: string }>;
         getStatus: () => Promise<{
           running: boolean;
           port: number;
@@ -570,10 +574,14 @@ declare global {
         setConfig: (payload: { enabled?: boolean; port?: number }) => Promise<{
           ok: boolean;
           status: { running: boolean; port: number; enabled: boolean; urls: string[] };
-          config: { enabled: boolean; port: number; token: string };
+          config: { enabled: boolean; port: number; token: string; extensionToken: string };
         }>;
         regenerateToken: () => Promise<{
           token: string;
+          status: { running: boolean; port: number; enabled: boolean; urls: string[] };
+        }>;
+        regenerateExtensionToken: () => Promise<{
+          extensionToken: string;
           status: { running: boolean; port: number; enabled: boolean; urls: string[] };
         }>;
       };

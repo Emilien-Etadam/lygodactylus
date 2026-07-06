@@ -1,5 +1,5 @@
-import { completeSimple } from '@earendil-works/pi-ai/compat';
-import type { UserMessage as PiUserMessage } from '@earendil-works/pi-ai';
+import { completeSimple, streamSimple } from '@earendil-works/pi-ai/compat';
+import type { Api, Model, UserMessage as PiUserMessage } from '@earendil-works/pi-ai';
 import type { ApiTestInput, ApiTestResult } from '../../renderer/types';
 import { PROVIDER_PRESETS, type AppConfig, type CustomProtocolType } from '../config/config-store';
 import {
@@ -130,25 +130,18 @@ function mapPiAiError(errorText: string, durationMs: number, provider?: string):
   return { ok: false, latencyMs: durationMs, errorType: 'unknown', details };
 }
 
-/**
- * Run a simple one-shot prompt via pi-ai model directly (no agent session needed).
- */
-export async function runPiAiOneShot(
-  prompt: string,
-  systemPrompt: string,
-  config: AppConfig,
-  options?: {
-    temperature?: number;
-    maxTokens?: number;
-    signal?: AbortSignal;
-  }
-): Promise<{ text: string; hasThinking: boolean; durationMs: number }> {
+interface PreparedPiOneShotModel {
+  resolvedModel: Model<Api>;
+  provider: string;
+  apiKey: string | undefined;
+}
+
+function preparePiModelForOneShot(config: AppConfig): PreparedPiOneShotModel {
   const modelString = resolvePiModelString(config);
   const keyProvider = config.customProtocol || config.provider || 'anthropic';
   const parts = modelString.split('/');
   const provider = parts.length >= 2 ? parts[0] : keyProvider || 'anthropic';
 
-  // Normalize base URL for OpenAI-compatible providers (strips copy-pasted endpoint suffixes)
   const routeProtocol = resolvePiRouteProtocol(config.provider, config.customProtocol);
   const rawBaseUrl = config.baseUrl?.trim() || undefined;
   const effectiveBaseUrl =
@@ -166,7 +159,6 @@ export async function runPiAiOneShot(
   });
 
   if (!piModel) {
-    // Synthetic fallback for unknown/custom models
     const effectiveProtocol = resolvePiRouteProtocol(
       config.provider,
       config.customProtocol
@@ -195,25 +187,35 @@ export async function runPiAiOneShot(
     logWarn('[OneShot] Model not in pi-ai registry, using synthetic model:', modelString, '→', api);
   }
 
-  // piModel is guaranteed non-undefined after synthetic fallback
   const resolvedModel = piModel!;
-
-  // Set API key via AuthStorage (for agent sessions) AND env vars (for pi-ai completeSimple)
   const apiKey = config.apiKey?.trim();
   if (apiKey) {
     const authStorage = getSharedAuthStorage();
-    // Set for the config provider
     authStorage.setRuntimeApiKey(provider, apiKey);
-    // Also set for the model's native provider if different
     if (resolvedModel.provider !== provider) {
       authStorage.setRuntimeApiKey(resolvedModel.provider, apiKey);
     }
   }
 
+  return { resolvedModel, provider, apiKey };
+}
+
+/**
+ * Run a simple one-shot prompt via pi-ai model directly (no agent session needed).
+ */
+export async function runPiAiOneShot(
+  prompt: string,
+  systemPrompt: string,
+  config: AppConfig,
+  options?: {
+    temperature?: number;
+    maxTokens?: number;
+    signal?: AbortSignal;
+  }
+): Promise<{ text: string; hasThinking: boolean; durationMs: number }> {
+  const { resolvedModel, apiKey } = preparePiModelForOneShot(config);
   const start = Date.now();
 
-  // Use pi-ai's completeSimple for a one-shot call
-  // Pass apiKey directly in options — completeSimple uses options.apiKey || env var
   const userMsg: PiUserMessage = { role: 'user', content: prompt, timestamp: Date.now() };
   log(
     '[OneShot] Calling completeSimple:',
@@ -262,6 +264,56 @@ export async function runPiAiOneShot(
     thinkingBlocks.length
   );
   return { text, hasThinking, durationMs: Date.now() - start };
+}
+
+export async function runPiAiOneShotStream(
+  prompt: string,
+  systemPrompt: string,
+  config: AppConfig,
+  onTextDelta: (delta: string) => void,
+  options?: {
+    temperature?: number;
+    maxTokens?: number;
+    signal?: AbortSignal;
+  }
+): Promise<void> {
+  const { resolvedModel, apiKey } = preparePiModelForOneShot(config);
+  const userMsg: PiUserMessage = { role: 'user', content: prompt, timestamp: Date.now() };
+
+  log(
+    '[OneShot] Calling streamSimple:',
+    resolvedModel.provider,
+    resolvedModel.id,
+    'baseUrl:',
+    resolvedModel.baseUrl,
+    'api:',
+    resolvedModel.api
+  );
+
+  const stream = streamSimple(
+    resolvedModel,
+    {
+      systemPrompt,
+      messages: [userMsg],
+    },
+    { ...options, apiKey: apiKey || undefined }
+  );
+
+  for await (const event of stream) {
+    if (event.type === 'text_delta' && event.delta) {
+      onTextDelta(event.delta);
+    }
+    if (event.type === 'error') {
+      const message = event.error.errorMessage || 'Provider returned an error';
+      throw new Error(message);
+    }
+  }
+
+  const response = await stream.result();
+  if (response.stopReason === 'error' || response.stopReason === 'aborted') {
+    logWarn('[OneShot] Provider error-as-resolve:', response.stopReason, response.errorMessage);
+    throw new Error(response.errorMessage || 'Provider returned an error');
+  }
 }
 
 function normalizeProbeAck(raw: string): string {

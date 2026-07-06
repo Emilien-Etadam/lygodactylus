@@ -11,7 +11,7 @@ export function registerChatLanIpc(): void {
       return chatLanConfigStore.getAll();
     } catch (error) {
       logError('[ChatLan] getConfig failed:', error);
-      return { enabled: false, port: 19890, token: '' };
+      return { enabled: false, port: 19890, token: '', extensionToken: '' };
     }
   });
 
@@ -50,6 +50,17 @@ export function registerChatLanIpc(): void {
       return { token, status: getChatLanStatus() };
     } catch (error) {
       logError('[ChatLan] regenerateToken failed:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('chatLan.regenerateExtensionToken', async () => {
+    try {
+      const extensionToken = chatLanConfigStore.regenerateExtensionToken();
+      await applyChatLanConfig();
+      return { extensionToken, status: getChatLanStatus() };
+    } catch (error) {
+      logError('[ChatLan] regenerateExtensionToken failed:', error);
       throw error;
     }
   });
