@@ -55,6 +55,7 @@
 ### Réseau & sandbox
 
 - **Chat LAN** — serveur web local pour discuter avec l'agent depuis un navigateur (Réglages → Chat LAN ; recommandé via VPN WireGuard)
+- **Extension Firefox Lygodactylus Web** — traduction, résumé et prompts sur les pages web via le Chat LAN : voir [extension/README.md](extension/README.md)
 - **Sandbox LAN network (v5.8+)** — accès réseau local depuis le sandbox sans le désactiver : proxy hôte authentifié (opt-in Réglages), filtrage RFC1918 ; `http_request` et `web_fetch` avec en-têtes personnalisés via la pile réseau hôte
 
 ### Distribution

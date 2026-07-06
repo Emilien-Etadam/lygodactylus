@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Lygodactylus Web",
+  "version": "1.0.0",
+  "description": "Traduire, résumer, extraire ou modifier des pages web via Lygodactylus (Chat LAN).",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "lygodactylus-web@emilien-etadam",
+      "strict_min_version": "109.0"
+    }
+  },
+  "permissions": ["activeTab", "contextMenus", "storage", "scripting"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["lib/extract.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "sidebar_action": {
+    "default_panel": "sidebar/sidebar.html",
+    "default_title": "Lygodactylus Web",
+    "open_at_install": false
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  }
+}
