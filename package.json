@@ -96,7 +96,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/coverage-v8": "^4.1.10",
     "autoprefixer": "^10.5.2",
-    "electron": "^41.10.1",
+    "electron": "^43.1.0",
     "electron-builder": "^26.15.3",
     "eslint": "^9.0.0",
     "eslint-plugin-react-hooks": "^5.0.0",
