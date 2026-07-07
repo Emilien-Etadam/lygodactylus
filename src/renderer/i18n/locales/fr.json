@@ -78,9 +78,6 @@
     "themeLight": "Clair",
     "themeDark": "Sombre",
     "themeSystem": "Système",
-    "themePreset": "Style",
-    "themePresetDefault": "Par défaut",
-    "themePresetVscode": "VS Code",
     "language": "Langue",
     "updates": "Mises à jour",
     "updateCurrentVersion": "Version actuelle : {{version}}",
@@ -268,11 +265,9 @@
     "moreModels": "Plus de modèles",
     "noModelsAvailable": "Aucun modèle disponible",
     "selectProtocol": "Sélectionnez le protocole compatible pour le service",
-    "enterOllamaUrl": "Saisissez l'URL du service Ollama compatible OpenAI",
     "enterOpenAIUrl": "Saisissez l'URL du service compatible OpenAI",
     "enterAnthropicUrl": "Saisissez l'URL du service compatible Anthropic",
-    "enterGeminiUrl": "Saisissez une Base URL compatible Gemini",
-    "enterModelId": "Saisissez l'ID du modèle, par ex. deepseek-chat, kimi-k2-thinking, gpt-5.4",
+    "enterModelId": "Saisissez l'ID du modèle, ex. qwen3.5:0.8b, meta-llama/Llama-3.2-3B-Instruct",
     "selectModelRequired": "Veuillez sélectionner un modèle",
     "contextWindow": "Fenêtre de contexte",
     "contextWindowPlaceholder": "Détection automatique",
@@ -300,7 +295,7 @@
     "localOllamaModelUnavailable": "Ollama local trouvé, mais le modèle {{model}} n'a pas pu effectuer une requête d'inférence minimale.",
     "localOllamaModelLoading": "Ollama local trouvé, mais le modèle est encore en cours de chargement en mémoire. Les grands modèles peuvent prendre jusqu'à une minute.",
     "enableThinking": "Activer le mode réflexion",
-    "enableThinkingHint": "Affiche le processus de réflexion de Claude étape par étape. Cela offre plus de transparence mais peut augmenter l'utilisation de tokens.",
+    "enableThinkingHint": "Affiche le raisonnement du modèle étape par étape si supporté. Peut augmenter l’usage de tokens.",
     "enableThinkingOllamaHint": "La plupart des modèles Ollama ne prennent pas en charge le mode réflexion. Activez-le uniquement si votre modèle le prend explicitement en charge.",
     "testSuccess": "Connexion réussie ({{ms}}ms)",
     "testSuccessNeedSave": "Test de connexion réussi. Enregistrez les paramètres avant de démarrer une session.",
@@ -321,15 +316,14 @@
       "commonSetupsHint": "Examiner ou appliquer une configuration recommandée",
       "apply": "Appliquer",
       "detectedBadge": "Détecté",
-      "preferProviderTab": "{{service}} détecté. Ce service est généralement plus facile à configurer depuis l'onglet {{provider}} dédié.",
+      "preferProviderTab": "{{service}} détecté. Utilisez le profil {{provider}} pour la configuration recommandée.",
       "protocolMismatch": "{{service}} détecté. Protocole recommandé : {{recommendedProtocol}}.",
       "protocolLooksGood": "{{service}} détecté. Votre protocole actuel correspond déjà à la configuration {{recommendedProtocol}} recommandée.",
       "baseUrlHint": "{{service}} détecté. Configuration {{recommendedProtocol}} recommandée : {{baseUrl}}. Modèle exemple : {{model}}.",
       "genericBaseUrlHint": "Cela ressemble à un point de terminaison personnalisé compatible {{recommendedProtocol}}. Format de base URL recommandé : {{baseUrl}}. Modèle exemple : {{model}}.",
       "protocolLabels": {
         "anthropic": "Anthropic",
-        "openai": "OpenAI",
-        "gemini": "Gemini"
+        "openai": "OpenAI"
       },
       "columns": {
         "service": "Service",
@@ -342,46 +336,22 @@
       "errorHints": {
         "emptyProbeGeneric": "Le point de terminaison a renvoyé une réponse de sonde vide. Cela signifie généralement que le protocole ou le modèle sélectionné est incompatible avec le service.",
         "emptyProbeDetected": "{{service}} a renvoyé une réponse de sonde vide. Essayez la configuration {{recommendedProtocol}} recommandée et vérifiez l'ID du modèle pour ce point de terminaison.",
-        "emptyProbePreferProvider": "{{service}} a renvoyé une réponse de sonde vide. Essayez l'onglet {{provider}} dédié plutôt que de le configurer comme un point de terminaison personnalisé générique.",
+        "emptyProbePreferProvider": "{{service}} a renvoyé une réponse de test vide. Passez au profil {{provider}} et vérifiez l’ID du modèle.",
         "probeMismatchGeneric": "Le point de terminaison a répondu, mais pas dans le format attendu par cette sonde. Cela indique généralement une incompatibilité de protocole ou de modèle.",
         "probeMismatchDetected": "{{service}} a répondu avec un format de sonde inattendu. Essayez la configuration {{recommendedProtocol}} recommandée et vérifiez l'ID du modèle pour ce point de terminaison."
       },
       "setups": {
-        "openrouter": {
-          "name": "OpenRouter",
-          "note": "Préférez l'onglet fournisseur OpenRouter dédié, sauf si vous déboguez un relais personnalisé."
-        },
-        "deepseek": {
-          "name": "DeepSeek API",
-          "note": "Utilisez le mode compatible OpenAI et copiez l'ID exact du modèle depuis la documentation DeepSeek."
-        },
-        "kimi": {
-          "name": "Kimi Coding",
-          "note": "Utilisez le point de terminaison coding en mode compatible Anthropic. Vérifiez bien l'ID exact du modèle coding dans la documentation Moonshot."
-        },
-        "glm": {
-          "name": "GLM / BigModel (route Anthropic)",
-          "note": "Utilisez la route compatible Anthropic lorsque le chemin du point de terminaison inclut /api/anthropic."
-        },
         "ollama": {
           "name": "Ollama",
-          "note": "Configurez via l'onglet compatible OpenAI avec une URL locale telle que http://localhost:11434/v1."
+          "note": "Configurez via le profil compatible OpenAI avec une URL locale, par ex. http://localhost:11434/v1."
         },
         "vllm": {
           "name": "vLLM",
-          "note": "Configurez via l'onglet compatible OpenAI avec une URL locale telle que http://localhost:8000/v1."
+          "note": "Configurez via le profil compatible OpenAI avec une URL locale, par ex. http://localhost:8000/v1."
         },
         "genericAnthropic": {
           "name": "Compatible Anthropic générique",
           "note": "Utilisez ceci pour les passerelles locales ou personnalisées qui exposent l'API Messages Anthropic."
-        },
-        "gemini": {
-          "name": "Point de terminaison Gemini personnalisé",
-          "note": "Utilisez le mode compatible Gemini et l'ID exact du modèle exposé par le point de terminaison."
-        },
-        "minimax": {
-          "name": "MiniMax",
-          "note": "Utilisez le mode compatible OpenAI, sauf si votre passerelle MiniMax documente un autre protocole."
         },
         "genericOpenAI": {
           "name": "Compatible OpenAI générique",
@@ -625,11 +595,11 @@
     "storagePathHint": "Choisissez où sont stockées les compétences personnalisées et comment l'application les actualise.",
     "builtinSkillsDesc": "Les compétences intégrées sont fournies avec l'application et peuvent être activées au besoin.",
     "title": "📦 Compétences",
-    "description": "Les compétences étendent les capacités de Claude avec des connaissances et des outils spécialisés.",
+    "description": "Les compétences étendent les capacités de l'agent avec des connaissances et des outils spécialisés.",
     "builtinSkills": "Compétences intégrées",
     "customSkills": "Compétences personnalisées",
     "noCustomSkills": "Aucune compétence personnalisée installée",
-    "installSkillsDesc": "Installez des compétences pour étendre les capacités de Claude",
+    "installSkillsDesc": "Installez des compétences pour étendre les capacités de l'agent",
     "storagePathTitle": "Répertoire de stockage des compétences",
     "storagePathUnavailable": "Chemin de stockage indisponible",
     "selectStoragePath": "Sélectionner le répertoire",

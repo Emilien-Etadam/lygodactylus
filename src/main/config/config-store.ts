@@ -388,14 +388,12 @@ export class ConfigStore {
     const projectedConfig = composeProjectedConfig(current, nextConfigSets, activeConfigSetId);
     this.saveConfig({
       ...projectedConfig,
-      claudeCodePath:
-        updates.claudeCodePath !== undefined ? updates.claudeCodePath : current.claudeCodePath,
       agentCliPath:
         updates.agentCliPath !== undefined
           ? updates.agentCliPath
           : updates.claudeCodePath !== undefined
             ? updates.claudeCodePath
-            : current.agentCliPath || current.claudeCodePath,
+            : current.agentCliPath,
       defaultWorkdir:
         updates.defaultWorkdir !== undefined ? updates.defaultWorkdir : current.defaultWorkdir,
       globalSkillsPath:

@@ -174,7 +174,7 @@ describe('AgentRunner Lygodactylus SDK integration', () => {
     ).toContain('runtimeSignature: sessionRuntimeSignature');
   });
 
-  it('uses the normalized route protocol so openrouter follows the openai-compatible path', () => {
+  it('uses the normalized route protocol for custom openai-compatible gateways', () => {
     expect(agentRunnerPiSetupContent).toContain('resolvePiRouteProtocol');
     expect(agentRunnerPiSetupContent).toContain('const configProtocol = resolvePiRouteProtocol(');
     expect(agentRunnerPiSetupContent).toContain('resolveSyntheticPiModelFallback');

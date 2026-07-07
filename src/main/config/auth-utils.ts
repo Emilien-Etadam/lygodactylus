@@ -201,33 +201,3 @@ export function shouldAllowEmptyOpenAIApiKey(
   return config.provider === 'openai' && isLoopbackBaseUrl(config.baseUrl);
 }
 
-/** @deprecated Use isLoopbackOpenAIEndpoint */
-export function isOllamaLegacyCustomOpenAIConfig(
-  config: Pick<AppConfig, 'provider' | 'customProtocol' | 'baseUrl'>
-): boolean {
-  return isLoopbackOpenAIEndpoint(config);
-}
-
-/** @deprecated Use resolveOpenAICredentials */
-export function resolveOllamaCredentials(
-  config: OpenAIConfigLike
-): ResolvedOpenAICredentials | null {
-  if (config.provider !== 'openai' || !isLoopbackOpenAIEndpoint(config)) {
-    return null;
-  }
-  return resolveOpenAICredentials(config);
-}
-
-/** @deprecated Use shouldAllowEmptyOpenAIApiKey */
-export function shouldAllowEmptyOllamaApiKey(
-  config: Pick<AppConfig, 'provider' | 'customProtocol' | 'baseUrl'>
-): boolean {
-  return shouldAllowEmptyOpenAIApiKey(config);
-}
-
-/** @deprecated Loopback anthropic gateways no longer use a separate gemini protocol */
-export function shouldAllowEmptyGeminiApiKey(
-  _config: Pick<AppConfig, 'provider' | 'customProtocol' | 'baseUrl'>
-): boolean {
-  return false;
-}

@@ -5,16 +5,13 @@ import {
   getUnifiedUnsupportedCustomOpenAIBaseUrl,
   isOfficialOpenAIBaseUrl,
   isLoopbackOpenAIEndpoint,
-  isOllamaLegacyCustomOpenAIConfig,
   isLoopbackBaseUrl,
   isLikelyOAuthAccessToken,
   normalizeAnthropicBaseUrl,
-  resolveOllamaCredentials,
   resolveOpenAICredentials,
   sanitizeOpenAIAccountId,
   shouldAllowEmptyAnthropicApiKey,
   shouldAllowEmptyOpenAIApiKey,
-  shouldAllowEmptyOllamaApiKey,
   shouldUseAnthropicAuthToken,
 } from '../src/main/config/auth-utils';
 
@@ -176,9 +173,9 @@ describe('auth-utils', () => {
     ).toBe(false);
   });
 
-  it('allows empty ollama api key alias for loopback openai endpoints', () => {
+  it('allows empty openai api key for loopback ollama endpoints', () => {
     expect(
-      shouldAllowEmptyOllamaApiKey({
+      shouldAllowEmptyOpenAIApiKey({
         provider: 'openai',
         customProtocol: 'openai',
         baseUrl: 'http://localhost:11434/v1',
@@ -193,7 +190,7 @@ describe('auth-utils', () => {
   });
 
   it('injects an internal placeholder key for loopback openai when api key is empty', () => {
-    const resolved = resolveOllamaCredentials({
+    const resolved = resolveOpenAICredentials({
       provider: 'openai',
       customProtocol: 'openai',
       apiKey: '',
@@ -215,9 +212,8 @@ describe('auth-utils', () => {
     ).toBe(true);
 
     expect(
-      isOllamaLegacyCustomOpenAIConfig({
+      isLoopbackOpenAIEndpoint({
         provider: 'openai',
-        customProtocol: 'openai',
         baseUrl: 'https://ollama.example.internal/v1',
       })
     ).toBe(false);

@@ -78,9 +78,6 @@
     "themeLight": "Light",
     "themeDark": "Dark",
     "themeSystem": "System",
-    "themePreset": "Style",
-    "themePresetDefault": "Default",
-    "themePresetVscode": "VS Code",
     "language": "Language",
     "updates": "Updates",
     "updateCurrentVersion": "Current version: {{version}}",
@@ -268,11 +265,9 @@
     "moreModels": "More Models",
     "noModelsAvailable": "No models available",
     "selectProtocol": "Select the compatible protocol for the service",
-    "enterOllamaUrl": "Enter the Ollama OpenAI-compatible service URL",
     "enterOpenAIUrl": "Enter OpenAI-compatible service URL",
     "enterAnthropicUrl": "Enter Anthropic-compatible service URL",
-    "enterGeminiUrl": "Enter a Gemini-compatible base URL",
-    "enterModelId": "Enter model ID, e.g., deepseek-chat, kimi-k2-thinking, gpt-5.4",
+    "enterModelId": "Enter model ID, e.g., qwen3.5:0.8b, meta-llama/Llama-3.2-3B-Instruct",
     "selectModelRequired": "Please select a model",
     "contextWindow": "Context Window",
     "contextWindowPlaceholder": "Auto-detect",
@@ -300,7 +295,7 @@
     "localOllamaModelUnavailable": "Found local Ollama, but model {{model}} could not complete a minimal inference request.",
     "localOllamaModelLoading": "Found local Ollama, but the model is still loading into memory. Large models may take up to a minute.",
     "enableThinking": "Enable Thinking Mode",
-    "enableThinkingHint": "Show Claude's thinking process step by step. This provides more transparency but may increase token usage.",
+    "enableThinkingHint": "Show the model's reasoning step by step when supported. May increase token usage.",
     "enableThinkingOllamaHint": "Most Ollama models do not support thinking mode. Enable only if your model explicitly supports it.",
     "testSuccess": "Connection successful ({{ms}}ms)",
     "testSuccessNeedSave": "Connection test passed. Save settings before starting a session.",
@@ -321,15 +316,14 @@
       "commonSetupsHint": "Review or apply a recommended setup",
       "apply": "Apply",
       "detectedBadge": "Detected",
-      "preferProviderTab": "Detected {{service}}. This service is usually easier to configure from the dedicated {{provider}} tab.",
+      "preferProviderTab": "Detected {{service}}. Use the {{provider}} profile for the recommended setup.",
       "protocolMismatch": "Detected {{service}}. Recommended protocol: {{recommendedProtocol}}.",
       "protocolLooksGood": "Detected {{service}}. Your current protocol already matches the recommended {{recommendedProtocol}} setup.",
       "baseUrlHint": "Detected {{service}}. Recommended {{recommendedProtocol}} setup: {{baseUrl}}. Example model: {{model}}.",
       "genericBaseUrlHint": "This looks like a custom {{recommendedProtocol}}-compatible endpoint. Recommended base URL format: {{baseUrl}}. Example model: {{model}}.",
       "protocolLabels": {
         "anthropic": "Anthropic",
-        "openai": "OpenAI",
-        "gemini": "Gemini"
+        "openai": "OpenAI"
       },
       "columns": {
         "service": "Service",
@@ -342,46 +336,22 @@
       "errorHints": {
         "emptyProbeGeneric": "The endpoint returned an empty probe response. This usually means the selected protocol or model is incompatible with the service.",
         "emptyProbeDetected": "{{service}} returned an empty probe response. Try the recommended {{recommendedProtocol}} setup and verify the model ID for that endpoint.",
-        "emptyProbePreferProvider": "{{service}} returned an empty probe response. Try the dedicated {{provider}} tab instead of configuring it as a generic custom endpoint.",
+        "emptyProbePreferProvider": "{{service}} returned an empty probe response. Switch to the {{provider}} profile and verify the model ID.",
         "probeMismatchGeneric": "The endpoint responded, but not in the format expected by this probe. This usually points to a protocol or model compatibility mismatch.",
         "probeMismatchDetected": "{{service}} responded with an unexpected probe format. Try the recommended {{recommendedProtocol}} setup and verify the model ID for that endpoint."
       },
       "setups": {
-        "openrouter": {
-          "name": "OpenRouter",
-          "note": "Prefer the dedicated OpenRouter provider tab unless you are debugging a custom relay."
-        },
-        "deepseek": {
-          "name": "DeepSeek API",
-          "note": "Use OpenAI-compatible mode and copy the exact model ID from DeepSeek docs."
-        },
-        "kimi": {
-          "name": "Kimi Coding",
-          "note": "Use the coding endpoint with Anthropic-compatible mode. Double-check the exact coding model ID from Moonshot docs."
-        },
-        "glm": {
-          "name": "GLM / BigModel (Anthropic route)",
-          "note": "Use the Anthropic-compatible route when the endpoint path includes /api/anthropic."
-        },
         "ollama": {
           "name": "Ollama",
-          "note": "Configure via the OpenAI-compatible tab with a local base URL such as http://localhost:11434/v1."
+          "note": "Configure via the OpenAI-compatible profile with a local base URL such as http://localhost:11434/v1."
         },
         "vllm": {
           "name": "vLLM",
-          "note": "Configure via the OpenAI-compatible tab with a local base URL such as http://localhost:8000/v1."
+          "note": "Configure via the OpenAI-compatible profile with a local base URL such as http://localhost:8000/v1."
         },
         "genericAnthropic": {
           "name": "Generic Anthropic-compatible",
           "note": "Use this for local or custom gateways that expose the Anthropic Messages API."
-        },
-        "gemini": {
-          "name": "Gemini custom endpoint",
-          "note": "Use Gemini-compatible mode and the exact model ID exposed by the endpoint."
-        },
-        "minimax": {
-          "name": "MiniMax",
-          "note": "Use OpenAI-compatible mode unless your MiniMax gateway documents another protocol."
         },
         "genericOpenAI": {
           "name": "Generic OpenAI-compatible",
@@ -625,11 +595,11 @@
     "storagePathHint": "Choose where custom skills live and how the app refreshes them.",
     "builtinSkillsDesc": "Built-in skills ship with the app and can be toggled when needed.",
     "title": "📦 Skills",
-    "description": "Skills extend Claude's capabilities with specialized knowledge and tools.",
+    "description": "Skills extend the agent with specialized knowledge and tools.",
     "builtinSkills": "Built-in Skills",
     "customSkills": "Custom Skills",
     "noCustomSkills": "No custom skills installed",
-    "installSkillsDesc": "Install skills to extend Claude's capabilities",
+    "installSkillsDesc": "Install skills to extend the agent's capabilities",
     "storagePathTitle": "Skills Storage Directory",
     "storagePathUnavailable": "Storage path unavailable",
     "selectStoragePath": "Select Directory",

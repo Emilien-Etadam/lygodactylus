@@ -78,9 +78,6 @@
     "themeLight": "Luminoasă",
     "themeDark": "Întunecată",
     "themeSystem": "Sistem",
-    "themePreset": "Stil",
-    "themePresetDefault": "Implicit",
-    "themePresetVscode": "VS Code",
     "language": "Limbă",
     "updates": "Updates",
     "updateCurrentVersion": "Current version: {{version}}",
@@ -251,10 +248,8 @@
     "moreModels": "Mai multe modele",
     "noModelsAvailable": "Niciun model disponibil",
     "selectProtocol": "Selectează protocolul compatibil pentru serviciu",
-    "enterOllamaUrl": "Introdu URL-ul serviciului Ollama compatibil cu OpenAI",
     "enterOpenAIUrl": "Introdu URL-ul serviciului compatibil cu OpenAI",
     "enterAnthropicUrl": "Introdu URL-ul serviciului compatibil cu Anthropic",
-    "enterGeminiUrl": "Introdu un Base URL compatibil cu Gemini",
     "enterModelId": "Introdu ID-ul modelului, de ex. deepseek-chat, kimi-k2-thinking, gpt-5.4",
     "selectModelRequired": "Te rog selectează un model",
     "contextWindow": "Fereastră de context",
@@ -283,7 +278,7 @@
     "localOllamaModelUnavailable": "S-a găsit Ollama local, dar modelul {{model}} nu a putut finaliza o cerere de inferență minimală.",
     "localOllamaModelLoading": "S-a găsit Ollama local, dar modelul încă se încarcă în memorie. Modelele mari pot dura până la un minut.",
     "enableThinking": "Activează modul de gândire",
-    "enableThinkingHint": "Afișează procesul de gândire al lui Claude pas cu pas. Aceasta oferă mai multă transparență, dar poate crește consumul de token-uri.",
+    "enableThinkingHint": "Afișează raționamentul modelului pas cu pas când este suportat. Poate crește consumul de token-uri.",
     "enableThinkingOllamaHint": "Majoritatea modelelor Ollama nu acceptă modul de gândire. Activează doar dacă modelul tău îl acceptă explicit.",
     "testSuccess": "Conexiune reușită ({{ms}}ms)",
     "testSuccessNeedSave": "Testul de conexiune a trecut. Salvează setările înainte de a porni o sesiune.",
@@ -311,8 +306,7 @@
       "genericBaseUrlHint": "Acesta pare a fi un endpoint personalizat compatibil cu {{recommendedProtocol}}. Format de Base URL recomandat: {{baseUrl}}. Model exemplu: {{model}}.",
       "protocolLabels": {
         "anthropic": "Anthropic",
-        "openai": "OpenAI",
-        "gemini": "Gemini"
+        "openai": "OpenAI"
       },
       "columns": {
         "service": "Serviciu",
@@ -330,33 +324,9 @@
         "probeMismatchDetected": "{{service}} a răspuns cu un format de probă neașteptat. Încearcă configurarea {{recommendedProtocol}} recomandată și verifică ID-ul modelului pentru acel endpoint."
       },
       "setups": {
-        "openrouter": {
-          "name": "OpenRouter",
-          "note": "Preferă fila dedicată de furnizor OpenRouter, cu excepția cazului în care depanezi un releu personalizat."
-        },
-        "deepseek": {
-          "name": "DeepSeek API",
-          "note": "Folosește modul compatibil cu OpenAI și copiază ID-ul exact al modelului din documentația DeepSeek."
-        },
-        "kimi": {
-          "name": "Kimi Coding",
-          "note": "Folosește endpoint-ul de coding cu modul compatibil cu Anthropic. Verifică ID-ul exact al modelului de coding din documentația Moonshot."
-        },
-        "glm": {
-          "name": "GLM / BigModel (rută Anthropic)",
-          "note": "Folosește ruta compatibilă cu Anthropic când calea endpoint-ului include /api/anthropic."
-        },
         "ollama": {
           "name": "Ollama",
           "note": "Preferă fila dedicată de furnizor Ollama pentru descoperirea și reîmprospătarea modelelor locale."
-        },
-        "gemini": {
-          "name": "Endpoint personalizat Gemini",
-          "note": "Folosește modul compatibil cu Gemini și ID-ul exact al modelului expus de endpoint."
-        },
-        "minimax": {
-          "name": "MiniMax",
-          "note": "Folosește modul compatibil cu OpenAI, cu excepția cazului în care gateway-ul tău MiniMax documentează un alt protocol."
         },
         "genericOpenAI": {
           "name": "Generic compatibil cu OpenAI",
@@ -608,11 +578,11 @@
     "storagePathHint": "Alege unde se află abilitățile personalizate și cum le reîmprospătează aplicația.",
     "builtinSkillsDesc": "Abilitățile încorporate vin cu aplicația și pot fi comutate la nevoie.",
     "title": "📦 Abilități",
-    "description": "Abilitățile extind capacitățile lui Claude cu cunoștințe și instrumente specializate.",
+    "description": "Abilitățile extind capacitățile agentului cu cunoștințe și instrumente specializate.",
     "builtinSkills": "Abilități încorporate",
     "customSkills": "Abilități personalizate",
     "noCustomSkills": "Nicio abilitate personalizată instalată",
-    "installSkillsDesc": "Instalează abilități pentru a extinde capacitățile lui Claude",
+    "installSkillsDesc": "Instalează abilități pentru a extinde capacitățile agentului",
     "storagePathTitle": "Directorul de stocare al abilităților",
     "storagePathUnavailable": "Calea de stocare indisponibilă",
     "selectStoragePath": "Selectează directorul",

@@ -78,9 +78,6 @@
     "themeLight": "Claro",
     "themeDark": "Oscuro",
     "themeSystem": "Sistema",
-    "themePreset": "Estilo",
-    "themePresetDefault": "Predeterminado",
-    "themePresetVscode": "VS Code",
     "language": "Idioma",
     "updates": "Updates",
     "updateCurrentVersion": "Current version: {{version}}",
@@ -251,10 +248,8 @@
     "moreModels": "Más modelos",
     "noModelsAvailable": "No hay modelos disponibles",
     "selectProtocol": "Selecciona el protocolo compatible con el servicio",
-    "enterOllamaUrl": "Introduce la URL del servicio de Ollama compatible con OpenAI",
     "enterOpenAIUrl": "Introduce la URL del servicio compatible con OpenAI",
     "enterAnthropicUrl": "Introduce la URL del servicio compatible con Anthropic",
-    "enterGeminiUrl": "Introduce una Base URL compatible con Gemini",
     "enterModelId": "Introduce el ID del modelo, p. ej., deepseek-chat, kimi-k2-thinking, gpt-5.4",
     "selectModelRequired": "Por favor, selecciona un modelo",
     "contextWindow": "Ventana de contexto",
@@ -283,7 +278,7 @@
     "localOllamaModelUnavailable": "Se encontró Ollama local, pero el modelo {{model}} no pudo completar una solicitud de inferencia mínima.",
     "localOllamaModelLoading": "Se encontró Ollama local, pero el modelo todavía se está cargando en memoria. Los modelos grandes pueden tardar hasta un minuto.",
     "enableThinking": "Activar el modo de razonamiento",
-    "enableThinkingHint": "Muestra el proceso de razonamiento de Claude paso a paso. Esto proporciona más transparencia, pero puede aumentar el uso de tokens.",
+    "enableThinkingHint": "Muestra el razonamiento del modelo paso a paso cuando esté soportado. Puede aumentar el uso de tokens.",
     "enableThinkingOllamaHint": "La mayoría de los modelos de Ollama no admiten el modo de razonamiento. Actívalo solo si tu modelo lo admite explícitamente.",
     "testSuccess": "Conexión correcta ({{ms}}ms)",
     "testSuccessNeedSave": "La prueba de conexión se superó. Guarda la configuración antes de iniciar una sesión.",
@@ -311,8 +306,7 @@
       "genericBaseUrlHint": "Esto parece un endpoint personalizado compatible con {{recommendedProtocol}}. Formato de Base URL recomendado: {{baseUrl}}. Modelo de ejemplo: {{model}}.",
       "protocolLabels": {
         "anthropic": "Anthropic",
-        "openai": "OpenAI",
-        "gemini": "Gemini"
+        "openai": "OpenAI"
       },
       "columns": {
         "service": "Servicio",
@@ -330,33 +324,9 @@
         "probeMismatchDetected": "{{service}} respondió con un formato de sondeo inesperado. Prueba la configuración recomendada de {{recommendedProtocol}} y verifica el ID del modelo para ese endpoint."
       },
       "setups": {
-        "openrouter": {
-          "name": "OpenRouter",
-          "note": "Prefiere la pestaña dedicada del proveedor OpenRouter a menos que estés depurando un relé personalizado."
-        },
-        "deepseek": {
-          "name": "DeepSeek API",
-          "note": "Usa el modo compatible con OpenAI y copia el ID exacto del modelo desde la documentación de DeepSeek."
-        },
-        "kimi": {
-          "name": "Kimi Coding",
-          "note": "Usa el endpoint de coding con el modo compatible con Anthropic. Verifica el ID exacto del modelo de coding en la documentación de Moonshot."
-        },
-        "glm": {
-          "name": "GLM / BigModel (ruta Anthropic)",
-          "note": "Usa la ruta compatible con Anthropic cuando la ruta del endpoint incluya /api/anthropic."
-        },
         "ollama": {
           "name": "Ollama",
           "note": "Prefiere la pestaña dedicada del proveedor Ollama para la detección y actualización de modelos locales."
-        },
-        "gemini": {
-          "name": "Endpoint personalizado de Gemini",
-          "note": "Usa el modo compatible con Gemini y el ID exacto del modelo expuesto por el endpoint."
-        },
-        "minimax": {
-          "name": "MiniMax",
-          "note": "Usa el modo compatible con OpenAI a menos que tu gateway de MiniMax documente otro protocolo."
         },
         "genericOpenAI": {
           "name": "Genérico compatible con OpenAI",
@@ -608,11 +578,11 @@
     "storagePathHint": "Elige dónde residen las habilidades personalizadas y cómo las actualiza la aplicación.",
     "builtinSkillsDesc": "Las habilidades integradas se incluyen con la aplicación y se pueden activar o desactivar cuando sea necesario.",
     "title": "📦 Habilidades",
-    "description": "Las habilidades amplían las capacidades de Claude con conocimiento y herramientas especializadas.",
+    "description": "Las habilidades amplían las capacidades del agente con conocimiento y herramientas especializadas.",
     "builtinSkills": "Habilidades integradas",
     "customSkills": "Habilidades personalizadas",
     "noCustomSkills": "No hay habilidades personalizadas instaladas",
-    "installSkillsDesc": "Instala habilidades para ampliar las capacidades de Claude",
+    "installSkillsDesc": "Instala habilidades para ampliar las capacidades del agente",
     "storagePathTitle": "Directorio de almacenamiento de habilidades",
     "storagePathUnavailable": "Ruta de almacenamiento no disponible",
     "selectStoragePath": "Seleccionar directorio",

@@ -1,6 +1,6 @@
 import type { AppConfig, CustomProtocolType, ProviderType } from '../config/config-store';
 import { configStore } from '../config/config-store';
-import { normalizeOpenAICompatibleBaseUrl, resolveOpenAICredentials, isOfficialOpenAIBaseUrl } from '../config/auth-utils';
+import { normalizeOpenAICompatibleBaseUrl, resolveOpenAICredentials, isOfficialOpenAIBaseUrl, OPENAI_PLATFORM_BASE_URL } from '../config/auth-utils';
 import { detectCommonProviderSetup } from '../../shared/api-provider-guidance';
 import { runPiAiOneShot } from '../agent/pi-ai-one-shot';
 import { logWarn } from '../utils/logger';
@@ -179,15 +179,32 @@ export class MemoryLLMClient implements MemoryLLMClientLike {
       baseUrl: embedConfig.baseUrl,
     });
 
-    const client = new (await import('openai')).default({
-      apiKey: resolved?.apiKey || embedConfig.apiKey,
-      baseURL: resolved?.baseUrl || normalizeOpenAICompatibleBaseUrl(embedConfig.baseUrl),
-      timeout: embedConfig.timeoutMs,
+    const apiKey = resolved?.apiKey || embedConfig.apiKey;
+    const baseUrl =
+      resolved?.baseUrl || normalizeOpenAICompatibleBaseUrl(embedConfig.baseUrl) || OPENAI_PLATFORM_BASE_URL;
+    const embeddingsUrl = baseUrl.endsWith('/v1')
+      ? `${baseUrl}/embeddings`
+      : `${baseUrl}/v1/embeddings`;
+
+    const response = await fetch(embeddingsUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: embedConfig.model,
+        input: trimmed,
+      }),
+      signal: AbortSignal.timeout(embedConfig.timeoutMs),
     });
-    const response = await client.embeddings.create({
-      model: embedConfig.model,
-      input: trimmed,
-    });
-    return response.data[0]?.embedding || [];
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(body || `HTTP ${response.status}`);
+    }
+
+    const payload = (await response.json()) as { data?: Array<{ embedding?: number[] }> };
+    return payload.data?.[0]?.embedding || [];
   }
 }

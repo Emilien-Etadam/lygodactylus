@@ -5,12 +5,7 @@
  */
 import { mt } from '../i18n';
 import { normalizeOllamaBaseUrl } from './auth-utils';
-import {
-  mergeLegacyProfiles,
-  migrateCustomProtocol,
-  migrateProfileKey,
-  migrateProviderType,
-} from './provider-migration';
+import { migrateLegacyConfig } from './provider-migration';
 import {
   DEFAULT_CONFIG_SET_ID,
   PROFILE_KEYS,
@@ -95,93 +90,6 @@ export function cloneProfiles(
  */
 export function normalizeModelIds(_config: AppConfig): void {
   // Legacy model ID normalization removed — only local/compatible providers remain.
-}
-
-function normalizeLegacyProjection(raw: Partial<AppConfig>): {
-  provider: ProviderType;
-  customProtocol: CustomProtocolType;
-  activeProfileKey: ProviderProfileKey;
-  profiles: Record<ProviderProfileKey, ProviderProfile>;
-  enableThinking: boolean;
-} {
-  const migratedProfiles = mergeLegacyProfiles(
-    (raw.profiles || {}) as Partial<Record<string, ProviderProfile>>
-  );
-  const provider = migrateProviderType(raw.provider, {
-    customProtocol: isCustomProtocol(raw.customProtocol) ? raw.customProtocol : undefined,
-    model:
-      typeof raw.model === 'string'
-        ? raw.model
-        : migratedProfiles[raw.activeProfileKey as ProviderProfileKey]?.model,
-  });
-  const customProtocol = migrateCustomProtocol(
-    provider,
-    isCustomProtocol(raw.customProtocol) ? raw.customProtocol : undefined
-  );
-  const derivedProfileKey = profileKeyFromProvider(provider, customProtocol);
-
-  const hasAnyRawProfiles = Boolean(migratedProfiles && Object.keys(migratedProfiles).length > 0);
-  const hasProfileUserData = PROFILE_KEYS.some((key) => {
-    const rawProfile = migratedProfiles?.[key];
-    if (!rawProfile) {
-      return false;
-    }
-    const fallback = getDefaultProfile(key);
-    if (typeof rawProfile.apiKey === 'string' && rawProfile.apiKey.trim()) {
-      return true;
-    }
-    if (
-      typeof rawProfile.baseUrl === 'string' &&
-      rawProfile.baseUrl.trim() &&
-      rawProfile.baseUrl.trim() !== fallback.baseUrl
-    ) {
-      return true;
-    }
-    if (
-      typeof rawProfile.model === 'string' &&
-      rawProfile.model.trim() &&
-      rawProfile.model.trim() !== fallback.model
-    ) {
-      return true;
-    }
-    return false;
-  });
-  const shouldUseLegacyProjection = !hasAnyRawProfiles || !hasProfileUserData;
-
-  let activeProfileKey: ProviderProfileKey = shouldUseLegacyProjection
-    ? derivedProfileKey
-    : migrateProfileKey(
-        raw.activeProfileKey,
-        migratedProfiles[raw.activeProfileKey as ProviderProfileKey],
-        provider
-      );
-
-  const profiles = cloneProfiles(migratedProfiles);
-  const hasLegacyProjection =
-    typeof raw.apiKey === 'string' ||
-    typeof raw.baseUrl === 'string' ||
-    typeof raw.model === 'string';
-
-  if (shouldUseLegacyProjection && hasLegacyProjection) {
-    profiles[derivedProfileKey] = normalizeProfile(derivedProfileKey, {
-      apiKey: typeof raw.apiKey === 'string' ? raw.apiKey : '',
-      baseUrl: typeof raw.baseUrl === 'string' ? raw.baseUrl : undefined,
-      model: typeof raw.model === 'string' ? raw.model : undefined,
-    });
-    activeProfileKey = derivedProfileKey;
-  }
-
-  if (!profiles[activeProfileKey]) {
-    activeProfileKey = derivedProfileKey;
-  }
-
-  return {
-    provider,
-    customProtocol,
-    activeProfileKey,
-    profiles,
-    enableThinking: toBoolean(raw.enableThinking, defaultConfig.enableThinking),
-  };
 }
 
 export function projectFromConfigSet(configSet: ApiConfigSet): {
@@ -345,33 +253,8 @@ export function normalizeConfigSets(
   return normalized;
 }
 
-function hasLegacySignal(legacy: {
-  provider: ProviderType;
-  customProtocol: CustomProtocolType;
-  activeProfileKey: ProviderProfileKey;
-  profiles: Record<ProviderProfileKey, ProviderProfile>;
-  enableThinking: boolean;
-}): boolean {
-  if (
-    legacy.provider !== defaultConfig.provider ||
-    legacy.customProtocol !== (defaultConfig.customProtocol || 'anthropic') ||
-    legacy.activeProfileKey !== defaultConfig.activeProfileKey ||
-    legacy.enableThinking !== defaultConfig.enableThinking
-  ) {
-    return true;
-  }
-
-  const activeProfile = legacy.profiles[legacy.activeProfileKey];
-  const fallbackActive = getDefaultProfile(legacy.activeProfileKey);
-  return Boolean(
-    activeProfile.apiKey.trim() ||
-    (activeProfile.baseUrl || '') !== (fallbackActive.baseUrl || '') ||
-    activeProfile.model !== fallbackActive.model
-  );
-}
-
-function shouldPreferLegacyConfigSetProjection(
-  normalizedSets: ApiConfigSet[],
+function configSetMatchesLegacySeed(
+  configSet: ApiConfigSet,
   legacy: {
     provider: ProviderType;
     customProtocol: CustomProtocolType;
@@ -380,21 +263,9 @@ function shouldPreferLegacyConfigSetProjection(
     enableThinking: boolean;
   }
 ): boolean {
-  if (!hasLegacySignal(legacy)) {
-    return false;
-  }
-  if (normalizedSets.length !== 1) {
-    return false;
-  }
-
-  const onlySet = normalizedSets[0];
-  if (!(onlySet.id === DEFAULT_CONFIG_SET_ID && onlySet.isSystem)) {
-    return false;
-  }
-
-  const projected = projectFromConfigSet(onlySet);
+  const projected = projectFromConfigSet(configSet);
   const legacyActive = legacy.profiles[legacy.activeProfileKey];
-  return !(
+  return (
     projected.provider === legacy.provider &&
     projected.customProtocol === legacy.customProtocol &&
     projected.activeProfileKey === legacy.activeProfileKey &&
@@ -405,15 +276,56 @@ function shouldPreferLegacyConfigSetProjection(
   );
 }
 
+function shouldRebuildDefaultConfigSet(
+  normalizedSets: ApiConfigSet[],
+  legacy: {
+    provider: ProviderType;
+    customProtocol: CustomProtocolType;
+    activeProfileKey: ProviderProfileKey;
+    profiles: Record<ProviderProfileKey, ProviderProfile>;
+    enableThinking: boolean;
+  }
+): boolean {
+  if (normalizedSets.length !== 1) {
+    return false;
+  }
+
+  const onlySet = normalizedSets[0];
+  if (!(onlySet.id === DEFAULT_CONFIG_SET_ID && onlySet.isSystem)) {
+    return false;
+  }
+
+  return !configSetMatchesLegacySeed(onlySet, legacy);
+}
+
 export function normalizeConfig(rawConfig: Partial<AppConfig> | undefined): AppConfig {
   const raw = rawConfig || {};
-  const legacy = normalizeLegacyProjection(raw);
-  const normalizedFromRaw = normalizeConfigSets(raw.configSets, legacy);
-  const configSets = shouldPreferLegacyConfigSetProjection(normalizedFromRaw, legacy)
-    ? [makeDefaultConfigSetFromLegacy(legacy)]
+  const migrated = migrateLegacyConfig(raw as Partial<AppConfig> & Record<string, unknown>);
+
+  const provider = isProviderType(migrated.provider) ? migrated.provider : defaultConfig.provider;
+  const customProtocol: CustomProtocolType = isCustomProtocol(migrated.customProtocol)
+    ? migrated.customProtocol
+    : defaultProtocolForProvider(provider);
+  const derivedProfileKey = profileKeyFromProvider(provider, customProtocol);
+  const activeProfileKey = isProfileKey(migrated.activeProfileKey)
+    ? migrated.activeProfileKey
+    : derivedProfileKey;
+  const profiles = cloneProfiles(migrated.profiles);
+
+  const legacySeed = {
+    provider,
+    customProtocol,
+    activeProfileKey,
+    profiles,
+    enableThinking: toBoolean(migrated.enableThinking, defaultConfig.enableThinking),
+  };
+
+  const normalizedFromRaw = normalizeConfigSets(migrated.configSets, legacySeed);
+  const configSets = shouldRebuildDefaultConfigSet(normalizedFromRaw, legacySeed)
+    ? [makeDefaultConfigSetFromLegacy(legacySeed)]
     : normalizedFromRaw;
 
-  const requestedActiveSetId = toNonEmptyString(raw.activeConfigSetId);
+  const requestedActiveSetId = toNonEmptyString(migrated.activeConfigSetId);
   const activeConfigSetId = configSets.some((set) => set.id === requestedActiveSetId)
     ? (requestedActiveSetId as string)
     : configSets[0].id;
@@ -431,14 +343,11 @@ export function normalizeConfig(rawConfig: Partial<AppConfig> | undefined): AppC
     profiles: projected.profiles,
     activeConfigSetId,
     configSets,
-    claudeCodePath:
-      typeof raw.claudeCodePath === 'string' ? raw.claudeCodePath : defaultConfig.claudeCodePath,
+    claudeCodePath: defaultConfig.claudeCodePath,
     agentCliPath:
-      typeof raw.agentCliPath === 'string'
-        ? raw.agentCliPath
-        : typeof raw.claudeCodePath === 'string'
-          ? raw.claudeCodePath
-          : defaultConfig.agentCliPath,
+      typeof migrated.agentCliPath === 'string'
+        ? migrated.agentCliPath
+        : defaultConfig.agentCliPath,
     defaultWorkdir:
       typeof raw.defaultWorkdir === 'string' ? raw.defaultWorkdir : defaultConfig.defaultWorkdir,
     globalSkillsPath:
@@ -561,20 +470,6 @@ export function buildBlankConfigSet(payload: {
     enableThinking: false,
     updatedAt: nowISO(),
   };
-}
-
-/** @deprecated Use exported functions directly. Kept for discoverability. */
-export class ConfigNormalizer {
-  normalizeConfig = normalizeConfig;
-  normalizeProfile = normalizeProfile;
-  cloneProfiles = cloneProfiles;
-  normalizeConfigSets = normalizeConfigSets;
-  projectFromConfigSet = projectFromConfigSet;
-  cloneConfigSet = cloneConfigSet;
-  composeProjectedConfig = composeProjectedConfig;
-  buildUniqueConfigSetName = buildUniqueConfigSetName;
-  generateConfigSetId = generateConfigSetId;
-  buildBlankConfigSet = buildBlankConfigSet;
 }
 
 export type { AppTheme, CreateSetMode };

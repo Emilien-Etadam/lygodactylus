@@ -3,46 +3,10 @@ import * as path from 'path';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 
-import { writeMCPLog } from '../mcp-logger.js';
-
 const execFileAsync = promisify(execFile);
 
 // Get workspace directory from environment or use current directory
 export const WORKSPACE_DIR = process.env.WORKSPACE_DIR || process.cwd();
-
-// Helper: Execute Claude Code command
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function executeClaudeCode(
-  prompt: string,
-  workingDir: string = WORKSPACE_DIR
-): Promise<string> {
-  try {
-    // Check if claude-code is available
-    const claudeCodePath = process.env.CLAUDE_CODE_PATH || 'claude-code';
-
-    // Execute claude-code with the prompt
-    const { stdout, stderr } = await execFileAsync(
-      'bash',
-      ['-c', `${claudeCodePath} "${prompt.replace(/"/g, '\\"')}"`],
-      {
-        cwd: workingDir,
-        maxBuffer: 10 * 1024 * 1024, // 10MB buffer
-        timeout: 120000, // 2 minute timeout
-      }
-    );
-
-    if (stderr && !stderr.includes('Warning')) {
-      writeMCPLog('[ClaudeCode] stderr:', stderr);
-    }
-
-    return stdout || stderr || 'Command executed successfully';
-  } catch (error: unknown) {
-    writeMCPLog('[ClaudeCode] Error:', error instanceof Error ? error.message : String(error));
-    throw new Error(
-      `Claude Code execution failed: ${error instanceof Error ? error.message : String(error)}`
-    );
-  }
-}
 
 // Helper: Validate and resolve a file path within WORKSPACE_DIR (reject absolute + traversal)
 export function resolveContainedPath(filePath: string): string {

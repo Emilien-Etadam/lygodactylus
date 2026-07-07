@@ -46,7 +46,7 @@ describe('runConfigApiTest', () => {
       {
         provider: 'openai',
         apiKey: 'sk-test',
-        model: 'gpt-4.1',
+        model: 'qwen3.5:0.8b',
       },
       createConfig()
     );
@@ -55,51 +55,24 @@ describe('runConfigApiTest', () => {
     expect(mocks.probeWithPiAi).toHaveBeenCalledTimes(1);
   });
 
-  it('routes ollama through probeWithPiAi', async () => {
+  it('routes loopback openai gateways through probeWithPiAi', async () => {
     const expected: ApiTestResult = { ok: true, latencyMs: 9 };
     mocks.probeWithPiAi.mockResolvedValue(expected);
 
     const result = await runConfigApiTest(
       {
-        provider: 'ollama',
+        provider: 'openai',
         apiKey: '',
-        baseUrl: 'http://localhost:11434',
+        baseUrl: 'http://localhost:11434/v1',
         model: 'qwen3.5:0.8b',
       },
       {
         ...createConfig(),
-        provider: 'ollama',
+        provider: 'openai',
         apiKey: '',
-        baseUrl: 'http://localhost:11434',
+        baseUrl: 'http://localhost:11434/v1',
         model: 'qwen3.5:0.8b',
-        activeProfileKey: 'ollama',
-      }
-    );
-
-    expect(result).toEqual(expected);
-    expect(mocks.probeWithPiAi).toHaveBeenCalledTimes(1);
-  });
-
-  it('routes gemini through probeWithPiAi', async () => {
-    const expected: ApiTestResult = { ok: true, latencyMs: 18 };
-    mocks.probeWithPiAi.mockResolvedValue(expected);
-
-    const result = await runConfigApiTest(
-      {
-        provider: 'gemini',
-        customProtocol: 'gemini',
-        apiKey: 'AIza-test',
-        baseUrl: 'https://generativelanguage.googleapis.com',
-        model: 'gemini/gemini-2.5-flash',
-      },
-      {
-        ...createConfig(),
-        provider: 'gemini',
-        customProtocol: 'gemini',
-        activeProfileKey: 'gemini',
-        apiKey: 'AIza-test',
-        baseUrl: 'https://generativelanguage.googleapis.com',
-        model: 'gemini/gemini-2.5-flash',
+        activeProfileKey: 'openai',
       }
     );
 

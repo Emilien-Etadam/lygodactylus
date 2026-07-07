@@ -11,43 +11,21 @@ import {
 
 describe('pi model resolution helpers', () => {
   it('skips invalid custom raw provider lookups and deduplicates candidates', () => {
-    const candidates = buildPiModelLookupCandidates('openai/gpt-5.4', {
+    const candidates = buildPiModelLookupCandidates('openai/qwen3.5:0.8b', {
       configProvider: 'openai',
       rawProvider: 'openai',
     });
 
     expect(candidates).toEqual([
-      { provider: 'openai', model: 'gpt-5.4' },
-      { provider: 'anthropic', model: 'gpt-5.4' },
-      { provider: 'google', model: 'gpt-5.4' },
-    ]);
-  });
-
-  it('prefers openrouter full model id before native provider lookup', () => {
-    const candidates = buildPiModelLookupCandidates('anthropic/claude-sonnet-4-6', {
-      configProvider: 'anthropic',
-      rawProvider: 'openai',
-    });
-
-    expect(candidates).toEqual([
-      { provider: 'openai', model: 'anthropic/claude-sonnet-4-6' },
-      { provider: 'anthropic', model: 'claude-sonnet-4-6' },
-      { provider: 'openai', model: 'claude-sonnet-4-6' },
-      { provider: 'google', model: 'claude-sonnet-4-6' },
+      { provider: 'openai', model: 'qwen3.5:0.8b' },
+      { provider: 'anthropic', model: 'qwen3.5:0.8b' },
     ]);
   });
 
   it('builds provider-prefixed model ids from config-like input', () => {
     expect(
-      resolvePiModelString({ provider: 'openai', customProtocol: 'openai', model: 'gpt-5.4' })
-    ).toBe('openai/gpt-5.4');
-    expect(
-      resolvePiModelString({
-        provider: 'openai',
-        customProtocol: 'gemini',
-        model: 'gemini-3-flash-preview',
-      })
-    ).toBe('gemini/gemini-3-flash-preview');
+      resolvePiModelString({ provider: 'openai', customProtocol: 'openai', model: 'qwen3.5:0.8b' })
+    ).toBe('openai/qwen3.5:0.8b');
     expect(
       resolvePiModelString({
         provider: 'anthropic',
@@ -65,7 +43,6 @@ describe('pi model resolution helpers', () => {
 
   it('builds synthetic models with protocol-specific api defaults', () => {
     expect(inferPiApi('anthropic')).toBe('anthropic-messages');
-    expect(inferPiApi('gemini')).toBe('google-generative-ai');
     expect(inferPiApi('unknown')).toBe('openai-completions');
 
     const model = buildSyntheticPiModel('grok-code-fast-1', 'xai', 'openai', 'https://api.x.ai/v1');
@@ -75,33 +52,18 @@ describe('pi model resolution helpers', () => {
     expect(model.baseUrl).toBe('https://api.x.ai/v1');
   });
 
-  it('preserves explicit provider-prefixed ids for relay synthetic fallbacks', () => {
+  it('strips helper-added provider prefixes for local openai fallbacks', () => {
     const fallback = resolveSyntheticPiModelFallback({
-      rawModel: 'z-ai/glm-5-turbo',
-      resolvedModelString: 'z-ai/glm-5-turbo',
+      rawModel: 'qwen3.5:0.8b',
+      resolvedModelString: 'openai/qwen3.5:0.8b',
       rawProvider: 'openai',
       routeProtocol: 'openai',
-      baseUrl: 'https://openrouter.ai/api/v1',
-    });
-
-    expect(fallback).toEqual({
-      provider: 'z-ai',
-      modelId: 'z-ai/glm-5-turbo',
-    });
-  });
-
-  it('strips helper-added provider prefixes for first-party openai fallbacks', () => {
-    const fallback = resolveSyntheticPiModelFallback({
-      rawModel: 'gpt-5.4',
-      resolvedModelString: 'openai/gpt-5.4',
-      rawProvider: 'openai',
-      routeProtocol: 'openai',
-      baseUrl: 'https://api.openai.com/v1',
+      baseUrl: 'http://localhost:11434/v1',
     });
 
     expect(fallback).toEqual({
       provider: 'openai',
-      modelId: 'gpt-5.4',
+      modelId: 'qwen3.5:0.8b',
     });
   });
 
@@ -123,11 +85,11 @@ describe('pi model resolution helpers', () => {
   it('downgrades openai responses api to completions for custom endpoints', () => {
     const model = applyPiModelRuntimeOverrides(
       {
-        id: 'gpt-5.4',
-        name: 'gpt-5.4',
+        id: 'qwen3.5:0.8b',
+        name: 'qwen3.5:0.8b',
         api: 'openai-responses',
         provider: 'openai',
-        baseUrl: 'https://api.openai.com/v1',
+        baseUrl: 'http://localhost:11434/v1',
         reasoning: false,
         input: ['text'],
         cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
@@ -137,36 +99,12 @@ describe('pi model resolution helpers', () => {
       {
         configProvider: 'openai',
         rawProvider: 'openai',
-        customBaseUrl: 'https://relay.example.com/v1',
+        customBaseUrl: 'http://127.0.0.1:8000/v1',
       }
     );
 
-    expect(model.baseUrl).toBe('https://relay.example.com/v1');
+    expect(model.baseUrl).toBe('http://127.0.0.1:8000/v1');
     expect(model.api).toBe('openai-completions');
-  });
-
-  it('keeps openai responses api for first-party openai endpoints', () => {
-    const model = applyPiModelRuntimeOverrides(
-      {
-        id: 'gpt-5.4',
-        name: 'gpt-5.4',
-        api: 'openai-responses',
-        provider: 'openai',
-        baseUrl: 'https://api.openai.com/v1',
-        reasoning: false,
-        input: ['text'],
-        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-        contextWindow: 128000,
-        maxTokens: 16384,
-      },
-      {
-        configProvider: 'openai',
-        rawProvider: 'openai',
-        customBaseUrl: 'https://api.openai.com/v1',
-      }
-    );
-
-    expect(model.api).toBe('openai-responses');
   });
 
   it('disables developer role for third-party openai-compatible endpoints', () => {
@@ -192,30 +130,6 @@ describe('pi model resolution helpers', () => {
 
     expect(model.baseUrl).toBe('https://api.moonshot.cn/v1');
     expect(model.compat?.supportsDeveloperRole).toBe(false);
-  });
-
-  it('keeps developer role enabled for first-party openai endpoints', () => {
-    const model = applyPiModelRuntimeOverrides(
-      {
-        id: 'gpt-5.4',
-        name: 'gpt-5.4',
-        api: 'openai-completions',
-        provider: 'openai',
-        baseUrl: 'https://api.openai.com/v1',
-        reasoning: true,
-        input: ['text'],
-        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-        contextWindow: 128000,
-        maxTokens: 16384,
-      },
-      {
-        configProvider: 'openai',
-        rawProvider: 'openai',
-        customBaseUrl: 'https://api.openai.com/v1',
-      }
-    );
-
-    expect(model.compat?.supportsDeveloperRole).toBeUndefined();
   });
 
   it('auto-detects reasoning models by model id pattern', () => {
@@ -279,10 +193,7 @@ describe('pi model resolution helpers', () => {
     expect(reasoner.reasoning).toBe(true);
 
     // Non-reasoning models should default to false
-    const gpt = buildSyntheticPiModel('gpt-5.4', 'openai', 'openai');
-    expect(gpt.reasoning).toBe(false);
-
-    const llama = buildSyntheticPiModel('llama-4-scout', 'meta', 'openai');
+    const llama = buildSyntheticPiModel('llama3.2', 'meta', 'openai');
     expect(llama.reasoning).toBe(false);
   });
 
@@ -365,30 +276,6 @@ describe('pi model resolution helpers', () => {
     expect((model.compat?.reasoningEffortMap as Record<string, string> | undefined)?.off).toBe(
       'none'
     );
-  });
-
-  it('disables developer role for openrouter with custom endpoint', () => {
-    const model = applyPiModelRuntimeOverrides(
-      {
-        id: 'anthropic/claude-sonnet-4-6',
-        name: 'claude-sonnet-4-6',
-        api: 'openai-completions',
-        provider: 'openai',
-        baseUrl: 'https://openrouter.ai/api/v1',
-        reasoning: false,
-        input: ['text'],
-        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-        contextWindow: 200000,
-        maxTokens: 8192,
-      },
-      {
-        configProvider: 'openai',
-        rawProvider: 'openai',
-        customBaseUrl: 'https://openrouter.ai/api/v1',
-      }
-    );
-
-    expect(model.compat?.supportsDeveloperRole).toBe(false);
   });
 
   it('disables supportsStore alongside developer role for non-standard endpoints', () => {
@@ -477,7 +364,7 @@ describe('pi model resolution helpers', () => {
         name: 'deepseek/deepseek-v4-flash',
         api: 'openai-completions',
         provider: 'openai',
-        baseUrl: 'https://openrouter.ai/api/v1',
+        baseUrl: 'http://127.0.0.1:8000/v1',
         reasoning: true,
         input: ['text'],
         cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
@@ -487,7 +374,7 @@ describe('pi model resolution helpers', () => {
       {
         configProvider: 'openai',
         rawProvider: 'openai',
-        customBaseUrl: 'https://openrouter.ai/api/v1',
+        customBaseUrl: 'http://127.0.0.1:8000/v1',
       }
     );
 

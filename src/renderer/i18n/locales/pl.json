@@ -78,9 +78,6 @@
     "themeLight": "Jasny",
     "themeDark": "Ciemny",
     "themeSystem": "Systemowy",
-    "themePreset": "Styl",
-    "themePresetDefault": "Domyślny",
-    "themePresetVscode": "VS Code",
     "language": "Język",
     "updates": "Updates",
     "updateCurrentVersion": "Current version: {{version}}",
@@ -251,10 +248,8 @@
     "moreModels": "Więcej modeli",
     "noModelsAvailable": "Brak dostępnych modeli",
     "selectProtocol": "Wybierz zgodny protokół dla usługi",
-    "enterOllamaUrl": "Wprowadź adres URL usługi Ollama zgodnej z OpenAI",
     "enterOpenAIUrl": "Wprowadź adres URL usługi zgodnej z OpenAI",
     "enterAnthropicUrl": "Wprowadź adres URL usługi zgodnej z Anthropic",
-    "enterGeminiUrl": "Wprowadź Base URL zgodny z Gemini",
     "enterModelId": "Wprowadź identyfikator modelu, np. deepseek-chat, kimi-k2-thinking, gpt-5.4",
     "selectModelRequired": "Wybierz model",
     "contextWindow": "Okno kontekstu",
@@ -283,7 +278,7 @@
     "localOllamaModelUnavailable": "Znaleziono lokalną Ollama, ale model {{model}} nie mógł ukończyć minimalnego żądania wnioskowania.",
     "localOllamaModelLoading": "Znaleziono lokalną Ollama, ale model wciąż ładuje się do pamięci. Duże modele mogą zająć nawet minutę.",
     "enableThinking": "Włącz tryb myślenia",
-    "enableThinkingHint": "Pokaż proces myślenia Claude krok po kroku. Zapewnia to większą przejrzystość, ale może zwiększyć zużycie tokenów.",
+    "enableThinkingHint": "Pokazuj rozumowanie modelu krok po kroku, jeśli jest obsługiwane. Może zwiększyć zużycie tokenów.",
     "enableThinkingOllamaHint": "Większość modeli Ollama nie obsługuje trybu myślenia. Włącz tylko, jeśli Twój model wyraźnie go obsługuje.",
     "testSuccess": "Połączenie udane ({{ms}}ms)",
     "testSuccessNeedSave": "Test połączenia zaliczony. Zapisz ustawienia przed rozpoczęciem sesji.",
@@ -311,8 +306,7 @@
       "genericBaseUrlHint": "To wygląda na niestandardowy punkt końcowy zgodny z {{recommendedProtocol}}. Zalecany format Base URL: {{baseUrl}}. Przykładowy model: {{model}}.",
       "protocolLabels": {
         "anthropic": "Anthropic",
-        "openai": "OpenAI",
-        "gemini": "Gemini"
+        "openai": "OpenAI"
       },
       "columns": {
         "service": "Usługa",
@@ -330,33 +324,9 @@
         "probeMismatchDetected": "{{service}} odpowiedział nieoczekiwanym formatem próby. Wypróbuj zalecaną konfigurację {{recommendedProtocol}} i zweryfikuj identyfikator modelu dla tego punktu końcowego."
       },
       "setups": {
-        "openrouter": {
-          "name": "OpenRouter",
-          "note": "Preferuj dedykowaną zakładkę dostawcy OpenRouter, chyba że debugujesz niestandardowy przekaźnik."
-        },
-        "deepseek": {
-          "name": "DeepSeek API",
-          "note": "Użyj trybu zgodnego z OpenAI i skopiuj dokładny identyfikator modelu z dokumentacji DeepSeek."
-        },
-        "kimi": {
-          "name": "Kimi Coding",
-          "note": "Użyj punktu końcowego coding w trybie zgodnym z Anthropic. Dokładnie sprawdź identyfikator modelu coding w dokumentacji Moonshot."
-        },
-        "glm": {
-          "name": "GLM / BigModel (trasa Anthropic)",
-          "note": "Użyj trasy zgodnej z Anthropic, gdy ścieżka punktu końcowego zawiera /api/anthropic."
-        },
         "ollama": {
           "name": "Ollama",
           "note": "Preferuj dedykowaną zakładkę dostawcy Ollama do wykrywania i odświeżania modeli lokalnych."
-        },
-        "gemini": {
-          "name": "Niestandardowy punkt końcowy Gemini",
-          "note": "Użyj trybu zgodnego z Gemini oraz dokładnego identyfikatora modelu udostępnianego przez punkt końcowy."
-        },
-        "minimax": {
-          "name": "MiniMax",
-          "note": "Użyj trybu zgodnego z OpenAI, chyba że Twoja brama MiniMax dokumentuje inny protokół."
         },
         "genericOpenAI": {
           "name": "Ogólny zgodny z OpenAI",
@@ -608,11 +578,11 @@
     "storagePathHint": "Wybierz, gdzie przechowywane są niestandardowe umiejętności i jak aplikacja je odświeża.",
     "builtinSkillsDesc": "Wbudowane umiejętności są dostarczane z aplikacją i można je włączać w razie potrzeby.",
     "title": "📦 Umiejętności",
-    "description": "Umiejętności rozszerzają możliwości Claude o specjalistyczną wiedzę i narzędzia.",
+    "description": "Umiejętności rozszerzają możliwości agenta o specjalistyczną wiedzę i narzędzia.",
     "builtinSkills": "Wbudowane umiejętności",
     "customSkills": "Niestandardowe umiejętności",
     "noCustomSkills": "Brak zainstalowanych niestandardowych umiejętności",
-    "installSkillsDesc": "Zainstaluj umiejętności, aby rozszerzyć możliwości Claude",
+    "installSkillsDesc": "Zainstaluj umiejętności, aby rozszerzyć możliwości agenta",
     "storagePathTitle": "Katalog przechowywania umiejętności",
     "storagePathUnavailable": "Ścieżka przechowywania niedostępna",
     "selectStoragePath": "Wybierz katalog",

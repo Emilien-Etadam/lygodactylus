@@ -10,7 +10,6 @@ import {
   isPluginSlashCommand,
   normalizePluginSlashPromptForExpansion,
   parseSlashCommand,
-  SLASH_COMMAND_DEFINITIONS,
 } from '../../src/shared/slash-commands';
 import type { PluginSlashCommandInfo } from '../../src/shared/plugin-slash-commands';
 

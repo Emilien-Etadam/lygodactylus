@@ -78,9 +78,6 @@
     "themeLight": "Ljust",
     "themeDark": "Mörkt",
     "themeSystem": "System",
-    "themePreset": "Stil",
-    "themePresetDefault": "Standard",
-    "themePresetVscode": "VS Code",
     "language": "Språk",
     "updates": "Updates",
     "updateCurrentVersion": "Current version: {{version}}",
@@ -251,10 +248,8 @@
     "moreModels": "Fler modeller",
     "noModelsAvailable": "Inga modeller tillgängliga",
     "selectProtocol": "Välj det kompatibla protokollet för tjänsten",
-    "enterOllamaUrl": "Ange URL till den OpenAI-kompatibla Ollama-tjänsten",
     "enterOpenAIUrl": "Ange URL till OpenAI-kompatibel tjänst",
     "enterAnthropicUrl": "Ange URL till Anthropic-kompatibel tjänst",
-    "enterGeminiUrl": "Ange en Gemini-kompatibel Base URL",
     "enterModelId": "Ange modell-ID, t.ex. deepseek-chat, kimi-k2-thinking, gpt-5.4",
     "selectModelRequired": "Välj en modell",
     "contextWindow": "Kontextfönster",
@@ -283,7 +278,7 @@
     "localOllamaModelUnavailable": "Hittade lokal Ollama, men modellen {{model}} kunde inte slutföra en minimal inferensförfrågan.",
     "localOllamaModelLoading": "Hittade lokal Ollama, men modellen läses fortfarande in i minnet. Stora modeller kan ta upp till en minut.",
     "enableThinking": "Aktivera tänkarläge",
-    "enableThinkingHint": "Visa Claudes tankeprocess steg för steg. Detta ger mer transparens men kan öka tokenanvändningen.",
+    "enableThinkingHint": "Visa modellens tankeprocess steg för steg när det stöds. Kan öka tokenanvändningen.",
     "enableThinkingOllamaHint": "De flesta Ollama-modeller stöder inte tänkarläge. Aktivera endast om din modell uttryckligen stöder det.",
     "testSuccess": "Anslutningen lyckades ({{ms}} ms)",
     "testSuccessNeedSave": "Anslutningstestet godkändes. Spara inställningarna innan du startar en session.",
@@ -311,8 +306,7 @@
       "genericBaseUrlHint": "Detta ser ut som en anpassad {{recommendedProtocol}}-kompatibel slutpunkt. Rekommenderat Base URL-format: {{baseUrl}}. Exempelmodell: {{model}}.",
       "protocolLabels": {
         "anthropic": "Anthropic",
-        "openai": "OpenAI",
-        "gemini": "Gemini"
+        "openai": "OpenAI"
       },
       "columns": {
         "service": "Tjänst",
@@ -330,33 +324,9 @@
         "probeMismatchDetected": "{{service}} svarade med ett oväntat probningsformat. Prova den rekommenderade {{recommendedProtocol}}-konfigurationen och verifiera modell-ID:t för den slutpunkten."
       },
       "setups": {
-        "openrouter": {
-          "name": "OpenRouter",
-          "note": "Föredra den dedikerade OpenRouter-leverantörsfliken om du inte felsöker ett anpassat relä."
-        },
-        "deepseek": {
-          "name": "DeepSeek API",
-          "note": "Använd OpenAI-kompatibelt läge och kopiera det exakta modell-ID:t från DeepSeek-dokumentationen."
-        },
-        "kimi": {
-          "name": "Kimi Coding",
-          "note": "Använd kodningsslutpunkten med Anthropic-kompatibelt läge. Dubbelkolla det exakta kodningsmodell-ID:t från Moonshot-dokumentationen."
-        },
-        "glm": {
-          "name": "GLM / BigModel (Anthropic-rutt)",
-          "note": "Använd den Anthropic-kompatibla rutten när slutpunktssökvägen innehåller /api/anthropic."
-        },
         "ollama": {
           "name": "Ollama",
           "note": "Föredra den dedikerade Ollama-leverantörsfliken för identifiering och uppdatering av lokala modeller."
-        },
-        "gemini": {
-          "name": "Gemini anpassad slutpunkt",
-          "note": "Använd Gemini-kompatibelt läge och det exakta modell-ID som slutpunkten exponerar."
-        },
-        "minimax": {
-          "name": "MiniMax",
-          "note": "Använd OpenAI-kompatibelt läge om inte din MiniMax-gateway dokumenterar ett annat protokoll."
         },
         "genericOpenAI": {
           "name": "Allmän OpenAI-kompatibel",
@@ -608,11 +578,11 @@
     "storagePathHint": "Välj var anpassade färdigheter ska lagras och hur appen uppdaterar dem.",
     "builtinSkillsDesc": "Inbyggda färdigheter levereras med appen och kan slås på och av vid behov.",
     "title": "📦 Färdigheter",
-    "description": "Färdigheter utökar Claudes förmågor med specialiserad kunskap och specialiserade verktyg.",
+    "description": "Färdigheter utökar agentens förmågor med specialiserad kunskap och specialiserade verktyg.",
     "builtinSkills": "Inbyggda färdigheter",
     "customSkills": "Anpassade färdigheter",
     "noCustomSkills": "Inga anpassade färdigheter installerade",
-    "installSkillsDesc": "Installera färdigheter för att utöka Claudes förmågor",
+    "installSkillsDesc": "Installera färdigheter för att utöka agentens förmågor",
     "storagePathTitle": "Lagringskatalog för färdigheter",
     "storagePathUnavailable": "Lagringssökväg ej tillgänglig",
     "selectStoragePath": "Välj katalog",

@@ -45,9 +45,6 @@ export const BUILTIN_SLASH_COMMAND_DEFINITIONS: readonly BuiltinSlashCommandDefi
   },
 ] as const;
 
-/** @deprecated Use BUILTIN_SLASH_COMMAND_DEFINITIONS */
-export const SLASH_COMMAND_DEFINITIONS = BUILTIN_SLASH_COMMAND_DEFINITIONS;
-
 const COMPACT_COMMAND_RE = /^\/compact(?:\s+([\s\S]*))?$/i;
 const HANDOFF_COMMAND_RE = /^\/handoff(?:\s+([\s\S]*))?$/i;
 const HANDSOFF_COMMAND_RE = /^\/handsoff(?:\s+([\s\S]*))?$/i;
