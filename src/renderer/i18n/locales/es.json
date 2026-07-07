@@ -78,9 +78,6 @@
     "themeLight": "Claro",
     "themeDark": "Oscuro",
     "themeSystem": "Sistema",
-    "themePreset": "Estilo",
-    "themePresetDefault": "Predeterminado",
-    "themePresetVscode": "VS Code",
     "language": "Idioma",
     "updates": "Updates",
     "updateCurrentVersion": "Current version: {{version}}",
@@ -251,10 +248,8 @@
     "moreModels": "Más modelos",
     "noModelsAvailable": "No hay modelos disponibles",
     "selectProtocol": "Selecciona el protocolo compatible con el servicio",
-    "enterOllamaUrl": "Introduce la URL del servicio de Ollama compatible con OpenAI",
     "enterOpenAIUrl": "Introduce la URL del servicio compatible con OpenAI",
     "enterAnthropicUrl": "Introduce la URL del servicio compatible con Anthropic",
-    "enterGeminiUrl": "Introduce una Base URL compatible con Gemini",
     "enterModelId": "Introduce el ID del modelo, p. ej., deepseek-chat, kimi-k2-thinking, gpt-5.4",
     "selectModelRequired": "Por favor, selecciona un modelo",
     "contextWindow": "Ventana de contexto",
@@ -311,8 +306,7 @@
       "genericBaseUrlHint": "Esto parece un endpoint personalizado compatible con {{recommendedProtocol}}. Formato de Base URL recomendado: {{baseUrl}}. Modelo de ejemplo: {{model}}.",
       "protocolLabels": {
         "anthropic": "Anthropic",
-        "openai": "OpenAI",
-        "gemini": "Gemini"
+        "openai": "OpenAI"
       },
       "columns": {
         "service": "Servicio",
@@ -330,33 +324,9 @@
         "probeMismatchDetected": "{{service}} respondió con un formato de sondeo inesperado. Prueba la configuración recomendada de {{recommendedProtocol}} y verifica el ID del modelo para ese endpoint."
       },
       "setups": {
-        "openrouter": {
-          "name": "OpenRouter",
-          "note": "Prefiere la pestaña dedicada del proveedor OpenRouter a menos que estés depurando un relé personalizado."
-        },
-        "deepseek": {
-          "name": "DeepSeek API",
-          "note": "Usa el modo compatible con OpenAI y copia el ID exacto del modelo desde la documentación de DeepSeek."
-        },
-        "kimi": {
-          "name": "Kimi Coding",
-          "note": "Usa el endpoint de coding con el modo compatible con Anthropic. Verifica el ID exacto del modelo de coding en la documentación de Moonshot."
-        },
-        "glm": {
-          "name": "GLM / BigModel (ruta Anthropic)",
-          "note": "Usa la ruta compatible con Anthropic cuando la ruta del endpoint incluya /api/anthropic."
-        },
         "ollama": {
           "name": "Ollama",
           "note": "Prefiere la pestaña dedicada del proveedor Ollama para la detección y actualización de modelos locales."
-        },
-        "gemini": {
-          "name": "Endpoint personalizado de Gemini",
-          "note": "Usa el modo compatible con Gemini y el ID exacto del modelo expuesto por el endpoint."
-        },
-        "minimax": {
-          "name": "MiniMax",
-          "note": "Usa el modo compatible con OpenAI a menos que tu gateway de MiniMax documente otro protocolo."
         },
         "genericOpenAI": {
           "name": "Genérico compatible con OpenAI",

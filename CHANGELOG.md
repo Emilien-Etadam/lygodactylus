@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Cleanup** : retrait des dépendances orphelines (`@google/genai`, `@opentelemetry/api`), clés i18n cloud mortes, code sandbox Claude Code inutilisé, documentation alignée sur l’usage local-first
+
 ## [5.9.0] - 2026-07-01
 
 ### Added

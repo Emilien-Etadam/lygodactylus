@@ -141,29 +141,6 @@ export function isLikelyAuthFailure(error: { status?: number; message: string })
   );
 }
 
-function isGeminiModelsGetProbeUnavailable(error: { status?: number; message: string }): boolean {
-  if (error.status !== undefined) {
-    return false;
-  }
-
-  return /models\.get|reading ['"]get['"]|reading get/i.test(error.message);
-}
-
-export function shouldContinueAfterGeminiAuthProbeError(error: {
-  status?: number;
-  message: string;
-}): boolean {
-  if (error.status === 404) {
-    return true;
-  }
-
-  if (isLikelyAuthFailure(error)) {
-    return false;
-  }
-
-  return isGeminiModelsGetProbeUnavailable(error);
-}
-
 function getModelDiagnosticFix(
   errorType: Awaited<ReturnType<typeof probeWithPiAi>>['errorType'],
   model: string

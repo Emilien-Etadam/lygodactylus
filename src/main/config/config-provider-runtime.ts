@@ -184,8 +184,6 @@ export function applyConfigToEnv(config: AppConfig): void {
   delete process.env.OPENAI_MODEL;
   delete process.env.OPENAI_API_MODE;
   delete process.env.OPENAI_ACCOUNT_ID;
-  delete process.env.GEMINI_API_KEY;
-  delete process.env.GEMINI_BASE_URL;
   delete process.env.CLAUDE_CODE_PATH;
   delete process.env.COWORK_WORKDIR;
 
@@ -248,7 +246,5 @@ export function applyConfigToEnv(config: AppConfig): void {
     OPENAI_MODEL: process.env.OPENAI_MODEL || '(not set)',
     OPENAI_API_MODE: process.env.OPENAI_API_MODE || '(default)',
     OPENAI_ACCOUNT_ID: process.env.OPENAI_ACCOUNT_ID || '(not set)',
-    GEMINI_API_KEY: process.env.GEMINI_API_KEY ? '✓ Set' : '(empty/unset)',
-    GEMINI_BASE_URL: process.env.GEMINI_BASE_URL || '(default)',
   });
 }

@@ -432,29 +432,6 @@ export class SandboxAdapter implements SandboxExecutor {
     return result.response === 0;
   }
 
-  // @ts-expect-error Reserved for future use
-  private async _showClaudeCodeInstallPrompt(
-    config: SandboxAdapterConfig,
-    distro: string
-  ): Promise<boolean> {
-    if (!config.mainWindow) {
-      return true; // Auto-install if no window
-    }
-
-    const result = await dialog.showMessageBox(config.mainWindow, {
-      type: 'question',
-      title: 'Install claude-code in WSL',
-      message: `Claude Code is not installed in ${distro}.`,
-      detail:
-        'Claude Code is required for AI agent functionality. ' +
-        'Would you like to install it automatically?',
-      buttons: ['Install', 'Skip (use native execution)'],
-      defaultId: 0,
-    });
-
-    return result.response === 0;
-  }
-
   private async showInstallFailedWarning(
     config: SandboxAdapterConfig,
     packageName: string
@@ -730,38 +707,6 @@ export class SandboxAdapter implements SandboxExecutor {
       return limaPathConverter.toWindows(resultPath);
     }
     return resultPath;
-  }
-
-  // ==================== Claude Code Integration ====================
-
-  /**
-   * Run claude-code in the sandbox
-   */
-  async runClaudeCode(
-    prompt: string,
-    options: {
-      cwd?: string;
-      model?: string;
-      maxTurns?: number;
-      systemPrompt?: string;
-      env?: Record<string, string>;
-    } = {}
-  ): Promise<AsyncIterable<unknown>> {
-    if (!this.executor) {
-      throw new Error('Sandbox not initialized');
-    }
-
-    if (this.state.mode === 'wsl' && this.executor instanceof WSLBridge) {
-      return (this.executor as WSLBridge).runClaudeCode(prompt, options);
-    }
-
-    if (this.state.mode === 'lima' && this.executor instanceof LimaBridge) {
-      return (this.executor as LimaBridge).runClaudeCode(prompt, options);
-    }
-
-    // For native mode, we need to spawn claude-code directly
-    // This is a simplified implementation - full streaming would be more complex
-    throw new Error('Claude Code execution is only supported in WSL/Lima mode');
   }
 }
 

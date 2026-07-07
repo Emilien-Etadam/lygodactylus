@@ -78,9 +78,6 @@
     "themeLight": "Hell",
     "themeDark": "Dunkel",
     "themeSystem": "System",
-    "themePreset": "Stil",
-    "themePresetDefault": "Standard",
-    "themePresetVscode": "VS Code",
     "language": "Sprache",
     "updates": "Updates",
     "updateCurrentVersion": "Current version: {{version}}",
@@ -251,10 +248,8 @@
     "moreModels": "Weitere Modelle",
     "noModelsAvailable": "Keine Modelle verfügbar",
     "selectProtocol": "Wählen Sie das kompatible Protokoll für den Dienst",
-    "enterOllamaUrl": "Geben Sie die OpenAI-kompatible Ollama-Dienst-URL ein",
     "enterOpenAIUrl": "Geben Sie die OpenAI-kompatible Dienst-URL ein",
     "enterAnthropicUrl": "Geben Sie die Anthropic-kompatible Dienst-URL ein",
-    "enterGeminiUrl": "Geben Sie eine Gemini-kompatible Base URL ein",
     "enterModelId": "Modell-ID eingeben, z. B. deepseek-chat, kimi-k2-thinking, gpt-5.4",
     "selectModelRequired": "Bitte wählen Sie ein Modell",
     "contextWindow": "Kontextfenster",
@@ -311,8 +306,7 @@
       "genericBaseUrlHint": "Das sieht nach einem benutzerdefinierten {{recommendedProtocol}}-kompatiblen Endpunkt aus. Empfohlenes Base-URL-Format: {{baseUrl}}. Beispielmodell: {{model}}.",
       "protocolLabels": {
         "anthropic": "Anthropic",
-        "openai": "OpenAI",
-        "gemini": "Gemini"
+        "openai": "OpenAI"
       },
       "columns": {
         "service": "Dienst",
@@ -330,33 +324,9 @@
         "probeMismatchDetected": "{{service}} antwortete mit einem unerwarteten Probe-Format. Versuchen Sie das empfohlene {{recommendedProtocol}}-Setup und prüfen Sie die Modell-ID für diesen Endpunkt."
       },
       "setups": {
-        "openrouter": {
-          "name": "OpenRouter",
-          "note": "Bevorzugen Sie den dedizierten OpenRouter-Anbieter-Tab, außer Sie debuggen ein benutzerdefiniertes Relay."
-        },
-        "deepseek": {
-          "name": "DeepSeek API",
-          "note": "Verwenden Sie den OpenAI-kompatiblen Modus und kopieren Sie die exakte Modell-ID aus den DeepSeek-Docs."
-        },
-        "kimi": {
-          "name": "Kimi Coding",
-          "note": "Verwenden Sie den Coding-Endpunkt im Anthropic-kompatiblen Modus. Prüfen Sie die exakte Coding-Modell-ID in den Moonshot-Docs."
-        },
-        "glm": {
-          "name": "GLM / BigModel (Anthropic-Route)",
-          "note": "Verwenden Sie die Anthropic-kompatible Route, wenn der Endpunktpfad /api/anthropic enthält."
-        },
         "ollama": {
           "name": "Ollama",
           "note": "Bevorzugen Sie den dedizierten Ollama-Anbieter-Tab für lokale Modellerkennung und -aktualisierung."
-        },
-        "gemini": {
-          "name": "Gemini benutzerdefinierter Endpunkt",
-          "note": "Verwenden Sie den Gemini-kompatiblen Modus und die exakte vom Endpunkt bereitgestellte Modell-ID."
-        },
-        "minimax": {
-          "name": "MiniMax",
-          "note": "Verwenden Sie den OpenAI-kompatiblen Modus, außer Ihr MiniMax-Gateway dokumentiert ein anderes Protokoll."
         },
         "genericOpenAI": {
           "name": "Generisch OpenAI-kompatibel",

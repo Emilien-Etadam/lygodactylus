@@ -653,58 +653,6 @@ export class WSLBridge implements SandboxExecutor {
   }
 
   /**
-   * Install claude-code in WSL
-   */
-  static async installClaudeCodeInWSL(distro: string): Promise<boolean> {
-    WSLBridge.validateDistroName(distro);
-    log('[WSL] Installing claude-code in WSL...');
-
-    try {
-      // Install with nvm environment (most common setup)
-      log('[WSL] Installing claude-code via npm...');
-      await execFileAsync(
-        'wsl',
-        [
-          '-d',
-          distro,
-          '-e',
-          'bash',
-          '-c',
-          'source ~/.nvm/nvm.sh 2>/dev/null; npm install -g @anthropic-ai/claude-code',
-        ],
-        { timeout: 180000, encoding: 'utf-8' }
-      );
-
-      // Verify installation
-      const verifyResult = await execFileAsync(
-        'wsl',
-        ['-d', distro, '-e', 'bash', '-c', 'source ~/.nvm/nvm.sh 2>/dev/null; claude --version'],
-        { timeout: 10000, encoding: 'utf-8' }
-      );
-
-      const version = verifyResult.stdout.trim();
-      log('[WSL] claude-code installed:', version);
-      return true;
-    } catch (error) {
-      logError('[WSL] Failed to install claude-code:', error);
-
-      // Try with sudo as fallback (for system-installed node)
-      try {
-        log('[WSL] Trying claude-code install with sudo...');
-        await execFileAsync(
-          'wsl',
-          ['-d', distro, '-e', 'sudo', 'npm', 'install', '-g', '@anthropic-ai/claude-code'],
-          { timeout: 180000, encoding: 'utf-8' }
-        );
-        return true;
-      } catch (sudoError) {
-        logError('[WSL] Failed to install claude-code with sudo:', sudoError);
-        return false;
-      }
-    }
-  }
-
-  /**
    * Get the path to the WSL agent script
    */
   private getAgentScriptPath(): string {
@@ -1102,52 +1050,6 @@ export class WSLBridge implements SandboxExecutor {
     const wslSrc = pathConverter.toWSL(src);
     const wslDest = pathConverter.toWSL(dest);
     await this.sendRequest('copyFile', { src: wslSrc, dest: wslDest });
-  }
-
-  /**
-   * Run claude-code in WSL
-   */
-  async runClaudeCode(
-    prompt: string,
-    options: {
-      cwd?: string;
-      model?: string;
-      maxTurns?: number;
-      systemPrompt?: string;
-      env?: Record<string, string>;
-    } = {}
-  ): Promise<AsyncIterable<unknown>> {
-    if (!this.isInitialized) {
-      throw new Error('WSL bridge not initialized');
-    }
-
-    const wslCwd = options.cwd ? pathConverter.toWSL(options.cwd) : undefined;
-
-    // Streaming request support can be added here using uuidv4() for request tracking
-
-    // This returns an async iterable that yields claude-code messages
-    // Implementation would involve streaming responses from the agent
-    // For now, we use a simple request/response pattern
-
-    const result = await this.sendRequest<{ messages: unknown[] }>(
-      'runClaudeCode',
-      {
-        prompt,
-        cwd: wslCwd,
-        model: options.model,
-        maxTurns: options.maxTurns,
-        systemPrompt: options.systemPrompt,
-        env: options.env,
-      },
-      300000
-    ); // 5 minute timeout for claude-code
-
-    // Convert to async iterable
-    return (async function* () {
-      for (const msg of result.messages) {
-        yield msg;
-      }
-    })();
   }
 
   /**

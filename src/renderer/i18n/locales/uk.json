@@ -78,9 +78,6 @@
     "themeLight": "Світла",
     "themeDark": "Темна",
     "themeSystem": "Системна",
-    "themePreset": "Стиль",
-    "themePresetDefault": "За замовчуванням",
-    "themePresetVscode": "VS Code",
     "language": "Мова",
     "updates": "Updates",
     "updateCurrentVersion": "Current version: {{version}}",
@@ -251,10 +248,8 @@
     "moreModels": "Більше моделей",
     "noModelsAvailable": "Немає доступних моделей",
     "selectProtocol": "Виберіть сумісний протокол для служби",
-    "enterOllamaUrl": "Введіть URL OpenAI-сумісної служби Ollama",
     "enterOpenAIUrl": "Введіть URL OpenAI-сумісної служби",
     "enterAnthropicUrl": "Введіть URL Anthropic-сумісної служби",
-    "enterGeminiUrl": "Введіть Gemini-сумісний base URL",
     "enterModelId": "Введіть ID моделі, напр., deepseek-chat, kimi-k2-thinking, gpt-5.4",
     "selectModelRequired": "Будь ласка, виберіть модель",
     "contextWindow": "Контекстне вікно",
@@ -311,8 +306,7 @@
       "genericBaseUrlHint": "Це схоже на власну {{recommendedProtocol}}-сумісну кінцеву точку. Рекомендований формат base URL: {{baseUrl}}. Приклад моделі: {{model}}.",
       "protocolLabels": {
         "anthropic": "Anthropic",
-        "openai": "OpenAI",
-        "gemini": "Gemini"
+        "openai": "OpenAI"
       },
       "columns": {
         "service": "Служба",
@@ -330,33 +324,9 @@
         "probeMismatchDetected": "{{service}} відповів несподіваним форматом зондування. Спробуйте рекомендоване налаштування {{recommendedProtocol}} і перевірте ID моделі для цієї кінцевої точки."
       },
       "setups": {
-        "openrouter": {
-          "name": "OpenRouter",
-          "note": "Віддавайте перевагу спеціальній вкладці постачальника OpenRouter, якщо тільки ви не налагоджуєте власний реле."
-        },
-        "deepseek": {
-          "name": "DeepSeek API",
-          "note": "Використовуйте OpenAI-сумісний режим і скопіюйте точний ID моделі з документації DeepSeek."
-        },
-        "kimi": {
-          "name": "Kimi Coding",
-          "note": "Використовуйте coding-кінцеву точку з Anthropic-сумісним режимом. Перевірте точний ID coding-моделі в документації Moonshot."
-        },
-        "glm": {
-          "name": "GLM / BigModel (маршрут Anthropic)",
-          "note": "Використовуйте Anthropic-сумісний маршрут, коли шлях кінцевої точки містить /api/anthropic."
-        },
         "ollama": {
           "name": "Ollama",
           "note": "Віддавайте перевагу спеціальній вкладці постачальника Ollama для виявлення та оновлення локальних моделей."
-        },
-        "gemini": {
-          "name": "Власна кінцева точка Gemini",
-          "note": "Використовуйте Gemini-сумісний режим і точний ID моделі, який надає кінцева точка."
-        },
-        "minimax": {
-          "name": "MiniMax",
-          "note": "Використовуйте OpenAI-сумісний режим, якщо тільки ваш шлюз MiniMax не документує інший протокол."
         },
         "genericOpenAI": {
           "name": "Загальний OpenAI-сумісний",
