@@ -2,7 +2,7 @@ import { getModel } from '@earendil-works/pi-ai/compat';
 import type { Api, Model } from '@earendil-works/pi-ai';
 import { isOfficialOpenAIBaseUrl, isLoopbackBaseUrl } from '../config/auth-utils';
 
-const COMMON_FALLBACK_PROVIDERS = ['openai', 'anthropic', 'google'] as const;
+const COMMON_FALLBACK_PROVIDERS = ['openai', 'anthropic'] as const;
 const INVALID_REGISTRY_PROVIDERS = new Set(['', 'custom']);
 const REASONING_MODEL_PATTERN =
   /\bthinking\b|\breasoner\b|deepseek-r1|deepseek-v4|kimi-k2|qwen3(?:\.5)?(?=[:/-]|$)/i;
@@ -80,9 +80,6 @@ export function inferPiApi(protocol: string): string {
   switch (protocol) {
     case 'anthropic':
       return 'anthropic-messages';
-    case 'gemini':
-    case 'google':
-      return 'google-generative-ai';
     case 'openai':
     default:
       return 'openai-completions';

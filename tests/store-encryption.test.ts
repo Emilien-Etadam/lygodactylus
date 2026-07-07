@@ -102,7 +102,7 @@ describe('createEncryptedStoreWithKeyRotation', () => {
       JSON.stringify({
         key: 'some-old-key',
         payload: {
-          provider: 'openrouter',
+          provider: 'openai',
           apiKey: 'legacy-secret',
         },
       })
@@ -145,7 +145,7 @@ describe('createEncryptedStoreWithKeyRotation', () => {
       JSON.stringify({
         key: 'legacy-key',
         payload: {
-          provider: 'openrouter',
+          provider: 'openai',
           apiKey: 'legacy-secret',
           isConfigured: true,
         },
@@ -169,7 +169,7 @@ describe('createEncryptedStoreWithKeyRotation', () => {
     });
 
     expect(store.store).toEqual({
-      provider: 'openrouter',
+      provider: 'openai',
       apiKey: 'legacy-secret',
       isConfigured: true,
     });
@@ -180,7 +180,7 @@ describe('createEncryptedStoreWithKeyRotation', () => {
     };
     expect(onDisk.key).toBe('stable-key');
     expect(onDisk.payload).toEqual({
-      provider: 'openrouter',
+      provider: 'openai',
       apiKey: 'legacy-secret',
       isConfigured: true,
     });
@@ -205,7 +205,7 @@ describe('createEncryptedStoreWithKeyRotation', () => {
       JSON.stringify({
         key: 'legacy-key',
         payload: {
-          provider: 'openrouter',
+          provider: 'openai',
           apiKey: 'legacy-secret',
           isConfigured: true,
         },
@@ -242,7 +242,7 @@ describe('createEncryptedStoreWithKeyRotation', () => {
     });
 
     expect(store.store).toEqual({
-      provider: 'openrouter',
+      provider: 'openai',
       apiKey: 'legacy-secret',
       isConfigured: true,
     });
