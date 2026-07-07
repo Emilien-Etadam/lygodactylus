@@ -119,3 +119,39 @@ extension/
 ```
 
 Voir le dépôt principal pour le comportement côté serveur (`src/main/chat-lan-server/web-action.ts`).
+
+---
+
+## Release (XPI signé)
+
+Chaque tag `ext-vX.Y.Z` déclenche le workflow [`.github/workflows/sign-extension.yml`](../.github/workflows/sign-extension.yml) : lint `web-ext`, signature AMO (canal **unlisted**), puis attachement du `.xpi` à la [release GitHub](https://github.com/emilien-etadam/lygodactylus/releases) correspondante.
+
+### Prérequis (une fois)
+
+Dans **Settings → Secrets and variables → Actions** du dépôt GitHub :
+
+| Secret | Usage |
+|--------|--------|
+| `AMO_JWT_ISSUER` | Clé JWT AMO (issuer) — mappée vers `WEB_EXT_API_KEY` |
+| `AMO_JWT_SECRET` | Secret JWT AMO — mappé vers `WEB_EXT_API_SECRET` |
+
+Ces identifiants se génèrent sur [addons.mozilla.org](https://addons.mozilla.org/) → **Developer Hub** → **Tools** → **Manage API Keys**.
+
+### Publier une version
+
+1. Mettre à jour le champ `"version"` dans `extension/manifest.json` (ex. `1.0.0`).
+2. Commiter et pousser sur `main`.
+3. Créer et pousser un tag aligné sur cette version :
+
+   ```bash
+   git tag ext-v1.0.0
+   git push origin ext-v1.0.0
+   ```
+
+   Le préfixe `ext-v` est obligatoire ; la partie `X.Y.Z` doit être **identique** à `manifest.json`. Sinon le job échoue avant lint et signature.
+
+4. Une fois le workflow terminé, ouvrir la release GitHub du tag (ex. `ext-v1.0.0`) et télécharger le fichier `.xpi` signé dans les assets.
+
+### Installation du XPI signé
+
+Dans Firefox : `about:addons` → icône engrenage → **Installer un module depuis un fichier…**, puis sélectionner le `.xpi` téléchargé.
