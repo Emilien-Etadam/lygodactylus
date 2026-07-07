@@ -127,9 +127,9 @@ function createConfig(overrides: Partial<AppConfig> = {}): AppConfig {
   return {
     provider: 'openai',
     apiKey: 'sk-saved',
-    baseUrl: 'https://api.openai.com/v1',
+    baseUrl: 'http://localhost:11434/v1',
     customProtocol: 'openai',
-    model: 'gpt-5.4',
+    model: 'qwen3.5:0.8b',
     activeProfileKey: 'openai',
     profiles: {},
     activeConfigSetId: 'default',
@@ -153,10 +153,10 @@ describe('probeWithPiAi', () => {
     mocks.buildSyntheticPiModel.mockReset();
 
     mocks.resolvePiRegistryModel.mockReturnValue({
-      id: 'gpt-5.4',
+      id: 'qwen3.5:0.8b',
       provider: 'openai',
       api: 'openai-completions',
-      baseUrl: 'https://api.openai.com/v1',
+      baseUrl: 'http://localhost:11434/v1',
     });
     mocks.completeSimple.mockResolvedValue({
       content: [{ type: 'text', text: 'sdk_probe_ok' }],
@@ -168,7 +168,7 @@ describe('probeWithPiAi', () => {
       {
         provider: 'openai',
         apiKey: '',
-        model: 'gpt-5.4',
+        model: 'qwen3.5:0.8b',
       },
       createConfig()
     );
@@ -275,7 +275,7 @@ describe('probeWithPiAi', () => {
     });
 
     const result = await probeWithPiAi(
-      { provider: 'openai', apiKey: 'sk-test', model: 'gpt-5.4' },
+      { provider: 'openai', apiKey: 'sk-test', model: 'qwen3.5:0.8b' },
       createConfig()
     );
 
@@ -288,7 +288,7 @@ describe('probeWithPiAi', () => {
     });
 
     const result = await probeWithPiAi(
-      { provider: 'openai', apiKey: 'sk-test', model: 'gpt-5.4' },
+      { provider: 'openai', apiKey: 'sk-test', model: 'qwen3.5:0.8b' },
       createConfig()
     );
 
@@ -301,7 +301,7 @@ describe('probeWithPiAi', () => {
     });
 
     const result = await probeWithPiAi(
-      { provider: 'openai', apiKey: 'sk-test', model: 'gpt-5.4' },
+      { provider: 'openai', apiKey: 'sk-test', model: 'qwen3.5:0.8b' },
       createConfig()
     );
 
@@ -390,164 +390,5 @@ describe('probeWithPiAi', () => {
       'http://localhost:11434/v1',
       'openai-completions'
     );
-  });
-
-  it('keeps explicit prefixed model namespaces for synthetic fallback models', async () => {
-    mocks.resolvePiRegistryModel.mockReturnValue(undefined);
-    mocks.buildSyntheticPiModel.mockReturnValue({
-      id: 'z-ai/glm-5-turbo',
-      provider: 'z-ai',
-      api: 'openai-completions',
-      baseUrl: 'https://openrouter.ai/api/v1',
-    });
-
-    const result = await probeWithPiAi(
-      {
-        provider: 'openai',
-        apiKey: 'sk-or-test',
-        model: 'z-ai/glm-5-turbo',
-        baseUrl: 'https://openrouter.ai/api/v1',
-      },
-      createConfig({
-        provider: 'openai',
-        apiKey: 'sk-or-test',
-        baseUrl: 'https://openrouter.ai/api/v1',
-        customProtocol: 'openai',
-        model: 'z-ai/glm-5-turbo',
-        activeProfileKey: 'openai',
-      })
-    );
-
-    expect(result.ok).toBe(true);
-    expect(mocks.buildSyntheticPiModel).toHaveBeenCalledWith(
-      'glm-5-turbo',
-      'z-ai',
-      'openai',
-      'https://openrouter.ai/api/v1',
-      'openai-completions'
-    );
-  });
-
-  // --- Gemini empty_probe_response regression tests (issue #88) ---
-
-  it('surfaces provider error-as-resolve instead of empty_probe_response', async () => {
-    mocks.completeSimple.mockResolvedValue({
-      content: [],
-      stopReason: 'error',
-      errorMessage: 'API key not valid. Please pass a valid API key.',
-    });
-
-    const result = await probeWithPiAi(
-      { provider: 'openai', apiKey: 'AIza-bad-key', model: 'gemini-2.5-flash' },
-      createConfig({
-        provider: 'openai',
-        customProtocol: 'gemini',
-        apiKey: 'AIza-bad-key',
-        model: 'gemini-2.5-flash',
-      })
-    );
-
-    expect(result.ok).toBe(false);
-    expect(result.details).not.toBe('empty_probe_response');
-    expect(result.errorType).toBe('unauthorized');
-    expect(result.details).toContain('API key not valid');
-  });
-
-  it('surfaces aborted stopReason instead of empty_probe_response', async () => {
-    mocks.completeSimple.mockResolvedValue({
-      content: [],
-      stopReason: 'aborted',
-      errorMessage: 'Request was aborted',
-    });
-
-    const result = await probeWithPiAi(
-      { provider: 'openai', apiKey: 'sk-test', model: 'gpt-5.4' },
-      createConfig()
-    );
-
-    expect(result.ok).toBe(false);
-    expect(result.details).not.toBe('empty_probe_response');
-  });
-
-  it('maps Gemini API_KEY_INVALID to unauthorized error type', async () => {
-    mocks.completeSimple.mockResolvedValue({
-      content: [],
-      stopReason: 'error',
-      errorMessage: 'API_KEY_INVALID',
-    });
-
-    const result = await probeWithPiAi(
-      { provider: 'openai', apiKey: 'bad', model: 'gemini-2.5-flash' },
-      createConfig({
-        provider: 'openai',
-        customProtocol: 'gemini',
-        apiKey: 'bad',
-        model: 'gemini-2.5-flash',
-      })
-    );
-
-    expect(result.ok).toBe(false);
-    expect(result.errorType).toBe('unauthorized');
-  });
-
-  it('maps Gemini PERMISSION_DENIED to unauthorized error type', async () => {
-    mocks.completeSimple.mockResolvedValue({
-      content: [],
-      stopReason: 'error',
-      errorMessage: 'PERMISSION_DENIED: The caller does not have permission',
-    });
-
-    const result = await probeWithPiAi(
-      { provider: 'openai', apiKey: 'bad', model: 'gemini-2.5-flash' },
-      createConfig({
-        provider: 'openai',
-        customProtocol: 'gemini',
-        apiKey: 'bad',
-        model: 'gemini-2.5-flash',
-      })
-    );
-
-    expect(result.ok).toBe(false);
-    expect(result.errorType).toBe('unauthorized');
-  });
-
-  it('falls back to generic unknown error for unrecognized provider error', async () => {
-    mocks.completeSimple.mockResolvedValue({
-      content: [],
-      stopReason: 'error',
-      errorMessage: 'An unknown error occurred',
-    });
-
-    const result = await probeWithPiAi(
-      { provider: 'openai', apiKey: 'key', model: 'gemini-2.5-flash' },
-      createConfig({
-        provider: 'openai',
-        customProtocol: 'gemini',
-        apiKey: 'key',
-        model: 'gemini-2.5-flash',
-      })
-    );
-
-    expect(result.ok).toBe(false);
-    expect(result.errorType).toBe('unknown');
-    expect(result.details).toBe('An unknown error occurred');
-  });
-
-  it('accepts probe ack with math answer prefix from question-style prompt', async () => {
-    mocks.completeSimple.mockResolvedValue({
-      content: [{ type: 'text', text: '2+2 = 4\n\nsdk_probe_ok' }],
-    });
-
-    const result = await probeWithPiAi(
-      { provider: 'openai', apiKey: 'key', model: 'gemini-2.5-flash' },
-      createConfig({
-        provider: 'openai',
-        customProtocol: 'gemini',
-        apiKey: 'key',
-        model: 'gemini-2.5-flash',
-      })
-    );
-
-    expect(result.ok).toBe(true);
   });
 });

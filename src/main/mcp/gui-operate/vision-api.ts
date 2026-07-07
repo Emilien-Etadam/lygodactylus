@@ -1,6 +1,8 @@
 import { writeMCPLog } from '../mcp-logger.js';
 
 import { OPENAI_PLATFORM_BASE_URL } from './constants.js';
+import { isLoopbackBaseUrl } from '../../../shared/network/loopback.js';
+import { OLLAMA_PLACEHOLDER_KEY } from '../../config/auth-utils.js';
 
 /**
  * Call vision API to analyze images with timeout and retry.
@@ -125,38 +127,33 @@ export function getBaseUrlHost(baseUrl: string | undefined): string {
 
 export function buildVisionRuntimeSummary(
   functionName: string | undefined,
-  anthropicApiKey: string | undefined,
   openAIApiKey: string | undefined,
   baseUrl: string | undefined,
   model: string,
-  isOpenAICompatible: boolean,
   compatibilityMode: boolean
 ): Record<string, unknown> {
   return {
     functionName: functionName || '(unknown)',
-    hasAnthropicApiKey: Boolean(anthropicApiKey),
     hasOpenAIApiKey: Boolean(openAIApiKey),
-    hasAnyApiKey: Boolean(anthropicApiKey || openAIApiKey),
     baseUrlHost: getBaseUrlHost(baseUrl),
     model,
-    isOpenAICompatible,
+    route: 'openai-chat-completions',
     compatibilityMode,
   };
 }
 
 export function pickVisionApiKey(
-  selectedRoute: 'openai-chat-completions' | 'anthropic-messages',
-  anthropicApiKey: string | undefined,
   openAIApiKey: string | undefined,
-  isOpenRouter: boolean
+  baseUrl: string | undefined
 ): string | undefined {
-  if (selectedRoute === 'anthropic-messages') {
-    return anthropicApiKey;
+  const trimmed = openAIApiKey?.trim();
+  if (trimmed) {
+    return trimmed;
   }
-  if (isOpenRouter) {
-    return anthropicApiKey || openAIApiKey;
+  if (isLoopbackBaseUrl(baseUrl)) {
+    return OLLAMA_PLACEHOLDER_KEY;
   }
-  return openAIApiKey;
+  return undefined;
 }
 
 /**
@@ -171,220 +168,56 @@ export async function callVisionAPIWithTimeout(
   compatibilityMode: boolean = false,
   previousErrorMessage?: string
 ): Promise<string> {
-  const anthropicApiKey = process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN;
-  const openAIApiKey = process.env.OPENAI_API_KEY;
-  const openAIBaseUrl = process.env.OPENAI_BASE_URL?.trim();
-  const anthropicBaseUrl = process.env.ANTHROPIC_BASE_URL?.trim();
-  const openAIModel = process.env.OPENAI_MODEL?.trim();
-  const anthropicModel =
-    process.env.CLAUDE_MODEL?.trim() || process.env.ANTHROPIC_DEFAULT_SONNET_MODEL?.trim();
-  const hasOpenAIConfig = Boolean(openAIBaseUrl || openAIModel);
-  const baseUrl = openAIBaseUrl || anthropicBaseUrl;
-  const model = openAIModel || anthropicModel || 'claude-sonnet-4-6';
-
-  const isOpenRouter =
-    !!baseUrl && (baseUrl.includes('openrouter.ai') || baseUrl.includes('openrouter'));
-
-  const isOpenAICompatible =
-    hasOpenAIConfig ||
-    model.includes('gemini') ||
-    model.includes('gpt-') ||
-    model.includes('openai/') ||
-    isOpenRouter ||
-    (baseUrl ? baseUrl.includes('api.openai.com') : false);
+  const openAIApiKey = process.env.OPENAI_API_KEY?.trim();
+  const baseUrl = process.env.OPENAI_BASE_URL?.trim() || OPENAI_PLATFORM_BASE_URL;
+  const model = process.env.OPENAI_MODEL?.trim() || 'llama3.2';
 
   const runtimeSummary = buildVisionRuntimeSummary(
     functionName,
-    anthropicApiKey,
     openAIApiKey,
     baseUrl,
     model,
-    isOpenAICompatible,
     compatibilityMode
   );
   writeMCPLog(JSON.stringify(runtimeSummary), 'Vision Runtime');
 
-  const selectedRoute = isOpenAICompatible ? 'openai-chat-completions' : 'anthropic-messages';
   writeMCPLog(
-    `[Vision Routing] function=${functionName || '(unknown)'} route=${selectedRoute} host=${getBaseUrlHost(baseUrl)} model=${model}${previousErrorMessage ? ` previousError=${previousErrorMessage}` : ''}`,
+    `[Vision Routing] function=${functionName || '(unknown)'} route=openai-chat-completions host=${getBaseUrlHost(baseUrl)} model=${model}${previousErrorMessage ? ` previousError=${previousErrorMessage}` : ''}`,
     'Vision Routing'
   );
 
-  const selectedApiKey = pickVisionApiKey(
-    selectedRoute,
-    anthropicApiKey,
-    openAIApiKey,
-    isOpenRouter
-  );
+  const selectedApiKey = pickVisionApiKey(openAIApiKey, baseUrl);
   if (!selectedApiKey) {
-    if (selectedRoute === 'anthropic-messages') {
-      throw new Error(
-        'Anthropic API key not configured. Please set ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN.'
-      );
-    }
-    throw new Error('OpenAI API key not configured for vision route. Please set OPENAI_API_KEY.');
+    throw new Error(
+      'OpenAI-compatible API key not configured for vision. Set OPENAI_API_KEY or use a loopback endpoint.'
+    );
   }
 
-  if (isOpenAICompatible) {
-    const openAIBaseUrl = baseUrl || OPENAI_PLATFORM_BASE_URL;
-    const openAIUrl = openAIBaseUrl.endsWith('/v1')
-      ? `${openAIBaseUrl}/chat/completions`
-      : `${openAIBaseUrl}/v1/chat/completions`;
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const https = require('https');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const http = require('http');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const url = require('url');
-
-    const urlObj = new url.URL(openAIUrl);
-    const isHttps = urlObj.protocol === 'https:';
-    const httpModule = isHttps ? https : http;
-
-    const requestBodyObj: Record<string, unknown> = {
-      model,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:image/png;base64,${base64Image}`,
-              },
-            },
-            {
-              type: 'text',
-              text: prompt,
-            },
-          ],
-        },
-      ],
-      max_tokens: maxTokens,
-    };
-
-    const requestBody = JSON.stringify(requestBodyObj);
-
-    const headers: Record<string, string | number> = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${selectedApiKey}`,
-      'Content-Length': Buffer.byteLength(requestBody),
-    };
-
-    if (isOpenRouter) {
-      headers['HTTP-Referer'] = 'https://github.com/Emilien-Etadam/lygodactylus';
-      headers['X-Title'] = 'Lygodactylus';
-    }
-
-    return new Promise<string>((resolve, reject) => {
-      let isResolved = false;
-
-      const options = {
-        hostname: urlObj.hostname,
-        port: urlObj.port || (isHttps ? 443 : 80),
-        path: urlObj.pathname + urlObj.search,
-        method: 'POST',
-        headers,
-        timeout: timeoutMs,
-      };
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const req = httpModule.request(options, (res: any) => {
-        let data = '';
-
-        res.on('data', (chunk: Buffer) => {
-          data += chunk.toString();
-        });
-
-        res.on('end', () => {
-          if (isResolved) return;
-          clearTimeout(timeoutId);
-
-          if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-            try {
-              writeMCPLog(
-                `[callVisionAPIWithTimeout] Response received, length: ${data.length}`,
-                'API Response'
-              );
-              const jsonData = JSON.parse(data);
-              const responseContent = jsonData.choices[0]?.message?.content || '';
-
-              const logLabel = functionName
-                ? `Vision API Response [${functionName}]`
-                : 'Vision API Response';
-              writeMCPLog(responseContent, logLabel);
-
-              isResolved = true;
-              resolve(responseContent);
-            } catch (e: unknown) {
-              isResolved = true;
-              reject(
-                new Error(
-                  `Failed to parse API response: ${e instanceof Error ? e.message : String(e)}`
-                )
-              );
-            }
-          } else {
-            isResolved = true;
-            reject(
-              new Error(`API request failed: ${res.statusCode} ${res.statusMessage} - ${data}`)
-            );
-          }
-        });
-      });
-
-      const timeoutId = setTimeout(() => {
-        if (!isResolved) {
-          isResolved = true;
-          req.destroy();
-          reject(new Error(`API request timeout after ${timeoutMs}ms`));
-        }
-      }, timeoutMs);
-
-      req.on('error', (error: Error) => {
-        if (isResolved) return;
-        clearTimeout(timeoutId);
-        isResolved = true;
-        reject(new Error(`API request error: ${error.message}`));
-      });
-
-      req.on('timeout', () => {
-        if (isResolved) return;
-        clearTimeout(timeoutId);
-        isResolved = true;
-        req.destroy();
-        reject(new Error(`API request timeout after ${timeoutMs}ms`));
-      });
-
-      req.write(requestBody);
-      req.end();
-    });
-  }
+  const openAIUrl = baseUrl.endsWith('/v1')
+    ? `${baseUrl}/chat/completions`
+    : `${baseUrl}/v1/chat/completions`;
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const Anthropic = require('@anthropic-ai/sdk');
-  const anthropicRouteBaseUrl = anthropicBaseUrl || baseUrl;
-  const anthropicRouteModel = anthropicModel || model;
-  const anthropic = new Anthropic({
-    apiKey: selectedApiKey,
-    baseURL: anthropicRouteBaseUrl,
-    timeout: timeoutMs,
-  });
+  const https = require('https');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const http = require('http');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const url = require('url');
 
-  const apiCallPromise = anthropic.messages.create({
-    model: anthropicRouteModel,
-    max_tokens: maxTokens,
+  const urlObj = new url.URL(openAIUrl);
+  const isHttps = urlObj.protocol === 'https:';
+  const httpModule = isHttps ? https : http;
+
+  const requestBodyObj: Record<string, unknown> = {
+    model,
     messages: [
       {
         role: 'user',
         content: [
           {
-            type: 'image',
-            source: {
-              type: 'base64',
-              media_type: 'image/png',
-              data: base64Image,
+            type: 'image_url',
+            image_url: {
+              url: `data:image/png;base64,${base64Image}`,
             },
           },
           {
@@ -394,31 +227,96 @@ export async function callVisionAPIWithTimeout(
         ],
       },
     ],
-  });
+    max_tokens: maxTokens,
+  };
 
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => {
-      reject(new Error(`API request timeout after ${timeoutMs}ms`));
+  const requestBody = JSON.stringify(requestBodyObj);
+
+  const headers: Record<string, string | number> = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${selectedApiKey}`,
+    'Content-Length': Buffer.byteLength(requestBody),
+  };
+
+  return new Promise<string>((resolve, reject) => {
+    let isResolved = false;
+
+    const options = {
+      hostname: urlObj.hostname,
+      port: urlObj.port || (isHttps ? 443 : 80),
+      path: urlObj.pathname + urlObj.search,
+      method: 'POST',
+      headers,
+      timeout: timeoutMs,
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const req = httpModule.request(options, (res: any) => {
+      let data = '';
+
+      res.on('data', (chunk: Buffer) => {
+        data += chunk.toString();
+      });
+
+      res.on('end', () => {
+        if (isResolved) return;
+        clearTimeout(timeoutId);
+
+        if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+          try {
+            writeMCPLog(
+              `[callVisionAPIWithTimeout] Response received, length: ${data.length}`,
+              'API Response'
+            );
+            const jsonData = JSON.parse(data);
+            const responseContent = jsonData.choices[0]?.message?.content || '';
+
+            const logLabel = functionName
+              ? `Vision API Response [${functionName}]`
+              : 'Vision API Response';
+            writeMCPLog(responseContent, logLabel);
+
+            isResolved = true;
+            resolve(responseContent);
+          } catch (e: unknown) {
+            isResolved = true;
+            reject(
+              new Error(
+                `Failed to parse API response: ${e instanceof Error ? e.message : String(e)}`
+              )
+            );
+          }
+        } else {
+          isResolved = true;
+          reject(new Error(`API request failed: ${res.statusCode} ${res.statusMessage} - ${data}`));
+        }
+      });
+    });
+
+    const timeoutId = setTimeout(() => {
+      if (!isResolved) {
+        isResolved = true;
+        req.destroy();
+        reject(new Error(`API request timeout after ${timeoutMs}ms`));
+      }
     }, timeoutMs);
+
+    req.on('error', (error: Error) => {
+      if (isResolved) return;
+      clearTimeout(timeoutId);
+      isResolved = true;
+      reject(new Error(`API request error: ${error.message}`));
+    });
+
+    req.on('timeout', () => {
+      if (isResolved) return;
+      clearTimeout(timeoutId);
+      isResolved = true;
+      req.destroy();
+      reject(new Error(`API request timeout after ${timeoutMs}ms`));
+    });
+
+    req.write(requestBody);
+    req.end();
   });
-
-  try {
-    const message = await Promise.race([apiCallPromise, timeoutPromise]);
-
-    const responseContent = message.content[0].type === 'text' ? message.content[0].text : '';
-
-    const logLabel = functionName ? `Vision API Response [${functionName}]` : 'Vision API Response';
-    writeMCPLog(responseContent, logLabel);
-    writeMCPLog(
-      `[callVisionAPIWithTimeout] Response received, length: ${responseContent.length}`,
-      'API Response'
-    );
-
-    return responseContent;
-  } catch (error: unknown) {
-    if (error instanceof Error && error.message.includes('timeout')) {
-      throw new Error(`API request timeout after ${timeoutMs}ms`);
-    }
-    throw error;
-  }
 }

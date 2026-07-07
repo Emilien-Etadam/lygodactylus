@@ -16,7 +16,6 @@ import {
   normalizeAnthropicBaseUrl,
   resolveOpenAICredentials,
   shouldAllowEmptyAnthropicApiKey,
-  shouldUseAnthropicAuthToken,
   normalizeOpenAICompatibleBaseUrl,
   normalizeOllamaBaseUrl,
 } from './auth-utils';
@@ -161,26 +160,22 @@ function getModelDiagnosticFix(
   }
 }
 
-/**
- * Build an Anthropic client with credentials passed explicitly.
- * baseURL and apiKey/authToken are always provided directly so the SDK
- * never falls back to reading process.env, avoiding race conditions in
- * concurrent diagnostic runs.
- */
-async function makeAnthropicClient(opts: {
-  effectiveKey: string;
-  useAuthToken: boolean;
-  baseUrl: string | undefined;
-}) {
-  const { Anthropic } = await import('@anthropic-ai/sdk');
-  const base = { baseURL: opts.baseUrl, timeout: 15000 };
-  return opts.useAuthToken
-    ? new Anthropic({ ...base, authToken: opts.effectiveKey })
-    : new Anthropic({ ...base, apiKey: opts.effectiveKey });
+function isLoopbackDiagnostic(input: DiagnosticInput, hostname: string): boolean {
+  if (isLoopback(hostname)) {
+    return true;
+  }
+  if (isLocalOpenAiDiagnostic(input)) {
+    return true;
+  }
+  return shouldAllowEmptyAnthropicApiKey({
+    provider: input.provider,
+    customProtocol: input.customProtocol,
+    baseUrl: resolveClientBaseUrl(input),
+  });
 }
 
 /**
- * Resolve the effective base URL for SDK clients, applying provider-specific normalization.
+ * Resolve the effective base URL for HTTP/pi-ai clients, applying provider-specific normalization.
  */
 function resolveClientBaseUrl(input: DiagnosticInput): string | undefined {
   const raw = input.baseUrl?.trim();
@@ -315,85 +310,161 @@ async function stepTls(
   step.latencyMs = Date.now() - start;
 }
 
+async function probeAuthWithPiAi(input: DiagnosticInput, step: DiagnosticStep): Promise<boolean> {
+  const model = input.model?.trim();
+  if (!model) {
+    return false;
+  }
+
+  const config = configStore.getAll();
+  const result = await probeWithPiAi(
+    {
+      provider: input.provider,
+      apiKey: input.apiKey,
+      baseUrl: input.baseUrl,
+      customProtocol: input.customProtocol,
+      model,
+      verificationLevel: 'fast',
+    },
+    config
+  );
+
+  if (result.ok) {
+    step.status = 'ok';
+    return true;
+  }
+
+  if (result.errorType === 'unauthorized') {
+    step.status = 'fail';
+    step.error = result.details;
+    step.fix = 'auth_invalid_key';
+    return true;
+  }
+
+  if (result.errorType === 'missing_key') {
+    step.status = 'fail';
+    step.error = result.details || 'No API key provided';
+    step.fix = 'missing_api_key';
+    return true;
+  }
+
+  // Non-auth probe failures are deferred to the model step.
+  step.status = 'ok';
+  step.fix = 'auth_probe_deferred';
+  log(
+    '[Diagnostics] Auth: pi-ai probe returned a non-auth error, continuing to model check',
+    { details: result.details?.slice(0, 200) }
+  );
+  return true;
+}
+
+async function probeAuthWithModelsList(
+  input: DiagnosticInput,
+  step: DiagnosticStep,
+  clientBaseUrl: string | undefined,
+  apiKey: string
+): Promise<void> {
+  if (isOpenAICompatible(input)) {
+    const resolved = resolveOpenAICredentials({
+      provider: input.provider,
+      customProtocol: input.customProtocol,
+      apiKey,
+      baseUrl: clientBaseUrl,
+    });
+
+    if (!resolved?.apiKey) {
+      step.status = 'fail';
+      step.error = 'No API key provided';
+      step.fix = 'missing_api_key';
+      return;
+    }
+
+    await fetchOllamaModelIndex({
+      baseUrl: clientBaseUrl,
+      apiKey: resolved.apiKey,
+    });
+    step.status = 'ok';
+    return;
+  }
+
+  const effectiveKey = apiKey || LOCAL_ANTHROPIC_PLACEHOLDER_KEY;
+  const anthropicBase =
+    normalizeAnthropicBaseUrl(clientBaseUrl) ||
+    normalizeAnthropicBaseUrl(PROVIDER_PRESETS.anthropic?.baseUrl);
+  if (!anthropicBase) {
+    throw new Error('No Anthropic-compatible base URL configured');
+  }
+
+  const response = await fetch(`${anthropicBase}/v1/models`, {
+    method: 'GET',
+    headers: {
+      'x-api-key': effectiveKey,
+      'anthropic-version': '2023-06-01',
+    },
+    signal: AbortSignal.timeout(15000),
+  });
+
+  if (response.status === 404) {
+    step.status = 'ok';
+    step.fix = 'models_list_not_supported';
+    log(
+      '[Diagnostics] Auth: models list returned 404 — provider may not support this endpoint, continuing to model check'
+    );
+    return;
+  }
+
+  if (!response.ok) {
+    const body = await response.text();
+    const error = new Error(body || `HTTP ${response.status}`) as Error & { status?: number };
+    error.status = response.status;
+    throw error;
+  }
+
+  step.status = 'ok';
+}
+
 async function stepAuth(input: DiagnosticInput, step: DiagnosticStep): Promise<void> {
   const start = Date.now();
   const apiKey = input.apiKey?.trim() || '';
   const clientBaseUrl = resolveClientBaseUrl(input);
+  const url = resolveEffectiveUrl(input);
+  const hostname = normalizeNetworkHostname(url.hostname);
+
+  if (isLoopbackDiagnostic(input, hostname)) {
+    step.status = 'ok';
+    step.latencyMs = Date.now() - start;
+    return;
+  }
 
   try {
-    if (isOpenAICompatible(input)) {
-      const resolved = resolveOpenAICredentials({
-        provider: input.provider,
-        customProtocol: input.customProtocol,
-        apiKey,
-        baseUrl: clientBaseUrl,
-      });
-
-      if (!resolved?.apiKey) {
-        step.status = 'fail';
-        step.error = 'No API key provided';
-        step.fix = 'missing_api_key';
-        step.latencyMs = Date.now() - start;
-        return;
-      }
-
-      const { default: OpenAI } = await import('openai');
-      const client = new OpenAI({
-        apiKey: resolved.apiKey,
-        baseURL: resolved.baseUrl || clientBaseUrl,
-        timeout: 15000,
-      });
-      await client.models.list();
-    } else {
-      // Anthropic-compatible
-      const allowEmpty = shouldAllowEmptyAnthropicApiKey({
-        provider: input.provider,
-        customProtocol: input.customProtocol,
-        baseUrl: clientBaseUrl,
-      });
-      const effectiveKey = apiKey || (allowEmpty ? LOCAL_ANTHROPIC_PLACEHOLDER_KEY : '');
-
-      if (!effectiveKey) {
-        step.status = 'fail';
-        step.error = 'No API key provided';
-        step.fix = 'missing_api_key';
-        step.latencyMs = Date.now() - start;
-        return;
-      }
-
-      const useAuthToken = shouldUseAnthropicAuthToken({
-        provider: input.provider,
-        customProtocol: input.customProtocol,
-        apiKey: effectiveKey,
-      });
-
-      // Credentials are passed explicitly so the SDK never reads process.env
-      const client = await makeAnthropicClient({
-        effectiveKey,
-        useAuthToken,
-        baseUrl: clientBaseUrl,
-      });
-      await client.models.list();
+    if (await probeAuthWithPiAi(input, step)) {
+      step.latencyMs = Date.now() - start;
+      return;
     }
 
-    step.status = 'ok';
+    if (isAnthropicCompatible(input) && !apiKey) {
+      step.status = 'fail';
+      step.error = 'No API key provided';
+      step.fix = 'missing_api_key';
+      step.latencyMs = Date.now() - start;
+      return;
+    }
+
+    await probeAuthWithModelsList(input, step, clientBaseUrl, apiKey);
   } catch (err) {
     const e = getApiErrorInfo(err);
 
     if (e.status === 404) {
-      // Many OpenAI-compatible providers (e.g. Alibaba DashScope) don't
-      // implement GET /v1/models.  A 404 does NOT mean auth failed — let
-      // stepModel (which uses chat completion) make the real determination.
       step.status = 'ok';
       step.fix = 'models_list_not_supported';
       log(
-        '[Diagnostics] Auth: models.list returned 404 — provider may not support this endpoint, continuing to model check'
+        '[Diagnostics] Auth: models list returned 404 — provider may not support this endpoint, continuing to model check'
       );
     } else {
       step.status = 'fail';
       step.error = e.message;
 
-      if (e.status === 401 || e.status === 403) {
+      if (e.status === 401 || e.status === 403 || isLikelyAuthFailure(e)) {
         step.fix = 'auth_invalid_key';
       } else {
         step.fix = 'auth_request_failed';

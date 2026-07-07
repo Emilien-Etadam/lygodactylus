@@ -4,7 +4,6 @@ const mocks = vi.hoisted(() => {
   const dnsLookup = vi.fn();
   const tcpConnect = vi.fn();
   const tlsConnect = vi.fn();
-  const openaiModelsList = vi.fn();
   const fetch = vi.fn();
   const probeWithPiAi = vi.fn();
 
@@ -12,7 +11,6 @@ const mocks = vi.hoisted(() => {
     dnsLookup,
     tcpConnect,
     tlsConnect,
-    openaiModelsList,
     fetch,
     probeWithPiAi,
   };
@@ -35,17 +33,6 @@ vi.mock('net', () => ({
 
 vi.mock('tls', () => ({
   connect: mocks.tlsConnect,
-}));
-
-vi.mock('openai', () => ({
-  default: class MockOpenAI {
-    models = { list: mocks.openaiModelsList };
-    chat = { completions: { create: vi.fn() } };
-  },
-}));
-
-vi.mock('@anthropic-ai/sdk', () => ({
-  Anthropic: vi.fn(),
 }));
 
 vi.mock('../src/main/config/config-store', () => ({
@@ -90,13 +77,17 @@ describe('runDiagnostics TLS step', () => {
     mocks.dnsLookup.mockReset();
     mocks.tcpConnect.mockReset();
     mocks.tlsConnect.mockReset();
-    mocks.openaiModelsList.mockReset();
     mocks.fetch.mockReset();
     mocks.probeWithPiAi.mockReset();
     global.fetch = mocks.fetch;
 
     mocks.dnsLookup.mockResolvedValue({ address: '127.0.0.1', family: 4 });
-    mocks.openaiModelsList.mockResolvedValue({});
+    mocks.fetch.mockResolvedValue(
+      new Response(JSON.stringify({ data: [{ id: 'gpt-4.1' }] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    );
     mocks.probeWithPiAi.mockResolvedValue({ ok: true, latencyMs: 10 });
 
     mocks.tcpConnect.mockImplementation(() => {
@@ -230,7 +221,7 @@ describe('runDiagnostics TLS step', () => {
       provider: 'openai',
       apiKey: 'sk-test',
       baseUrl: 'https://api.openai.com/v1',
-      model: 'gpt-4.1',
+      model: 'qwen3.5:0.8b',
     });
 
     expect(result.overallOk).toBe(true);
@@ -238,24 +229,26 @@ describe('runDiagnostics TLS step', () => {
       expect.objectContaining({
         provider: 'openai',
         apiKey: 'sk-test',
-        model: 'gpt-4.1',
+        model: 'qwen3.5:0.8b',
       }),
       expect.any(Object)
     );
   });
 
   it('model step reports failure from probeWithPiAi', async () => {
-    mocks.probeWithPiAi.mockResolvedValue({
-      ok: false,
-      errorType: 'unauthorized',
-      details: '401 Unauthorized',
-    });
+    mocks.probeWithPiAi
+      .mockResolvedValueOnce({ ok: true, latencyMs: 5 })
+      .mockResolvedValueOnce({
+        ok: false,
+        errorType: 'unauthorized',
+        details: '401 Unauthorized',
+      });
 
     const result = await runDiagnostics({
       provider: 'openai',
       apiKey: 'sk-bad',
       baseUrl: 'https://api.openai.com/v1',
-      model: 'gpt-4.1',
+      model: 'qwen3.5:0.8b',
     });
 
     expect(result.overallOk).toBe(false);
@@ -266,24 +259,26 @@ describe('runDiagnostics TLS step', () => {
   });
 
   it.each([
-    ['network_error', 'connection reset by peer', 'model_network_error:gpt-4.1'],
-    ['rate_limited', '429 Too Many Requests', 'model_rate_limited:gpt-4.1'],
-    ['server_error', '502 Bad Gateway', 'model_request_failed:gpt-4.1'],
+    ['network_error', 'connection reset by peer', 'model_network_error:qwen3.5:0.8b'],
+    ['rate_limited', '429 Too Many Requests', 'model_rate_limited:qwen3.5:0.8b'],
+    ['server_error', '502 Bad Gateway', 'model_request_failed:qwen3.5:0.8b'],
     ['unauthorized', '403 Forbidden', 'auth_invalid_key'],
   ] as const)(
     'maps %s probe failures to a specific diagnostic fix instead of model_unavailable',
     async (errorType, details, expectedFix) => {
-      mocks.probeWithPiAi.mockResolvedValue({
-        ok: false,
-        errorType,
-        details,
-      });
+      mocks.probeWithPiAi
+        .mockResolvedValueOnce({ ok: true, latencyMs: 5 })
+        .mockResolvedValueOnce({
+          ok: false,
+          errorType,
+          details,
+        });
 
       const result = await runDiagnostics({
         provider: 'openai',
         apiKey: 'sk-test',
         baseUrl: 'https://api.openai.com/v1',
-        model: 'gpt-4.1',
+        model: 'qwen3.5:0.8b',
       });
 
       expect(result.overallOk).toBe(false);
