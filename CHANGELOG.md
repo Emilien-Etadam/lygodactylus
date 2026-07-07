@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Development
+
+- **Tooling** : migration ESLint 8 (`.eslintrc.cjs`) vers ESLint 9 flat config (`eslint.config.js`) ; `@typescript-eslint/*` ^8, `eslint-plugin-react-hooks` ^5 ; script `lint` simplifié (`eslint src`)
+
 ### Changed
 
 - **Phase 4 (local-first)** : migration one-shot des anciens `config.json` multi-fournisseurs (`openrouter`, `gemini`, `ollama`, `vllm`, onglets dédiés) vers les profils `openai` / `anthropic` ; suppression de la projection legacy bidirectionnelle (`shouldPreferLegacyConfigSetProjection`, `mergeLegacyProfiles` au boot)
