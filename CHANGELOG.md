@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Development
+
+- **Tooling** : migration ESLint 8 (`.eslintrc.cjs`) vers ESLint 9 flat config (`eslint.config.js`) ; `@typescript-eslint/*` ^8, `eslint-plugin-react-hooks` ^5 ; script `lint` simplifié (`eslint src`)
+
 ### Changed
 
 - **Electron 41 → 43** (Chromium M150, Node.js v24.18) : mise à jour du runtime desktop ; rebuild `better-sqlite3` aligné sur la version Electron installée (script `postinstall` / `rebuild` inchangé, cible dynamique)
