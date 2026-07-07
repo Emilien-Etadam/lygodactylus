@@ -124,7 +124,7 @@ Voir le dépôt principal pour le comportement côté serveur (`src/main/chat-la
 
 ## Release (XPI signé)
 
-Chaque tag `ext-vX.Y.Z` déclenche le workflow [`.github/workflows/sign-extension.yml`](../.github/workflows/sign-extension.yml) : lint `web-ext`, signature AMO (canal **unlisted**), puis attachement du `.xpi` à la [release GitHub](https://github.com/emilien-etadam/lygodactylus/releases) correspondante.
+Chaque tag `ext-vX.Y.Z` déclenche le workflow [`.github/workflows/sign-extension.yml`](../.github/workflows/sign-extension.yml) : lint `web-ext`, signature AMO (canal **unlisted**), puis attachement du `.xpi` à la [release GitHub](https://github.com/Emilien-Etadam/lygodactylus/releases) correspondante.
 
 ### Prérequis (une fois)
 
