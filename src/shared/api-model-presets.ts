@@ -46,7 +46,7 @@ export const PI_AI_CURATED_PRESETS: Record<string, { piProvider: string; pick: s
   },
   openai: {
     piProvider: 'openai',
-    pick: ['gpt-5.4', 'gpt-5.4-mini', 'o4-mini'],
+    pick: ['qwen3.5:0.8b', 'llama3.2', 'qwen3:8b'],
   },
 };
 
