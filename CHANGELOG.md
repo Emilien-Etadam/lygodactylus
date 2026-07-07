@@ -7,32 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Development
+## [6.0.0] - 2026-07-07
 
-- **Tooling** : migration ESLint 8 (`.eslintrc.cjs`) vers ESLint 9 flat config (`eslint.config.js`) ; `@typescript-eslint/*` ^8, `eslint-plugin-react-hooks` ^5 ; script `lint` simplifié (`eslint src`)
+Série **v6** : fork recentré **local-first** (Ollama/vLLM en OpenAI-compatible), runtime Electron 43, sans SDK cloud en dépendances directes.
 
 ### Changed
 
-- **Electron 41 → 43** (Chromium M150, Node.js v24.18) : mise à jour du runtime desktop ; rebuild `better-sqlite3` aligné sur la version Electron installée (script `postinstall` / `rebuild` inchangé, cible dynamique)
-- **Phase 4 (local-first)** : migration one-shot des anciens `config.json` multi-fournisseurs (`openrouter`, `gemini`, `ollama`, `vllm`, onglets dédiés) vers les profils `openai` / `anthropic` ; suppression de la projection legacy bidirectionnelle (`shouldPreferLegacyConfigSetProjection`, `mergeLegacyProfiles` au boot)
-- **pi-model-resolution** : retrait des branches de fallback `google` / `gemini` dans la résolution de modèles
-- **auth-utils** : suppression des alias dépréciés (`resolveOllamaCredentials`, `shouldAllowEmptyGeminiApiKey`, etc.)
-- **agentCliPath** : `claudeCodePath` n’est plus écrit ; lecture fallback unique au boot (via `config-migrations` + `migrateLegacyConfig`)
-- **i18n** : libellés skills / thinking mode neutralisés (plus de références Claude / onglets dédiés) sur les 12 locales
+- **Electron 41 → 43** (Chromium M150, Node.js v24.18 embarqué) : rebuild `better-sqlite3` aligné sur la version Electron installée
+- **Diagnostics API** : auth loopback (skip immédiat) ; remote via `probeWithPiAi` ou `GET /v1/models` en HTTP — plus d’import `@anthropic-ai/sdk` / `openai`
+- **Vision GUI** : route unique OpenAI-compatible HTTP (`/v1/chat/completions`) ; défauts locaux Ollama (`http://localhost:11434/v1`)
+- **Mémoire** : embeddings via `fetch` HTTP au lieu du SDK OpenAI
+- **Presets modèles** : exemples locaux (`qwen3.5:0.8b`, `llama3.2`, `qwen3:8b`)
+- **Phase 4 (config)** : `migrateLegacyConfig()` one-shot au boot ; suppression de la projection legacy bidirectionnelle
+- **pi-model-resolution** : retrait des branches `google` / `gemini`
+- **agentCliPath** : `claudeCodePath` lu en fallback, plus jamais écrit
+- **i18n** (12 locales) : libellés skills / thinking mode neutralisés ; clés cloud obsolètes supprimées
+
+### Development
+
+- **ESLint 9** flat config (`eslint.config.js`) ; `@typescript-eslint/*` ^8, `eslint-plugin-react-hooks` ^5
 
 ### Breaking changes
 
-- Les `config.json` qui utilisaient encore `provider: "openrouter"`, `"gemini"`, `"ollama"`, `"vllm"` ou des clés de profil legacy (`profiles.openrouter`, `profiles.gemini`, etc.) sont migrés automatiquement au démarrage vers un profil **OpenAI-compatible** ou **Anthropic-compatible**. Vérifiez `baseUrl`, `model` et `apiKey` après mise à jour.
-- Le champ `claudeCodePath` n’est plus persisté. Utilisez `agentCliPath` ; une migration one-shot copie l’ancienne valeur au premier lancement.
-- Pour reconfigurer manuellement un relais type OpenRouter : créez un profil **OpenAI-compatible**, `baseUrl` `https://openrouter.ai/api/v1`, modèle sans préfixe fournisseur ou avec le préfixe attendu par le relais.
+- `config.json` legacy (`openrouter`, `gemini`, `ollama`, `vllm`, profils dédiés) → migration auto vers **OpenAI-compatible** ou **Anthropic-compatible** au démarrage. Vérifiez `baseUrl`, `model`, `apiKey` après mise à jour.
+- `claudeCodePath` n’est plus persisté → utiliser `agentCliPath`
+- OpenRouter manuel : profil **OpenAI-compatible**, `baseUrl` `https://openrouter.ai/api/v1`
+- Installateurs régénérés avec Electron 43 ; `npm run rebuild` requis après upgrade depuis v5.x
 
 ### Removed
 
-- **Cleanup** : retrait des dépendances orphelines (`@google/genai`, `@opentelemetry/api`), clés i18n cloud mortes, code sandbox Claude Code inutilisé, documentation alignée sur l’usage local-first
+- Dépendances directes orphelines : `@google/genai`, `@opentelemetry/api`, `@anthropic-ai/sdk`, `openai`
+- Sandbox Claude Code (WSL/Lima) : chemins `installClaudeCode` / `runClaudeCode` jamais utilisés
+- Alias `auth-utils` dépréciés ; wrappers `ConfigNormalizer` / `SLASH_COMMAND_DEFINITIONS`
 
 ### Dependencies
 
-- Niveau 1 : bumps patches/mineures — `@earendil-works/pi-ai` + `pi-coding-agent` ^0.80.3, Electron ^43.1.0, `electron-builder` ^26.15.3, `electron-updater` ^6.8.9, Vitest + `@vitest/coverage-v8` ^4.1.10, `zustand` ^5.0.14, `lucide-react` ^1.23.0, `typebox` ^1.3.4, `prettier` ^3.9.4, `postcss` ^8.5.16, `autoprefixer` ^10.5.2 ; patch `pi-ai` régénéré pour 0.80.3
+- `@earendil-works/pi-ai` + `pi-coding-agent` ^0.80.3 ; patch `pi-ai` régénéré
+- `electron` ^43.1.0, `electron-builder` ^26.15.3, `electron-updater` ^6.8.9
+- Vitest ^4.1.10, `zustand` ^5.0.14, `lucide-react` ^1.23.0, `typebox` ^1.3.4, `prettier` ^3.9.4
 
 ## [5.9.0] - 2026-07-01
 
