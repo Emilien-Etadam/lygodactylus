@@ -4,13 +4,19 @@ import path from 'node:path';
 import type { CatalogEntry } from '../src/shared/catalog-types';
 
 async function githubSubdirExists(repo: string, subdir: string, ref: string): Promise<boolean> {
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github+json',
+    'User-Agent': 'lygodactylus-catalog-validator',
+  };
+  const token = process.env.GITHUB_TOKEN;
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const response = await fetch(
     `https://api.github.com/repos/${repo}/contents/${subdir}?ref=${encodeURIComponent(ref)}`,
     {
-      headers: {
-        Accept: 'application/vnd.github+json',
-        'User-Agent': 'lygodactylus-catalog-validator',
-      },
+      headers,
     }
   );
   if (response.status === 404) {
