@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Phase 4 (local-first)** : migration one-shot des anciens `config.json` multi-fournisseurs (`openrouter`, `gemini`, `ollama`, `vllm`, onglets dédiés) vers les profils `openai` / `anthropic` ; suppression de la projection legacy bidirectionnelle (`shouldPreferLegacyConfigSetProjection`, `mergeLegacyProfiles` au boot)
+- **pi-model-resolution** : retrait des branches de fallback `google` / `gemini` dans la résolution de modèles
+- **auth-utils** : suppression des alias dépréciés (`resolveOllamaCredentials`, `shouldAllowEmptyGeminiApiKey`, etc.)
+- **agentCliPath** : `claudeCodePath` n’est plus écrit ; lecture fallback unique au boot (via `config-migrations` + `migrateLegacyConfig`)
+- **i18n** : libellés skills / thinking mode neutralisés (plus de références Claude / onglets dédiés) sur les 12 locales
+
+### Breaking changes
+
+- Les `config.json` qui utilisaient encore `provider: "openrouter"`, `"gemini"`, `"ollama"`, `"vllm"` ou des clés de profil legacy (`profiles.openrouter`, `profiles.gemini`, etc.) sont migrés automatiquement au démarrage vers un profil **OpenAI-compatible** ou **Anthropic-compatible**. Vérifiez `baseUrl`, `model` et `apiKey` après mise à jour.
+- Le champ `claudeCodePath` n’est plus persisté. Utilisez `agentCliPath` ; une migration one-shot copie l’ancienne valeur au premier lancement.
+- Pour reconfigurer manuellement un relais type OpenRouter : créez un profil **OpenAI-compatible**, `baseUrl` `https://openrouter.ai/api/v1`, modèle sans préfixe fournisseur ou avec le préfixe attendu par le relais.
+
+### Removed
+
 - **Cleanup** : retrait des dépendances orphelines (`@google/genai`, `@opentelemetry/api`), clés i18n cloud mortes, code sandbox Claude Code inutilisé, documentation alignée sur l’usage local-first
 
 ## [5.9.0] - 2026-07-01

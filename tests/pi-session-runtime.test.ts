@@ -16,7 +16,7 @@ describe('pi session runtime signature', () => {
     const original = buildPiSessionRuntimeSignature(baseInput);
     const changedProvider = buildPiSessionRuntimeSignature({
       ...baseInput,
-      configProvider: 'openrouter',
+      configProvider: 'openai',
     });
 
     expect(changedProvider).not.toBe(original);

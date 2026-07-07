@@ -55,24 +55,24 @@ describe('runConfigApiTest', () => {
     expect(mocks.probeWithPiAi).toHaveBeenCalledTimes(1);
   });
 
-  it('routes ollama through probeWithPiAi', async () => {
+  it('routes loopback openai gateways through probeWithPiAi', async () => {
     const expected: ApiTestResult = { ok: true, latencyMs: 9 };
     mocks.probeWithPiAi.mockResolvedValue(expected);
 
     const result = await runConfigApiTest(
       {
-        provider: 'ollama',
+        provider: 'openai',
         apiKey: '',
-        baseUrl: 'http://localhost:11434',
+        baseUrl: 'http://localhost:11434/v1',
         model: 'qwen3.5:0.8b',
       },
       {
         ...createConfig(),
-        provider: 'ollama',
+        provider: 'openai',
         apiKey: '',
-        baseUrl: 'http://localhost:11434',
+        baseUrl: 'http://localhost:11434/v1',
         model: 'qwen3.5:0.8b',
-        activeProfileKey: 'ollama',
+        activeProfileKey: 'openai',
       }
     );
 

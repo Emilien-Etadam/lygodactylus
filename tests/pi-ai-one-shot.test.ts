@@ -56,19 +56,10 @@ vi.mock('../src/main/agent/shared-auth', () => ({
 
 vi.mock('../src/main/agent/pi-model-resolution', () => ({
   resolvePiRouteProtocol: (provider?: string, customProtocol?: string) => {
-    if (provider === 'custom') {
-      if (customProtocol === 'openai' || customProtocol === 'gemini') {
-        return customProtocol;
-      }
-      return 'anthropic';
-    }
-    if (provider === 'ollama' || provider === 'openai' || provider === 'openrouter') {
+    if (provider === 'openai' || customProtocol === 'openai') {
       return 'openai';
     }
-    if (provider === 'gemini') {
-      return 'gemini';
-    }
-    return provider || 'anthropic';
+    return 'anthropic';
   },
   resolvePiModelString: ({
     model,
@@ -89,7 +80,6 @@ vi.mock('../src/main/agent/pi-model-resolution', () => ({
   buildSyntheticPiModel: mocks.buildSyntheticPiModel,
   applyPiModelRuntimeOverrides: (model: unknown) => model,
   resolveSyntheticPiModelFallback: ({
-    rawModel,
     resolvedModelString,
     rawProvider,
     routeProtocol,
@@ -101,22 +91,17 @@ vi.mock('../src/main/agent/pi-model-resolution', () => ({
     routeProtocol: string;
     baseUrl?: string;
   }) => {
-    const raw = rawModel?.trim() || '';
     const resolved = resolvedModelString.trim();
     const parts = resolved.split('/');
     const strippedModelId = parts.length >= 2 ? parts.slice(1).join('/') : resolved;
-    const preserve =
-      rawProvider === 'openrouter' && routeProtocol === 'openai' && raw.includes('/');
     return {
-      provider:
-        rawProvider === 'openrouter' ? 'openrouter' : parts[0] || rawProvider || routeProtocol,
-      modelId: preserve ? resolved : strippedModelId,
+      provider: parts[0] || rawProvider || routeProtocol,
+      modelId: strippedModelId,
       baseUrl,
     };
   },
   inferPiApi: (protocol: string) => {
     if (protocol === 'anthropic') return 'anthropic-messages';
-    if (protocol === 'gemini' || protocol === 'google') return 'google-generative-ai';
     return 'openai-completions';
   },
 }));

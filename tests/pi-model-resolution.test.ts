@@ -19,7 +19,6 @@ describe('pi model resolution helpers', () => {
     expect(candidates).toEqual([
       { provider: 'openai', model: 'qwen3.5:0.8b' },
       { provider: 'anthropic', model: 'qwen3.5:0.8b' },
-      { provider: 'google', model: 'qwen3.5:0.8b' },
     ]);
   });
 
@@ -44,7 +43,6 @@ describe('pi model resolution helpers', () => {
 
   it('builds synthetic models with protocol-specific api defaults', () => {
     expect(inferPiApi('anthropic')).toBe('anthropic-messages');
-    expect(inferPiApi('gemini')).toBe('google-generative-ai');
     expect(inferPiApi('unknown')).toBe('openai-completions');
 
     const model = buildSyntheticPiModel('grok-code-fast-1', 'xai', 'openai', 'https://api.x.ai/v1');
