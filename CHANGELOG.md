@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Electron 41 → 43** (Chromium M150, Node.js v24.18) : mise à jour du runtime desktop ; rebuild `better-sqlite3` aligné sur la version Electron installée (script `postinstall` / `rebuild` inchangé, cible dynamique)
 - **Phase 4 (local-first)** : migration one-shot des anciens `config.json` multi-fournisseurs (`openrouter`, `gemini`, `ollama`, `vllm`, onglets dédiés) vers les profils `openai` / `anthropic` ; suppression de la projection legacy bidirectionnelle (`shouldPreferLegacyConfigSetProjection`, `mergeLegacyProfiles` au boot)
 - **pi-model-resolution** : retrait des branches de fallback `google` / `gemini` dans la résolution de modèles
 - **auth-utils** : suppression des alias dépréciés (`resolveOllamaCredentials`, `shouldAllowEmptyGeminiApiKey`, etc.)
