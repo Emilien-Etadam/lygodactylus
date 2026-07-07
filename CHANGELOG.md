@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Cleanup** : retrait des dépendances orphelines (`@google/genai`, `@opentelemetry/api`), clés i18n cloud mortes, code sandbox Claude Code inutilisé, documentation alignée sur l’usage local-first
 
+### Dependencies
+
+- Niveau 1 : bumps patches/mineures — `@earendil-works/pi-ai` + `pi-coding-agent` ^0.80.3, Electron ^43.1.0, `electron-builder` ^26.15.3, `electron-updater` ^6.8.9, Vitest + `@vitest/coverage-v8` ^4.1.10, `zustand` ^5.0.14, `lucide-react` ^1.23.0, `typebox` ^1.3.4, `prettier` ^3.9.4, `postcss` ^8.5.16, `autoprefixer` ^10.5.2 ; patch `pi-ai` régénéré pour 0.80.3
+
 ## [5.9.0] - 2026-07-01
 
 ### Added
