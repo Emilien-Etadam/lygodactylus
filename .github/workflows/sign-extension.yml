@@ -1,0 +1,51 @@
+name: Sign Firefox Extension
+
+on:
+  push:
+    tags:
+      - 'ext-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  sign-extension:
+    name: Lint, sign & release XPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Verify tag version matches manifest
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          if [[ ! "$TAG" =~ ^ext-v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Tag invalide : ${TAG}. Attendu : ext-vX.Y.Z (ex. ext-v1.0.0)."
+            exit 1
+          fi
+          TAG_VERSION="${TAG#ext-v}"
+          MANIFEST_VERSION=$(python3 -c "import json; print(json.load(open('extension/manifest.json'))['version'])")
+          if [ "$TAG_VERSION" != "$MANIFEST_VERSION" ]; then
+            echo "::error::La version du tag (${TAG} → ${TAG_VERSION}) ne correspond pas à extension/manifest.json (version: ${MANIFEST_VERSION}). Mettez à jour le manifest ou le tag."
+            exit 1
+          fi
+          echo "Version OK : ${TAG_VERSION}"
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 'lts/*'
+
+      - name: Lint extension
+        run: npx --yes web-ext@8 lint --source-dir extension/
+
+      - name: Sign extension (AMO unlisted)
+        run: npx --yes web-ext@8 sign --source-dir extension/ --channel unlisted --artifacts-dir web-ext-artifacts
+        env:
+          WEB_EXT_API_KEY: ${{ secrets.AMO_JWT_ISSUER }}
+          WEB_EXT_API_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+
+      - name: Upload signed XPI to GitHub Release
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v2
+        with:
+          files: web-ext-artifacts/*.xpi
+          tag_name: ${{ github.ref_name }}
