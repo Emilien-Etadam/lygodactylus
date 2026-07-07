@@ -82,13 +82,6 @@ describe('wsl-bridge distro name validation', () => {
     expect(validateCall - methodStart).toBeLessThan(100);
   });
 
-  it('validates distro at the top of installClaudeCodeInWSL', () => {
-    const methodStart = wslBridgeSrc.indexOf('static async installClaudeCodeInWSL(distro: string)');
-    const validateCall = wslBridgeSrc.indexOf('WSLBridge.validateDistroName(distro)', methodStart);
-    expect(validateCall).toBeGreaterThan(methodStart);
-    expect(validateCall - methodStart).toBeLessThan(100);
-  });
-
   it('validates distro in installSkillDependencies', () => {
     const methodStart = wslBridgeSrc.indexOf(
       'static async installSkillDependencies(distro: string)'

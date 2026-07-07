@@ -563,18 +563,4 @@ export function buildBlankConfigSet(payload: {
   };
 }
 
-/** @deprecated Use exported functions directly. Kept for discoverability. */
-export class ConfigNormalizer {
-  normalizeConfig = normalizeConfig;
-  normalizeProfile = normalizeProfile;
-  cloneProfiles = cloneProfiles;
-  normalizeConfigSets = normalizeConfigSets;
-  projectFromConfigSet = projectFromConfigSet;
-  cloneConfigSet = cloneConfigSet;
-  composeProjectedConfig = composeProjectedConfig;
-  buildUniqueConfigSetName = buildUniqueConfigSetName;
-  generateConfigSetId = generateConfigSetId;
-  buildBlankConfigSet = buildBlankConfigSet;
-}
-
 export type { AppTheme, CreateSetMode };

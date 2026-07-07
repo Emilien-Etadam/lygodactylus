@@ -5,7 +5,6 @@
  * This script runs inside WSL2 and handles:
  * - Command execution in isolated environment
  * - File operations with path validation
- * - Claude-code execution
  *
  * Communication is via stdin/stdout JSON-RPC.
  */
@@ -333,82 +332,6 @@ class SandboxAgent {
   }
 
   /**
-   * Run claude-code CLI
-   */
-  async runClaudeCode(params: {
-    prompt: string;
-    cwd?: string;
-    model?: string;
-    maxTurns?: number;
-    systemPrompt?: string;
-    env?: Record<string, string>;
-  }): Promise<{ messages: unknown[] }> {
-    const cwd = params.cwd || this.workspacePath;
-    this.validatePath(cwd);
-
-    log('Running claude-code in:', cwd);
-
-    // Build claude command
-    const args = ['--print'];
-    if (params.model) {
-      args.push('--model', params.model);
-    }
-    if (params.maxTurns) {
-      args.push('--max-turns', String(params.maxTurns));
-    }
-    args.push(params.prompt);
-
-    return new Promise((resolve, reject) => {
-      const proc = spawn('claude', args, {
-        cwd,
-        env: {
-          ...process.env,
-          ...params.env,
-        },
-        timeout: 300000, // 5 minutes
-      });
-
-      let output = '';
-      let errorOutput = '';
-
-      proc.stdout?.on('data', (data: Buffer) => {
-        output += data.toString();
-      });
-
-      proc.stderr?.on('data', (data: Buffer) => {
-        errorOutput += data.toString();
-      });
-
-      proc.on('error', (error: Error) => {
-        reject(error);
-      });
-
-      proc.on('close', (code: number | null) => {
-        if (code === 0) {
-          // Parse output as messages
-          try {
-            const messages = output
-              .split(/\r?\n/)
-              .filter(Boolean)
-              .map((line) => {
-                try {
-                  return JSON.parse(line);
-                } catch {
-                  return { type: 'text', content: line };
-                }
-              });
-            resolve({ messages });
-          } catch {
-            resolve({ messages: [{ type: 'text', content: output }] });
-          }
-        } else {
-          reject(new Error(`claude-code exited with code ${code}: ${errorOutput}`));
-        }
-      });
-    });
-  }
-
-  /**
    * Handle ping request
    */
   ping(): { pong: boolean } {
@@ -463,9 +386,6 @@ class SandboxAgent {
 
       case 'copyFile':
         return this.copyFile(params as Parameters<typeof this.copyFile>[0]);
-
-      case 'runClaudeCode':
-        return this.runClaudeCode(params as Parameters<typeof this.runClaudeCode>[0]);
 
       case 'shutdown':
         return this.shutdown();

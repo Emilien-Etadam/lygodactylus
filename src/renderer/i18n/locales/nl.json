@@ -78,9 +78,6 @@
     "themeLight": "Licht",
     "themeDark": "Donker",
     "themeSystem": "Systeem",
-    "themePreset": "Stijl",
-    "themePresetDefault": "Standaard",
-    "themePresetVscode": "VS Code",
     "language": "Taal",
     "updates": "Updates",
     "updateCurrentVersion": "Current version: {{version}}",
@@ -251,10 +248,8 @@
     "moreModels": "Meer modellen",
     "noModelsAvailable": "Geen modellen beschikbaar",
     "selectProtocol": "Selecteer het compatibele protocol voor de service",
-    "enterOllamaUrl": "Voer de Ollama OpenAI-compatibele service-URL in",
     "enterOpenAIUrl": "Voer een OpenAI-compatibele service-URL in",
     "enterAnthropicUrl": "Voer een Anthropic-compatibele service-URL in",
-    "enterGeminiUrl": "Voer een Gemini-compatibele base URL in",
     "enterModelId": "Voer model-ID in, bijv. deepseek-chat, kimi-k2-thinking, gpt-5.4",
     "selectModelRequired": "Selecteer een model",
     "contextWindow": "Contextvenster",
@@ -311,8 +306,7 @@
       "genericBaseUrlHint": "Dit lijkt op een aangepast {{recommendedProtocol}}-compatibel eindpunt. Aanbevolen base URL-indeling: {{baseUrl}}. Voorbeeldmodel: {{model}}.",
       "protocolLabels": {
         "anthropic": "Anthropic",
-        "openai": "OpenAI",
-        "gemini": "Gemini"
+        "openai": "OpenAI"
       },
       "columns": {
         "service": "Service",
@@ -330,33 +324,9 @@
         "probeMismatchDetected": "{{service}} reageerde met een onverwachte probe-indeling. Probeer de aanbevolen {{recommendedProtocol}}-instelling en controleer het model-ID voor dat eindpunt."
       },
       "setups": {
-        "openrouter": {
-          "name": "OpenRouter",
-          "note": "Geef de voorkeur aan het speciale OpenRouter-providertabblad, tenzij je een aangepaste relay aan het debuggen bent."
-        },
-        "deepseek": {
-          "name": "DeepSeek API",
-          "note": "Gebruik de OpenAI-compatibele modus en kopieer het exacte model-ID uit de DeepSeek-documentatie."
-        },
-        "kimi": {
-          "name": "Kimi Coding",
-          "note": "Gebruik het coding-eindpunt met de Anthropic-compatibele modus. Controleer het exacte coding-model-ID in de Moonshot-documentatie."
-        },
-        "glm": {
-          "name": "GLM / BigModel (Anthropic-route)",
-          "note": "Gebruik de Anthropic-compatibele route wanneer het eindpuntpad /api/anthropic bevat."
-        },
         "ollama": {
           "name": "Ollama",
           "note": "Geef de voorkeur aan het speciale Ollama-providertabblad voor het detecteren en vernieuwen van lokale modellen."
-        },
-        "gemini": {
-          "name": "Gemini aangepast eindpunt",
-          "note": "Gebruik de Gemini-compatibele modus en het exacte model-ID dat door het eindpunt wordt blootgesteld."
-        },
-        "minimax": {
-          "name": "MiniMax",
-          "note": "Gebruik de OpenAI-compatibele modus, tenzij je MiniMax-gateway een ander protocol documenteert."
         },
         "genericOpenAI": {
           "name": "Algemeen OpenAI-compatibel",

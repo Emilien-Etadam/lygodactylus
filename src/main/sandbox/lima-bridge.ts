@@ -573,23 +573,6 @@ export class LimaBridge implements SandboxExecutor {
   }
 
   /**
-   * Install claude-code in Lima
-   */
-  static async installClaudeCodeInLima(): Promise<boolean> {
-    log('[Lima] Installing claude-code...');
-    try {
-      await execLimaShellWithRetry(getCachedLimaInstanceName(),         'bash -c "source ~/.nvm/nvm.sh && npm install -g @anthropic-ai/claude-code"',
-        180000
-      );
-      log('[Lima] claude-code installed');
-      return true;
-    } catch (error) {
-      logError('[Lima] Failed to install claude-code:', error);
-      return false;
-    }
-  }
-
-  /**
    * Get path to Lima agent script
    */
   private getAgentScriptPath(): string {
@@ -966,44 +949,6 @@ export class LimaBridge implements SandboxExecutor {
     }
 
     await this.sendRequest('copyFile', { src, dest });
-  }
-
-  /**
-   * Run claude-code in Lima
-   */
-  async runClaudeCode(
-    prompt: string,
-    options: {
-      cwd?: string;
-      model?: string;
-      maxTurns?: number;
-      systemPrompt?: string;
-      env?: Record<string, string>;
-    } = {}
-  ): Promise<AsyncIterable<unknown>> {
-    if (!this.isInitialized) {
-      throw new Error('Lima bridge not initialized');
-    }
-
-    const result = await this.sendRequest<{ messages: unknown[] }>(
-      'runClaudeCode',
-      {
-        prompt,
-        cwd: options.cwd,
-        model: options.model,
-        maxTurns: options.maxTurns,
-        systemPrompt: options.systemPrompt,
-        env: options.env,
-      },
-      300000
-    ); // 5 minute timeout for claude-code
-
-    // Convert to async iterable
-    return (async function* () {
-      for (const msg of result.messages) {
-        yield msg;
-      }
-    })();
   }
 
   /**

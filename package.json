@@ -1,11 +1,9 @@
 {
   "name": "lygodactylus",
   "version": "5.9.0",
-  "description": "Lygodactylus — open-source AI agent desktop app for Windows, macOS & Linux with Claude Code, MCP tools, Skills, sandbox isolation and multi-model support",
+  "description": "Lygodactylus — open-source local AI agent desktop app for Windows, macOS & Linux with Ollama/vLLM support, MCP tools, Skills, and sandbox isolation",
   "keywords": [
     "ai-agent",
-    "claude",
-    "claude-code",
     "electron",
     "desktop-app",
     "mcp",
@@ -13,14 +11,10 @@
     "open-source",
     "ai-coding",
     "ai-tools",
-    "computer-use",
-    "openai",
-    "gemini",
-    "deepseek",
-    "skills",
-    "pptx-generator",
-    "docx",
-    "multi-model"
+    "ollama",
+    "vllm",
+    "local-llm",
+    "skills"
   ],
   "homepage": "https://github.com/emilien-etadam/lygodactylus",
   "repository": {
@@ -62,11 +56,9 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.102.0",
-    "@google/genai": "^1.44.0",
     "@earendil-works/pi-ai": "^0.80.2",
     "@earendil-works/pi-coding-agent": "^0.80.2",
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@opentelemetry/api": "1.9.1",
     "archiver": "^7.0.1",
     "better-sqlite3": "^12.10.0",
     "chokidar": "^4.0.1",
