@@ -20,6 +20,7 @@ type PiSessionEvent = Parameters<Parameters<PiAgentSession['subscribe']>[0]>[0];
 
 export interface StreamEventState {
   streamedText: string;
+  streamedThinking: string;
   compactionStepId?: string;
   hasEmittedError: boolean;
   terminalErrorText?: string;

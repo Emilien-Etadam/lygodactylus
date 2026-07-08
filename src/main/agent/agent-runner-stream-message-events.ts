@@ -152,6 +152,7 @@ export function handleMessageUpdateEvent(
     deps.markFirstStreamEvent(assistantMessageEvent.type);
     const parsed = deps.thinkParser.push(assistantMessageEvent.delta);
     if (parsed.thinking) {
+      state.streamedThinking += parsed.thinking;
       deps.ctx.renderer.dispatch({
         type: 'stream.thinking',
         payload: { sessionId: deps.session.id, delta: parsed.thinking },
@@ -166,6 +167,7 @@ export function handleMessageUpdateEvent(
 
   if (assistantMessageEvent.type === 'thinking_delta') {
     deps.markFirstStreamEvent(assistantMessageEvent.type);
+    state.streamedThinking += assistantMessageEvent.delta;
     deps.ctx.renderer.dispatch({
       type: 'stream.thinking',
       payload: { sessionId: deps.session.id, delta: assistantMessageEvent.delta },
@@ -243,8 +245,10 @@ export function handleMessageEndEvent(
   const resolvedPayload = resolveMessageEndPayload({
     message: message as Parameters<typeof resolveMessageEndPayload>[0]['message'],
     streamedText: state.streamedText,
+    streamedThinking: state.streamedThinking,
   });
   state.streamedText = resolvedPayload.nextStreamedText;
+  state.streamedThinking = '';
 
   if (deps.piSetup.provider === 'ollama') {
     log(
