@@ -68,7 +68,8 @@
 
 | Tag             | Date       | Highlights                                                                    |
 | --------------- | ---------- | ----------------------------------------------------------------------------- |
-| `v6.0.0`        | 2026-07-07 | **Latest** — série v6 local-first, Electron 43, migration config one-shot, sans SDK cloud directs |
+| `v6.0.1`        | 2026-07-08 | **Latest** — fix bash sandbox WSL (`EADDRNOTAVAIL` proxy LAN) |
+| `v6.0.0`        | 2026-07-07 | Série v6 local-first, Electron 43, migration config one-shot, sans SDK cloud directs |
 | `v5.9.0`        | 2026-07-01 | marketplace skills GitHub, extension Firefox web-action |
 | `v5.8.1`        | 2026-06-28 | fix timeout chat (vLLM distant + mémoire), sidebars plus étroites |
 | `v5.8.0`        | 2026-06-28 | Sandbox LAN network (http_request, proxy opt-in), repo app-only cleanup |
@@ -99,7 +100,7 @@
 | `v3.3.1-EE4`    | 2026-06-23 | Slash autocomplete, agent-runner split (phase 1)                              |
 | `v3.3.1-EE3.x`  | 2026-06    | Security, WSL sandbox, Windows perf, pi-agent migration                       |
 
-Current stable fork baseline: **`6.0.0`** — [CHANGELOG](CHANGELOG.md)
+Current stable fork baseline: **`6.0.1`** — [CHANGELOG](CHANGELOG.md)
 
 ### v5.x hardening
 
@@ -141,4 +142,4 @@ Current stable fork baseline: **`6.0.0`** — [CHANGELOG](CHANGELOG.md)
 
 ---
 
-_Last updated: 2026-07-07 (v6.0.0 release)_
+_Last updated: 2026-07-08 (v6.0.1 release)_
