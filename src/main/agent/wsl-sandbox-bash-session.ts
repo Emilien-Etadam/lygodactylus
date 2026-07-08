@@ -6,6 +6,7 @@ import {
 } from '../sandbox/sandbox-workspace-path';
 import { getSandboxNetworkProxy } from '../sandbox/sandbox-network-proxy';
 import { configStore } from '../config/config-store';
+import { logError } from '../utils/logger';
 
 const MARKER_DONE = '__OCOWORK_BASH_DONE__';
 const MARKER_EXIT_PREFIX = '__OCOWORK_BASH_EXIT:';
@@ -261,15 +262,20 @@ class WslSandboxBashSession {
       return;
     }
 
-    const proxy = getSandboxNetworkProxy();
-    const proxyUrl = await proxy.acquire(this.options.distro);
-    const setupScript = proxy.buildBashSetupScript();
-    if (!proxyUrl || !setupScript || !this.child?.stdin) {
-      return;
-    }
+    try {
+      const proxy = getSandboxNetworkProxy();
+      const proxyUrl = await proxy.acquire(this.options.distro);
+      const setupScript = proxy.buildBashSetupScript();
+      if (!proxyUrl || !setupScript || !this.child?.stdin) {
+        return;
+      }
 
-    this.child.stdin.write(`${setupScript}\n`);
-    this.proxyConfigured = true;
+      this.child.stdin.write(`${setupScript}\n`);
+      this.proxyConfigured = true;
+    } catch (error) {
+      // LAN proxy is optional; bash must keep working when binding fails (e.g. WSL mirrored DNS IP).
+      logError('[WslSandboxBashSession] Failed to configure sandbox LAN network proxy:', error);
+    }
   }
 
   private handleOutput(chunk: Buffer): void {

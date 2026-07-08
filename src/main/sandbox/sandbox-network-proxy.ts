@@ -15,8 +15,27 @@ import {
   normalizeNetworkHost,
 } from './sandbox-network-target';
 import { buildSandboxLanNetworkBashSetup } from './sandbox-network-bash';
+import { pickWslWindowsHostIp } from './sandbox-network-host';
 
 const execFileAsync = promisify(execFile);
+
+async function queryWslIpv4(
+  distro: string,
+  script: string
+): Promise<string | null> {
+  const safeDistro = validateDistroName(distro);
+  try {
+    const { stdout } = await execFileAsync(
+      'wsl',
+      ['-d', safeDistro, '-e', 'bash', '-lc', script],
+      { windowsHide: true, timeout: 10_000 }
+    );
+    const ip = stdout.trim();
+    return ip || null;
+  } catch {
+    return null;
+  }
+}
 
 function validateDistroName(distro: string): string {
   if (!/^[a-zA-Z0-9._-]+$/.test(distro)) {
@@ -26,22 +45,22 @@ function validateDistroName(distro: string): string {
 }
 
 export async function getWslWindowsHostIp(distro: string): Promise<string | null> {
-  const safeDistro = validateDistroName(distro);
   try {
-    const { stdout } = await execFileAsync(
-      'wsl',
-      [
-        '-d',
-        safeDistro,
-        '-e',
-        'bash',
-        '-lc',
-        "grep -m1 nameserver /etc/resolv.conf | awk '{print $2}'",
-      ],
-      { windowsHide: true, timeout: 10_000 }
+    const [nameserver, defaultGateway] = await Promise.all([
+      queryWslIpv4(distro, "grep -m1 nameserver /etc/resolv.conf | awk '{print $2}'"),
+      queryWslIpv4(distro, "ip route show default | awk '{print $3; exit}'"),
+    ]);
+
+    const hostIp = pickWslWindowsHostIp(
+      [nameserver, defaultGateway].filter((value): value is string => Boolean(value))
     );
-    const ip = stdout.trim();
-    return ip || null;
+    if (!hostIp) {
+      logError(
+        '[SandboxNetworkProxy] No bindable Windows host IP found for WSL sandbox LAN proxy',
+        { nameserver, defaultGateway }
+      );
+    }
+    return hostIp;
   } catch (error) {
     logError('[SandboxNetworkProxy] Failed to resolve WSL Windows host IP:', error);
     return null;
@@ -124,7 +143,11 @@ export class SandboxNetworkProxy {
       return null;
     }
 
-    await this.start(hostIp);
+    const started = await this.start(hostIp);
+    if (!started) {
+      this.refCount = Math.max(0, this.refCount - 1);
+      return null;
+    }
     return this.getProxyUrl();
   }
 
@@ -135,9 +158,9 @@ export class SandboxNetworkProxy {
     }
   }
 
-  private async start(hostIp: string): Promise<void> {
+  private async start(hostIp: string): Promise<boolean> {
     if (this.server?.listening) {
-      return;
+      return true;
     }
 
     const authToken = generateProxyToken();
@@ -151,13 +174,24 @@ export class SandboxNetworkProxy {
       logError('[SandboxNetworkProxy] Server error:', error);
     });
 
-    await new Promise<void>((resolve, reject) => {
-      server.once('error', reject);
-      server.listen(0, hostIp, () => {
-        server.removeListener('error', reject);
-        resolve();
+    try {
+      await new Promise<void>((resolve, reject) => {
+        server.once('error', reject);
+        server.listen(0, hostIp, () => {
+          server.removeListener('error', reject);
+          resolve();
+        });
       });
-    });
+    } catch (error) {
+      logError(
+        `[SandboxNetworkProxy] Failed to bind LAN proxy on ${hostIp}; bash will run without LAN proxy`,
+        error
+      );
+      await new Promise<void>((resolve) => {
+        server.close(() => resolve());
+      });
+      return false;
+    }
 
     const address = server.address();
     this.port = typeof address === 'object' && address ? address.port : 0;
@@ -165,6 +199,7 @@ export class SandboxNetworkProxy {
     this.authToken = authToken;
     this.server = server;
     log(`[SandboxNetworkProxy] Listening on ${hostIp}:${this.port} (LAN-only, authenticated)`);
+    return true;
   }
 
   private ensureAuthorized(
