@@ -70,6 +70,7 @@
     "i18next-browser-languagedetector": "^8.2.1",
     "katex": "^0.17.0",
     "lucide-react": "^1.23.0",
+    "openai": "6.26.0",
     "patch-package": "8.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

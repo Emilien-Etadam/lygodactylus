@@ -10,6 +10,7 @@ export interface MemoryCompletionRequest {
   userPrompt: string;
   temperature?: number;
   maxTokens?: number;
+  jsonMode?: boolean;
 }
 
 export interface MemoryCompletionResponse {
@@ -80,6 +81,29 @@ function buildAppConfig(base: AppConfig, resolved: ResolvedMemoryModelConfig): A
   };
 }
 
+async function runWithMemoryTimeout<T>(
+  timeoutMs: number,
+  fn: (signal: AbortSignal) => Promise<T>
+): Promise<T> {
+  const controller = new AbortController();
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    const timeoutPromise = new Promise<never>((_resolve, reject) => {
+      timeout = setTimeout(() => {
+        controller.abort();
+        reject(new Error(`Memory LLM request timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
+      timeout.unref?.();
+    });
+    return await Promise.race([fn(controller.signal), timeoutPromise]);
+  } finally {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+  }
+}
+
 export class MemoryLLMClient implements MemoryLLMClientLike {
   constructor(private readonly getConfig: () => AppConfig = () => configStore.getAll()) {}
 
@@ -90,36 +114,65 @@ export class MemoryLLMClient implements MemoryLLMClientLike {
       appConfig.memoryRuntime?.llm,
       appConfig.model
     );
-    const controller = new AbortController();
-    let timeout: ReturnType<typeof setTimeout> | undefined;
 
-    try {
-      const timeoutPromise = new Promise<never>((_resolve, reject) => {
-        timeout = setTimeout(() => {
-          controller.abort();
-          reject(new Error(`Memory LLM request timed out after ${llmConfig.timeoutMs}ms`));
-        }, llmConfig.timeoutMs);
-        timeout.unref?.();
-      });
-      const result = await Promise.race([
-        runPiAiOneShot(
+    const runPiAiCompletion = (): Promise<MemoryCompletionResponse> =>
+      runWithMemoryTimeout(llmConfig.timeoutMs, async (signal) => {
+        const result = await runPiAiOneShot(
           request.userPrompt,
           request.systemPrompt,
           buildAppConfig(appConfig, llmConfig),
           {
             temperature: request.temperature ?? 0,
             maxTokens: request.maxTokens ?? 16_000,
-            signal: controller.signal,
+            signal,
           }
-        ),
-        timeoutPromise,
-      ]);
-      return { text: result.text };
-    } finally {
-      if (timeout) {
-        clearTimeout(timeout);
+        );
+        return { text: result.text };
+      });
+
+    if (request.jsonMode === true && llmConfig.provider === 'openai') {
+      try {
+        const resolved = resolveOpenAICredentials({
+          provider: llmConfig.provider,
+          customProtocol: llmConfig.customProtocol,
+          apiKey: llmConfig.apiKey,
+          baseUrl: llmConfig.baseUrl,
+        });
+        const apiKey = resolved?.apiKey || llmConfig.apiKey;
+        const baseURL =
+          resolved?.baseUrl || normalizeOpenAICompatibleBaseUrl(llmConfig.baseUrl);
+
+        return await runWithMemoryTimeout(llmConfig.timeoutMs, async (signal) => {
+          const client = new (await import('openai')).default({
+            apiKey,
+            baseURL,
+            timeout: llmConfig.timeoutMs,
+          });
+          const completion = await client.chat.completions.create(
+            {
+              model: llmConfig.model,
+              temperature: request.temperature ?? 0,
+              max_tokens: request.maxTokens ?? 16_000,
+              response_format: { type: 'json_object' },
+              messages: [
+                { role: 'system', content: request.systemPrompt },
+                { role: 'user', content: request.userPrompt },
+              ],
+            },
+            { signal }
+          );
+          return { text: completion.choices[0]?.message?.content ?? '' };
+        });
+      } catch (error) {
+        logWarn(
+          '[MemoryLLMClient] OpenAI JSON mode completion failed; falling back to pi-ai:',
+          error
+        );
+        return runPiAiCompletion();
       }
     }
+
+    return runPiAiCompletion();
   }
 
   async embed(text: string): Promise<number[]> {

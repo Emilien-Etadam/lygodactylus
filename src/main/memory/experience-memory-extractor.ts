@@ -35,6 +35,7 @@ export class ExperienceMemoryExtractor {
         .join('\n'),
       temperature: 0,
       maxTokens: 16_000,
+      jsonMode: true,
     });
 
     const payload = extractJson(response.text);
