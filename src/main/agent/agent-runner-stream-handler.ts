@@ -76,6 +76,7 @@ export async function runPromptWithStreamHandling({
   const loopGuard = new LoopGuard();
   const state: StreamEventState = {
     streamedText: '',
+    streamedThinking: '',
     hasEmittedError: false,
     receivedFirstStreamEvent: false,
   };

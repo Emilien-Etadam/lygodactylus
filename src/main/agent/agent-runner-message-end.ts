@@ -16,6 +16,7 @@ type MessageEndMessage = Pick<AssistantMessage, 'role' | 'content' | 'stopReason
 interface ResolveMessageEndPayloadOptions {
   message?: MessageEndMessage;
   streamedText: string;
+  streamedThinking?: string;
 }
 
 interface ResolvedMessageEndPayload {
@@ -137,11 +138,16 @@ export function resolveAssistantStreamErrorText(
 
 export function buildTerminalErrorMessage(errorText: string, partialText = ''): string {
   const normalizedPartial = partialText.trimEnd();
-  const hint = isContextOverflowError(errorText)
-    ? mt('errContextCompactionHint')
-    : FOUR_XX_ERROR_RE.test(errorText)
-      ? mt('errCheckConfigHint')
-      : mt('errRetryingHint');
+  // The empty-success case is not auto-retried by the SDK (the request succeeded
+  // with HTTP 200), so don't falsely promise an automatic retry — point the user
+  // at their config/protocol instead.
+  const isEmptySuccess = errorText === mt('errEmptySuccess');
+  const hint =
+    isContextOverflowError(errorText)
+      ? mt('errContextCompactionHint')
+      : FOUR_XX_ERROR_RE.test(errorText) || isEmptySuccess
+        ? mt('errCheckConfigHint')
+        : mt('errRetryingHint');
   const errorBlock = `**Error**: ${errorText}\n\n${hint}`;
   return normalizedPartial ? `${normalizedPartial}\n\n${errorBlock}` : errorBlock;
 }
@@ -184,7 +190,7 @@ export function shouldPreserveExistingTrace(disposition: AbortDisposition): bool
 export function resolveMessageEndPayload(
   options: ResolveMessageEndPayloadOptions
 ): ResolvedMessageEndPayload {
-  const { message, streamedText } = options;
+  const { message, streamedText, streamedThinking } = options;
   const nextStreamedText = '';
 
   if (message?.stopReason === 'error' && message.errorMessage) {
@@ -204,6 +210,18 @@ export function resolveMessageEndPayload(
         : [];
 
   if (rawContent.length === 0) {
+    // Reasoning-only turn: some reasoning models (e.g. Qwen3 served by vLLM with
+    // preserve_thinking) route the whole turn into reasoning_content and leave the
+    // visible content empty. That is a legitimate, successful turn — surface the
+    // reasoning as a thinking block instead of a false "empty result" error.
+    const reasoning = streamedThinking?.trim();
+    if (reasoning) {
+      return {
+        effectiveContent: [{ type: 'thinking', thinking: reasoning } as ThinkingContent],
+        nextStreamedText,
+        shouldEmitMessage: true,
+      };
+    }
     return {
       effectiveContent: [],
       errorText: toUserFacingErrorText('empty_success_result'),
