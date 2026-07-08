@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.1] - 2026-07-08
+
+### Fixed
+
+- **Sandbox WSL / bash** : le tool bash ne démarrait plus quand le proxy réseau LAN sandbox était activé et que WSL exposait l’IP DNS virtuelle `10.255.255.254` (mode réseau miroir) — `EADDRNOTAVAIL` au bind du proxy ; le bash continue désormais sans proxy LAN si le bind échoue
+
 ## [6.0.0] - 2026-07-07
 
 Série **v6** : fork recentré **local-first** (Ollama/vLLM en OpenAI-compatible), runtime Electron 43, sans SDK cloud en dépendances directes.

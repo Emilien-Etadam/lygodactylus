@@ -4,16 +4,55 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version semver (sans préfixe v) — doit correspondre à package.json sur la branche cible'
+        required: true
+        type: string
+      ref:
+        description: 'Branche, tag ou SHA à builder'
+        required: false
+        default: main
+        type: string
 
 permissions:
   contents: write
 
+env:
+  RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && format('v{0}', github.event.inputs.version) || github.ref_name }}
+  CHECKOUT_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.ref || github.ref }}
+
 jobs:
-  lint-and-test:
-    name: Lint & Test
+  validate-manual-release:
+    name: Validate manual release
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ github.event.inputs.ref }}
+
+      - name: Verify package.json version
+        run: |
+          set -euo pipefail
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          INPUT_VERSION="${{ github.event.inputs.version }}"
+          if [ "$PKG_VERSION" != "$INPUT_VERSION" ]; then
+            echo "::error::package.json ($PKG_VERSION) ≠ version saisie ($INPUT_VERSION). Mettez à jour la version sur ${{ github.event.inputs.ref }} avant de lancer la release."
+            exit 1
+          fi
+          echo "Version OK: $PKG_VERSION → tag ${{ env.RELEASE_TAG }}"
+
+  lint-and-test:
+    name: Lint & Test
+    needs: [validate-manual-release]
+    if: ${{ always() && (needs.validate-manual-release.result == 'success' || needs.validate-manual-release.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
 
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
@@ -44,6 +83,8 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
 
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
@@ -176,7 +217,9 @@ jobs:
             release/*.dmg
             release/*.zip
           draft: true
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          target_commitish: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.ref || github.sha }}
+          generate_release_notes: true
 
   build-windows:
     name: Release Windows
@@ -184,6 +227,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
 
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
@@ -318,7 +363,9 @@ jobs:
             release/latest.yml
             release/*.blockmap
           draft: true
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          target_commitish: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.ref || github.sha }}
+          generate_release_notes: true
 
   build-linux:
     name: Release Linux
@@ -326,6 +373,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
 
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
@@ -404,7 +453,9 @@ jobs:
         with:
           files: release/*.AppImage
           draft: true
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          target_commitish: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.ref || github.sha }}
+          generate_release_notes: true
 
   publish-release:
     name: Publish GitHub Release
@@ -417,6 +468,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          TAG="${GITHUB_REF_NAME}"
+          TAG="${{ env.RELEASE_TAG }}"
           echo "Publishing release ${TAG}"
           gh release edit "${TAG}" --repo "${GITHUB_REPOSITORY}" --draft=false

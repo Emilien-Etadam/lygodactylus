@@ -4,7 +4,7 @@
 
 | Version                              | Supported          |
 | ------------------------------------ | ------------------ |
-| `6.x` (current series, latest `6.0.0`) | Yes                |
+| `6.x` (current series, latest `6.0.1`) | Yes                |
 | `5.x` and older `EE*` builds         | Best effort only   |
 | Upstream `3.3.x` without `EE` suffix | Not maintained     |
 
