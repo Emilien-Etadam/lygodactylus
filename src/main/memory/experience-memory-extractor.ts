@@ -1,5 +1,6 @@
 import { SESSION_CHUNK_EXTRACTION_PROMPT } from './memory-prompts';
 import type { MemoryLLMClientLike } from './memory-llm-client';
+import { isDegenerateText } from './memory-quality';
 import type { ExperienceSessionExtract, MemoryTranscriptTurn } from './memory-types';
 import { compactTranscript, extractJson } from './memory-utils';
 
@@ -102,7 +103,13 @@ export class ExperienceMemoryExtractor {
           (
             item
           ): item is ExperienceSessionExtract['chunks'][number] =>
-            Boolean(item && item.summary && item.sourceTurns.length > 0)
+            Boolean(
+              item &&
+                item.summary &&
+                item.sourceTurns.length > 0 &&
+                !isDegenerateText(item.summary) &&
+                !isDegenerateText(item.details)
+            )
         ),
     };
   }
