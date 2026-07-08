@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue" alt="Platform" />
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License" />
   <img src="https://img.shields.io/badge/Node.js-22+-brightgreen" alt="Node.js" />
-  <img src="https://img.shields.io/badge/version-5.9.0-orange" alt="Version" />
+  <img src="https://img.shields.io/badge/version-6.0.0-orange" alt="Version" />
   <img src="https://img.shields.io/badge/status-alpha-yellow" alt="Status" />
 </p>
 
@@ -27,7 +27,7 @@
 **Lygodactylus** is a desktop AI agent app (Electron) for Windows, macOS, and Linux. It manages your files, generates documents via **Skills** (bundled PDF/XLSX; DOCX/PPTX downloaded on first use), installs extensions through a curated **marketplace** (Skills, MCP, plugins), isolates commands in a **sandbox** (WSL2 / Lima), offers **LAN chat** (a web UI on your network — recommended over a WireGuard VPN tunnel), and ships **native tools** (glob, grep, web, todos, interactive questions) compatible with LiteLLM / vLLM / Qwen.
 
 > [!NOTE]
-> This repository is a **personal app-only fork** (no VitePress website or upstream bots). The **v5.x** series is an experimental **alpha**. Older `EE*` releases remain available but are no longer the active branch. For the official stable upstream version, see [OpenCoworkAI/open-cowork](https://github.com/OpenCoworkAI/open-cowork).
+> This repository is a **personal app-only fork** (no VitePress website or upstream bots). The **v6.x** series is an experimental **alpha** (local-first). Older `EE*` and `5.x` releases remain available but are no longer the active branch.
 
 ---
 

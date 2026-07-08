@@ -4,8 +4,8 @@
 
 | Version                              | Supported          |
 | ------------------------------------ | ------------------ |
-| `5.x` (current series, latest `5.9.0`) | Yes                |
-| `3.3.1-EE4.x` and older `EE*` builds | Best effort only   |
+| `6.x` (current series, latest `6.0.0`) | Yes                |
+| `5.x` and older `EE*` builds         | Best effort only   |
 | Upstream `3.3.x` without `EE` suffix | Not maintained     |
 
 Security fixes for the current series are published as new releases on [GitHub Releases](https://github.com/Emilien-Etadam/lygodactylus/releases).
