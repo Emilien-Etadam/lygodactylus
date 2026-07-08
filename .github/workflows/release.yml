@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version semver (sans préfixe v) — doit correspondre à package.json sur la branche cible'
+        description: 'Version semver (ex. 6.0.1 ou v6.0.1) — doit correspondre à package.json'
         required: true
         type: string
       ref:
@@ -20,7 +20,6 @@ permissions:
   contents: write
 
 env:
-  RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && format('v{0}', github.event.inputs.version) || github.ref_name }}
   CHECKOUT_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.ref || github.ref }}
 
 jobs:
@@ -28,28 +27,47 @@ jobs:
     name: Validate manual release
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.meta.outputs.release_tag }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: ${{ github.event.inputs.ref }}
 
       - name: Verify package.json version
+        id: meta
         run: |
           set -euo pipefail
-          PKG_VERSION=$(node -p "require('./package.json').version")
-          INPUT_VERSION="${{ github.event.inputs.version }}"
-          if [ "$PKG_VERSION" != "$INPUT_VERSION" ]; then
-            echo "::error::package.json ($PKG_VERSION) ≠ version saisie ($INPUT_VERSION). Mettez à jour la version sur ${{ github.event.inputs.ref }} avant de lancer la release."
+          RAW="${{ github.event.inputs.version }}"
+          NORMALIZED=$(printf '%s' "$RAW" | tr -d '[:space:]' | sed 's/^[vV]//')
+          if [ -z "$NORMALIZED" ]; then
+            echo "::error::Version invalide: \"$RAW\""
             exit 1
           fi
-          echo "Version OK: $PKG_VERSION → tag ${{ env.RELEASE_TAG }}"
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          if [ "$PKG_VERSION" != "$NORMALIZED" ]; then
+            echo "::error::package.json ($PKG_VERSION) ≠ version normalisée ($NORMALIZED depuis \"$RAW\"). Mettez à jour la version sur ${{ github.event.inputs.ref }} avant de lancer la release."
+            exit 1
+          fi
+          echo "release_tag=v${NORMALIZED}" >> "$GITHUB_OUTPUT"
+          echo "Version OK: $PKG_VERSION → tag v${NORMALIZED}"
 
   lint-and-test:
     name: Lint & Test
     needs: [validate-manual-release]
     if: ${{ always() && (needs.validate-manual-release.result == 'success' || needs.validate-manual-release.result == 'skipped') }}
     runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.release_meta.outputs.release_tag }}
     steps:
+      - id: release_meta
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "release_tag=${{ needs.validate-manual-release.outputs.release_tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "release_tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: ${{ env.CHECKOUT_REF }}
@@ -81,6 +99,8 @@ jobs:
     name: Release macOS
     needs: [lint-and-test]
     runs-on: macos-14
+    env:
+      RELEASE_TAG: ${{ needs.lint-and-test.outputs.release_tag }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
@@ -225,6 +245,8 @@ jobs:
     name: Release Windows
     needs: [lint-and-test]
     runs-on: windows-latest
+    env:
+      RELEASE_TAG: ${{ needs.lint-and-test.outputs.release_tag }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
@@ -371,6 +393,8 @@ jobs:
     name: Release Linux
     needs: [lint-and-test]
     runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ needs.lint-and-test.outputs.release_tag }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
@@ -459,9 +483,11 @@ jobs:
 
   publish-release:
     name: Publish GitHub Release
-    needs: [build-macos, build-windows, build-linux]
+    needs: [build-macos, build-windows, build-linux, lint-and-test]
     if: ${{ !cancelled() && needs.build-macos.result == 'success' && needs.build-windows.result == 'success' && needs.build-linux.result == 'success' }}
     runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ needs.lint-and-test.outputs.release_tag }}
     steps:
       - name: Publish release (remove draft)
         env:
