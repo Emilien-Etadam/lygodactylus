@@ -9,6 +9,7 @@ import type { ExperienceMemoryStore } from './experience-memory-store';
 import type { MemoryIngestionQueue } from './memory-ingestion-queue';
 import type { MemorySessionStateStore } from './memory-state-store';
 import type { ChunkMemoryItem, MemoryIngestionInput, MemoryTranscriptTurn } from './memory-types';
+import { assessSessionHealth, isDegenerateText } from './memory-quality';
 import { getMemoryInjectionPolicy, sanitizeMemoryContent } from './memory-sanitizer';
 import {
   extractKeywords,
@@ -184,6 +185,21 @@ export async function ingest(
     return;
   }
 
+  const health = assessSessionHealth(messages);
+  if (!health.healthy) {
+    stateStore.set({
+      sessionId: session.id,
+      sourceWorkspace,
+      lastProcessedMessageCount: messages.length,
+      lastIngestedAt: previousState?.lastIngestedAt || null,
+      lastError: `skipped: ${health.reason}`,
+      createdAt: previousState?.createdAt || Date.now(),
+      updatedAt: Date.now(),
+    });
+    log('[MemoryService] Skipped ingestion (unhealthy session): ' + health.reason);
+    return;
+  }
+
   const fullTurns = messagesToTranscript(messages);
   const deltaTurns = messagesToTranscript(messages.slice(lastProcessedMessageCount));
   const sessionDate = host.resolveSessionDate(session, messages);
@@ -334,9 +350,14 @@ export async function storeExperienceSession(
 
   const chunkInputs: Array<Omit<ChunkMemoryItem, 'id'>> = [];
   for (const chunk of input.extracted.chunks) {
+    const rawSummary = chunk.summary;
+    const rawDetails = chunk.details;
+    if (isDegenerateText(rawSummary) || isDegenerateText(rawDetails)) {
+      continue;
+    }
     const rawText = sanitize(host.extractRawText(input.fullTurns, chunk.sourceTurns));
-    const summary = sanitize(chunk.summary);
-    const details = sanitize(chunk.details);
+    const summary = sanitize(rawSummary);
+    const details = sanitize(rawDetails);
     const searchableText = [summary, details, ...chunk.keywords].join(' ').trim();
     chunkInputs.push({
       sessionId: input.sessionId,
@@ -360,7 +381,9 @@ export async function storeExperienceSession(
   const sessionSearchable = [input.extracted.sessionSummary, ...input.extracted.sessionKeywords]
     .join(' ')
     .trim();
-  const sessionSummary = sanitize(input.extracted.sessionSummary);
+  const rawSessionSummary = input.extracted.sessionSummary;
+  const sessionSummaryIsDegenerate = isDegenerateText(rawSessionSummary);
+  const sessionSummary = sessionSummaryIsDegenerate ? '' : sanitize(rawSessionSummary);
   store.replaceSession(
     input.sessionId,
     {
@@ -375,10 +398,12 @@ export async function storeExperienceSession(
         ? input.extracted.sessionKeywords
         : extractKeywords(sessionSearchable),
       chunkIds: [],
-      rawSession: input.fullTurns.map((turn) => ({
-        ...turn,
-        content: sanitize(turn.content),
-      })),
+      rawSession: sessionSummaryIsDegenerate
+        ? []
+        : input.fullTurns.map((turn) => ({
+            ...turn,
+            content: sanitize(turn.content),
+          })),
       sessionDate: input.sessionDate,
       createdAt: existing?.createdAt || new Date(input.sessionCreatedAt).toISOString(),
       ingestedAt,

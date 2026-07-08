@@ -782,4 +782,75 @@ describe('MemoryService', () => {
 
     fs.rmSync(outsideDir, { recursive: true, force: true });
   });
+
+  it('skips ingestion when the last assistant response is an error', async () => {
+    await service.enqueueIngestion({
+      session: makeSession('session-error', 'Failed run', '/repo/a'),
+      prompt: '修复 gateway token rotation',
+      messages: makeMessages('session-error', [
+        { role: 'user', text: '请用中文回答。', timestamp: 1 },
+        { role: 'assistant', text: '好的。', timestamp: 2 },
+        { role: 'user', text: '继续处理 gateway token rotation。', timestamp: 3 },
+        {
+          role: 'assistant',
+          text: '**Error**: model timeout while finishing gateway token rotation.',
+          timestamp: 4,
+        },
+      ]),
+    });
+
+    const overview = service.getOverview('/repo/a');
+    expect(overview.experienceSessionCount).toBe(0);
+    expect(overview.experienceChunkCount).toBe(0);
+
+    const state = service.readFile(service.getOverview().stateFilePath);
+    expect(JSON.stringify(state.parsed)).toContain('skipped: errored');
+  });
+
+  it('skips ingestion when assistant transcript text is degenerate', async () => {
+    const degenerateLine =
+      'The coffee filter needs replacement before brewing another pot of coffee today';
+    const degenerateReply = [degenerateLine, degenerateLine, degenerateLine].join('\n');
+
+    await service.enqueueIngestion({
+      session: makeSession('session-degenerate', 'Degenerate run', '/repo/a'),
+      prompt: 'coffee machine help',
+      messages: makeMessages('session-degenerate', [
+        { role: 'user', text: 'What should I do with the coffee machine?', timestamp: 1 },
+        { role: 'assistant', text: degenerateReply, timestamp: 2 },
+      ]),
+    });
+
+    const overview = service.getOverview('/repo/a');
+    expect(overview.experienceSessionCount).toBe(0);
+    expect(overview.experienceChunkCount).toBe(0);
+
+    const state = service.readFile(service.getOverview().stateFilePath);
+    expect(JSON.stringify(state.parsed)).toContain('skipped: degenerate');
+  });
+
+  it('stores healthy sessions normally after quality checks pass', async () => {
+    await service.enqueueIngestion({
+      session: makeSession('session-healthy', 'Gateway fixes', '/repo/a'),
+      prompt: '修复 gateway token rotation',
+      messages: makeMessages('session-healthy', [
+        { role: 'user', text: '请用中文回答，我叫 Jack。', timestamp: 1 },
+        { role: 'assistant', text: '好的，我会用中文继续。', timestamp: 2 },
+        {
+          role: 'user',
+          text: '我们修复 gateway token rotation，并更新 remote gateway 的行为。',
+          timestamp: 3,
+        },
+        { role: 'assistant', text: '已经完成 gateway token rotation。', timestamp: 4 },
+      ]),
+    });
+
+    const overview = service.getOverview('/repo/a');
+    expect(overview.experienceSessionCount).toBe(1);
+    expect(overview.experienceChunkCount).toBe(1);
+
+    const inspected = service.inspectSession('session-healthy', '/repo/a');
+    expect(inspected?.session.rawSession.length).toBeGreaterThan(0);
+    expect(inspected?.session.summary).toContain('gateway');
+  });
 });
