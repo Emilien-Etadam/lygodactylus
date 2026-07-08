@@ -23,54 +23,38 @@ env:
   CHECKOUT_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.ref || github.ref }}
 
 jobs:
-  validate-manual-release:
-    name: Validate manual release
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    outputs:
-      release_tag: ${{ steps.meta.outputs.release_tag }}
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-        with:
-          ref: ${{ github.event.inputs.ref }}
-
-      - name: Verify package.json version
-        id: meta
-        run: |
-          set -euo pipefail
-          RAW="${{ github.event.inputs.version }}"
-          NORMALIZED=$(printf '%s' "$RAW" | tr -d '[:space:]' | sed 's/^[vV]//')
-          if [ -z "$NORMALIZED" ]; then
-            echo "::error::Version invalide: \"$RAW\""
-            exit 1
-          fi
-          PKG_VERSION=$(node -p "require('./package.json').version")
-          if [ "$PKG_VERSION" != "$NORMALIZED" ]; then
-            echo "::error::package.json ($PKG_VERSION) ≠ version normalisée ($NORMALIZED depuis \"$RAW\"). Mettez à jour la version sur ${{ github.event.inputs.ref }} avant de lancer la release."
-            exit 1
-          fi
-          echo "release_tag=v${NORMALIZED}" >> "$GITHUB_OUTPUT"
-          echo "Version OK: $PKG_VERSION → tag v${NORMALIZED}"
-
   lint-and-test:
     name: Lint & Test
-    needs: [validate-manual-release]
-    if: ${{ always() && (needs.validate-manual-release.result == 'success' || needs.validate-manual-release.result == 'skipped') }}
     runs-on: ubuntu-latest
     outputs:
       release_tag: ${{ steps.release_meta.outputs.release_tag }}
     steps:
-      - id: release_meta
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "release_tag=${{ needs.validate-manual-release.outputs.release_tag }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "release_tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
-          fi
-
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: ${{ env.CHECKOUT_REF }}
+
+      - name: Resolve release tag
+        id: release_meta
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            RAW="${{ github.event.inputs.version }}"
+            NORMALIZED=$(printf '%s' "$RAW" | tr -d '[:space:]' | sed 's/^[vV]//')
+            if [ -z "$NORMALIZED" ]; then
+              echo "::error::Version invalide: \"$RAW\""
+              exit 1
+            fi
+            PKG_VERSION=$(node -p "require('./package.json').version")
+            if [ "$PKG_VERSION" != "$NORMALIZED" ]; then
+              echo "::error::package.json ($PKG_VERSION) ≠ version normalisée ($NORMALIZED depuis \"$RAW\"). Mettez à jour la version sur ${{ github.event.inputs.ref }} avant de lancer la release."
+              exit 1
+            fi
+            echo "release_tag=v${NORMALIZED}" >> "$GITHUB_OUTPUT"
+            echo "Version OK: $PKG_VERSION → tag v${NORMALIZED}"
+          else
+            echo "release_tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            echo "Release tag: ${GITHUB_REF_NAME}"
+          fi
 
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
@@ -98,6 +82,7 @@ jobs:
   build-macos:
     name: Release macOS
     needs: [lint-and-test]
+    if: ${{ needs.lint-and-test.result == 'success' }}
     runs-on: macos-14
     env:
       RELEASE_TAG: ${{ needs.lint-and-test.outputs.release_tag }}
@@ -244,6 +229,7 @@ jobs:
   build-windows:
     name: Release Windows
     needs: [lint-and-test]
+    if: ${{ needs.lint-and-test.result == 'success' }}
     runs-on: windows-latest
     env:
       RELEASE_TAG: ${{ needs.lint-and-test.outputs.release_tag }}
@@ -392,6 +378,7 @@ jobs:
   build-linux:
     name: Release Linux
     needs: [lint-and-test]
+    if: ${{ needs.lint-and-test.result == 'success' }}
     runs-on: ubuntu-latest
     env:
       RELEASE_TAG: ${{ needs.lint-and-test.outputs.release_tag }}
