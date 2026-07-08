@@ -85,7 +85,7 @@ describe('wsl sandbox bash operations', () => {
   it('parses CRLF markers from WSL output', async () => {
     const child = new FakeChildProcess();
     const originalWrite = child.stdin.write;
-    child.stdin.write = vi.fn((script: string, cb?: (error?: Error | null) => void) => {
+    child.stdin.write = vi.fn((_script: string, cb?: (error?: Error | null) => void) => {
       child.stdout.emit(
         'data',
         Buffer.from('test\r\n__OCOWORK_BASH_EXIT:0\r\n__OCOWORK_BASH_DONE__\r\n')
