@@ -8,7 +8,7 @@ import { mt } from '../../main/i18n';
 describe('resolveMessageEndPayload', () => {
   it('recovers a reasoning-only turn as a thinking block instead of erroring', () => {
     const result = resolveMessageEndPayload({
-      message: { role: 'assistant', content: [] },
+      message: { role: 'assistant', content: [], stopReason: 'stop' },
       streamedText: '',
       streamedThinking: 'The user asked for the time in Paris.',
     });
@@ -22,7 +22,7 @@ describe('resolveMessageEndPayload', () => {
 
   it('reports an empty-success error only when there is no text and no reasoning', () => {
     const result = resolveMessageEndPayload({
-      message: { role: 'assistant', content: [] },
+      message: { role: 'assistant', content: [], stopReason: 'stop' },
       streamedText: '',
       streamedThinking: '   ',
     });
@@ -33,7 +33,7 @@ describe('resolveMessageEndPayload', () => {
 
   it('emits normal text content untouched', () => {
     const result = resolveMessageEndPayload({
-      message: { role: 'assistant', content: [{ type: 'text', text: 'Hello' }] },
+      message: { role: 'assistant', content: [{ type: 'text', text: 'Hello' }], stopReason: 'stop' },
       streamedText: '',
     });
 
