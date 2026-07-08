@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.3] - 2026-07-08
+
+### Added
+
+- **Mémoire** : extraction en JSON garanti via `response_format: { type: 'json_object' }` (SDK OpenAI en direct) sur le rail OpenAI-compatible (vLLM/Ollama), avec repli gracieux sur pi-ai ; `openai` promu en dépendance directe pour rendre `import('openai')` résolvable (corrige aussi le chemin embeddings)
+
+### Changed
+
+- **Mémoire** : garde-fous à l'ingestion contre l'auto-empoisonnement — les sessions en erreur/abandonnées ou au texte dégénéré (boucles, faible diversité lexicale) ne sont plus mémorisées ; chunks dégénérés filtrés ; `rawSession` non stocké pour un résumé dégénéré
+
+### Fixed
+
+- **CI** : erreur `tsc` préexistante (paramètre de test inutilisé) qui rendait la CI rouge pour toutes les PR
+
 ## [6.0.2] - 2026-07-08
 
 ### Fixed
