@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const useIPCPath = path.resolve(process.cwd(), 'src/renderer/hooks/useIPC.ts');
+const useSessionIpcPath = path.resolve(process.cwd(), 'src/renderer/hooks/ipc/useSessionIpc.ts');
 
 describe('useIPC session start error handling', () => {
   it('contains the session start failure inside the hook after showing a global notice', () => {
-    const source = fs.readFileSync(useIPCPath, 'utf8');
+    const source = fs.readFileSync(useSessionIpcPath, 'utf8');
 
     expect(source).toContain('id: `notice-session-start-${Date.now()}`');
     expect(source).toContain(
