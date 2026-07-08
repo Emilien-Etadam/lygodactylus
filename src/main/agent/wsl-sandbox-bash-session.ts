@@ -11,6 +11,7 @@ import { logError } from '../utils/logger';
 const MARKER_DONE = '__OCOWORK_BASH_DONE__';
 const MARKER_EXIT_PREFIX = '__OCOWORK_BASH_EXIT:';
 const DEFAULT_TERMINATION_GRACE_MS = 5000;
+const WSL_STARTUP_TIMEOUT_MS = 30_000;
 
 type SpawnProcess = (command: string, args: string[], options: SpawnOptions) => ChildProcess;
 
@@ -191,8 +192,14 @@ class WslSandboxBashSession {
       }
 
       this.active = entry;
+      if (entry.request.timeout !== undefined && entry.request.timeout > 0) {
+        this.activeTimeout = setTimeout(() => {
+          void this.terminateActive('timeout', entry.request.timeout);
+        }, entry.request.timeout * 1000);
+      }
       try {
         await this.ensureChild();
+        this.buffer = '';
         await this.runActiveCommand(entry);
       } catch (error) {
         entry.reject(error instanceof Error ? error : new Error(String(error)));
@@ -213,6 +220,17 @@ class WslSandboxBashSession {
       return;
     }
 
+    await Promise.race([
+      this.startChild(),
+      new Promise<void>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error('WSL bash session startup timed out'));
+        }, WSL_STARTUP_TIMEOUT_MS).unref?.();
+      }),
+    ]);
+  }
+
+  private async startChild(): Promise<void> {
     const child = this.options.spawnProcess(
       'wsl',
       ['-d', this.options.distro, '-e', 'bash', '--noprofile', '--norc'],
@@ -249,7 +267,8 @@ class WslSandboxBashSession {
     this.child = child;
     child.stdin.write('source ~/.nvm/nvm.sh 2>/dev/null\n');
     child.stdin.write('set +m\n');
-    await this.ensureSandboxNetworkProxy();
+    // LAN proxy is optional — never block bash startup on it.
+    void this.ensureSandboxNetworkProxy();
   }
 
   private async ensureSandboxNetworkProxy(): Promise<void> {
@@ -285,16 +304,20 @@ class WslSandboxBashSession {
     }
 
     active.request.onData(chunk);
-    this.buffer += chunk.toString();
+    this.buffer += chunk.toString().replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
-    const doneToken = `\n${MARKER_DONE}\n`;
-    const doneIndex = this.buffer.indexOf(doneToken);
+    const doneIndex = this.findDoneMarkerIndex(this.buffer);
     if (doneIndex < 0) {
       return;
     }
 
+    const doneTokenLength = this.buffer
+      .slice(doneIndex)
+      .startsWith(`\n${MARKER_DONE}\n`)
+      ? `\n${MARKER_DONE}\n`.length
+      : `\n${MARKER_DONE}`.length;
     const beforeDone = this.buffer.slice(0, doneIndex);
-    this.buffer = this.buffer.slice(doneIndex + doneToken.length);
+    this.buffer = this.buffer.slice(doneIndex + doneTokenLength);
 
     const exitMatch = beforeDone.match(new RegExp(`${MARKER_EXIT_PREFIX}(\\d+)\\s*$`, 'm'));
     const exitCode = exitMatch ? Number.parseInt(exitMatch[1] ?? '1', 10) : 1;
@@ -305,6 +328,21 @@ class WslSandboxBashSession {
     }
 
     active.resolve({ exitCode });
+  }
+
+  private findDoneMarkerIndex(buffer: string): number {
+    const withTrailingNewline = buffer.indexOf(`\n${MARKER_DONE}\n`);
+    if (withTrailingNewline >= 0) {
+      return withTrailingNewline;
+    }
+
+    const atEnd = buffer.lastIndexOf(`\n${MARKER_DONE}`);
+    if (atEnd < 0) {
+      return -1;
+    }
+
+    const afterMarker = buffer.slice(atEnd + `\n${MARKER_DONE}`.length);
+    return afterMarker.length === 0 || afterMarker.startsWith('\n') ? atEnd : -1;
   }
 
   private runActiveCommand(entry: {
@@ -353,13 +391,6 @@ class WslSandboxBashSession {
           reject(error);
         }
       });
-
-      if (entry.request.timeout !== undefined && entry.request.timeout > 0) {
-        this.activeTimeout = setTimeout(() => {
-          void this.terminateActive('timeout', entry.request.timeout);
-        }, entry.request.timeout * 1000);
-        this.activeTimeout.unref?.();
-      }
     });
   }
 

@@ -82,6 +82,36 @@ describe('wsl sandbox bash operations', () => {
     expect(Buffer.concat(chunks).toString()).toContain(sandboxPath);
   });
 
+  it('parses CRLF markers from WSL output', async () => {
+    const child = new FakeChildProcess();
+    const originalWrite = child.stdin.write;
+    child.stdin.write = vi.fn((script: string, cb?: (error?: Error | null) => void) => {
+      child.stdout.emit(
+        'data',
+        Buffer.from('test\r\n__OCOWORK_BASH_EXIT:0\r\n__OCOWORK_BASH_DONE__\r\n')
+      );
+      cb?.(null);
+      return true;
+    }) as typeof originalWrite;
+
+    const ops = createWslSandboxBashOperations({
+      distro: 'Ubuntu-24.04',
+      sandboxPath,
+      spawnProcess: createSpawnMock(child),
+    });
+
+    const chunks: Buffer[] = [];
+    const result = await ops.exec('echo test', '/workspace', {
+      onData: (chunk) => chunks.push(chunk as Buffer),
+      signal: undefined,
+      timeout: 30,
+      env: undefined,
+    });
+
+    expect(result.exitCode).toBe(0);
+    expect(Buffer.concat(chunks).toString()).toContain('test');
+  });
+
   it('rejects aborted commands', async () => {
     const child = new FakeChildProcess();
     const controller = new AbortController();
