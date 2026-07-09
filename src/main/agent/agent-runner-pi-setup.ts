@@ -242,8 +242,8 @@ export async function preparePiSessionRun({
   logTiming('before building conversation context', runStartTime);
   logCtx('[AgentRunner] Using pi-ai native routing for:', piModel.provider, piModel.id);
   const thinkingLevel: PreparedPiSessionRun['thinkingLevel'] =
-    (configStore.get('enableThinking') ?? false) ? 'medium' : 'off';
-  logCtx('[AgentRunner] Enable thinking mode:', thinkingLevel !== 'off');
+    (configStore.get('enableThinking') ?? false) ? configStore.get('thinkingLevel') : 'off';
+  logCtx('[AgentRunner] Enable thinking mode:', thinkingLevel);
 
   const sessionRuntimeSignature = buildPiSessionRuntimeSignature({
     configProvider: runtimeConfig.provider,

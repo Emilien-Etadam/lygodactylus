@@ -709,7 +709,14 @@
     "memoryNoRecall": "No relevant memory recalled for this turn",
     "memoryDisabledSession": "Memory disabled for this session",
     "memorySessionToggle": "Memory for session",
-    "memoryOpenSourceSession": "Open source session"
+    "memoryOpenSourceSession": "Open source session",
+    "thinkingToggle": "思考强度",
+    "thinkingLevels": {
+      "off": "关闭",
+      "low": "低",
+      "medium": "中",
+      "high": "高"
+    }
   },
   "context": {
     "progress": "进度",

@@ -14,6 +14,8 @@ import {
 
 export type ProviderType = 'openai' | 'anthropic';
 export type CustomProtocolType = 'anthropic' | 'openai';
+export const THINKING_LEVELS = ['low', 'medium', 'high'] as const;
+export type ThinkingLevel = (typeof THINKING_LEVELS)[number];
 export type AppTheme = 'dark' | 'light' | 'system';
 export type ProviderProfileKey = 'openai' | 'anthropic';
 export type ConfigSetId = string;
@@ -70,6 +72,7 @@ export interface AppConfig {
   memoryRuntime: MemoryRuntimeConfig;
   webSearch: WebSearchConfig;
   enableThinking: boolean;
+  thinkingLevel: ThinkingLevel;
   isConfigured: boolean;
 }
 
@@ -128,6 +131,7 @@ export const DIRECT_READ_KEYS = new Set<keyof AppConfig>([
   'memoryEnabled',
   'webSearch',
   'enableThinking',
+  'thinkingLevel',
   'isConfigured',
 ]);
 
@@ -236,6 +240,7 @@ export const defaultConfig: AppConfig = {
   },
   webSearch: { ...DEFAULT_WEB_SEARCH_CONFIG },
   enableThinking: false,
+  thinkingLevel: 'medium',
   isConfigured: false,
 };
 
@@ -253,6 +258,10 @@ export function isProfileKey(value: unknown): value is ProviderProfileKey {
 
 export function isAppTheme(value: unknown): value is AppTheme {
   return typeof value === 'string' && VALID_THEMES.includes(value as AppTheme);
+}
+
+export function isThinkingLevel(value: unknown): value is ThinkingLevel {
+  return typeof value === 'string' && THINKING_LEVELS.includes(value as ThinkingLevel);
 }
 
 function isMemoryModelRuntimeConfig(value: unknown): value is Partial<MemoryModelRuntimeConfig> {

@@ -749,8 +749,11 @@ export interface AppConfig {
   memoryRuntime?: MemoryRuntimeConfig;
   webSearch?: WebSearchConfig;
   enableThinking?: boolean;
+  thinkingLevel?: ThinkingLevel;
   isConfigured: boolean;
 }
+
+export type ThinkingLevel = 'low' | 'medium' | 'high';
 
 export type WebSearchProvider = 'duckduckgo' | 'searxng' | 'yacy';
 

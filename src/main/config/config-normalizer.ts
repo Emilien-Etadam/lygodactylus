@@ -17,6 +17,7 @@ import {
   isProfileKey,
   isProviderType,
   isAppTheme,
+  isThinkingLevel,
   normalizeMemoryRuntimeConfig,
   normalizeWebSearchConfig,
   nowISO,
@@ -369,6 +370,9 @@ export function normalizeConfig(rawConfig: Partial<AppConfig> | undefined): AppC
     memoryRuntime: normalizeMemoryRuntimeConfig(raw.memoryRuntime),
     webSearch: normalizeWebSearchConfig(raw.webSearch),
     enableThinking: projected.enableThinking,
+    thinkingLevel: isThinkingLevel(raw.thinkingLevel)
+      ? raw.thinkingLevel
+      : defaultConfig.thinkingLevel,
     isConfigured: toBoolean(raw.isConfigured, defaultConfig.isConfigured),
   };
   normalizeModelIds(result);

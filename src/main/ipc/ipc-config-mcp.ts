@@ -33,6 +33,7 @@ const buildAgentRuntimeSignature = (config: AppConfig): string =>
     customProtocol: config.customProtocol,
     model: config.model,
     enableThinking: config.enableThinking,
+    thinkingLevel: config.thinkingLevel,
     memoryEnabled: config.memoryEnabled,
     memoryRuntime: config.memoryRuntime,
   });
