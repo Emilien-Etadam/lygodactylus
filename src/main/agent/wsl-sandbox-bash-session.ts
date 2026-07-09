@@ -10,6 +10,7 @@ import { logError } from '../utils/logger';
 
 const MARKER_DONE = '__OCOWORK_BASH_DONE__';
 const MARKER_EXIT_PREFIX = '__OCOWORK_BASH_EXIT:';
+const MARKER_READY = '__OCOWORK_BASH_READY__';
 const DEFAULT_TERMINATION_GRACE_MS = 5000;
 const WSL_STARTUP_TIMEOUT_MS = 30_000;
 
@@ -106,6 +107,7 @@ class WslSandboxBashSession {
   private disposed = false;
   private draining = false;
   private proxyConfigured = false;
+  private readyState: { resolve: () => void; reject: (error: Error) => void } | undefined;
 
   constructor(
     private readonly options: Required<
@@ -192,13 +194,16 @@ class WslSandboxBashSession {
       }
 
       this.active = entry;
-      if (entry.request.timeout !== undefined && entry.request.timeout > 0) {
-        this.activeTimeout = setTimeout(() => {
-          void this.terminateActive('timeout', entry.request.timeout);
-        }, entry.request.timeout * 1000);
-      }
       try {
         await this.ensureChild();
+        // Arm the command timeout only once the shell is ready — cold WSL
+        // boots are bounded separately by WSL_STARTUP_TIMEOUT_MS and must
+        // not eat into the caller's per-command timeout budget.
+        if (entry.request.timeout !== undefined && entry.request.timeout > 0) {
+          this.activeTimeout = setTimeout(() => {
+            void this.terminateActive('timeout', entry.request.timeout);
+          }, entry.request.timeout * 1000);
+        }
         this.buffer = '';
         await this.runActiveCommand(entry);
       } catch (error) {
@@ -251,6 +256,8 @@ class WslSandboxBashSession {
       this.child = null;
       this.proxyConfigured = false;
       const error = new Error('WSL bash session closed unexpectedly');
+      this.readyState?.reject(error);
+      this.readyState = undefined;
       if (this.active) {
         this.active.reject(error);
         this.active = undefined;
@@ -258,6 +265,8 @@ class WslSandboxBashSession {
       this.queue.splice(0).forEach((entry) => entry.reject(error));
     });
     child.once('error', (error) => {
+      this.readyState?.reject(error);
+      this.readyState = undefined;
       if (this.active) {
         this.active.reject(error);
         this.active = undefined;
@@ -265,10 +274,20 @@ class WslSandboxBashSession {
     });
 
     this.child = child;
+    this.buffer = '';
+    const ready = new Promise<void>((resolve, reject) => {
+      this.readyState = { resolve, reject };
+    });
     child.stdin.write('source ~/.nvm/nvm.sh 2>/dev/null\n');
     child.stdin.write('set +m\n');
     // LAN proxy is optional — never block bash startup on it.
     void this.ensureSandboxNetworkProxy();
+    // Wait for bash to actually be alive and reading stdin (WSL2 cold boot
+    // can take several seconds) before signaling the session as usable —
+    // this is what WSL_STARTUP_TIMEOUT_MS bounds, kept separate from the
+    // caller's per-command timeout.
+    child.stdin.write(`echo ${MARKER_READY}\n`);
+    await ready;
   }
 
   private async ensureSandboxNetworkProxy(): Promise<void> {
@@ -298,6 +317,17 @@ class WslSandboxBashSession {
   }
 
   private handleOutput(chunk: Buffer): void {
+    if (this.readyState) {
+      this.buffer += chunk.toString().replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      if (this.buffer.includes(MARKER_READY)) {
+        this.buffer = '';
+        const { resolve } = this.readyState;
+        this.readyState = undefined;
+        resolve();
+      }
+      return;
+    }
+
     const active = this.active;
     if (!active) {
       return;
