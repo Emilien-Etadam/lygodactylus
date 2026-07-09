@@ -11,7 +11,7 @@ import * as path from 'path';
 import { URL } from 'url';
 import { app } from 'electron';
 import type { IncomingMessage, ServerResponse } from 'http';
-import type { PermissionResult, ServerEvent } from '../../renderer/types';
+import type { ClientEvent, PermissionResult, ServerEvent } from '../../renderer/types';
 import { log, logError } from '../utils/logger';
 import { mainAppState } from '../main-app-state';
 import { configStore } from '../config/config-store';
@@ -20,6 +20,9 @@ import { chatLanConfigStore } from './chat-lan-config-store';
 import { subscribeChatLanEvents } from './chat-lan-event-bus';
 import { applyChatLanSecurityHeaders, isChatLanAuthorized } from './chat-lan-auth';
 import { handleWebAction } from './web-action';
+import { handleChatLanRpc, isAllowedRpcChannel } from './chat-lan-rpc';
+import { handleClientEvent } from '../main-client-events';
+import { isAllowedClientEvent } from '../../shared/client-event-allowlist';
 
 const BIND_HOST = '0.0.0.0';
 const MAX_BODY_BYTES = 1024 * 1024;
@@ -59,6 +62,37 @@ export const STATIC_FILES: Record<string, { file: string; type: string; cache: s
     type: 'image/png',
     cache: 'public, max-age=86400',
   },
+};
+
+/**
+ * CSP for the full React renderer served under /app/ — mirrors the meta CSP
+ * in the app's index.html (Google Fonts, KaTeX CDN fonts, data/blob images).
+ */
+const APP_CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'wasm-unsafe-eval'",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net",
+  "img-src 'self' data: blob:",
+  "connect-src 'self'",
+].join('; ');
+
+const APP_MIME_TYPES: Record<string, string> = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json',
+  '.map': 'application/json',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
+  '.txt': 'text/plain; charset=utf-8',
+  '.wasm': 'application/wasm',
 };
 
 export interface ChatLanStatus {
@@ -171,6 +205,82 @@ function resolveChatLanUiDir(): string {
   throw new Error(
     `Chat LAN UI directory not found (tried: ${getChatLanUiDirCandidates().join(', ')})`
   );
+}
+
+/** Candidate paths for the built React renderer (dev + packaged). */
+export function getRendererDistCandidates(options?: {
+  isPackaged?: boolean;
+  appPath?: string;
+  cwd?: string;
+  moduleDir?: string;
+}): string[] {
+  const isPackaged = options?.isPackaged ?? app.isPackaged;
+  const appPath = options?.appPath ?? app.getAppPath();
+  const cwd = options?.cwd ?? process.cwd();
+  const moduleDir = options?.moduleDir ?? __dirname;
+
+  const candidates: string[] = [];
+  if (isPackaged) {
+    candidates.push(path.join(appPath, 'dist'));
+  }
+  candidates.push(
+    path.join(cwd, 'dist'),
+    path.join(moduleDir, '../../../dist'),
+    path.join(moduleDir, '../../../../dist')
+  );
+  return candidates;
+}
+
+function resolveRendererDistDir(): string | null {
+  for (const candidate of getRendererDistCandidates()) {
+    if (fs.existsSync(path.join(candidate, 'index.html'))) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
+/**
+ * Serve the full React renderer under /app/. Assets resolve inside the dist
+ * directory only (normalized + prefix-checked); anything without a file
+ * extension falls back to index.html (SPA routing).
+ */
+function serveAppUi(res: ServerResponse, pathname: string): void {
+  const distDir = resolveRendererDistDir();
+  if (!distDir) {
+    applyChatLanSecurityHeaders(res);
+    res.writeHead(503, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Full web UI unavailable: renderer build (dist/) not found');
+    return;
+  }
+
+  const relative = pathname.replace(/^\/app\/?/, '');
+  const ext = path.extname(relative).toLowerCase();
+  const target = ext
+    ? path.normalize(path.join(distDir, relative))
+    : path.join(distDir, 'index.html');
+
+  if (!target.startsWith(distDir + path.sep) && target !== path.join(distDir, 'index.html')) {
+    json(res, 404, { error: 'not_found' });
+    return;
+  }
+
+  try {
+    const content = fs.readFileSync(target);
+    applyChatLanSecurityHeaders(
+      res,
+      // Hashed assets are immutable; html must revalidate.
+      ext && ext !== '.html' ? 'public, max-age=86400' : 'no-cache'
+    );
+    res.setHeader('Content-Security-Policy', APP_CSP);
+    res.writeHead(200, {
+      'Content-Type': APP_MIME_TYPES[ext || '.html'] || 'application/octet-stream',
+      'Content-Length': content.length,
+    });
+    res.end(content);
+  } catch {
+    json(res, 404, { error: 'not_found' });
+  }
 }
 
 function serveStaticFile(res: ServerResponse, pathname: string): void {
@@ -298,6 +408,48 @@ async function handleApi(req: IncomingMessage, res: ServerResponse, url: URL): P
     return;
   }
 
+  // Bridge for the full React web UI: same ClientEvent surface as Electron
+  // IPC (validated against the shared allowlist), same dispatcher.
+  if (method === 'POST' && url.pathname === '/api/bridge/event') {
+    const raw = await readBody(req);
+    const event = raw ? JSON.parse(raw) : null;
+    if (!isAllowedClientEvent(event)) {
+      json(res, 400, { error: 'invalid_client_event' });
+      return;
+    }
+    void handleClientEvent(event as ClientEvent).catch((error) => {
+      logError('[ChatLan] Bridge event failed:', error);
+    });
+    json(res, 200, { ok: true });
+    return;
+  }
+
+  if (method === 'POST' && url.pathname === '/api/bridge/invoke') {
+    const raw = await readBody(req);
+    const event = raw ? JSON.parse(raw) : null;
+    if (!isAllowedClientEvent(event)) {
+      json(res, 400, { error: 'invalid_client_event' });
+      return;
+    }
+    const result = await handleClientEvent(event as ClientEvent);
+    json(res, 200, { result: result ?? null });
+    return;
+  }
+
+  // Allowlisted namespaced RPC (get-version, plugins.listCommands, ...).
+  if (method === 'POST' && url.pathname === '/api/rpc') {
+    const raw = await readBody(req);
+    const body = raw ? JSON.parse(raw) : {};
+    if (!isAllowedRpcChannel(body.channel)) {
+      json(res, 403, { error: 'rpc_channel_not_allowed' });
+      return;
+    }
+    const args = Array.isArray(body.args) ? body.args : [];
+    const result = await handleChatLanRpc(body.channel, args);
+    json(res, 200, { result: result ?? null });
+    return;
+  }
+
   if (method === 'GET' && url.pathname === '/api/events') {
     applyChatLanSecurityHeaders(res);
     res.writeHead(200, {
@@ -335,6 +487,18 @@ async function onRequest(req: IncomingMessage, res: ServerResponse): Promise<voi
 
     if (Object.prototype.hasOwnProperty.call(STATIC_FILES, url.pathname)) {
       serveStaticFile(res, url.pathname);
+      return;
+    }
+
+    if (url.pathname === '/app') {
+      applyChatLanSecurityHeaders(res);
+      res.writeHead(301, { Location: '/app/' });
+      res.end();
+      return;
+    }
+
+    if (url.pathname.startsWith('/app/')) {
+      serveAppUi(res, url.pathname);
       return;
     }
 

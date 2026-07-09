@@ -3,7 +3,7 @@
 /* App-shell cache only. Chat data (/api/*) is always network — caching it
  * would show stale conversations and break SSE. Bump the version when any
  * shell file changes, otherwise HTTPS/installed clients keep the old shell. */
-const CACHE_NAME = 'lygo-chat-shell-v1';
+const CACHE_NAME = 'lygo-chat-shell-v2';
 const SHELL = [
   '/',
   '/app.js',
@@ -30,7 +30,13 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-  if (event.request.method !== 'GET' || url.pathname.startsWith('/api/')) {
+  // /app/ is the full React UI (own hashed assets, must stay fresh) — only
+  // the lightweight shell is cached for offline.
+  if (
+    event.request.method !== 'GET' ||
+    url.pathname.startsWith('/api/') ||
+    url.pathname.startsWith('/app')
+  ) {
     return;
   }
 

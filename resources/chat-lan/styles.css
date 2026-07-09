@@ -189,6 +189,15 @@ button.danger { background: var(--danger); }
 .perm-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
 .hidden { display: none !important; }
 #newSessionBtn { margin-left: auto; }
+.full-ui-link {
+  color: var(--accent);
+  font-size: 0.8rem;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.full-ui-link:hover { background: #1f2430; }
 
 @media (max-width: 700px) {
   main { grid-template-columns: 1fr; }

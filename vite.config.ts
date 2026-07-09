@@ -16,6 +16,9 @@ const ignoredWatchPaths = [
 ];
 
 export default defineConfig({
+  // Relative asset URLs: required for Electron's file:// loading and lets the
+  // Chat LAN server serve the same build under /app/ for the remote web UI.
+  base: './',
   plugins: [
     react(),
     electron([

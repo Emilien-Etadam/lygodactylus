@@ -56,6 +56,7 @@
 
 - **LAN chat** — local web server to talk to the agent from a browser (Settings → Chat LAN; recommended over WireGuard VPN)
 - **Mobile Companion (PWA)** — the Chat LAN UI is a PWA: pair your phone with a **QR code** (Settings → Chat LAN), "Add to Home Screen" on Android, automatic stream reconnection when the app returns to the foreground. Behind an **HTTPS reverse proxy** (e.g. Nginx Proxy Manager, via the "Public URL" field) it installs as a real app (fullscreen, offline shell). Over plain HTTP (LAN/WireGuard), Add to Home Screen creates a shortcut without offline mode. On the proxy side: disable response buffering (the SSE stream sends a keep-alive every 25 s) and use long read timeouts.
+- **Full remote UI (`/app/`)** — beyond the light chat, the desktop's full React interface is served at `http://host:port/app/` ("Full interface" link in the light chat, same token): real-time streaming with thinking and tool traces, interactive permissions and questions, plugin slash commands, message fork/edit, context panel. Sensitive channels stay blocked server-side (allowlist): no API key reads (redacted config), no remote changes to configuration, sandbox, plugins or schedules. The Settings panels are therefore non-functional there — by design.
 - **Sandbox LAN network (v5.8+)** — reach local network services from the sandbox without disabling it: authenticated host proxy (opt-in in Settings), RFC1918 filtering; `http_request` and `web_fetch` with custom headers via the host network stack
 
 ### Distribution

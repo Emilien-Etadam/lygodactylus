@@ -3,10 +3,17 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const isMac = typeof window !== 'undefined' && window.electronAPI?.platform === 'darwin';
+const isBrowser =
+  typeof window !== 'undefined' && (window.electronAPI?.platform as string) === 'browser';
 
 export function Titlebar() {
   const { t } = useTranslation();
   const [isMaximized, setIsMaximized] = useState(false);
+
+  // Served over the Chat LAN bridge: no window to minimize/maximize/close.
+  if (isBrowser) {
+    return null;
+  }
 
   const handleMinimize = () => {
     window.electronAPI?.window.minimize();
