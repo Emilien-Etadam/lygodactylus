@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.4] - 2026-07-09
+
+### Fixed
+
+- **Sandbox WSL / bash** : timeouts systématiques (même sur `echo test`) — le timer de timeout par commande démarrait avant que le shell WSL persistant confirme qu'il était prêt à lire stdin, donc un démarrage à froid de la VM WSL2 (fréquent après ~8s d'inactivité) consommait tout le budget du timeout ; pire, le timeout tuait le process WSL, provoquant un nouveau démarrage à froid en boucle pour chaque commande suivante. Ajout d'un handshake de disponibilité explicite avant d'armer le timer de la commande.
+
 ## [6.0.3] - 2026-07-08
 
 ### Added
