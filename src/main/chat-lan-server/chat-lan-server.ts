@@ -23,6 +23,43 @@ import { handleWebAction } from './web-action';
 
 const BIND_HOST = '0.0.0.0';
 const MAX_BODY_BYTES = 1024 * 1024;
+const SSE_KEEPALIVE_MS = 25000;
+
+/**
+ * Whitelisted static assets (PWA shell). No dynamic path resolution — anything
+ * not listed here 404s, so path traversal is structurally impossible. Static
+ * routes are unauthenticated like `/` always was: they are the login shell,
+ * the API stays token-gated.
+ */
+export const STATIC_FILES: Record<string, { file: string; type: string; cache: string }> = {
+  '/': { file: 'index.html', type: 'text/html; charset=utf-8', cache: 'no-cache' },
+  '/index.html': { file: 'index.html', type: 'text/html; charset=utf-8', cache: 'no-cache' },
+  '/app.js': { file: 'app.js', type: 'text/javascript; charset=utf-8', cache: 'no-cache' },
+  '/styles.css': { file: 'styles.css', type: 'text/css; charset=utf-8', cache: 'no-cache' },
+  '/sw.js': { file: 'sw.js', type: 'text/javascript; charset=utf-8', cache: 'no-cache' },
+  '/manifest.webmanifest': {
+    file: 'manifest.webmanifest',
+    type: 'application/manifest+json',
+    cache: 'public, max-age=3600',
+  },
+  '/icons/icon-192.png': { file: 'icons/icon-192.png', type: 'image/png', cache: 'public, max-age=86400' },
+  '/icons/icon-512.png': { file: 'icons/icon-512.png', type: 'image/png', cache: 'public, max-age=86400' },
+  '/icons/apple-touch-icon.png': {
+    file: 'icons/apple-touch-icon.png',
+    type: 'image/png',
+    cache: 'public, max-age=86400',
+  },
+  '/icons/maskable-192.png': {
+    file: 'icons/maskable-192.png',
+    type: 'image/png',
+    cache: 'public, max-age=86400',
+  },
+  '/icons/maskable-512.png': {
+    file: 'icons/maskable-512.png',
+    type: 'image/png',
+    cache: 'public, max-age=86400',
+  },
+};
 
 export interface ChatLanStatus {
   running: boolean;
@@ -92,8 +129,8 @@ function broadcastSse(event: ServerEvent): void {
   }
 }
 
-/** Candidate paths for the LAN chat static UI (dev + packaged). */
-export function getChatLanUiPathCandidates(options?: {
+/** Candidate paths for the LAN chat static UI directory (dev + packaged). */
+export function getChatLanUiDirCandidates(options?: {
   isPackaged?: boolean;
   resourcesPath?: string;
   appPath?: string;
@@ -109,45 +146,52 @@ export function getChatLanUiPathCandidates(options?: {
   const candidates: string[] = [];
 
   if (isPackaged && resourcesPath) {
-    candidates.push(path.join(resourcesPath, 'chat-lan', 'index.html'));
+    candidates.push(path.join(resourcesPath, 'chat-lan'));
   }
 
   if (isPackaged) {
-    candidates.push(path.join(appPath, 'resources', 'chat-lan', 'index.html'));
+    candidates.push(path.join(appPath, 'resources', 'chat-lan'));
   }
 
   candidates.push(
-    path.join(cwd, 'resources', 'chat-lan', 'index.html'),
-    path.join(moduleDir, '../../../resources/chat-lan/index.html'),
-    path.join(moduleDir, '../../../../resources/chat-lan/index.html')
+    path.join(cwd, 'resources', 'chat-lan'),
+    path.join(moduleDir, '../../../resources/chat-lan'),
+    path.join(moduleDir, '../../../../resources/chat-lan')
   );
 
   return candidates;
 }
 
-function resolveChatLanUiPath(): string {
-  for (const candidate of getChatLanUiPathCandidates()) {
-    if (fs.existsSync(candidate)) {
-      log(`[ChatLan] UI path: ${candidate}`);
+function resolveChatLanUiDir(): string {
+  for (const candidate of getChatLanUiDirCandidates()) {
+    if (fs.existsSync(path.join(candidate, 'index.html'))) {
       return candidate;
     }
   }
   throw new Error(
-    `Chat LAN UI file not found (tried: ${getChatLanUiPathCandidates().join(', ')})`
+    `Chat LAN UI directory not found (tried: ${getChatLanUiDirCandidates().join(', ')})`
   );
 }
 
-function serveChatUi(res: ServerResponse): void {
+function serveStaticFile(res: ServerResponse, pathname: string): void {
+  const entry = STATIC_FILES[pathname];
+  if (!entry) {
+    json(res, 404, { error: 'not_found' });
+    return;
+  }
   try {
-    const html = fs.readFileSync(resolveChatLanUiPath(), 'utf8');
-    applyChatLanSecurityHeaders(res);
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(html);
+    const content = fs.readFileSync(path.join(resolveChatLanUiDir(), entry.file));
+    applyChatLanSecurityHeaders(res, entry.cache);
+    res.writeHead(200, {
+      'Content-Type': entry.type,
+      'Content-Length': content.length,
+    });
+    res.end(content);
   } catch (error) {
-    logError('[ChatLan] Failed to load UI:', error);
+    logError(`[ChatLan] Failed to serve ${pathname}:`, error);
     applyChatLanSecurityHeaders(res);
-    res.writeHead(500);
-    res.end('Chat UI missing');
+    res.writeHead(entry.file === 'index.html' ? 500 : 404);
+    res.end(entry.file === 'index.html' ? 'Chat UI missing' : 'Not found');
   }
 }
 
@@ -259,10 +303,25 @@ async function handleApi(req: IncomingMessage, res: ServerResponse, url: URL): P
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       Connection: 'keep-alive',
+      // Nginx (Proxy Manager) buffers responses by default, which stalls SSE.
+      'X-Accel-Buffering': 'no',
     });
     res.write('\n');
     sseClients.add(res);
-    req.on('close', () => sseClients.delete(res));
+    // Periodic comments keep the stream alive through proxy timeouts and let
+    // Android clients detect dead connections instead of waiting forever.
+    const keepAlive = setInterval(() => {
+      try {
+        res.write(': ping\n\n');
+      } catch {
+        clearInterval(keepAlive);
+        sseClients.delete(res);
+      }
+    }, SSE_KEEPALIVE_MS);
+    req.on('close', () => {
+      clearInterval(keepAlive);
+      sseClients.delete(res);
+    });
     return;
   }
 
@@ -274,8 +333,8 @@ async function onRequest(req: IncomingMessage, res: ServerResponse): Promise<voi
     const host = req.headers.host || 'localhost';
     const url = new URL(req.url || '/', `http://${host}`);
 
-    if (url.pathname === '/' || url.pathname === '/index.html') {
-      serveChatUi(res);
+    if (Object.prototype.hasOwnProperty.call(STATIC_FILES, url.pathname)) {
+      serveStaticFile(res, url.pathname);
       return;
     }
 

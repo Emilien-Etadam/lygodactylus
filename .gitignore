@@ -104,3 +104,4 @@ DEV_LOG.md
 !src/renderer/assets/*.png
 !public/*.png
 !resources/social-preview.png
+!resources/chat-lan/icons/*.png

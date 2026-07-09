@@ -139,7 +139,7 @@ Current stable fork baseline: **`6.0.2`** — [CHANGELOG](CHANGELOG.md)
 
 - **Computer Use (CUA)**: GUI automation via screen capture and mouse/keyboard control (GUI MCP server already provides foundation)
 - **Collaborative Mode**: Multiple users sharing a workspace
-- **Mobile Companion**: Lightweight mobile app for monitoring and quick interactions
+- **Mobile Companion**: Lightweight mobile app for monitoring and quick interactions — **first step done**: the Chat LAN web UI is now an installable PWA (QR pairing, Android home-screen install, SSE auto-reconnect, reverse-proxy/HTTPS support); a richer client may follow
 
 ---
 

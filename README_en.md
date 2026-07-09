@@ -55,6 +55,7 @@
 ### Network & sandbox
 
 - **LAN chat** — local web server to talk to the agent from a browser (Settings → Chat LAN; recommended over WireGuard VPN)
+- **Mobile Companion (PWA)** — the Chat LAN UI is a PWA: pair your phone with a **QR code** (Settings → Chat LAN), "Add to Home Screen" on Android, automatic stream reconnection when the app returns to the foreground. Behind an **HTTPS reverse proxy** (e.g. Nginx Proxy Manager, via the "Public URL" field) it installs as a real app (fullscreen, offline shell). Over plain HTTP (LAN/WireGuard), Add to Home Screen creates a shortcut without offline mode. On the proxy side: disable response buffering (the SSE stream sends a keep-alive every 25 s) and use long read timeouts.
 - **Sandbox LAN network (v5.8+)** — reach local network services from the sandbox without disabling it: authenticated host proxy (opt-in in Settings), RFC1918 filtering; `http_request` and `web_fetch` with custom headers via the host network stack
 
 ### Distribution

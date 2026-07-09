@@ -55,6 +55,7 @@
 ### Réseau & sandbox
 
 - **Chat LAN** — serveur web local pour discuter avec l'agent depuis un navigateur (Réglages → Chat LAN ; recommandé via VPN WireGuard)
+- **Mobile Companion (PWA)** — l'interface Chat LAN est une PWA : appairage du téléphone par **QR code** (Réglages → Chat LAN), « Ajouter à l'écran d'accueil » sur Android, reconnexion automatique du flux quand l'app revient au premier plan. Derrière un **reverse proxy HTTPS** (ex. Nginx Proxy Manager, via le champ « URL publique »), elle s'installe comme une vraie application (plein écran, shell hors-ligne). En HTTP simple (LAN/WireGuard), l'ajout à l'écran d'accueil crée un raccourci sans mode hors-ligne. Côté proxy : désactivez le buffering des réponses (le flux SSE envoie un keep-alive toutes les 25 s) et prévoyez des timeouts de lecture longs.
 - **Extension Firefox Lygodactylus Web** — traduction, résumé et prompts sur les pages web via le Chat LAN : voir [extension/README.md](extension/README.md)
 - **Sandbox LAN network (v5.8+)** — accès réseau local depuis le sandbox sans le désactiver : proxy hôte authentifié (opt-in Réglages), filtrage RFC1918 ; `http_request` et `web_fetch` avec en-têtes personnalisés via la pile réseau hôte
 

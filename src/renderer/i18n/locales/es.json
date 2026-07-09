@@ -1062,6 +1062,11 @@
     "extensionTokenRegenerated": "New extension token generated",
     "urls": "Open in browser (local network)",
     "wireguardHint": "From another device on WireGuard, use the IP address shown above.",
-    "saved": "Settings saved"
+    "saved": "Settings saved",
+    "publicUrl": "URL pública (reverse proxy)",
+    "publicUrlHint": "URL HTTPS externa cuando el servidor está detrás de un reverse proxy (p. ej. Nginx Proxy Manager). Con HTTPS la interfaz se instala como una app real (PWA).",
+    "qrTitle": "Emparejamiento móvil (código QR)",
+    "qrHint": "Escanéalo con tu teléfono para conectarte al instante. El QR contiene el token de acceso: no lo compartas.",
+    "installHint": "En Android: menú de Chrome → «Añadir a pantalla de inicio». Con una URL HTTPS la app se instala a pantalla completa con soporte sin conexión."
   }
 }

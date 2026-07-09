@@ -64,6 +64,7 @@ Out of scope:
 - Review marketplace extensions before installing; MCP stdio servers run local code.
 - Use **Chat LAN** only over a trusted network path (e.g. WireGuard VPN). Disable it when not needed; regenerate the token if it may have leaked.
 - Prefer the built-in Chat LAN UI (Bearer token in headers). Query-string tokens are supported for compatibility but are easier to leak in logs.
+- The **mobile pairing QR code** (Settings → Chat LAN) embeds the access token in the URL for one-scan sign-in. The token transits once as a query parameter (the web UI strips it from the address bar immediately and stores it locally). Only display or scan the QR on trusted devices/networks; regenerate the token if the QR may have been seen by others.
 - Enable sandbox isolation when running untrusted agent operations.
 - **Sandbox LAN network** is **disabled by default**. Enable it only when the agent must reach trusted LAN services (e.g. local APIs). The host proxy forwards **RFC1918 / link-local targets only**; loopback and public internet remain blocked through the proxy. Prefer `http_request` (host stack) for authenticated APIs instead of embedding secrets in sandbox shell commands.
 - Configure **memory injection policy** conservatively (`block` or `strip-suspicious`) if memory content may come from untrusted sessions or external sources.

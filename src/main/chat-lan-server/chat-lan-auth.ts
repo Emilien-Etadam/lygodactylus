@@ -48,10 +48,11 @@ export function isWebActionAuthorized(req: IncomingMessage): boolean {
   return Boolean(provided && expected && timingSafeEqualString(provided, expected));
 }
 
-export function applyChatLanSecurityHeaders(res: ServerResponse): void {
+/** cacheControl may only be relaxed for static assets — API responses must stay no-store. */
+export function applyChatLanSecurityHeaders(res: ServerResponse, cacheControl = 'no-store'): void {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Referrer-Policy', 'no-referrer');
-  res.setHeader('Cache-Control', 'no-store');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; style-src 'unsafe-inline'");
+  res.setHeader('Cache-Control', cacheControl);
+  res.setHeader('Content-Security-Policy', "default-src 'self'; style-src 'self' 'unsafe-inline'");
 }

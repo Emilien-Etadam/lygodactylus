@@ -1062,6 +1062,11 @@
     "extensionTokenRegenerated": "New extension token generated",
     "urls": "Open in browser (local network)",
     "wireguardHint": "From another device on WireGuard, use the IP address shown above.",
-    "saved": "Settings saved"
+    "saved": "Settings saved",
+    "publicUrl": "URL public (reverse proxy)",
+    "publicUrlHint": "URL HTTPS extern când serverul este în spatele unui reverse proxy (ex. Nginx Proxy Manager). Prin HTTPS interfața se instalează ca o aplicație reală (PWA).",
+    "qrTitle": "Asociere mobilă (cod QR)",
+    "qrHint": "Scanează cu telefonul pentru a te conecta instantaneu. Codul QR conține tokenul de acces: nu îl distribui.",
+    "installHint": "Pe Android: meniul Chrome → „Adaugă la ecranul de pornire”. Printr-un URL HTTPS aplicația se instalează pe tot ecranul cu suport offline."
   }
 }

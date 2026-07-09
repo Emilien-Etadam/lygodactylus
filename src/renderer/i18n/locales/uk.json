@@ -1062,6 +1062,11 @@
     "extensionTokenRegenerated": "New extension token generated",
     "urls": "Open in browser (local network)",
     "wireguardHint": "From another device on WireGuard, use the IP address shown above.",
-    "saved": "Settings saved"
+    "saved": "Settings saved",
+    "publicUrl": "Публічна URL-адреса (reverse proxy)",
+    "publicUrlHint": "Зовнішня HTTPS-адреса, якщо сервер стоїть за reverse proxy (напр. Nginx Proxy Manager). Через HTTPS вебінтерфейс встановлюється як справжній застосунок (PWA).",
+    "qrTitle": "Мобільне під'єднання (QR-код)",
+    "qrHint": "Відскануйте телефоном, щоб миттєво увійти. QR-код містить токен доступу: не діліться ним.",
+    "installHint": "На Android: меню Chrome → «Додати на головний екран». Через HTTPS-адресу застосунок встановлюється на весь екран із підтримкою офлайн."
   }
 }

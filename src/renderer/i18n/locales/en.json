@@ -129,7 +129,12 @@
     "extensionTokenRegenerated": "New extension token generated",
     "urls": "Open in browser (local network)",
     "wireguardHint": "Recommended: access via your WireGuard tunnel (not public Wi‑Fi). The token is sent in the Authorization header, not the URL.",
-    "saved": "Settings saved"
+    "saved": "Settings saved",
+    "publicUrl": "Public URL (reverse proxy)",
+    "publicUrlHint": "External HTTPS URL when the server sits behind a reverse proxy (e.g. Nginx Proxy Manager). Over HTTPS the web UI installs as a real app (PWA).",
+    "qrTitle": "Mobile pairing (QR code)",
+    "qrHint": "Scan with your phone to sign in instantly. The QR embeds the access token: do not share it.",
+    "installHint": "On Android: Chrome menu → “Add to Home Screen”. Over an HTTPS URL the app installs fullscreen with offline support."
   },
   "memory": {
     "title": "Memory",

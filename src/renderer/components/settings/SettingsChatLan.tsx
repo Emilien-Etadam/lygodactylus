@@ -1,12 +1,14 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Copy, Loader2, RefreshCw, Wifi } from 'lucide-react';
+import { Copy, Loader2, QrCode, RefreshCw, Smartphone, Wifi } from 'lucide-react';
+import QRCode from 'qrcode';
 
 interface ChatLanConfig {
   enabled: boolean;
   port: number;
   token: string;
   extensionToken: string;
+  publicUrl: string;
 }
 
 interface ChatLanStatus {
@@ -21,8 +23,11 @@ export function SettingsChatLan() {
   const [config, setConfig] = useState<ChatLanConfig | null>(null);
   const [status, setStatus] = useState<ChatLanStatus | null>(null);
   const [portInput, setPortInput] = useState('19890');
+  const [publicUrlInput, setPublicUrlInput] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     const [nextConfig, nextStatus] = await Promise.all([
@@ -32,13 +37,45 @@ export function SettingsChatLan() {
     setConfig(nextConfig);
     setStatus(nextStatus);
     setPortInput(String(nextConfig.port));
+    setPublicUrlInput(nextConfig.publicUrl);
   }, []);
 
   useEffect(() => {
     void refresh();
   }, [refresh]);
 
-  const applyConfig = async (patch: { enabled?: boolean; port?: number }) => {
+  const pairingUrls = useMemo(() => {
+    const urls: string[] = [];
+    if (config?.publicUrl) {
+      urls.push(config.publicUrl + '/');
+    }
+    if (status?.running) {
+      urls.push(...status.urls);
+    }
+    return urls;
+  }, [config?.publicUrl, status]);
+
+  useEffect(() => {
+    if (pairingUrls.length > 0 && (!qrUrl || !pairingUrls.includes(qrUrl))) {
+      setQrUrl(pairingUrls[0]);
+    }
+    if (pairingUrls.length === 0) {
+      setQrUrl(null);
+    }
+  }, [pairingUrls, qrUrl]);
+
+  useEffect(() => {
+    if (!qrUrl || !config?.token) {
+      setQrDataUrl(null);
+      return;
+    }
+    const target = `${qrUrl}?token=${encodeURIComponent(config.token)}`;
+    QRCode.toDataURL(target, { margin: 1, width: 220 })
+      .then(setQrDataUrl)
+      .catch(() => setQrDataUrl(null));
+  }, [qrUrl, config?.token]);
+
+  const applyConfig = async (patch: { enabled?: boolean; port?: number; publicUrl?: string }) => {
     setIsSaving(true);
     setMessage(null);
     try {
@@ -197,6 +234,28 @@ export function SettingsChatLan() {
         </div>
       </div>
 
+      <div className="grid gap-2 max-w-xl">
+        <label className="text-xs text-text-muted">{t('chatLan.publicUrl')}</label>
+        <div className="flex gap-2">
+          <input
+            type="url"
+            value={publicUrlInput}
+            onChange={(e) => setPublicUrlInput(e.target.value)}
+            placeholder="https://chat.example.com"
+            className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-text-primary font-mono text-xs"
+          />
+          <button
+            type="button"
+            disabled={isSaving}
+            onClick={() => void applyConfig({ publicUrl: publicUrlInput })}
+            className="px-3 py-2 rounded-lg bg-accent text-white text-sm font-medium"
+          >
+            {t('common.save')}
+          </button>
+        </div>
+        <p className="text-[11px] text-text-muted">{t('chatLan.publicUrlHint')}</p>
+      </div>
+
       {status?.running && status.urls.length > 0 && (
         <div className="rounded-lg border border-border-muted bg-background-secondary/50 p-3 space-y-1">
           <p className="text-xs font-medium text-text-primary">{t('chatLan.urls')}</p>
@@ -206,6 +265,40 @@ export function SettingsChatLan() {
             </p>
           ))}
           <p className="text-[11px] text-text-muted pt-1">{t('chatLan.wireguardHint')}</p>
+        </div>
+      )}
+
+      {pairingUrls.length > 0 && config.token && (
+        <div className="rounded-lg border border-border-muted bg-background-secondary/50 p-3 space-y-2">
+          <p className="text-xs font-medium text-text-primary flex items-center gap-1.5">
+            <QrCode className="w-3.5 h-3.5" />
+            {t('chatLan.qrTitle')}
+          </p>
+          {pairingUrls.length > 1 && (
+            <select
+              value={qrUrl ?? ''}
+              onChange={(e) => setQrUrl(e.target.value)}
+              className="w-full max-w-sm px-2 py-1.5 rounded-lg bg-background border border-border text-text-primary font-mono text-xs"
+            >
+              {pairingUrls.map((url) => (
+                <option key={url} value={url}>
+                  {url}
+                </option>
+              ))}
+            </select>
+          )}
+          {qrDataUrl && (
+            <img
+              src={qrDataUrl}
+              alt={t('chatLan.qrTitle')}
+              className="rounded-lg bg-white p-1 w-[180px] h-[180px]"
+            />
+          )}
+          <p className="text-[11px] text-text-muted">{t('chatLan.qrHint')}</p>
+          <p className="text-[11px] text-text-muted flex items-center gap-1.5">
+            <Smartphone className="w-3.5 h-3.5 shrink-0" />
+            {t('chatLan.installHint')}
+          </p>
         </div>
       )}
 

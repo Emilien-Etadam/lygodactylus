@@ -1062,6 +1062,11 @@
     "extensionTokenRegenerated": "New extension token generated",
     "urls": "Open in browser (local network)",
     "wireguardHint": "From another device on WireGuard, use the IP address shown above.",
-    "saved": "Settings saved"
+    "saved": "Settings saved",
+    "publicUrl": "Offentlig URL (omvendt proxy)",
+    "publicUrlHint": "Ekstern HTTPS-URL når serveren står bak en omvendt proxy (f.eks. Nginx Proxy Manager). Over HTTPS installeres web-grensesnittet som en ekte app (PWA).",
+    "qrTitle": "Mobil sammenkobling (QR-kode)",
+    "qrHint": "Skann med telefonen for å logge inn umiddelbart. QR-koden inneholder tilgangstokenet: ikke del den.",
+    "installHint": "På Android: Chrome-menyen → «Legg til på startskjermen». Via en HTTPS-URL installeres appen i fullskjerm med frakoblet støtte."
   }
 }
