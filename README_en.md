@@ -42,6 +42,7 @@
 - **Simplified API config** — two profiles: OpenAI-compatible and Anthropic-compatible
 - **Automatic model detection** for remote API endpoints
 - **Proactive compaction** — auto-compact when context is nearly full
+- **Tool-call guard** — automatic retry when a local model (e.g. Qwen) emits a tool call as `<tool_call>`/`<function=…>` text instead of a structured call: see [docs/qwen-local-reliability.md](docs/qwen-local-reliability.md) (French)
 - **Message fork / edit** — start a new session from a message or edit a user prompt
 - **Slash commands** — `/` autocomplete in chat, including commands from installed plugins
 - **VS Code theme**, **copy/paste** on Windows, **sandbox toggle**, **pi-coding-agent 0.80.2** (`@earendil-works`)

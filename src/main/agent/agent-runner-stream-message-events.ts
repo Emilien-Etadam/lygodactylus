@@ -338,6 +338,26 @@ export function handleMessageEndEvent(
     if (deps.controller.signal.aborted) {
       return;
     }
+  } else {
+    // Turn ended with no structured tool call — check whether the model wrote
+    // the call out as plain text (Qwen-style <tool_call>/<function=...> drift)
+    // and, if so, nudge it to retry through the real tool-call mechanism.
+    let turnText = '';
+    let turnThinking = '';
+    for (const block of resolvedPayload.effectiveContent) {
+      if (block.type === 'text') {
+        turnText += `${block.text}\n`;
+      } else if (block.type === 'thinking') {
+        turnThinking += `${block.thinking}\n`;
+      }
+    }
+    deps.handleHallucinatedToolCallDecision(
+      deps.hallucinatedToolCallGuard.inspectTurn({
+        text: turnText,
+        thinking: turnThinking,
+        structuredToolCallCount: 0,
+      })
+    );
   }
 
   if (contentBlocks.length === 0) {
