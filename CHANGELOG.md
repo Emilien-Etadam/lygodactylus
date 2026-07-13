@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Tool-call guard** : détection des tool calls « hallucinés » en texte par les modèles locaux (ex. Qwen3.x à contexte profond) — appel émis en balises `<tool_call>`/`<function=…>` ou laissé dans le raisonnement au lieu d'un appel structuré ; l'app recadre automatiquement le modèle pour qu'il réémette l'appel via le vrai mécanisme de tool calling (2 relances max par run)
+- **Docs** : guide de fiabilisation des tool calls Qwen en local ([docs/qwen-local-reliability.md](docs/qwen-local-reliability.md)) — template de chat corrigé (froggeric), préservation du raisonnement avec la compaction, recommandations de quantization
+
 ## [6.0.4] - 2026-07-09
 
 ### Fixed
