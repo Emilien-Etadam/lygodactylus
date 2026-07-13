@@ -39,7 +39,7 @@ export class InstallResolver {
     }
   }
 
-  async uninstall(entry: CatalogEntry): Promise<void> {
+  async uninstall(entry: Pick<CatalogEntry, 'id' | 'type'>): Promise<void> {
     const record = marketplaceInstalledStore.get(entry.id);
     if (!record) {
       return;

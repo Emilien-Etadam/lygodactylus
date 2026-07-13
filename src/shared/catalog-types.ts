@@ -43,13 +43,31 @@ export interface CatalogEntry {
   envDescription?: Record<string, string>;
   deprecated?: boolean;
   deprecationMessage?: string;
+  /** Set on entries coming from a user-added catalog source; absent for the official catalog. */
+  sourceId?: string;
+  sourceName?: string;
 }
 
 export interface CatalogManifest {
   version: string;
   updatedAt: string;
-  policy: 'curated-strict';
+  policy: string;
   entries: CatalogEntry[];
+}
+
+/** A user-added third-party catalog (URL pointing to a manifest.json). */
+export interface CatalogSource {
+  id: string;
+  name: string;
+  url: string;
+  addedAt: number;
+}
+
+export interface CatalogSourceStatus extends CatalogSource {
+  state: 'ok' | 'error';
+  entryCount: number;
+  error?: string;
+  fetchedAt?: number;
 }
 
 export type CatalogManifestSource = 'remote' | 'bundled';

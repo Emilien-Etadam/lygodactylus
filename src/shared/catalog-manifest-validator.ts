@@ -3,6 +3,14 @@ import type { CatalogEntry, CatalogManifest, ResolveSpec } from './catalog-types
 const ENTRY_ID_PATTERN = /^[a-z0-9][a-z0-9-]*$/;
 const VALID_TYPES = new Set(['skill', 'mcp', 'plugin']);
 const VALID_VIA = new Set(['builtin', 'preset', 'mcp-registry', 'github']);
+// Third-party catalogs may not reference app-internal resources (builtin paths, presets).
+const EXTERNAL_VIA = new Set(['mcp-registry', 'github']);
+
+/**
+ * - `official`: the curated first-party manifest (policy curated-strict, all entries verified).
+ * - `external`: a user-added third-party manifest (verified may be false, restricted resolve strategies).
+ */
+export type CatalogManifestProfile = 'official' | 'external';
 
 export interface CatalogManifestValidationResult {
   valid: boolean;
@@ -13,13 +21,22 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
-function pushResolveErrors(resolve: unknown, prefix: string, errors: string[]): void {
+function pushResolveErrors(
+  resolve: unknown,
+  prefix: string,
+  errors: string[],
+  profile: CatalogManifestProfile
+): void {
   if (!isRecord(resolve) || typeof resolve.via !== 'string') {
     errors.push(`${prefix}: resolve.via is required`);
     return;
   }
   if (!VALID_VIA.has(resolve.via)) {
     errors.push(`${prefix}: unsupported resolve.via "${resolve.via}"`);
+    return;
+  }
+  if (profile === 'external' && !EXTERNAL_VIA.has(resolve.via)) {
+    errors.push(`${prefix}: resolve.via "${resolve.via}" is not allowed in external catalogs`);
     return;
   }
 
@@ -61,7 +78,12 @@ function pushResolveErrors(resolve: unknown, prefix: string, errors: string[]): 
   }
 }
 
-function validateEntry(entry: unknown, index: number, errors: string[]): void {
+function validateEntry(
+  entry: unknown,
+  index: number,
+  errors: string[],
+  profile: CatalogManifestProfile = 'official'
+): void {
   const prefix = `entries[${index}]`;
   if (!isRecord(entry)) {
     errors.push(`${prefix}: must be an object`);
@@ -80,11 +102,15 @@ function validateEntry(entry: unknown, index: number, errors: string[]): void {
   if (typeof entry.type !== 'string' || !VALID_TYPES.has(entry.type)) {
     errors.push(`${prefix}: type must be skill, mcp, or plugin`);
   }
-  if (entry.verified !== true) {
-    errors.push(`${prefix}: verified must be true in curated-strict manifests`);
+  if (profile === 'official') {
+    if (entry.verified !== true) {
+      errors.push(`${prefix}: verified must be true in curated-strict manifests`);
+    }
+  } else if (typeof entry.verified !== 'boolean') {
+    errors.push(`${prefix}: verified must be a boolean`);
   }
 
-  pushResolveErrors(entry.resolve, prefix, errors);
+  pushResolveErrors(entry.resolve, prefix, errors, profile);
 
   if (entry.requiresEnv !== undefined) {
     if (
@@ -96,15 +122,22 @@ function validateEntry(entry: unknown, index: number, errors: string[]): void {
   }
 }
 
-export function validateCatalogManifest(value: unknown): CatalogManifestValidationResult {
+export function validateCatalogManifest(
+  value: unknown,
+  profile: CatalogManifestProfile = 'official'
+): CatalogManifestValidationResult {
   const errors: string[] = [];
 
   if (!isRecord(value)) {
     return { valid: false, errors: ['manifest must be a JSON object'] };
   }
 
-  if (value.policy !== 'curated-strict') {
-    errors.push('policy must be "curated-strict"');
+  if (profile === 'official') {
+    if (value.policy !== 'curated-strict') {
+      errors.push('policy must be "curated-strict"');
+    }
+  } else if (typeof value.policy !== 'string' || !value.policy.trim()) {
+    errors.push('policy is required');
   }
   if (typeof value.version !== 'string' || !value.version.trim()) {
     errors.push('version is required');
@@ -117,7 +150,7 @@ export function validateCatalogManifest(value: unknown): CatalogManifestValidati
   } else {
     const ids = new Set<string>();
     value.entries.forEach((entry, index) => {
-      validateEntry(entry, index, errors);
+      validateEntry(entry, index, errors, profile);
       if (isRecord(entry) && typeof entry.id === 'string') {
         if (ids.has(entry.id)) {
           errors.push(`duplicate entry id: ${entry.id}`);
