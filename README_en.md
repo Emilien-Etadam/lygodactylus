@@ -24,7 +24,7 @@
 
 ## What is it?
 
-**Lygodactylus** is a desktop AI agent app (Electron) for Windows, macOS, and Linux. It manages your files, generates documents via **Skills** (bundled PDF/XLSX; DOCX/PPTX downloaded on first use), installs extensions through a curated **marketplace** (Skills, MCP, plugins), isolates commands in a **sandbox** (WSL2 / Lima), offers **LAN chat** (a web UI on your network — recommended over a WireGuard VPN tunnel), and ships **native tools** (glob, grep, web, todos, interactive questions) compatible with LiteLLM / vLLM / Qwen.
+**Lygodactylus** is a desktop AI agent app (Electron) for Windows, macOS, and Linux. It manages your files, generates Office documents via the **OfficeCLI** skill (`.docx`, `.xlsx`, `.pptx` — installable from the marketplace), installs extensions through a curated **marketplace** (Skills, MCP, plugins), isolates commands in a **sandbox** (WSL2 / Lima), offers **LAN chat** (a web UI on your network — recommended over a WireGuard VPN tunnel), and ships **native tools** (glob, grep, web, todos, interactive questions) compatible with LiteLLM / vLLM / Qwen.
 
 > [!NOTE]
 > This repository is a **personal app-only fork** (no VitePress website or upstream bots). The **v6.x** series is an experimental **alpha** (local-first). Older `EE*` and `5.x` releases remain available but are no longer the active branch.
@@ -49,8 +49,8 @@
 
 ### Extensions & documents
 
-- **Unified marketplace** — Settings → Extensions: skills, MCP connectors, and plugins (curated catalog, 21+ entries)
-- **On-demand skills (v5.4+)** — `docx` and `pptx` (~2.7 MB) downloaded from GitHub Releases on first use; `pdf`, `xlsx`, `skill-creator` bundled
+- **Unified marketplace** — Settings → Extensions: skills, MCP connectors, and plugins (curated catalog, 19 entries)
+- **Office documents** — [OfficeCLI](https://github.com/iOfficeAI/OfficeCLI) skill (Apache-2.0) installable from the marketplace: create and edit `.docx`, `.xlsx`, `.pptx` via a self-contained binary downloaded on first use, inside the sandbox when it is enabled. Replaces Anthropic's proprietary document skills, removed in v5.9 (license incompatible with redistribution)
 - **On-demand runtimes (v5.3+)** — Node.js, Python 3.10, and cliclick (macOS) downloaded into `userData` on first use (slimmer installer)
 
 ### Network & sandbox
@@ -86,7 +86,7 @@ Download the latest build from [Releases](https://github.com/emilien-etadam/lygo
 On **Windows**, the app checks for updates on startup. On **macOS/Linux**, use **Settings → General → Check for updates**.
 
 > [!TIP]
-> On first use, Node.js, Python, and heavy skills (`docx`/`pptx`) may be downloaded automatically from official GitHub releases.
+> On first use, Node.js and Python may be downloaded automatically from official GitHub releases.
 
 ### From source
 

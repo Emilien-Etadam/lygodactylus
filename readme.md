@@ -24,7 +24,7 @@
 
 ## C'est quoi ?
 
-**Lygodactylus** est une application desktop d'agent IA (Electron) pour Windows, macOS et Linux. Elle gère vos fichiers, génère des documents via **Skills** (PDF, XLSX embarqués ; DOCX/PPTX téléchargés à la demande), installe des extensions via une **marketplace** curated (Skills, MCP, plugins), isole les commandes dans un **sandbox** (WSL2 / Lima), expose un **chat LAN** (interface web sur le réseau — usage recommandé via tunnel WireGuard), et propose des **outils natifs** (glob, grep, web, todos, questions interactives) compatibles LiteLLM / vLLM / Qwen.
+**Lygodactylus** est une application desktop d'agent IA (Electron) pour Windows, macOS et Linux. Elle gère vos fichiers, génère des documents Office via le skill **OfficeCLI** (`.docx`, `.xlsx`, `.pptx` — installable depuis la marketplace), installe des extensions via une **marketplace** curated (Skills, MCP, plugins), isole les commandes dans un **sandbox** (WSL2 / Lima), expose un **chat LAN** (interface web sur le réseau — usage recommandé via tunnel WireGuard), et propose des **outils natifs** (glob, grep, web, todos, questions interactives) compatibles LiteLLM / vLLM / Qwen.
 
 > [!NOTE]
 > Ce dépôt est un **fork personnel app-only** (pas de site VitePress ni bots upstream). La série **v6.x** est en **alpha** expérimentale (local-first). Les anciennes releases `EE*` et `5.x` restent disponibles mais ne sont plus la branche active. Pour la version stable officielle upstream, voir [OpenCoworkAI/open-cowork](https://github.com/OpenCoworkAI/open-cowork).
@@ -49,8 +49,8 @@
 
 ### Extensions & documents
 
-- **Marketplace unifiée** — Réglages → Extensions : skills, connecteurs MCP et plugins (catalogue curated, 21+ entrées)
-- **Skills on-demand (v5.4+)** — `docx` et `pptx` (~2.7 MB) téléchargés depuis GitHub Releases au premier usage ; `pdf`, `xlsx`, `skill-creator` embarqués
+- **Marketplace unifiée** — Réglages → Extensions : skills, connecteurs MCP et plugins (catalogue curated, 19 entrées)
+- **Documents Office** — skill [OfficeCLI](https://github.com/iOfficeAI/OfficeCLI) (Apache-2.0) installable depuis la marketplace : création et édition de `.docx`, `.xlsx`, `.pptx` via un binaire autoporteur téléchargé au premier usage, dans le sandbox quand il est actif. Remplace les skills documents propriétaires d'Anthropic, retirés en v5.9 (licence incompatible avec la redistribution)
 - **Runtimes on-demand (v5.3+)** — Node.js, Python 3.10 et cliclick (macOS) téléchargés dans `userData` au premier usage (installateur allégé)
 
 ### Réseau & sandbox
@@ -87,7 +87,7 @@ Téléchargez la dernière version sur la page [Releases](https://github.com/emi
 Sur **Windows**, l'app vérifie les mises à jour au démarrage. Sur **macOS/Linux**, utilisez **Réglages → Général → Vérifier les mises à jour**.
 
 > [!TIP]
-> Au premier usage, Node.js, Python et les skills lourds (`docx`/`pptx`) peuvent être téléchargés automatiquement depuis les releases GitHub officielles.
+> Au premier usage, Node.js et Python peuvent être téléchargés automatiquement depuis les releases GitHub officielles.
 
 ### Depuis les sources
 

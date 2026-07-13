@@ -3,7 +3,18 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { CatalogEntry } from '../src/shared/catalog-types';
 
+// Entries resolving into this repository are validated against the working
+// tree: at PR time the subdir does not exist on `main` yet, but the manifest
+// on `main` and the subdir land in the same merge, so local presence is the
+// meaningful check.
+const SELF_REPO = 'emilien-etadam/lygodactylus';
+
 async function githubSubdirExists(repo: string, subdir: string, ref: string): Promise<boolean> {
+  if (repo.toLowerCase() === SELF_REPO) {
+    const localPath = path.resolve(process.cwd(), subdir);
+    return fs.existsSync(localPath) && fs.statSync(localPath).isDirectory();
+  }
+
   const headers: Record<string, string> = {
     Accept: 'application/vnd.github+json',
     'User-Agent': 'lygodactylus-catalog-validator',
