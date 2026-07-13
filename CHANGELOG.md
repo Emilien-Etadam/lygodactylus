@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Skill OfficeCLI dans la marketplace** : nouvelle entrée catalogue (Réglages → Extensions) qui installe le skill [OfficeCLI](https://github.com/iOfficeAI/OfficeCLI) (Apache-2.0) — génération et édition de documents Office (`.docx`, `.xlsx`, `.pptx`) via le binaire autoporteur `officecli`, téléchargé au premier usage par le skill lui-même (dans le sandbox quand il est actif). Redonne une capacité de génération documentaire après le retrait en v6.0 des skills documents propriétaires d'Anthropic ; `SKILL.md` vendorisé dans `catalog/skills/officecli/` (politique curated-strict, provenance dans `NOTICE.md`)
+
 - **Planifications pilotables par l'agent** : nouveaux outils natifs `schedule_list`, `schedule_create`, `schedule_update`, `schedule_delete`, `schedule_toggle`, `schedule_run_now` exposés au LLM — l'agent peut désormais consulter, créer, modifier, activer/désactiver, supprimer et déclencher les planifications (Paramètres → Planifications) directement depuis le chat (modes unique, quotidien, hebdomadaire et intervalle), avec les mêmes validations que l'UI (répertoire de travail supporté, heure d'exécution future)
 
 - **Tool-call guard** : détection des tool calls « hallucinés » en texte par les modèles locaux (ex. Qwen3.x à contexte profond) — appel émis en balises `<tool_call>`/`<function=…>` ou laissé dans le raisonnement au lieu d'un appel structuré ; l'app recadre automatiquement le modèle pour qu'il réémette l'appel via le vrai mécanisme de tool calling (2 relances max par run)

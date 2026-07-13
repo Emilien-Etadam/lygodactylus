@@ -1,6 +1,6 @@
 {
   "version": "2",
-  "updatedAt": "2026-06-24",
+  "updatedAt": "2026-07-13",
   "policy": "curated-strict",
   "entries": [
     {
@@ -227,6 +227,19 @@
         "via": "github",
         "repo": "anthropics/skills",
         "subdir": "skills/skill-creator",
+        "ref": "main"
+      }
+    },
+    {
+      "id": "officecli-skill",
+      "type": "skill",
+      "name": "OfficeCLI",
+      "description": "Create, analyze, and modify Office documents (.docx, .xlsx, .pptx) via the officecli CLI (Apache-2.0). Downloads the binary on first use.",
+      "verified": true,
+      "resolve": {
+        "via": "github",
+        "repo": "Emilien-Etadam/lygodactylus",
+        "subdir": "catalog/skills/officecli",
         "ref": "main"
       }
     }
