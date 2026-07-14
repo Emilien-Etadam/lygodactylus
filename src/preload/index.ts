@@ -16,6 +16,7 @@ import type {
   MarketplaceEntry,
   MarketplaceInstallResult,
   CatalogManifestMeta,
+  CatalogSourceStatus,
   ScheduleTask,
   ScheduleCreateInput,
   ScheduleUpdateInput,
@@ -212,6 +213,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     uninstall: (catalogId: string) => ipcRenderer.invoke('marketplace.uninstall', catalogId),
     setEnabled: (catalogId: string, enabled: boolean) =>
       ipcRenderer.invoke('marketplace.setEnabled', catalogId, enabled),
+    listSources: (forceRefresh = false) =>
+      ipcRenderer.invoke('marketplace.sources.list', forceRefresh),
+    addSource: (url: string, name?: string) =>
+      ipcRenderer.invoke('marketplace.sources.add', url, name),
+    removeSource: (sourceId: string) =>
+      ipcRenderer.invoke('marketplace.sources.remove', sourceId),
   },
 
   // Sandbox methods
@@ -478,6 +485,9 @@ declare global {
         ) => Promise<MarketplaceInstallResult>;
         uninstall: (catalogId: string) => Promise<{ success: boolean }>;
         setEnabled: (catalogId: string, enabled: boolean) => Promise<{ success: boolean }>;
+        listSources: (forceRefresh?: boolean) => Promise<CatalogSourceStatus[]>;
+        addSource: (url: string, name?: string) => Promise<CatalogSourceStatus>;
+        removeSource: (sourceId: string) => Promise<{ success: boolean }>;
       };
       sandbox: {
         getStatus: () => Promise<{

@@ -223,6 +223,8 @@ export type {
   CatalogManifest,
   CatalogManifestMeta,
   CatalogManifestSource,
+  CatalogSource,
+  CatalogSourceStatus,
   MarketplaceEntry,
   MarketplaceInstallResult,
   MarketplaceInstallState,
