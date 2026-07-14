@@ -1,12 +1,16 @@
 import { getModel } from '@earendil-works/pi-ai/compat';
 import type { Api, Model } from '@earendil-works/pi-ai';
 import { isOfficialOpenAIBaseUrl, isLoopbackBaseUrl } from '../config/auth-utils';
+import { detectCommonProviderSetup } from '../../shared/api-provider-guidance';
 
 const COMMON_FALLBACK_PROVIDERS = ['openai', 'anthropic'] as const;
 const INVALID_REGISTRY_PROVIDERS = new Set(['', 'custom']);
 const REASONING_MODEL_PATTERN =
-  /\bthinking\b|\breasoner\b|deepseek-r1|deepseek-v4|kimi-k2|qwen3(?:\.5)?(?=[:/-]|$)/i;
+  /\bthinking\b|\breasoner\b|deepseek-r1|deepseek-v4|kimi-k2|qwen3(?:\.\d+)?(?=[:/-]|$)/i;
 const DEEPSEEK_V4_MODEL_PATTERN = /(?:^|[/_-])deepseek[-_.]?v4(?:$|[-:_.])/i;
+// Qwen3 hybrid-thinking families toggle reasoning via chat_template_kwargs.enable_thinking
+// on jinja-template servers (vLLM, SGLang), not via reasoning_effort.
+const QWEN_HYBRID_THINKING_PATTERN = /qwen3(?:\.\d+)?(?=[:/-]|$)/i;
 type PiRegistryProvider = Parameters<typeof getModel>[0];
 
 export interface PiModelStringInput {
@@ -91,6 +95,7 @@ export function inferPiApi(protocol: string): string {
  * Used as a middle layer between user config overrides and the hardcoded default.
  */
 const KNOWN_MODEL_SPECS: Record<string, { contextWindow: number; maxTokens: number }> = {
+  'qwen3.6': { contextWindow: 262144, maxTokens: 32768 },
   'qwen3.5': { contextWindow: 258048, maxTokens: 32768 },
   qwen3: { contextWindow: 40960, maxTokens: 8192 },
   'qwen2.5': { contextWindow: 131072, maxTokens: 8192 },
@@ -281,27 +286,39 @@ export function applyPiModelRuntimeOverrides(
     } as typeof nextModel;
   }
 
-  if (
+  const customEndpoint = options.customBaseUrl?.trim() || nextModel.baseUrl?.trim() || '';
+  const isQwenHybridOnCustomEndpoint =
+    nextModel.api === 'openai-completions' &&
+    nextModel.reasoning &&
+    QWEN_HYBRID_THINKING_PATTERN.test(nextModel.id) &&
+    !!customEndpoint &&
+    !isOfficialOpenAIBaseUrl(customEndpoint) &&
+    detectCommonProviderSetup(customEndpoint)?.id !== 'ollama';
+
+  if (isQwenHybridOnCustomEndpoint) {
+    nextModel = {
+      ...nextModel,
+      compat: {
+        ...(nextModel.compat || {}),
+        thinkingFormat: 'qwen-chat-template',
+      },
+    } as typeof nextModel;
+  } else if (
     options.rawProvider === 'openai' &&
     isLoopbackBaseUrl(options.customBaseUrl) &&
     nextModel.reasoning &&
     nextModel.api === 'openai-completions'
   ) {
-    const currentCompat = (nextModel.compat || {}) as Record<string, unknown>;
-    const currentReasoningEffortMap = (
-      currentCompat.reasoningEffortMap && typeof currentCompat.reasoningEffortMap === 'object'
-        ? currentCompat.reasoningEffortMap
-        : {}
-    ) as Record<string, string>;
+    // Ollama's OpenAI-compatible endpoint disables thinking via reasoning_effort: "none".
     nextModel = {
       ...nextModel,
+      thinkingLevelMap: {
+        ...(nextModel.thinkingLevelMap || {}),
+        off: 'none',
+      },
       compat: {
-        ...currentCompat,
+        ...(nextModel.compat || {}),
         supportsReasoningEffort: true,
-        reasoningEffortMap: {
-          ...currentReasoningEffortMap,
-          off: 'none',
-        },
       },
     } as typeof nextModel;
   }

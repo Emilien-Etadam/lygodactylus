@@ -709,7 +709,14 @@
     "memoryNoRecall": "No relevant memory recalled for this turn",
     "memoryDisabledSession": "Memory disabled for this session",
     "memorySessionToggle": "Memory for session",
-    "memoryOpenSourceSession": "Open source session"
+    "memoryOpenSourceSession": "Open source session",
+    "thinkingToggle": "Рівень міркування",
+    "thinkingLevels": {
+      "off": "Вимкнено",
+      "low": "Низький",
+      "medium": "Середній",
+      "high": "Високий"
+    }
   },
   "context": {
     "progress": "Прогрес",
@@ -1045,7 +1052,25 @@
     "catalogMeta": "Catalog v{{version}} · updated {{updatedAt}} · {{count}} extensions",
     "catalogSourceRemote": "Source: remote catalog (OTA)",
     "catalogSourceBundled": "Source: bundled catalog (offline fallback)",
-    "catalogUpdated": "Catalog updated from the remote registry"
+    "catalogUpdated": "Catalog updated from the remote registry",
+    "viewSources": "Каталоги",
+    "sourcesTitle": "Сторонні каталоги",
+    "sourcesDesc": "Додавайте каталоги розширень з інших джерел (URL файлу manifest.json).",
+    "sourcesWarning": "Сторонні каталоги не перевіряються Lygodactylus. Їхні розширення позначаються як неперевірені — додавайте лише джерела, яким довіряєте.",
+    "sourceEntryCount": "Розширень: {{count}}",
+    "sourceError": "Недоступно: {{error}}",
+    "sourceRemove": "Видалити",
+    "sourceEmpty": "Сторонні каталоги ще не додано.",
+    "sourceUrlPlaceholder": "https://example.com/catalog/manifest.json",
+    "sourceNamePlaceholder": "Відображувана назва (необов'язково)",
+    "sourceAdd": "Додати каталог",
+    "sourceAdded": "Каталог «{{name}}» додано ({{count}} розширень)",
+    "sourceAddFailed": "Не вдалося додати каталог",
+    "sourceRemoveConfirm": "Видалити каталог «{{name}}»? Уже встановлені розширення залишаться.",
+    "sourceRemoved": "Каталог «{{name}}» видалено",
+    "sourceRemoveFailed": "Не вдалося видалити каталог",
+    "unverifiedBadge": "Неперевірено",
+    "unverifiedBadgeHint": "Зі стороннього каталогу: {{source}}"
   },
   "chatLan": {
     "title": "LAN Chat",

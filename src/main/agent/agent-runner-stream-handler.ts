@@ -3,6 +3,10 @@ import type { Message, Session } from '../../renderer/types';
 import { log, logCtx, logWarn } from '../utils/logger';
 import { buildTerminalErrorMessage } from './agent-runner-message-end';
 import { LoopGuard, type LoopGuardDecision } from './agent-runner-loop-guard';
+import {
+  HallucinatedToolCallGuard,
+  type HallucinatedToolCallDecision,
+} from './hallucinated-toolcall-guard';
 import { safeStringify } from './agent-runner-mcp-bridge';
 import type { PreparedPiSessionRun } from './agent-runner-pi-setup';
 import type { AgentRunnerRunContext } from './agent-runner-run-context';
@@ -10,6 +14,7 @@ import {
   createOllamaColdStartTimer,
   handleCompactionEndEvent,
   handleCompactionStartEvent,
+  handleHallucinatedToolCallDecision as handleHallucinatedToolCallDecisionEvent,
   handleLoopGuardDecision as handleLoopGuardDecisionEvent,
   handleMessageEndEvent,
   handleMessageUpdateEvent,
@@ -74,6 +79,7 @@ export async function runPromptWithStreamHandling({
   const promptStartedAt = Date.now();
   const streamEventCounts = new Map<string, number>();
   const loopGuard = new LoopGuard();
+  const hallucinatedToolCallGuard = new HallucinatedToolCallGuard();
   const state: StreamEventState = {
     streamedText: '',
     streamedThinking: '',
@@ -163,6 +169,7 @@ export async function runPromptWithStreamHandling({
     piSetup,
     thinkParser,
     loopGuard,
+    hallucinatedToolCallGuard,
     promptStartedAt,
     recordStreamEvent: (eventType: string) =>
       streamEventCounts.set(eventType, (streamEventCounts.get(eventType) ?? 0) + 1),
@@ -176,6 +183,8 @@ export async function runPromptWithStreamHandling({
       emitTerminalErrorEvent(errorText, state, eventDeps, options),
     handleLoopGuardDecision: (decision: LoopGuardDecision, context: string) =>
       handleLoopGuardDecisionEvent(decision, context, eventDeps),
+    handleHallucinatedToolCallDecision: (decision: HallucinatedToolCallDecision) =>
+      handleHallucinatedToolCallDecisionEvent(decision, eventDeps),
     onLoopGuardAbort: () => {
       state.hasEmittedError = true;
       abortedByLoopGuard = true;

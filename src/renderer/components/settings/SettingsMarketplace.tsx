@@ -5,23 +5,31 @@ import {
   CheckCircle,
   FolderOpen,
   Globe,
+  Library,
   Loader2,
   Package,
   Plug,
+  Plus,
   Power,
   PowerOff,
   RefreshCw,
+  ShieldAlert,
   ShieldCheck,
   Trash2,
 } from 'lucide-react';
-import type { CatalogEntryType, CatalogManifestMeta, MarketplaceEntry } from '../../types';
+import type {
+  CatalogEntryType,
+  CatalogManifestMeta,
+  CatalogSourceStatus,
+  MarketplaceEntry,
+} from '../../types';
 import { SettingsContentSection } from './shared';
 import { MarketplaceMcpAdvanced } from './MarketplaceMcpAdvanced';
 
 const isElectron = typeof window !== 'undefined' && window.electronAPI !== undefined;
 
 type MarketplaceFilter = 'all' | CatalogEntryType;
-type MarketplaceView = 'marketplace' | 'installed' | 'storage';
+type MarketplaceView = 'marketplace' | 'installed' | 'sources' | 'storage';
 
 export function SettingsMarketplace({ isActive }: { isActive: boolean }) {
   const { t } = useTranslation();
@@ -36,6 +44,10 @@ export function SettingsMarketplace({ isActive }: { isActive: boolean }) {
   const [envTarget, setEnvTarget] = useState<MarketplaceEntry | null>(null);
   const [envValues, setEnvValues] = useState<Record<string, string>>({});
   const [catalogMeta, setCatalogMeta] = useState<CatalogManifestMeta | null>(null);
+  const [sources, setSources] = useState<CatalogSourceStatus[]>([]);
+  const [newSourceUrl, setNewSourceUrl] = useState('');
+  const [newSourceName, setNewSourceName] = useState('');
+  const [isAddingSource, setIsAddingSource] = useState(false);
 
   const loadEntries = useCallback(
     async (forceRefresh = false) => {
@@ -44,14 +56,16 @@ export function SettingsMarketplace({ isActive }: { isActive: boolean }) {
       }
       setIsLoading(true);
       try {
-        const [catalog, path, meta] = await Promise.all([
+        const [catalog, path, meta, sourceList] = await Promise.all([
           window.electronAPI.marketplace.list(forceRefresh),
           window.electronAPI.skills.getStoragePath(),
           window.electronAPI.marketplace.getMeta(forceRefresh),
+          window.electronAPI.marketplace.listSources(forceRefresh),
         ]);
         setEntries(catalog);
         setStoragePath(path || '');
         setCatalogMeta(meta);
+        setSources(sourceList);
         setError('');
         if (forceRefresh && meta.source === 'remote') {
           setSuccess(t('marketplace.catalogUpdated'));
@@ -152,6 +166,48 @@ export function SettingsMarketplace({ isActive }: { isActive: boolean }) {
     }
   }
 
+  async function handleAddSource() {
+    if (!isElectron || !newSourceUrl.trim()) {
+      return;
+    }
+    setIsAddingSource(true);
+    setError('');
+    try {
+      const status = await window.electronAPI.marketplace.addSource(
+        newSourceUrl,
+        newSourceName.trim() || undefined
+      );
+      setSuccess(t('marketplace.sourceAdded', { name: status.name, count: status.entryCount }));
+      setNewSourceUrl('');
+      setNewSourceName('');
+      await loadEntries();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('marketplace.sourceAddFailed'));
+    } finally {
+      setIsAddingSource(false);
+    }
+  }
+
+  async function handleRemoveSource(source: CatalogSourceStatus) {
+    if (!isElectron) {
+      return;
+    }
+    if (!confirm(t('marketplace.sourceRemoveConfirm', { name: source.name }))) {
+      return;
+    }
+    setActionId(source.id);
+    setError('');
+    try {
+      await window.electronAPI.marketplace.removeSource(source.id);
+      setSuccess(t('marketplace.sourceRemoved', { name: source.name }));
+      await loadEntries();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('marketplace.sourceRemoveFailed'));
+    } finally {
+      setActionId(null);
+    }
+  }
+
   async function handleInstallFromFolder() {
     if (!isElectron) {
       return;
@@ -225,6 +281,7 @@ export function SettingsMarketplace({ isActive }: { isActive: boolean }) {
   const viewButtons: Array<{ id: MarketplaceView; label: string }> = [
     { id: 'marketplace', label: t('marketplace.viewMarketplace') },
     { id: 'installed', label: t('marketplace.viewInstalled') },
+    { id: 'sources', label: t('marketplace.viewSources') },
     { id: 'storage', label: t('marketplace.viewStorage') },
   ];
 
@@ -243,7 +300,7 @@ export function SettingsMarketplace({ isActive }: { isActive: boolean }) {
         </div>
       )}
 
-      {catalogMeta && view !== 'storage' && (
+      {catalogMeta && view !== 'storage' && view !== 'sources' && (
         <div className="text-xs text-text-muted rounded-lg border border-border px-3 py-2 space-y-1">
           <div>
             {t('marketplace.catalogMeta', {
@@ -284,7 +341,7 @@ export function SettingsMarketplace({ isActive }: { isActive: boolean }) {
         </button>
       </div>
 
-      {view !== 'storage' && (
+      {view !== 'storage' && view !== 'sources' && (
         <div className="flex flex-wrap gap-2">
           {filterButtons.map((button) => (
             <button
@@ -324,6 +381,88 @@ export function SettingsMarketplace({ isActive }: { isActive: boolean }) {
             >
               <Globe className="w-4 h-4" />
               {t('skills.openStoragePath')}
+            </button>
+          </div>
+        </SettingsContentSection>
+      ) : view === 'sources' ? (
+        <SettingsContentSection
+          title={t('marketplace.sourcesTitle')}
+          description={t('marketplace.sourcesDesc')}
+        >
+          <div className="flex items-start gap-2 text-xs text-warning bg-warning/10 border border-warning/20 rounded-lg px-3 py-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span>{t('marketplace.sourcesWarning')}</span>
+          </div>
+
+          <div className="space-y-2">
+            {sources.map((source) => (
+              <div
+                key={source.id}
+                className="flex items-start justify-between gap-3 rounded-xl border border-border bg-background-secondary/50 p-3"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <Library className="w-4 h-4 text-accent flex-shrink-0" />
+                    <span className="font-medium text-text-primary truncate">{source.name}</span>
+                  </div>
+                  <div className="mt-1 text-xs text-text-muted break-all">{source.url}</div>
+                  <div className="mt-1 text-xs">
+                    {source.state === 'ok' ? (
+                      <span className="text-success">
+                        {t('marketplace.sourceEntryCount', { count: source.entryCount })}
+                      </span>
+                    ) : (
+                      <span className="text-error">
+                        {t('marketplace.sourceError', { error: source.error || '' })}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={() => void handleRemoveSource(source)}
+                  disabled={actionId === source.id || isLoading}
+                  className="px-3 py-1.5 rounded-lg border border-error/30 text-error text-sm inline-flex items-center gap-2 disabled:opacity-50 flex-shrink-0"
+                >
+                  {actionId === source.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                  {t('marketplace.sourceRemove')}
+                </button>
+              </div>
+            ))}
+            {sources.length === 0 && (
+              <p className="text-sm text-text-muted">{t('marketplace.sourceEmpty')}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <input
+              type="text"
+              value={newSourceUrl}
+              onChange={(event) => setNewSourceUrl(event.target.value)}
+              placeholder={t('marketplace.sourceUrlPlaceholder')}
+              className="w-full rounded-lg border border-border bg-background-secondary px-3 py-2 text-sm"
+            />
+            <input
+              type="text"
+              value={newSourceName}
+              onChange={(event) => setNewSourceName(event.target.value)}
+              placeholder={t('marketplace.sourceNamePlaceholder')}
+              className="w-full rounded-lg border border-border bg-background-secondary px-3 py-2 text-sm"
+            />
+            <button
+              onClick={() => void handleAddSource()}
+              disabled={isAddingSource || !newSourceUrl.trim()}
+              className="w-full py-2.5 px-3 rounded-lg border border-border hover:border-accent hover:bg-accent/5 transition-all flex items-center justify-center gap-2 text-text-secondary hover:text-accent disabled:opacity-50"
+            >
+              {isAddingSource ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Plus className="w-4 h-4" />
+              )}
+              {t('marketplace.sourceAdd')}
             </button>
           </div>
         </SettingsContentSection>
@@ -440,14 +579,25 @@ function MarketplaceCard({
           </div>
           <p className="mt-1 text-sm text-text-muted line-clamp-3">{entry.description}</p>
         </div>
-        <span className="inline-flex items-center gap-1 rounded-full bg-success/10 text-success text-[11px] px-2 py-1 flex-shrink-0">
-          <ShieldCheck className="w-3 h-3" />
-          {t('marketplace.verifiedBadge')}
-        </span>
+        {entry.sourceId ? (
+          <span
+            className="inline-flex items-center gap-1 rounded-full bg-warning/10 text-warning text-[11px] px-2 py-1 flex-shrink-0"
+            title={t('marketplace.unverifiedBadgeHint', { source: entry.sourceName || '' })}
+          >
+            <ShieldAlert className="w-3 h-3" />
+            {t('marketplace.unverifiedBadge')}
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 rounded-full bg-success/10 text-success text-[11px] px-2 py-1 flex-shrink-0">
+            <ShieldCheck className="w-3 h-3" />
+            {t('marketplace.verifiedBadge')}
+          </span>
+        )}
       </div>
 
       <div className="flex items-center gap-2 text-xs text-text-muted">
         <span className="uppercase tracking-wide">{entry.type}</span>
+        {entry.sourceName && <span className="truncate">{entry.sourceName}</span>}
         {entry.deprecated && <span className="text-warning">{t('marketplace.deprecated')}</span>}
       </div>
 

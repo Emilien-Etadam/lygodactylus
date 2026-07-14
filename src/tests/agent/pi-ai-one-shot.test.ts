@@ -68,6 +68,7 @@ function makeConfig(): AppConfig {
     },
     webSearch: { ...DEFAULT_WEB_SEARCH_CONFIG },
     enableThinking: false,
+    thinkingLevel: 'medium',
     isConfigured: true,
   };
 }

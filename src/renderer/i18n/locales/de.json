@@ -709,7 +709,14 @@
     "memoryNoRecall": "No relevant memory recalled for this turn",
     "memoryDisabledSession": "Memory disabled for this session",
     "memorySessionToggle": "Memory for session",
-    "memoryOpenSourceSession": "Open source session"
+    "memoryOpenSourceSession": "Open source session",
+    "thinkingToggle": "Denkstufe",
+    "thinkingLevels": {
+      "off": "Aus",
+      "low": "Niedrig",
+      "medium": "Mittel",
+      "high": "Hoch"
+    }
   },
   "context": {
     "progress": "Fortschritt",
@@ -1045,7 +1052,25 @@
     "catalogMeta": "Catalog v{{version}} · updated {{updatedAt}} · {{count}} extensions",
     "catalogSourceRemote": "Source: remote catalog (OTA)",
     "catalogSourceBundled": "Source: bundled catalog (offline fallback)",
-    "catalogUpdated": "Catalog updated from the remote registry"
+    "catalogUpdated": "Catalog updated from the remote registry",
+    "viewSources": "Kataloge",
+    "sourcesTitle": "Drittanbieter-Kataloge",
+    "sourcesDesc": "Füge Erweiterungskataloge aus anderen Quellen hinzu (URL einer manifest.json).",
+    "sourcesWarning": "Drittanbieter-Kataloge werden nicht von Lygodactylus geprüft. Ihre Erweiterungen werden als nicht verifiziert markiert – füge nur vertrauenswürdige Quellen hinzu.",
+    "sourceEntryCount": "{{count}} Erweiterungen",
+    "sourceError": "Nicht verfügbar: {{error}}",
+    "sourceRemove": "Entfernen",
+    "sourceEmpty": "Keine Drittanbieter-Kataloge hinzugefügt.",
+    "sourceUrlPlaceholder": "https://example.com/catalog/manifest.json",
+    "sourceNamePlaceholder": "Anzeigename (optional)",
+    "sourceAdd": "Katalog hinzufügen",
+    "sourceAdded": "Katalog „{{name}}“ hinzugefügt ({{count}} Erweiterungen)",
+    "sourceAddFailed": "Katalog konnte nicht hinzugefügt werden",
+    "sourceRemoveConfirm": "Katalog „{{name}}“ entfernen? Bereits installierte Erweiterungen bleiben installiert.",
+    "sourceRemoved": "Katalog „{{name}}“ entfernt",
+    "sourceRemoveFailed": "Katalog konnte nicht entfernt werden",
+    "unverifiedBadge": "Nicht verifiziert",
+    "unverifiedBadgeHint": "Aus Drittanbieter-Katalog: {{source}}"
   },
   "chatLan": {
     "title": "LAN Chat",

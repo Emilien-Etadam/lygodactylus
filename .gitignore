@@ -60,11 +60,9 @@ CLAUDE.md
 .codex/*
 
 dist*
-resources/node
 resources/tools
 resources/python
 resources/skills-core
-docs/
 /.mcp.json
 /eng.traineddata
 /jpn.traineddata
@@ -103,5 +101,6 @@ DEV_LOG.md
 *.png
 !src/renderer/assets/*.png
 !public/*.png
-!resources/social-preview.png
+!resources/*.png
+!resources/icon.iconset/*.png
 !resources/chat-lan/icons/*.png

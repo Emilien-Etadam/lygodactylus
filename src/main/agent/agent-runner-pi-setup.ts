@@ -28,6 +28,9 @@ import {
 import { buildCoworkAppendPrompt } from './agent-runner-prompts';
 import { buildNativeCustomTools } from './agent-runner-native-tools';
 import { buildWebSearchCustomTools } from './agent-runner-web-search-tool';
+import { createScheduleTools } from '../schedule/schedule-tools';
+import { mainAppState } from '../main-app-state';
+import { getWorkspacePathUnsupportedReason } from '../main-working-dir';
 import {
   AgentRunnerRunContext,
   ensureSkillsSetup,
@@ -242,8 +245,8 @@ export async function preparePiSessionRun({
   logTiming('before building conversation context', runStartTime);
   logCtx('[AgentRunner] Using pi-ai native routing for:', piModel.provider, piModel.id);
   const thinkingLevel: PreparedPiSessionRun['thinkingLevel'] =
-    (configStore.get('enableThinking') ?? false) ? 'medium' : 'off';
-  logCtx('[AgentRunner] Enable thinking mode:', thinkingLevel !== 'off');
+    (configStore.get('enableThinking') ?? false) ? configStore.get('thinkingLevel') : 'off';
+  logCtx('[AgentRunner] Enable thinking mode:', thinkingLevel);
 
   const sessionRuntimeSignature = buildPiSessionRuntimeSignature({
     configProvider: runtimeConfig.provider,
@@ -345,6 +348,11 @@ export async function preparePiSessionRun({
     sessionId: session.id,
     requestUserQuestion: ctx.requestUserQuestion,
   });
+  const scheduleCustomTools = createScheduleTools({
+    getManager: () => mainAppState.scheduledTaskManager,
+    defaultCwd: workingDir || process.cwd(),
+    getCwdUnsupportedReason: getWorkspacePathUnsupportedReason,
+  });
   const extensionCustomTools = extensionResult.customTools || [];
   if (mcpCustomTools.length > 0) {
     log(
@@ -362,6 +370,12 @@ export async function preparePiSessionRun({
     log(
       `[AgentRunner] Registered ${nativeCustomTools.length} native tools as customTools:`,
       nativeCustomTools.map((tool) => tool.name).join(', ')
+    );
+  }
+  if (scheduleCustomTools.length > 0) {
+    log(
+      `[AgentRunner] Registered ${scheduleCustomTools.length} schedule tools as customTools:`,
+      scheduleCustomTools.map((tool) => tool.name).join(', ')
     );
   }
   if (extensionCustomTools.length > 0) {
@@ -402,6 +416,7 @@ export async function preparePiSessionRun({
   const allCustomTools = [
     ...(wrappedBash ? [wrappedBash] : []),
     ...nativeCustomTools,
+    ...scheduleCustomTools,
     ...webSearchCustomTools,
     ...mcpCustomTools,
     ...extensionCustomTools,

@@ -44,6 +44,7 @@ import {
   defaultProtocolForProvider,
   DIRECT_READ_KEYS,
   isAppTheme,
+  isThinkingLevel,
   isCustomProtocol,
   isProfileKey,
   isProviderType,
@@ -135,6 +136,9 @@ export class ConfigStore {
           return defaultConfig[key];
         }
         if (key === 'theme' && !isAppTheme(rawValue)) {
+          return defaultConfig[key];
+        }
+        if (key === 'thinkingLevel' && !isThinkingLevel(rawValue)) {
           return defaultConfig[key];
         }
         if (
@@ -420,6 +424,9 @@ export class ConfigStore {
         updates.webSearch !== undefined
           ? normalizeWebSearchConfig(updates.webSearch)
           : current.webSearch,
+      thinkingLevel: isThinkingLevel(updates.thinkingLevel)
+        ? updates.thinkingLevel
+        : current.thinkingLevel,
       isConfigured:
         updates.isConfigured !== undefined ? updates.isConfigured : current.isConfigured,
     });

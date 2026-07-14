@@ -71,26 +71,42 @@ export function registerMarketplaceIpc(): void {
     if (!mainAppState.marketplaceService) {
       throw new Error('MarketplaceService not initialized');
     }
-    const record = mainAppState.marketplaceService
-      ? await mainAppState.marketplaceService
-          .list()
-          .then((entries) => entries.find((entry) => entry.id === catalogId))
-      : undefined;
     const result = await mainAppState.marketplaceService.uninstall(catalogId);
-    if (record?.type === 'mcp' && record.installedRef) {
+    if (result.type === 'mcp' && result.installedRef) {
       const mcpManager = mainAppState.sessionManager?.getMCPManager();
       if (mcpManager) {
-        await mcpManager.removeServer(record.installedRef);
+        await mcpManager.removeServer(result.installedRef);
         mainAppState.sessionManager?.invalidateMcpServersCache();
       }
     }
-    if (record?.type === 'skill' || record?.type === 'plugin') {
+    if (result.type === 'skill' || result.type === 'plugin') {
       mainAppState.sessionManager?.invalidateSkillsSetup();
     }
-    if (record?.type === 'plugin') {
+    if (result.type === 'plugin') {
       notifyPluginCommandsChanged();
     }
     return result;
+  });
+
+  ipcMain.handle('marketplace.sources.list', async (_event, forceRefresh = false) => {
+    if (!mainAppState.marketplaceService) {
+      throw new Error('MarketplaceService not initialized');
+    }
+    return mainAppState.marketplaceService.listSources(forceRefresh === true);
+  });
+
+  ipcMain.handle('marketplace.sources.add', async (_event, url: string, name?: string) => {
+    if (!mainAppState.marketplaceService) {
+      throw new Error('MarketplaceService not initialized');
+    }
+    return mainAppState.marketplaceService.addSource(url, name);
+  });
+
+  ipcMain.handle('marketplace.sources.remove', async (_event, sourceId: string) => {
+    if (!mainAppState.marketplaceService) {
+      throw new Error('MarketplaceService not initialized');
+    }
+    return mainAppState.marketplaceService.removeSource(sourceId);
   });
 
   ipcMain.handle('marketplace.setEnabled', async (_event, catalogId: string, enabled: boolean) => {

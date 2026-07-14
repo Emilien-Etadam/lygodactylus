@@ -500,7 +500,7 @@ function toTimeMinutes(value: string): number {
   return hour * 60 + minute;
 }
 
-function computeNextRunAtFromScheduleConfig(
+export function computeNextRunAtFromScheduleConfig(
   scheduleConfig: ScheduledTaskScheduleConfig,
   now: number
 ): number | null {

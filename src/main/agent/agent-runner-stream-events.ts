@@ -10,6 +10,11 @@ import {
   type LoopGuard,
   type LoopGuardDecision,
 } from './agent-runner-loop-guard';
+import {
+  buildHallucinatedToolCallSteerMessage,
+  type HallucinatedToolCallGuard,
+  type HallucinatedToolCallDecision,
+} from './hallucinated-toolcall-guard';
 import { safeStringify, summarizeMessageForLog, toErrorText } from './agent-runner-mcp-bridge';
 import type { PreparedPiSessionRun } from './agent-runner-pi-setup';
 import type { AgentRunnerRunContext } from './agent-runner-run-context';
@@ -37,14 +42,33 @@ export interface StreamEventDeps {
   piSetup: PreparedPiSessionRun;
   thinkParser: ThinkTagStreamParser;
   loopGuard: LoopGuard;
+  hallucinatedToolCallGuard: HallucinatedToolCallGuard;
   promptStartedAt: number;
   recordStreamEvent(eventType: string): void;
   getStreamEventSummary(): Record<string, number>;
   markFirstStreamEvent(eventType: string): void;
   emitTerminalError(errorText: string, options?: EmitTerminalErrorOptions): void;
   handleLoopGuardDecision(decision: LoopGuardDecision, context: string): void;
+  handleHallucinatedToolCallDecision(decision: HallucinatedToolCallDecision): void;
   onLoopGuardAbort(): void;
   onStreamErrorAbort(): void;
+}
+
+/** Queue a steering message on the pi session (fire-and-forget, log on failure). */
+function sendModelSteer(deps: StreamEventDeps, steerText: string, logTag: string): void {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sessionAny = deps.piSetup.piSession as any;
+    if (typeof sessionAny.sendUserMessage !== 'function') {
+      logWarn(`[${logTag}] piSession.sendUserMessage is not available; skipping steer`);
+      return;
+    }
+    Promise.resolve(sessionAny.sendUserMessage(steerText, { deliverAs: 'steer' })).catch(
+      (error: unknown) => logWarn(`[${logTag}] sendUserMessage(steer) failed:`, error)
+    );
+  } catch (error) {
+    logWarn(`[${logTag}] sendUserMessage(steer) threw:`, error);
+  }
 }
 
 export function handleLoopGuardDecision(
@@ -82,19 +106,24 @@ export function handleLoopGuardDecision(
     decision.action === 'hash_halt' || decision.action === 'freq_halt'
       ? buildHaltSteerMessage(decision)
       : buildWarnSteerMessage(decision);
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sessionAny = deps.piSetup.piSession as any;
-    if (typeof sessionAny.sendUserMessage !== 'function') {
-      logWarn('[LoopGuard] piSession.sendUserMessage is not available; skipping steer');
-      return;
-    }
-    Promise.resolve(sessionAny.sendUserMessage(steerText, { deliverAs: 'steer' })).catch(
-      (error: unknown) => logWarn('[LoopGuard] sendUserMessage(steer) failed:', error)
-    );
-  } catch (error) {
-    logWarn('[LoopGuard] sendUserMessage(steer) threw:', error);
+  sendModelSteer(deps, steerText, 'LoopGuard');
+}
+
+export function handleHallucinatedToolCallDecision(
+  decision: HallucinatedToolCallDecision,
+  deps: StreamEventDeps
+): void {
+  if (decision.action === 'none' || deps.controller.signal.aborted) {
+    return;
   }
+  logWarn(
+    `[ToolCallGuard] action=${decision.action} reason=${decision.reason}` +
+      (decision.match?.toolName ? ` tool=${decision.match.toolName}` : '')
+  );
+  if (decision.action !== 'steer') {
+    return;
+  }
+  sendModelSteer(deps, buildHallucinatedToolCallSteerMessage(decision), 'ToolCallGuard');
 }
 
 export function logStreamEvent(event: PiSessionEvent, deps: StreamEventDeps): void {

@@ -709,7 +709,14 @@
     "memoryNoRecall": "No relevant memory recalled for this turn",
     "memoryDisabledSession": "Memory disabled for this session",
     "memorySessionToggle": "Memory for session",
-    "memoryOpenSourceSession": "Open source session"
+    "memoryOpenSourceSession": "Open source session",
+    "thinkingToggle": "Redeneerniveau",
+    "thinkingLevels": {
+      "off": "Uit",
+      "low": "Laag",
+      "medium": "Gemiddeld",
+      "high": "Hoog"
+    }
   },
   "context": {
     "progress": "Voortgang",
@@ -1045,7 +1052,25 @@
     "catalogMeta": "Catalog v{{version}} · updated {{updatedAt}} · {{count}} extensions",
     "catalogSourceRemote": "Source: remote catalog (OTA)",
     "catalogSourceBundled": "Source: bundled catalog (offline fallback)",
-    "catalogUpdated": "Catalog updated from the remote registry"
+    "catalogUpdated": "Catalog updated from the remote registry",
+    "viewSources": "Catalogi",
+    "sourcesTitle": "Externe catalogi",
+    "sourcesDesc": "Voeg extensiecatalogi van andere bronnen toe (URL van een manifest.json).",
+    "sourcesWarning": "Externe catalogi worden niet door Lygodactylus gecontroleerd. Hun extensies worden gemarkeerd als niet-geverifieerd – voeg alleen bronnen toe die je vertrouwt.",
+    "sourceEntryCount": "{{count}} extensies",
+    "sourceError": "Niet beschikbaar: {{error}}",
+    "sourceRemove": "Verwijderen",
+    "sourceEmpty": "Nog geen externe catalogi toegevoegd.",
+    "sourceUrlPlaceholder": "https://example.com/catalog/manifest.json",
+    "sourceNamePlaceholder": "Weergavenaam (optioneel)",
+    "sourceAdd": "Catalogus toevoegen",
+    "sourceAdded": "Catalogus “{{name}}” toegevoegd ({{count}} extensies)",
+    "sourceAddFailed": "Catalogus toevoegen mislukt",
+    "sourceRemoveConfirm": "Catalogus “{{name}}” verwijderen? Reeds geïnstalleerde extensies blijven geïnstalleerd.",
+    "sourceRemoved": "Catalogus “{{name}}” verwijderd",
+    "sourceRemoveFailed": "Catalogus verwijderen mislukt",
+    "unverifiedBadge": "Niet geverifieerd",
+    "unverifiedBadgeHint": "Uit externe catalogus: {{source}}"
   },
   "chatLan": {
     "title": "LAN Chat",

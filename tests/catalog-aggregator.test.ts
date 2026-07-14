@@ -2,12 +2,20 @@ import { describe, expect, it, vi } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-vi.mock('electron', () => ({
-  app: {
+vi.mock('electron', () => {
+  const app = {
     getAppPath: () => process.cwd(),
+    getPath: () => '/tmp/lygodactylus-test',
+    getVersion: () => '0.0.0-test',
+    getName: () => 'lygodactylus-test',
+    name: 'lygodactylus-test',
     isPackaged: false,
-  },
-}));
+  };
+  const ipcMain = { handle: () => {}, on: () => {} };
+  const shell = { openPath: async () => '' };
+  // electron-store reads `app` off the default export.
+  return { app, ipcMain, shell, default: { app, ipcMain, shell } };
+});
 
 import { CatalogAggregator } from '../src/main/catalog/catalog-aggregator';
 

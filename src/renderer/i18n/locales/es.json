@@ -709,7 +709,14 @@
     "memoryNoRecall": "No relevant memory recalled for this turn",
     "memoryDisabledSession": "Memory disabled for this session",
     "memorySessionToggle": "Memory for session",
-    "memoryOpenSourceSession": "Open source session"
+    "memoryOpenSourceSession": "Open source session",
+    "thinkingToggle": "Nivel de razonamiento",
+    "thinkingLevels": {
+      "off": "Desactivado",
+      "low": "Bajo",
+      "medium": "Medio",
+      "high": "Alto"
+    }
   },
   "context": {
     "progress": "Progreso",
@@ -1045,7 +1052,25 @@
     "catalogMeta": "Catalog v{{version}} · updated {{updatedAt}} · {{count}} extensions",
     "catalogSourceRemote": "Source: remote catalog (OTA)",
     "catalogSourceBundled": "Source: bundled catalog (offline fallback)",
-    "catalogUpdated": "Catalog updated from the remote registry"
+    "catalogUpdated": "Catalog updated from the remote registry",
+    "viewSources": "Catálogos",
+    "sourcesTitle": "Catálogos de terceros",
+    "sourcesDesc": "Añade catálogos de extensiones de otras fuentes (URL de un manifest.json).",
+    "sourcesWarning": "Los catálogos de terceros no son revisados por Lygodactylus. Sus extensiones se marcan como no verificadas: añade solo fuentes de confianza.",
+    "sourceEntryCount": "{{count}} extensiones",
+    "sourceError": "No disponible: {{error}}",
+    "sourceRemove": "Quitar",
+    "sourceEmpty": "No se han añadido catálogos de terceros.",
+    "sourceUrlPlaceholder": "https://example.com/catalog/manifest.json",
+    "sourceNamePlaceholder": "Nombre para mostrar (opcional)",
+    "sourceAdd": "Añadir catálogo",
+    "sourceAdded": "Catálogo «{{name}}» añadido ({{count}} extensiones)",
+    "sourceAddFailed": "No se pudo añadir el catálogo",
+    "sourceRemoveConfirm": "¿Quitar el catálogo «{{name}}»? Las extensiones ya instaladas se conservarán.",
+    "sourceRemoved": "Catálogo «{{name}}» quitado",
+    "sourceRemoveFailed": "No se pudo quitar el catálogo",
+    "unverifiedBadge": "No verificado",
+    "unverifiedBadgeHint": "Del catálogo de terceros: {{source}}"
   },
   "chatLan": {
     "title": "LAN Chat",
