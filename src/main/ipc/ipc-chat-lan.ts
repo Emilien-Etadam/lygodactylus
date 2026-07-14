@@ -11,7 +11,7 @@ export function registerChatLanIpc(): void {
       return chatLanConfigStore.getAll();
     } catch (error) {
       logError('[ChatLan] getConfig failed:', error);
-      return { enabled: false, port: 19890, token: '', extensionToken: '' };
+      return { enabled: false, port: 19890, token: '', extensionToken: '', publicUrl: '' };
     }
   });
 
@@ -26,13 +26,16 @@ export function registerChatLanIpc(): void {
 
   ipcMain.handle(
     'chatLan.setConfig',
-    async (_event, payload: { enabled?: boolean; port?: number }) => {
+    async (_event, payload: { enabled?: boolean; port?: number; publicUrl?: string }) => {
       try {
         if (typeof payload.enabled === 'boolean') {
           chatLanConfigStore.setEnabled(payload.enabled);
         }
         if (typeof payload.port === 'number') {
           chatLanConfigStore.setPort(payload.port);
+        }
+        if (typeof payload.publicUrl === 'string') {
+          chatLanConfigStore.setPublicUrl(payload.publicUrl);
         }
         await applyChatLanConfig();
         return { ok: true, status: getChatLanStatus(), config: chatLanConfigStore.getAll() };

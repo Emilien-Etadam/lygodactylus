@@ -5,8 +5,11 @@
  * Outputs:
  *   resources/icon.png, icon.ico, icon.icns, icon.iconset/*
  *   resources/tray-icon.png, tray-icon.ico, tray-iconTemplate.png
+ *   resources/chat-lan/icons/* (PWA icons for the Chat LAN mobile companion)
  *   public/favicon.png, public/logo.png
  *   src/renderer/assets/logo.png
+ *
+ * Pass --chat-lan-only to regenerate only the Chat LAN PWA icons.
  */
 
 'use strict';
@@ -42,6 +45,9 @@ const ICONSET_SIZES = [
 
 const ICO_SIZES = [16, 24, 32, 48, 64, 128, 256];
 const TRAY_SIZES = [16, 22, 32];
+
+const CHAT_LAN_ICONS_DIR = path.join(RESOURCES_DIR, 'chat-lan', 'icons');
+const CHAT_LAN_BACKGROUND = { r: 15, g: 17, b: 23, alpha: 1 };
 
 async function resizePng(input, outputPath, size) {
   await sharp(input)
@@ -95,6 +101,30 @@ async function generateIco(logoPath, outputPath, sizes) {
   fs.writeFileSync(outputPath, ico);
 }
 
+/* Maskable icons: Android crops to a circle, so the logo must sit inside
+ * the ~80% safe zone on an opaque background. */
+async function createMaskablePng(logoPath, outputPath, size) {
+  const inner = Math.round(size * 0.7);
+  const logo = await sharp(logoPath)
+    .resize(inner, inner, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png()
+    .toBuffer();
+  const offset = Math.round((size - inner) / 2);
+  await sharp({ create: { width: size, height: size, channels: 4, background: CHAT_LAN_BACKGROUND } })
+    .composite([{ input: logo, top: offset, left: offset }])
+    .png()
+    .toFile(outputPath);
+}
+
+async function generateChatLanIcons(logoPath) {
+  fs.mkdirSync(CHAT_LAN_ICONS_DIR, { recursive: true });
+  await resizePng(logoPath, path.join(CHAT_LAN_ICONS_DIR, 'icon-192.png'), 192);
+  await resizePng(logoPath, path.join(CHAT_LAN_ICONS_DIR, 'icon-512.png'), 512);
+  await createMaskablePng(logoPath, path.join(CHAT_LAN_ICONS_DIR, 'apple-touch-icon.png'), 180);
+  await createMaskablePng(logoPath, path.join(CHAT_LAN_ICONS_DIR, 'maskable-192.png'), 192);
+  await createMaskablePng(logoPath, path.join(CHAT_LAN_ICONS_DIR, 'maskable-512.png'), 512);
+}
+
 function propagateLogoCopies(logoPath) {
   for (const destination of LOGO_COPIES) {
     fs.mkdirSync(path.dirname(destination), { recursive: true });
@@ -110,6 +140,12 @@ async function main() {
 
   console.log('[generate:icons] Generating icons from', LOGO_PATH);
 
+  if (process.argv.includes('--chat-lan-only')) {
+    await generateChatLanIcons(LOGO_PATH);
+    console.log('[generate:icons] Done (chat-lan only).');
+    return;
+  }
+
   await resizePng(LOGO_PATH, path.join(RESOURCES_DIR, 'icon.png'), 512);
   await generateIconset(LOGO_PATH);
   await generateIcns();
@@ -118,6 +154,8 @@ async function main() {
   await resizePng(LOGO_PATH, path.join(RESOURCES_DIR, 'tray-icon.png'), 32);
   await createTrayTemplate(LOGO_PATH, path.join(RESOURCES_DIR, 'tray-iconTemplate.png'), 22);
   await generateIco(LOGO_PATH, path.join(RESOURCES_DIR, 'tray-icon.ico'), TRAY_SIZES);
+
+  await generateChatLanIcons(LOGO_PATH);
 
   await resizePng(LOGO_PATH, PUBLIC_FAVICON, 32);
   propagateLogoCopies(LOGO_PATH);

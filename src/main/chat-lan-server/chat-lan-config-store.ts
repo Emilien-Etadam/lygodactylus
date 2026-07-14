@@ -10,6 +10,8 @@ export interface ChatLanConfig {
   port: number;
   token: string;
   extensionToken: string;
+  /** External HTTPS URL when the server sits behind a reverse proxy (e.g. Nginx Proxy Manager). */
+  publicUrl: string;
 }
 
 const DEFAULT_PORT = 19890;
@@ -29,6 +31,7 @@ class ChatLanConfigStore {
         port: DEFAULT_PORT,
         token: generateToken(),
         extensionToken: generateToken(),
+        publicUrl: '',
       },
       logPrefix: '[ChatLanConfigStore]',
     }) as unknown as Store<ChatLanConfig>;
@@ -47,7 +50,25 @@ class ChatLanConfigStore {
       port: Number(this.store.get('port')) || DEFAULT_PORT,
       token: String(this.store.get('token') || generateToken()),
       extensionToken: String(this.store.get('extensionToken') || generateToken()),
+      publicUrl: String(this.store.get('publicUrl') || ''),
     };
+  }
+
+  setPublicUrl(publicUrl: string): void {
+    const trimmed = publicUrl.trim().replace(/\/+$/, '');
+    if (!trimmed) {
+      this.store.set('publicUrl', '');
+      return;
+    }
+    try {
+      const parsed = new URL(trimmed);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        return;
+      }
+      this.store.set('publicUrl', trimmed);
+    } catch {
+      /* invalid URL — keep previous value */
+    }
   }
 
   setEnabled(enabled: boolean): void {

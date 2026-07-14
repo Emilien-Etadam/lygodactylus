@@ -1087,6 +1087,11 @@
     "extensionTokenRegenerated": "New extension token generated",
     "urls": "Open in browser (local network)",
     "wireguardHint": "From another device on WireGuard, use the IP address shown above.",
-    "saved": "Settings saved"
+    "saved": "Settings saved",
+    "publicUrl": "公共 URL（反向代理）",
+    "publicUrlHint": "当服务器位于反向代理（如 Nginx Proxy Manager）之后时的外部 HTTPS 地址。通过 HTTPS，网页界面可作为真正的应用（PWA）安装。",
+    "qrTitle": "移动端配对（二维码）",
+    "qrHint": "用手机扫描即可立即登录。二维码包含访问令牌：请勿分享。",
+    "installHint": "在 Android 上：Chrome 菜单 →「添加到主屏幕」。通过 HTTPS 地址，应用可全屏安装并支持离线使用。"
   }
 }

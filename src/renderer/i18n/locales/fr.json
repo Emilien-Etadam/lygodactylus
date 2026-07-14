@@ -129,7 +129,12 @@
     "extensionTokenRegenerated": "Nouveau token extension généré",
     "urls": "Ouvrir dans le navigateur (réseau local)",
     "wireguardHint": "Recommandé : accédez via votre tunnel WireGuard (pas le Wi‑Fi public). Le jeton passe dans l’en-tête Authorization, pas dans l’URL.",
-    "saved": "Paramètres enregistrés"
+    "saved": "Paramètres enregistrés",
+    "publicUrl": "URL publique (reverse proxy)",
+    "publicUrlHint": "URL HTTPS externe si le serveur est derrière un reverse proxy (ex. Nginx Proxy Manager). En HTTPS, l'interface s'installe comme une vraie application (PWA).",
+    "qrTitle": "Appairage mobile (QR code)",
+    "qrHint": "Scannez avec votre téléphone pour vous connecter en un geste. Le QR contient le token d'accès : ne le partagez pas.",
+    "installHint": "Sur Android : menu Chrome → « Ajouter à l'écran d'accueil ». Via une URL HTTPS, l'app s'installe en mode plein écran avec support hors-ligne."
   },
   "memory": {
     "title": "Mémoire",

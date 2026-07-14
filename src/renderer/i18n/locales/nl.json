@@ -1087,6 +1087,11 @@
     "extensionTokenRegenerated": "New extension token generated",
     "urls": "Open in browser (local network)",
     "wireguardHint": "From another device on WireGuard, use the IP address shown above.",
-    "saved": "Settings saved"
+    "saved": "Settings saved",
+    "publicUrl": "Publieke URL (reverse proxy)",
+    "publicUrlHint": "Externe HTTPS-URL wanneer de server achter een reverse proxy staat (bijv. Nginx Proxy Manager). Via HTTPS installeert de web-UI als een echte app (PWA).",
+    "qrTitle": "Mobiel koppelen (QR-code)",
+    "qrHint": "Scan met je telefoon om direct in te loggen. De QR bevat het toegangstoken: deel het niet.",
+    "installHint": "Op Android: Chrome-menu → “Toevoegen aan startscherm”. Via een HTTPS-URL installeert de app op volledig scherm met offline-ondersteuning."
   }
 }

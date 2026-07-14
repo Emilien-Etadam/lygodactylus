@@ -1,3 +1,7 @@
+// Must be first: installs the HTTP/SSE electronAPI shim when the app is
+// served by the Chat LAN server instead of Electron (isElectron reads
+// window.electronAPI at module evaluation).
+import './web-bridge/install';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';

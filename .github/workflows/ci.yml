@@ -47,6 +47,10 @@ jobs:
       # If coverage drops below the thresholds, vitest exits non-zero and this step fails.
       - name: Test with Coverage
         run: npm run test:coverage
+        # tests/catalog-github-paths.test.ts appelle l'API GitHub : sans token,
+        # le quota anonyme partagé des runners (60 req/h/IP) provoque des 403.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload coverage report
         if: always()
