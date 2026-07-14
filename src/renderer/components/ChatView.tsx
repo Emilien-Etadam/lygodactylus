@@ -26,6 +26,7 @@ import {
   type SlashCommandDefinition,
 } from '../../shared/slash-commands';
 import { SlashCommandMenu } from './SlashCommandMenu';
+import { ThinkingLevelToggle } from './ThinkingLevelToggle';
 import { Send, Square, Plus, Loader2, Plug, X, Clock, ChevronDown, StickyNote, FileText } from 'lucide-react';
 import { MemoryContextBar } from './MemoryContextBar';
 
@@ -830,6 +831,9 @@ export function ChatView() {
               />
 
               <div className="flex items-center gap-2">
+                {/* Reasoning level toggle */}
+                <ThinkingLevelToggle />
+
                 {/* Model display */}
                 <span className="hidden sm:inline-flex px-2.5 py-1 rounded-full border border-border-subtle bg-background/60 text-xs text-text-muted">
                   {appConfig?.model || t('chat.noModel')}

@@ -254,6 +254,7 @@ export function registerSandboxLogsIpc(): void {
           customProtocol: configStore.get('customProtocol') || null,
           sandboxEnabled: !!configStore.get('sandboxEnabled'),
           thinkingEnabled: !!configStore.get('enableThinking'),
+          thinkingLevel: configStore.get('thinkingLevel'),
           apiKeyConfigured: !!configStore.get('apiKey'),
           claudeCodePathConfigured: !!resolveAgentCliPath(configStore.getAll()),
           agentCliPathConfigured: !!resolveAgentCliPath(configStore.getAll()),

@@ -189,6 +189,16 @@ describe('pi model resolution helpers', () => {
     );
     expect(qwen3.reasoning).toBe(true);
 
+    const qwen36 = buildSyntheticPiModel(
+      'qwen3.6:27b',
+      'openai',
+      'openai',
+      'http://localhost:8000/v1'
+    );
+    expect(qwen36.reasoning).toBe(true);
+    expect(qwen36.contextWindow).toBe(262144);
+    expect(qwen36.maxTokens).toBe(32768);
+
     const reasoner = buildSyntheticPiModel('o3-reasoner', 'openai', 'openai');
     expect(reasoner.reasoning).toBe(true);
 
@@ -273,9 +283,80 @@ describe('pi model resolution helpers', () => {
     );
 
     expect(model.compat?.supportsReasoningEffort).toBe(true);
-    expect((model.compat?.reasoningEffortMap as Record<string, string> | undefined)?.off).toBe(
-      'none'
+    expect(model.thinkingLevelMap?.off).toBe('none');
+    expect(model.compat?.thinkingFormat).toBeUndefined();
+  });
+
+  it('uses qwen chat-template thinking toggles on non-ollama endpoints like vLLM', () => {
+    const model = applyPiModelRuntimeOverrides(
+      {
+        id: 'Qwen/Qwen3.6-27B',
+        name: 'Qwen/Qwen3.6-27B',
+        api: 'openai-completions',
+        provider: 'openai',
+        baseUrl: 'http://localhost:8000/v1',
+        reasoning: true,
+        input: ['text'],
+        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: 262144,
+        maxTokens: 32768,
+      },
+      {
+        configProvider: 'openai',
+        rawProvider: 'openai',
+        customBaseUrl: 'http://localhost:8000/v1',
+      }
     );
+
+    expect(model.compat?.thinkingFormat).toBe('qwen-chat-template');
+  });
+
+  it('uses qwen chat-template thinking toggles for remote vLLM endpoints', () => {
+    const model = applyPiModelRuntimeOverrides(
+      {
+        id: 'qwen3.6:27b',
+        name: 'qwen3.6:27b',
+        api: 'openai-completions',
+        provider: 'openai',
+        baseUrl: 'http://192.168.1.50:8000/v1',
+        reasoning: true,
+        input: ['text'],
+        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: 262144,
+        maxTokens: 32768,
+      },
+      {
+        configProvider: 'openai',
+        rawProvider: 'openai',
+        customBaseUrl: 'http://192.168.1.50:8000/v1',
+      }
+    );
+
+    expect(model.compat?.thinkingFormat).toBe('qwen-chat-template');
+  });
+
+  it('does not apply qwen chat-template format to non-qwen reasoning models', () => {
+    const model = applyPiModelRuntimeOverrides(
+      {
+        id: 'kimi-k2-thinking',
+        name: 'kimi-k2-thinking',
+        api: 'openai-completions',
+        provider: 'openai',
+        baseUrl: 'http://localhost:8000/v1',
+        reasoning: true,
+        input: ['text'],
+        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: 128000,
+        maxTokens: 16384,
+      },
+      {
+        configProvider: 'openai',
+        rawProvider: 'openai',
+        customBaseUrl: 'http://localhost:8000/v1',
+      }
+    );
+
+    expect(model.compat?.thinkingFormat).toBeUndefined();
   });
 
   it('disables supportsStore alongside developer role for non-standard endpoints', () => {

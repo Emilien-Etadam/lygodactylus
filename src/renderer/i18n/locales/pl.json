@@ -709,7 +709,14 @@
     "memoryNoRecall": "No relevant memory recalled for this turn",
     "memoryDisabledSession": "Memory disabled for this session",
     "memorySessionToggle": "Memory for session",
-    "memoryOpenSourceSession": "Open source session"
+    "memoryOpenSourceSession": "Open source session",
+    "thinkingToggle": "Poziom rozumowania",
+    "thinkingLevels": {
+      "off": "Wyłączony",
+      "low": "Niski",
+      "medium": "Średni",
+      "high": "Wysoki"
+    }
   },
   "context": {
     "progress": "Postęp",

@@ -75,6 +75,7 @@ export interface DiagnosticsSummary {
     customProtocol: string | null;
     sandboxEnabled: boolean;
     thinkingEnabled: boolean;
+    thinkingLevel?: string;
     apiKeyConfigured: boolean;
     claudeCodePathConfigured: boolean;
     agentCliPathConfigured: boolean;

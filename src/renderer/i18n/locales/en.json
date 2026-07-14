@@ -760,7 +760,14 @@
     "longPasteConverted": "Long paste converted to attached text note",
     "longPasteTooLarge": "Pasted text is too large (max 2 MB). Try attaching a file instead.",
     "textNoteLabel": "Pasted note ({{size}})",
-    "imageProcessFailed": "Failed to process image"
+    "imageProcessFailed": "Failed to process image",
+    "thinkingToggle": "Reasoning level",
+    "thinkingLevels": {
+      "off": "Off",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    }
   },
   "context": {
     "progress": "Progress",
