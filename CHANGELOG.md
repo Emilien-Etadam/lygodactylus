@@ -7,14 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.1.0] - 2026-07-14
+
 ### Added
 
+- **Chat LAN — UI React complète servie à `/app/`** : les clients LAN accèdent au vrai renderer desktop (streaming avec thinking et traces d'outils, permissions interactives, slash commands des plugins, fork/rewind de messages, panneau de contexte) sans duplication de code UI — shim web-bridge HTTP/SSE installé quand `window.electronAPI` est absent, endpoints bridge validés par la même allowlist de `ClientEvents` que l'IPC Electron, canaux de gestion rejetés par design, secrets masqués en profondeur côté serveur (`chat-lan-redact.ts`)
+- **Mobile Companion PWA** : appairage par QR code, UI installable sur mobile, SSE compatible proxy
+- **Niveau de raisonnement réglable par prompt** : nouvelle config `thinkingLevel` (low/medium/high) combinée à `enableThinking`, hot-swappée sur la session, avec bouton Off/Faible/Moyen/Élevé dans le composer (12 locales) ; envoi de `chat_template_kwargs.enable_thinking` aux endpoints OpenAI-compatibles non-Ollama (vLLM, SGLang) et reconnaissance de `qwen3.6` (contexte 262k) comme modèle raisonnant
+- **Catalogues tiers dans la marketplace** : enregistrement de sources additionnelles (URL d'un `manifest.json`) dans Paramètres → Extensions → Catalogues — entrées externes préfixées par source, forcées « Non vérifié », stratégies de résolution limitées à github/mcp-registry, dernier manifest valide conservé en cas d'échec réseau transitoire (18 clés i18n, 12 locales)
 - **Skill OfficeCLI dans la marketplace** : nouvelle entrée catalogue (Réglages → Extensions) qui installe le skill [OfficeCLI](https://github.com/iOfficeAI/OfficeCLI) (Apache-2.0) — génération et édition de documents Office (`.docx`, `.xlsx`, `.pptx`) via le binaire autoporteur `officecli`, téléchargé au premier usage par le skill lui-même (dans le sandbox quand il est actif). Redonne une capacité de génération documentaire après le retrait en v6.0 des skills documents propriétaires d'Anthropic ; `SKILL.md` vendorisé dans `catalog/skills/officecli/` (politique curated-strict, provenance dans `NOTICE.md`)
 
 - **Planifications pilotables par l'agent** : nouveaux outils natifs `schedule_list`, `schedule_create`, `schedule_update`, `schedule_delete`, `schedule_toggle`, `schedule_run_now` exposés au LLM — l'agent peut désormais consulter, créer, modifier, activer/désactiver, supprimer et déclencher les planifications (Paramètres → Planifications) directement depuis le chat (modes unique, quotidien, hebdomadaire et intervalle), avec les mêmes validations que l'UI (répertoire de travail supporté, heure d'exécution future)
 
 - **Tool-call guard** : détection des tool calls « hallucinés » en texte par les modèles locaux (ex. Qwen3.x à contexte profond) — appel émis en balises `<tool_call>`/`<function=…>` ou laissé dans le raisonnement au lieu d'un appel structuré ; l'app recadre automatiquement le modèle pour qu'il réémette l'appel via le vrai mécanisme de tool calling (2 relances max par run)
-- **Docs** : guide de fiabilisation des tool calls Qwen en local ([docs/qwen-local-reliability.md](docs/qwen-local-reliability.md)) — template de chat corrigé (froggeric), préservation du raisonnement avec la compaction, recommandations de quantization
+### Changed
+
+- **Ménage du dépôt** : suppression de fichiers morts (`resources/WeChat.jpg`, doublon `resources/logolygo.png`, script one-shot de backlog) ; `.gitignore` corrigé — les icônes suivies de `resources/` et le dossier `docs/` ne sont plus masqués par les règles `*.png` et `docs/`
+
+### Fixed
+
+- **CI** : les appels API GitHub de `tests/catalog-github-paths.test.ts` sont désormais authentifiés (`GITHUB_TOKEN`) — corrige les échecs 403 dus au quota anonyme partagé des runners
 
 ## [6.0.4] - 2026-07-09
 
