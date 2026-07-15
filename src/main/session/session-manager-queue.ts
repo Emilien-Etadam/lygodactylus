@@ -26,6 +26,7 @@ export interface SessionManagerAgentRunner {
 export interface PromptQueueItem {
   prompt: string;
   content?: ContentBlock[];
+  messageId?: string;
 }
 
 export type PromptQueues = Map<string, PromptQueueItem[]>;
@@ -34,7 +35,12 @@ interface QueueRuntime {
   activeSessions: Map<string, AbortController>;
   promptQueues: PromptQueues;
   processQueue(session: Session): Promise<void>;
-  processPrompt(session: Session, prompt: string, content?: ContentBlock[]): Promise<void>;
+  processPrompt(
+    session: Session,
+    prompt: string,
+    content?: ContentBlock[],
+    messageId?: string
+  ): Promise<void>;
   loadSession(sessionId: string): Session | null;
   updateSessionStatus(sessionId: string, status: SessionStatus): void;
 }
@@ -43,6 +49,7 @@ export interface ProcessPromptOptions {
   session: Session;
   prompt: string;
   content?: ContentBlock[];
+  messageId?: string;
   agentRunner: SessionManagerAgentRunner;
   extensionManager?: AgentRuntimeExtensionManager;
   ensureSandboxInitialized(session: Session): Promise<void>;
@@ -62,10 +69,11 @@ export function enqueuePrompt(
   runtime: QueueRuntime,
   session: Session,
   prompt: string,
-  content?: ContentBlock[]
+  content?: ContentBlock[],
+  messageId?: string
 ): void {
   const queue = runtime.promptQueues.get(session.id) || [];
-  queue.push({ prompt, content });
+  queue.push({ prompt, content, messageId });
   runtime.promptQueues.set(session.id, queue);
 
   if (!runtime.activeSessions.has(session.id)) {
@@ -107,7 +115,7 @@ export async function processQueue(runtime: QueueRuntime, initialSession: Sessio
           return;
         }
 
-        await runtime.processPrompt(latestSession, item.prompt, item.content);
+        await runtime.processPrompt(latestSession, item.prompt, item.content, item.messageId);
         if (controller.signal.aborted) {
           return;
         }
@@ -191,8 +199,13 @@ export async function processPrompt(options: ProcessPromptOptions): Promise<void
       }
 
       const existingMessages = options.getMessages(session.id);
+      // Reuse the renderer-provided message id so the message displayed in the
+      // UI and the persisted one stay addressable by the same id (fork/rewind).
+      const requestedId = options.messageId;
+      const isIdAvailable =
+        requestedId && !existingMessages.some((message) => message.id === requestedId);
       const userMessage: Message = {
-        id: uuidv4(),
+        id: isIdAvailable ? requestedId : uuidv4(),
         sessionId: session.id,
         role: 'user',
         content: messageContent,

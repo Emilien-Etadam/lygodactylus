@@ -96,8 +96,8 @@ export class SessionManager {
       loadSession: (sessionId) => this.loadSession(sessionId),
       getMessages: (sessionId) => this.getMessages(sessionId),
       saveMessage: (message) => this.saveMessage(message),
-      startSession: (title, prompt, cwd, allowedTools, content, memoryEnabled) =>
-        this.startSession(title, prompt, cwd, allowedTools, content, memoryEnabled),
+      startSession: (title, prompt, cwd, allowedTools, content, memoryEnabled, messageId) =>
+        this.startSession(title, prompt, cwd, allowedTools, content, memoryEnabled, messageId),
       extensionManager: this.extensionManager,
       workspaceMountVirtualPath: WORKSPACE_MOUNT_VIRTUAL_PATH,
     });
@@ -187,12 +187,13 @@ export class SessionManager {
     cwd?: string,
     allowedTools?: string[],
     content?: ContentBlock[],
-    memoryEnabled?: boolean
+    memoryEnabled?: boolean,
+    messageId?: string
   ): Promise<Session> {
     log('[SessionManager] Starting new session:', title);
     const session = this.facadeSupport.createSession(title, cwd, allowedTools, memoryEnabled);
     this.store.saveSession(session);
-    this.enqueuePrompt(session, prompt, content);
+    this.enqueuePrompt(session, prompt, content, messageId);
     return session;
   }
 
@@ -203,14 +204,15 @@ export class SessionManager {
   async continueSession(
     sessionId: string,
     prompt: string,
-    content?: ContentBlock[]
+    content?: ContentBlock[],
+    messageId?: string
   ): Promise<void> {
     log('[SessionManager] Continuing session:', sessionId);
     const session = this.loadSession(sessionId);
     if (!session) {
       throw new Error(`Session not found: ${sessionId}`);
     }
-    this.enqueuePrompt(session, prompt, content);
+    this.enqueuePrompt(session, prompt, content, messageId);
   }
 
   async compactSession(
@@ -222,7 +224,8 @@ export class SessionManager {
 
   async handoffSession(
     sessionId: string,
-    customInstructions?: string
+    customInstructions?: string,
+    messageId?: string
   ): Promise<{
     success: boolean;
     newSession?: Session;
@@ -230,7 +233,7 @@ export class SessionManager {
     errorKey?: string;
     error?: string;
   }> {
-    return this.facadeSupport.handoffSession(sessionId, customInstructions);
+    return this.facadeSupport.handoffSession(sessionId, customInstructions, messageId);
   }
 
   async forkSessionFromMessage(
@@ -439,11 +442,17 @@ export class SessionManager {
     return processFileAttachments({ session, content, sendToRenderer: this.sendToRenderer });
   }
 
-  private processPrompt(session: Session, prompt: string, content?: ContentBlock[]): Promise<void> {
+  private processPrompt(
+    session: Session,
+    prompt: string,
+    content?: ContentBlock[],
+    messageId?: string
+  ): Promise<void> {
     return processSessionPrompt({
       session,
       prompt,
       content,
+      messageId,
       agentRunner: this.agentRunner,
       extensionManager: this.extensionManager,
       ensureSandboxInitialized: (currentSession) => this.ensureSandboxInitialized(currentSession),
@@ -462,20 +471,26 @@ export class SessionManager {
     });
   }
 
-  private enqueuePrompt(session: Session, prompt: string, content?: ContentBlock[]): void {
+  private enqueuePrompt(
+    session: Session,
+    prompt: string,
+    content?: ContentBlock[],
+    messageId?: string
+  ): void {
     enqueueSessionPrompt(
       {
         activeSessions: this.activeSessions,
         promptQueues: this.promptQueues,
         processQueue: (queuedSession) => this.processQueue(queuedSession),
-        processPrompt: (queuedSession, queuedPrompt, queuedContent) =>
-          this.processPrompt(queuedSession, queuedPrompt, queuedContent),
+        processPrompt: (queuedSession, queuedPrompt, queuedContent, queuedMessageId) =>
+          this.processPrompt(queuedSession, queuedPrompt, queuedContent, queuedMessageId),
         loadSession: (sessionId) => this.loadSession(sessionId),
         updateSessionStatus: (sessionId, status) => this.updateSessionStatus(sessionId, status),
       },
       session,
       prompt,
-      content
+      content,
+      messageId
     );
   }
 
@@ -485,8 +500,8 @@ export class SessionManager {
         activeSessions: this.activeSessions,
         promptQueues: this.promptQueues,
         processQueue: (queuedSession) => this.processQueue(queuedSession),
-        processPrompt: (queuedSession, queuedPrompt, queuedContent) =>
-          this.processPrompt(queuedSession, queuedPrompt, queuedContent),
+        processPrompt: (queuedSession, queuedPrompt, queuedContent, queuedMessageId) =>
+          this.processPrompt(queuedSession, queuedPrompt, queuedContent, queuedMessageId),
         loadSession: (sessionId) => this.loadSession(sessionId),
         updateSessionStatus: (sessionId, status) => this.updateSessionStatus(sessionId, status),
       },
