@@ -1092,6 +1092,14 @@
     "publicUrlHint": "Externe HTTPS-URL, wenn der Server hinter einem Reverse Proxy läuft (z. B. Nginx Proxy Manager). Über HTTPS lässt sich die Web-UI als echte App (PWA) installieren.",
     "qrTitle": "Mobile Kopplung (QR-Code)",
     "qrHint": "Mit dem Handy scannen, um sich sofort anzumelden. Der QR-Code enthält das Zugriffstoken: nicht weitergeben.",
-    "installHint": "Auf Android: Chrome-Menü → „Zum Startbildschirm hinzufügen“. Über eine HTTPS-URL wird die App im Vollbildmodus mit Offline-Unterstützung installiert."
+    "installHint": "Auf Android: Chrome-Menü → „Zum Startbildschirm hinzufügen“. Über eine HTTPS-URL wird die App im Vollbildmodus mit Offline-Unterstützung installiert.",
+    "extensionInstallTitle": "Firefox-Erweiterung „Lygodactylus Web“",
+    "extensionInstallHint": "Lädt das signierte Add-on (.xpi) von den GitHub-Releases herunter und öffnet es in Firefox. Bestätigen Sie die Installation mit einem Klick und fügen Sie dann das Erweiterungs-Token (automatisch kopiert) in die Add-on-Einstellungen ein.",
+    "extensionInstallButton": "In Firefox installieren",
+    "extensionInstallOpenReleases": "Release-Seite",
+    "extensionInstallStarted": "Firefox wird geöffnet — bestätigen Sie das Hinzufügen des Add-ons. Das Erweiterungs-Token wurde kopiert: Fügen Sie es in die Einstellungen der Erweiterung ein.",
+    "extensionInstallErrorNoRelease": "Kein signiertes Add-on (.xpi) in den GitHub-Releases gefunden.",
+    "extensionInstallErrorDownload": "Download des Add-ons fehlgeschlagen. Prüfen Sie die Netzwerkverbindung und versuchen Sie es erneut.",
+    "extensionInstallErrorFirefoxNotFound": "Firefox wurde nicht gefunden. Die .xpi-Datei liegt im Downloads-Ordner — installieren Sie sie über about:addons → „Add-on aus Datei installieren…“."
   }
 }

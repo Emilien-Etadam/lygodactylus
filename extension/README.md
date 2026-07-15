@@ -6,6 +6,16 @@ Technologie : JavaScript vanilla, API `browser.*` (Firefox uniquement, pas de po
 
 ---
 
+## Installation depuis l’application (recommandé)
+
+Dans Lygodactylus → **Réglages** → **Chat LAN**, cliquez sur **Installer dans Firefox** (bloc « Extension Firefox »). L’application télécharge le dernier `.xpi` signé depuis les [releases GitHub](https://github.com/Emilien-Etadam/lygodactylus/releases) (tags `ext-v*`) dans votre dossier Téléchargements, puis l’ouvre dans Firefox : confirmez l’installation en un clic dans la bannière du navigateur. Le **token extension** est copié automatiquement dans le presse-papier — collez-le dans les options de l’extension avec l’URL du serveur.
+
+Si Firefox est introuvable, le `.xpi` reste dans le dossier Téléchargements : installez-le via `about:addons` → **Installer un module depuis un fichier…**
+
+> Une installation totalement silencieuse n’est pas possible sur Firefox : le navigateur demande toujours une confirmation à l’utilisateur.
+
+---
+
 ## Installation (développement)
 
 1. Clonez ce dépôt et assurez-vous que Lygodactylus est installé avec le **Chat LAN** activé.

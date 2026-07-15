@@ -1092,6 +1092,14 @@
     "publicUrlHint": "Externe HTTPS-URL wanneer de server achter een reverse proxy staat (bijv. Nginx Proxy Manager). Via HTTPS installeert de web-UI als een echte app (PWA).",
     "qrTitle": "Mobiel koppelen (QR-code)",
     "qrHint": "Scan met je telefoon om direct in te loggen. De QR bevat het toegangstoken: deel het niet.",
-    "installHint": "Op Android: Chrome-menu → “Toevoegen aan startscherm”. Via een HTTPS-URL installeert de app op volledig scherm met offline-ondersteuning."
+    "installHint": "Op Android: Chrome-menu → “Toevoegen aan startscherm”. Via een HTTPS-URL installeert de app op volledig scherm met offline-ondersteuning.",
+    "extensionInstallTitle": "Firefox-extensie “Lygodactylus Web”",
+    "extensionInstallHint": "Downloadt de ondertekende add-on (.xpi) van de GitHub-releases en opent deze in Firefox. Bevestig de installatie met één klik en plak daarna het extensietoken (automatisch gekopieerd) in de opties van de add-on.",
+    "extensionInstallButton": "Installeren in Firefox",
+    "extensionInstallOpenReleases": "Releasepagina",
+    "extensionInstallStarted": "Firefox wordt geopend — bevestig het toevoegen van de add-on. Het extensietoken is gekopieerd: plak het in de opties van de extensie.",
+    "extensionInstallErrorNoRelease": "Geen ondertekende add-on (.xpi) gevonden in de GitHub-releases.",
+    "extensionInstallErrorDownload": "Downloaden van de add-on is mislukt. Controleer de netwerkverbinding en probeer het opnieuw.",
+    "extensionInstallErrorFirefoxNotFound": "Firefox niet gevonden. Het .xpi-bestand staat in uw map Downloads — installeer het via about:addons → “Add-on installeren vanuit bestand…”."
   }
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Copy, Loader2, QrCode, RefreshCw, Smartphone, Wifi } from 'lucide-react';
+import { Copy, Loader2, Puzzle, QrCode, RefreshCw, Smartphone, Wifi } from 'lucide-react';
 import QRCode from 'qrcode';
 
 interface ChatLanConfig {
@@ -28,6 +28,8 @@ export function SettingsChatLan() {
   const [message, setMessage] = useState<string | null>(null);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [isInstallingExtension, setIsInstallingExtension] = useState(false);
+  const [extensionInstallError, setExtensionInstallError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     const [nextConfig, nextStatus] = await Promise.all([
@@ -126,6 +128,35 @@ export function SettingsChatLan() {
     if (!config?.extensionToken) return;
     await navigator.clipboard.writeText(config.extensionToken);
     setMessage(t('chatLan.extensionTokenCopied'));
+  };
+
+  const installFirefoxExtension = async () => {
+    setIsInstallingExtension(true);
+    setMessage(null);
+    setExtensionInstallError(null);
+    try {
+      const result = await window.electronAPI.chatLan.installFirefoxExtension();
+      if (result.ok) {
+        if (config?.extensionToken) {
+          await navigator.clipboard.writeText(config.extensionToken);
+        }
+        setMessage(t('chatLan.extensionInstallStarted'));
+      } else if (result.error === 'firefox-not-found') {
+        setExtensionInstallError(
+          result.detail
+            ? `${t('chatLan.extensionInstallErrorFirefoxNotFound')} (${result.detail})`
+            : t('chatLan.extensionInstallErrorFirefoxNotFound')
+        );
+      } else if (result.error === 'no-release') {
+        setExtensionInstallError(t('chatLan.extensionInstallErrorNoRelease'));
+      } else {
+        setExtensionInstallError(t('chatLan.extensionInstallErrorDownload'));
+      }
+    } catch {
+      setExtensionInstallError(t('chatLan.extensionInstallErrorDownload'));
+    } finally {
+      setIsInstallingExtension(false);
+    }
   };
 
   if (!config) {
@@ -232,6 +263,39 @@ export function SettingsChatLan() {
             <RefreshCw className="w-4 h-4" />
           </button>
         </div>
+      </div>
+
+      <div className="rounded-lg border border-border-muted bg-background-secondary/50 p-3 space-y-2 max-w-xl">
+        <p className="text-xs font-medium text-text-primary flex items-center gap-1.5">
+          <Puzzle className="w-3.5 h-3.5" />
+          {t('chatLan.extensionInstallTitle')}
+        </p>
+        <p className="text-[11px] text-text-muted">{t('chatLan.extensionInstallHint')}</p>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={isInstallingExtension}
+            onClick={() => void installFirefoxExtension()}
+            className="px-3 py-2 rounded-lg bg-accent text-white text-sm font-medium flex items-center gap-2"
+          >
+            {isInstallingExtension && <Loader2 className="w-4 h-4 animate-spin" />}
+            {t('chatLan.extensionInstallButton')}
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              void window.electronAPI.openExternal(
+                'https://github.com/Emilien-Etadam/lygodactylus/releases'
+              )
+            }
+            className="px-3 py-2 rounded-lg border border-border text-sm text-text-primary"
+          >
+            {t('chatLan.extensionInstallOpenReleases')}
+          </button>
+        </div>
+        {extensionInstallError && (
+          <p className="text-xs text-red-500 break-all">{extensionInstallError}</p>
+        )}
       </div>
 
       <div className="grid gap-2 max-w-xl">

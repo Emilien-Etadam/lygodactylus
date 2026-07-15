@@ -134,7 +134,15 @@
     "publicUrlHint": "URL HTTPS externe si le serveur est derrière un reverse proxy (ex. Nginx Proxy Manager). En HTTPS, l'interface s'installe comme une vraie application (PWA).",
     "qrTitle": "Appairage mobile (QR code)",
     "qrHint": "Scannez avec votre téléphone pour vous connecter en un geste. Le QR contient le token d'accès : ne le partagez pas.",
-    "installHint": "Sur Android : menu Chrome → « Ajouter à l'écran d'accueil ». Via une URL HTTPS, l'app s'installe en mode plein écran avec support hors-ligne."
+    "installHint": "Sur Android : menu Chrome → « Ajouter à l'écran d'accueil ». Via une URL HTTPS, l'app s'installe en mode plein écran avec support hors-ligne.",
+    "extensionInstallTitle": "Extension Firefox « Lygodactylus Web »",
+    "extensionInstallHint": "Télécharge le module signé (.xpi) depuis les releases GitHub et l'ouvre dans Firefox. Confirmez l'installation en un clic, puis collez le token extension (copié automatiquement) dans les options du module.",
+    "extensionInstallButton": "Installer dans Firefox",
+    "extensionInstallOpenReleases": "Page des releases",
+    "extensionInstallStarted": "Firefox va s'ouvrir : confirmez l'ajout du module. Le token extension a été copié — collez-le dans les options de l'extension.",
+    "extensionInstallErrorNoRelease": "Aucun module signé (.xpi) trouvé dans les releases GitHub.",
+    "extensionInstallErrorDownload": "Échec du téléchargement du module. Vérifiez la connexion réseau puis réessayez.",
+    "extensionInstallErrorFirefoxNotFound": "Firefox est introuvable. Le fichier .xpi est dans votre dossier Téléchargements — installez-le via about:addons → « Installer un module depuis un fichier… »."
   },
   "memory": {
     "title": "Mémoire",
