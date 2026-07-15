@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'ext-v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag de release (ext-vX.Y.Z) — créé sur le commit courant s'il n'existe pas encore"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -12,13 +18,15 @@ jobs:
   sign-extension:
     name: Lint, sign & release XPI
     runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Verify tag version matches manifest
         run: |
           set -euo pipefail
-          TAG="${GITHUB_REF_NAME}"
+          TAG="${RELEASE_TAG}"
           if [[ ! "$TAG" =~ ^ext-v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]]; then
             echo "::error::Tag invalide : ${TAG}. Attendu : ext-vX.Y.Z (ex. ext-v1.0.0)."
             exit 1
@@ -48,4 +56,4 @@ jobs:
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v2
         with:
           files: web-ext-artifacts/*.xpi
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ inputs.tag || github.ref_name }}
