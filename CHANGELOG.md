@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.2.0] - 2026-07-15
+
+### Added
+
+- **Installation en un clic de l'extension Firefox** : nouveau bloc « Extension Firefox » dans Réglages → Chat LAN — l'app télécharge le dernier `.xpi` signé depuis les releases GitHub (tags `ext-v*`), l'ouvre dans Firefox (détection par plateforme Windows/macOS/Linux ; téléchargement dans le dossier Téléchargements pour rester lisible par les Firefox sandboxés snap/flatpak) et copie automatiquement le token extension dans le presse-papier. Si Firefox est introuvable, le `.xpi` reste disponible et l'UI pointe vers `about:addons` ; bouton de secours vers la page des releases (8 clés i18n, 12 locales)
+
+### Changed
+
+- **CI** : le workflow de signature de l'extension (`sign-extension.yml`) accepte un déclenchement manuel (`workflow_dispatch`, input `tag`) — le tag `ext-vX.Y.Z` est créé sur le commit courant s'il n'existe pas encore ; première release extension publiée (`ext-v1.0.0`)
+
 ## [6.1.2] - 2026-07-15
 
 ### Fixed
