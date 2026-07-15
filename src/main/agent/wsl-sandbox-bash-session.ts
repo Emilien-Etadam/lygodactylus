@@ -408,13 +408,19 @@ class WslSandboxBashSession {
         this.options.virtualWorkspacePath
       );
       const escapedCwd = shellEscapePosixPath(wslCwd);
+      // Newline-joined: the command and each marker echo must be separate
+      // shell commands. Space-joining turned the marker echos into arguments
+      // of the user command and left the block unterminated, wedging the
+      // persistent shell forever (every command then hit its timeout).
       const script = [
-        `{ cd '${escapedCwd}' || { echo '${MARKER_EXIT_PREFIX}1'; echo '${MARKER_DONE}'; exit 0; };`,
+        `if cd '${escapedCwd}'; then`,
         rewrittenCommand,
         `echo "${MARKER_EXIT_PREFIX}$?"`,
+        'else',
+        `echo "${MARKER_EXIT_PREFIX}1"`,
+        'fi',
         `echo "${MARKER_DONE}"`,
-        '}',
-      ].join(' ');
+      ].join('\n');
 
       this.child.stdin.write(`${script}\n`, (error) => {
         if (error) {
