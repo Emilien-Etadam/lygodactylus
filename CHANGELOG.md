@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.1.1] - 2026-07-15
+
+### Fixed
+
+- **Sandbox WSL / bash** : cause racine des timeouts systématiques (v6.0.2 et v6.0.4 n'avaient corrigé que des problèmes périphériques) — le script envoyé au shell persistant joignait ses morceaux par des espaces au lieu de retours à la ligne : les `echo` des marqueurs de fin devenaient des arguments de la commande utilisateur et le groupe `{` ne se refermait jamais, donc bash attendait indéfiniment sans rien exécuter et chaque commande expirait à son timeout. Script reconstruit en bloc `if/fi` multi-lignes ; l'échec de `cd` ne tue plus le shell persistant ; ajout de tests d'intégration contre un vrai bash (les tests unitaires mockaient le shell et ne pouvaient pas détecter d'erreur de syntaxe)
+
 ## [6.1.0] - 2026-07-14
 
 ### Added
