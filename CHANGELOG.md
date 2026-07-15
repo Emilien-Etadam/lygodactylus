@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.1.2] - 2026-07-15
+
+### Fixed
+
+- **Fenêtre de contexte** : l'app détecte désormais la fenêtre de contexte réellement servie par l'endpoint au lieu de se fier aux specs par famille de modèle — sonde Ollama `/api/show` étendue aux hôtes distants (LAN), et lecture de `max_model_len` / `context_length` dans `/v1/models` pour vLLM et compatibles (cache par endpoint+modèle, timeout 4 s, échec non bloquant). Corrige le scénario « contexte plein côté serveur alors que la jauge affiche 50 % et que `/compact` répond “rien à compacter” » quand le déploiement plafonne le contexte en dessous du nominal (ex. qwen3.6 servi à 131k au lieu de 262k). Une « Fenêtre de contexte » saisie manuellement dans Réglages → API garde la priorité
+
 ## [6.1.1] - 2026-07-15
 
 ### Fixed
