@@ -803,6 +803,8 @@ export interface ProviderPresets {
 export interface ProviderModelInfo {
   id: string;
   name: string;
+  /** Serving context window reported by the endpoint (e.g. vLLM max_model_len), when available. */
+  contextWindow?: number;
 }
 
 export interface ApiTestInput {

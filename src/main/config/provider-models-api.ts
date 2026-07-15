@@ -39,20 +39,41 @@ function buildHeaders(apiKey: string | undefined, useBearerAuth: boolean): Heade
   return headers;
 }
 
-function normalizeModelEntries(
-  entries: Array<{ id?: string | null; name?: string | null; display_name?: string | null }>
-): ProviderModelInfo[] {
+/**
+ * Serving-side context window reported by OpenAI-compatible servers in their
+ * /models entries: vLLM uses max_model_len, others use context_length or
+ * similar. Absent on the official OpenAI API.
+ */
+function extractReportedContextWindow(entry: Record<string, unknown>): number | undefined {
+  for (const key of ['max_model_len', 'context_length', 'context_window', 'max_context_length']) {
+    const value = entry[key];
+    if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+      return Math.floor(value);
+    }
+  }
+  return undefined;
+}
+
+function normalizeModelEntries(entries: Array<Record<string, unknown>>): ProviderModelInfo[] {
   const seen = new Set<string>();
   const models: ProviderModelInfo[] = [];
 
   for (const entry of entries) {
-    const id = entry.id?.trim();
+    const id = typeof entry.id === 'string' ? entry.id.trim() : '';
     if (!id || seen.has(id)) {
       continue;
     }
     seen.add(id);
-    const displayName = entry.display_name?.trim() || entry.name?.trim();
-    models.push({ id, name: displayName || id });
+    const displayName =
+      (typeof entry.display_name === 'string' && entry.display_name.trim()) ||
+      (typeof entry.name === 'string' && entry.name.trim()) ||
+      '';
+    const contextWindow = extractReportedContextWindow(entry);
+    models.push({
+      id,
+      name: displayName || id,
+      ...(contextWindow ? { contextWindow } : {}),
+    });
   }
 
   return models.sort((a, b) => a.id.localeCompare(b.id));
@@ -62,11 +83,12 @@ async function fetchModelsIndex(input: {
   modelsUrl: string;
   apiKey?: string;
   useBearerAuth: boolean;
+  timeoutMs?: number;
 }): Promise<ProviderModelInfo[]> {
   const response = await fetch(input.modelsUrl, {
     method: 'GET',
     headers: buildHeaders(input.apiKey, input.useBearerAuth),
-    signal: AbortSignal.timeout(MODELS_LIST_TIMEOUT_MS),
+    signal: AbortSignal.timeout(input.timeoutMs ?? MODELS_LIST_TIMEOUT_MS),
   });
 
   if (response.status === 404) {
@@ -92,14 +114,7 @@ async function fetchModelsIndex(input: {
       : [];
 
   return normalizeModelEntries(
-    rawItems.map((item) => {
-      const modelItem = item as {
-        id?: string | null;
-        name?: string | null;
-        display_name?: string | null;
-      };
-      return modelItem;
-    })
+    rawItems.filter((item): item is Record<string, unknown> => !!item && typeof item === 'object')
   );
 }
 
@@ -161,6 +176,57 @@ async function listAnthropicCompatibleModels(
     apiKey: effectiveKey,
     useBearerAuth,
   });
+}
+
+const REMOTE_CONTEXT_PROBE_TIMEOUT_MS = 4000;
+const remoteContextWindowCache = new Map<string, number | undefined>();
+
+/**
+ * Ask an OpenAI-compatible endpoint for the serving context window of a model
+ * (vLLM max_model_len, etc.). Returns undefined when the server does not
+ * report one. Successful lookups (including "server reports nothing") are
+ * cached for the app lifetime; failures are retried on the next call.
+ */
+export async function fetchRemoteModelContextWindow(input: {
+  baseUrl?: string;
+  apiKey?: string;
+  provider: AppConfig['provider'];
+  customProtocol?: AppConfig['customProtocol'];
+  model: string;
+}): Promise<number | undefined> {
+  const cacheKey = `${input.baseUrl ?? ''}::${input.model}`;
+  if (remoteContextWindowCache.has(cacheKey)) {
+    return remoteContextWindowCache.get(cacheKey);
+  }
+
+  const config = {
+    provider: input.provider,
+    customProtocol: input.customProtocol,
+    apiKey: input.apiKey,
+    baseUrl: input.baseUrl,
+  } as Pick<AppConfig, 'provider' | 'customProtocol' | 'apiKey' | 'baseUrl'>;
+  const resolved = resolveOpenAICredentials(config);
+  const clientBaseUrl =
+    resolved?.baseUrl || normalizeOpenAICompatibleBaseUrl(input.baseUrl?.trim());
+  if (!clientBaseUrl) {
+    return undefined;
+  }
+
+  const models = await fetchModelsIndex({
+    modelsUrl: `${clientBaseUrl.replace(/\/+$/, '')}/models`,
+    apiKey: resolved?.apiKey || input.apiKey,
+    useBearerAuth: true,
+    timeoutMs: REMOTE_CONTEXT_PROBE_TIMEOUT_MS,
+  });
+
+  const contextWindow = models.find((model) => model.id === input.model)?.contextWindow;
+  remoteContextWindowCache.set(cacheKey, contextWindow);
+  return contextWindow;
+}
+
+/** @internal Test helper */
+export function resetRemoteModelContextWindowCacheForTests(): void {
+  remoteContextWindowCache.clear();
 }
 
 export async function listProviderModels(

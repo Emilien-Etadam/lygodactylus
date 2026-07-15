@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { listProviderModels } from '../src/main/config/provider-models-api';
+import {
+  fetchRemoteModelContextWindow,
+  listProviderModels,
+  resetRemoteModelContextWindowCacheForTests,
+} from '../src/main/config/provider-models-api';
 import { resetOllamaModelIndexCache } from '../src/main/config/ollama-api';
 
 describe('provider models api', () => {
@@ -8,6 +12,7 @@ describe('provider models api', () => {
 
   beforeEach(() => {
     resetOllamaModelIndexCache();
+    resetRemoteModelContextWindowCacheForTests();
     global.fetch = vi.fn();
   });
 
@@ -105,6 +110,121 @@ describe('provider models api', () => {
         }),
       })
     );
+  });
+
+  it('captures the serving context window reported by vLLM-style endpoints', async () => {
+    vi.mocked(global.fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          object: 'list',
+          data: [
+            { id: 'qwen3.6-27b', object: 'model', max_model_len: 131072 },
+            { id: 'other-model', object: 'model', context_length: 32768 },
+            { id: 'no-context-model', object: 'model' },
+          ],
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      )
+    );
+
+    const result = await listProviderModels({
+      provider: 'openai',
+      apiKey: 'sk-test',
+      baseUrl: 'https://vllm.lan:8000/v1',
+    });
+
+    expect(result).toEqual([
+      { id: 'no-context-model', name: 'no-context-model' },
+      { id: 'other-model', name: 'other-model', contextWindow: 32768 },
+      { id: 'qwen3.6-27b', name: 'qwen3.6-27b', contextWindow: 131072 },
+    ]);
+  });
+
+  it('fetches the remote context window for a specific model and caches it', async () => {
+    vi.mocked(global.fetch).mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          object: 'list',
+          data: [{ id: 'qwen3.6-27b', object: 'model', max_model_len: 131072 }],
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      )
+    );
+
+    const first = await fetchRemoteModelContextWindow({
+      provider: 'openai',
+      apiKey: 'sk-test',
+      baseUrl: 'https://vllm.lan:8000/v1',
+      model: 'qwen3.6-27b',
+    });
+    const second = await fetchRemoteModelContextWindow({
+      provider: 'openai',
+      apiKey: 'sk-test',
+      baseUrl: 'https://vllm.lan:8000/v1',
+      model: 'qwen3.6-27b',
+    });
+
+    expect(first).toBe(131072);
+    expect(second).toBe(131072);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns undefined and caches when the endpoint reports no context window', async () => {
+    vi.mocked(global.fetch).mockResolvedValue(
+      new Response(
+        JSON.stringify({ object: 'list', data: [{ id: 'qwen3.6-27b', object: 'model' }] }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      )
+    );
+
+    const first = await fetchRemoteModelContextWindow({
+      provider: 'openai',
+      apiKey: 'sk-test',
+      baseUrl: 'https://vllm.lan:8000/v1',
+      model: 'qwen3.6-27b',
+    });
+    const second = await fetchRemoteModelContextWindow({
+      provider: 'openai',
+      apiKey: 'sk-test',
+      baseUrl: 'https://vllm.lan:8000/v1',
+      model: 'qwen3.6-27b',
+    });
+
+    expect(first).toBeUndefined();
+    expect(second).toBeUndefined();
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('propagates probe failures without caching them', async () => {
+    vi.mocked(global.fetch).mockRejectedValueOnce(new Error('network down'));
+
+    await expect(
+      fetchRemoteModelContextWindow({
+        provider: 'openai',
+        apiKey: 'sk-test',
+        baseUrl: 'https://vllm.lan:8000/v1',
+        model: 'qwen3.6-27b',
+      })
+    ).rejects.toThrow('network down');
+
+    vi.mocked(global.fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          object: 'list',
+          data: [{ id: 'qwen3.6-27b', object: 'model', max_model_len: 131072 }],
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      )
+    );
+
+    await expect(
+      fetchRemoteModelContextWindow({
+        provider: 'openai',
+        apiKey: 'sk-test',
+        baseUrl: 'https://vllm.lan:8000/v1',
+        model: 'qwen3.6-27b',
+      })
+    ).resolves.toBe(131072);
   });
 
   it('delegates loopback openai discovery to the ollama models endpoint', async () => {

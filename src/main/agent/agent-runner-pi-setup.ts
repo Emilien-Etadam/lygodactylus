@@ -6,8 +6,13 @@ import {
 } from '@earendil-works/pi-coding-agent';
 import type { Message, Session } from '../../renderer/types';
 import { configStore } from '../config/config-store';
-import { isLoopbackOpenAIEndpoint, normalizeOpenAICompatibleBaseUrl } from '../config/auth-utils';
+import {
+  isLoopbackOpenAIEndpoint,
+  isOfficialOpenAIBaseUrl,
+  normalizeOpenAICompatibleBaseUrl,
+} from '../config/auth-utils';
 import { fetchOllamaModelInfo } from '../config/ollama-api';
+import { fetchRemoteModelContextWindow } from '../config/provider-models-api';
 import { detectCommonProviderSetup } from '../../shared/api-provider-guidance';
 import type { BeforeSessionRunResult } from '../extensions/agent-runtime-extension';
 import type { SandboxAdapter } from '../sandbox/sandbox-adapter';
@@ -164,28 +169,52 @@ export async function preparePiSessionRun({
 
   const provider = runtimeConfig.provider || 'anthropic';
   const effectiveModelBaseUrl = piModel.baseUrl || runtimeConfig.baseUrl || '';
-  const isOllamaLoopbackEndpoint =
-    detectCommonProviderSetup(effectiveModelBaseUrl)?.id === 'ollama';
-  if (
-    provider === 'openai' &&
-    isLoopbackOpenAIEndpoint({ provider, baseUrl: runtimeConfig.baseUrl }) &&
-    isOllamaLoopbackEndpoint &&
-    !runtimeConfig.contextWindow
-  ) {
-    const ollamaInfo = await fetchOllamaModelInfo({
-      baseUrl: effectiveModelBaseUrl || 'http://localhost:11434/v1',
-      model: piModel.id,
-      apiKey: runtimeConfig.apiKey,
-    });
-    if (ollamaInfo.contextWindow) {
-      log(
-        '[AgentRunner] Ollama /api/show reported contextWindow:',
-        ollamaInfo.contextWindow,
-        '(was:',
-        piModel.contextWindow,
-        ')'
-      );
-      piModel = { ...piModel, contextWindow: ollamaInfo.contextWindow };
+  const isOllamaEndpoint = detectCommonProviderSetup(effectiveModelBaseUrl)?.id === 'ollama';
+  // The serving endpoint is the authority on the usable context window: local
+  // deployments routinely cap it below the model family's nominal size
+  // (vLLM --max-model-len, Ollama num_ctx). Trusting the hardcoded spec makes
+  // the gauge and auto-compaction budgets wrong and the server rejects
+  // requests long before compaction triggers. A manual contextWindow in API
+  // settings always wins over detection.
+  if (provider === 'openai' && !runtimeConfig.contextWindow) {
+    if (isOllamaEndpoint) {
+      const ollamaInfo = await fetchOllamaModelInfo({
+        baseUrl: effectiveModelBaseUrl || 'http://localhost:11434/v1',
+        model: piModel.id,
+        apiKey: runtimeConfig.apiKey,
+      });
+      if (ollamaInfo.contextWindow) {
+        log(
+          '[AgentRunner] Ollama /api/show reported contextWindow:',
+          ollamaInfo.contextWindow,
+          '(was:',
+          piModel.contextWindow,
+          ')'
+        );
+        piModel = { ...piModel, contextWindow: ollamaInfo.contextWindow };
+      }
+    } else if (!isOfficialOpenAIBaseUrl(effectiveModelBaseUrl)) {
+      try {
+        const reportedContextWindow = await fetchRemoteModelContextWindow({
+          baseUrl: effectiveModelBaseUrl,
+          apiKey: runtimeConfig.apiKey,
+          provider,
+          customProtocol: runtimeConfig.customProtocol,
+          model: piModel.id,
+        });
+        if (reportedContextWindow && reportedContextWindow !== piModel.contextWindow) {
+          log(
+            '[AgentRunner] Endpoint /models reported contextWindow:',
+            reportedContextWindow,
+            '(was:',
+            piModel.contextWindow,
+            ')'
+          );
+          piModel = { ...piModel, contextWindow: reportedContextWindow };
+        }
+      } catch (error) {
+        logWarn('[AgentRunner] Context window probe failed (using defaults):', error);
+      }
     }
   }
 
