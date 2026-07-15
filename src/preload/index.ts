@@ -361,6 +361,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
       extensionToken: string;
       status: { running: boolean; port: number; enabled: boolean; urls: string[] };
     }> => ipcRenderer.invoke('chatLan.regenerateExtensionToken'),
+    installFirefoxExtension: (): Promise<
+      | { ok: true; version: string; xpiPath: string }
+      | { ok: false; error: 'no-release' | 'download-failed' | 'firefox-not-found'; detail?: string }
+    > => ipcRenderer.invoke('chatLan.installFirefoxExtension'),
   },
 
   memory: {
@@ -618,6 +622,14 @@ declare global {
           extensionToken: string;
           status: { running: boolean; port: number; enabled: boolean; urls: string[] };
         }>;
+        installFirefoxExtension: () => Promise<
+          | { ok: true; version: string; xpiPath: string }
+          | {
+              ok: false;
+              error: 'no-release' | 'download-failed' | 'firefox-not-found';
+              detail?: string;
+            }
+        >;
       };
       memory: {
         getOverview: (cwd?: string) => Promise<MemoryOverview>;

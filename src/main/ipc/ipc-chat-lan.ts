@@ -4,6 +4,10 @@
 import { ipcMain } from 'electron';
 import { logError } from '../utils/logger';
 import { applyChatLanConfig, chatLanConfigStore, getChatLanStatus } from '../chat-lan-server';
+import {
+  installFirefoxExtension,
+  type FirefoxExtensionInstallResult,
+} from '../firefox-extension-installer';
 
 export function registerChatLanIpc(): void {
   ipcMain.handle('chatLan.getConfig', () => {
@@ -56,6 +60,22 @@ export function registerChatLanIpc(): void {
       throw error;
     }
   });
+
+  ipcMain.handle(
+    'chatLan.installFirefoxExtension',
+    async (): Promise<FirefoxExtensionInstallResult> => {
+      try {
+        return await installFirefoxExtension();
+      } catch (error) {
+        logError('[ChatLan] installFirefoxExtension failed:', error);
+        return {
+          ok: false,
+          error: 'download-failed',
+          detail: error instanceof Error ? error.message : String(error),
+        };
+      }
+    }
+  );
 
   ipcMain.handle('chatLan.regenerateExtensionToken', async () => {
     try {

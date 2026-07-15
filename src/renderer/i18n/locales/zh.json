@@ -1092,6 +1092,14 @@
     "publicUrlHint": "当服务器位于反向代理（如 Nginx Proxy Manager）之后时的外部 HTTPS 地址。通过 HTTPS，网页界面可作为真正的应用（PWA）安装。",
     "qrTitle": "移动端配对（二维码）",
     "qrHint": "用手机扫描即可立即登录。二维码包含访问令牌：请勿分享。",
-    "installHint": "在 Android 上：Chrome 菜单 →「添加到主屏幕」。通过 HTTPS 地址，应用可全屏安装并支持离线使用。"
+    "installHint": "在 Android 上：Chrome 菜单 →「添加到主屏幕」。通过 HTTPS 地址，应用可全屏安装并支持离线使用。",
+    "extensionInstallTitle": "Firefox 扩展「Lygodactylus Web」",
+    "extensionInstallHint": "从 GitHub Releases 下载已签名的扩展（.xpi）并在 Firefox 中打开。一键确认安装，然后将扩展令牌（已自动复制）粘贴到扩展选项中。",
+    "extensionInstallButton": "在 Firefox 中安装",
+    "extensionInstallOpenReleases": "Releases 页面",
+    "extensionInstallStarted": "Firefox 即将打开——请确认添加扩展。扩展令牌已复制：请将其粘贴到扩展选项中。",
+    "extensionInstallErrorNoRelease": "在 GitHub Releases 中未找到已签名的扩展（.xpi）。",
+    "extensionInstallErrorDownload": "扩展下载失败。请检查网络连接后重试。",
+    "extensionInstallErrorFirefoxNotFound": "未找到 Firefox。.xpi 文件已下载到「下载」文件夹——请通过 about:addons →「从文件安装附加组件…」安装。"
   }
 }

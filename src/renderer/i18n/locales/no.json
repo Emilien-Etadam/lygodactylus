@@ -1092,6 +1092,14 @@
     "publicUrlHint": "Ekstern HTTPS-URL når serveren står bak en omvendt proxy (f.eks. Nginx Proxy Manager). Over HTTPS installeres web-grensesnittet som en ekte app (PWA).",
     "qrTitle": "Mobil sammenkobling (QR-kode)",
     "qrHint": "Skann med telefonen for å logge inn umiddelbart. QR-koden inneholder tilgangstokenet: ikke del den.",
-    "installHint": "På Android: Chrome-menyen → «Legg til på startskjermen». Via en HTTPS-URL installeres appen i fullskjerm med frakoblet støtte."
+    "installHint": "På Android: Chrome-menyen → «Legg til på startskjermen». Via en HTTPS-URL installeres appen i fullskjerm med frakoblet støtte.",
+    "extensionInstallTitle": "Firefox-utvidelsen «Lygodactylus Web»",
+    "extensionInstallHint": "Laster ned den signerte utvidelsen (.xpi) fra GitHub-utgivelsene og åpner den i Firefox. Bekreft installasjonen med ett klikk, og lim deretter inn utvidelsestokenet (kopiert automatisk) i utvidelsens innstillinger.",
+    "extensionInstallButton": "Installer i Firefox",
+    "extensionInstallOpenReleases": "Utgivelsesside",
+    "extensionInstallStarted": "Firefox åpnes — bekreft at utvidelsen legges til. Utvidelsestokenet er kopiert: lim det inn i utvidelsens innstillinger.",
+    "extensionInstallErrorNoRelease": "Fant ingen signert utvidelse (.xpi) i GitHub-utgivelsene.",
+    "extensionInstallErrorDownload": "Kunne ikke laste ned utvidelsen. Sjekk nettverkstilkoblingen og prøv igjen.",
+    "extensionInstallErrorFirefoxNotFound": "Fant ikke Firefox. .xpi-filen ligger i Nedlastinger-mappen — installer den via about:addons → «Installer utvidelse fra fil…»."
   }
 }
