@@ -474,11 +474,12 @@ export type ClientEvent =
         allowedTools?: string[];
         content?: ContentBlock[];
         memoryEnabled?: boolean;
+        messageId?: string;
       };
     }
   | {
       type: 'session.continue';
-      payload: { sessionId: string; prompt: string; content?: ContentBlock[] };
+      payload: { sessionId: string; prompt: string; content?: ContentBlock[]; messageId?: string };
     }
   | { type: 'session.stop'; payload: { sessionId: string } }
   | {
@@ -487,7 +488,7 @@ export type ClientEvent =
     }
   | {
       type: 'session.handoff';
-      payload: { sessionId: string; customInstructions?: string };
+      payload: { sessionId: string; customInstructions?: string; messageId?: string };
     }
   | {
       type: 'session.forkFromMessage';

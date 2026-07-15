@@ -65,21 +65,27 @@ export async function handleClientEvent(event: ClientEvent): Promise<unknown> {
         event.payload.cwd,
         event.payload.allowedTools,
         event.payload.content,
-        event.payload.memoryEnabled
+        event.payload.memoryEnabled,
+        event.payload.messageId
       );
 
     case 'session.continue':
       return sm.continueSession(
         event.payload.sessionId,
         event.payload.prompt,
-        event.payload.content
+        event.payload.content,
+        event.payload.messageId
       );
 
     case 'session.compact':
       return sm.compactSession(event.payload.sessionId, event.payload.customInstructions);
 
     case 'session.handoff':
-      return sm.handoffSession(event.payload.sessionId, event.payload.customInstructions);
+      return sm.handoffSession(
+        event.payload.sessionId,
+        event.payload.customInstructions,
+        event.payload.messageId
+      );
 
     case 'session.forkFromMessage':
       return sm.forkSessionFromMessage(event.payload.sessionId, event.payload.messageId);

@@ -65,7 +65,8 @@ export async function handoffSession(
   deps: SessionManagerFacadeSupportDeps,
   stopSession: (sessionId: string) => void,
   sessionId: string,
-  customInstructions?: string
+  customInstructions?: string,
+  messageId?: string
 ): Promise<{
   success: boolean;
   newSession?: Session;
@@ -116,7 +117,8 @@ export async function handoffSession(
       session.cwd,
       session.allowedTools,
       initialContent,
-      session.memoryEnabled
+      session.memoryEnabled,
+      messageId
     );
     return { success: true, newSession, initialContent };
   } catch (error) {

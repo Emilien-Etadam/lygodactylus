@@ -69,7 +69,8 @@ export interface SessionManagerFacadeSupportDeps {
     cwd?: string,
     allowedTools?: string[],
     content?: ContentBlock[],
-    memoryEnabled?: boolean
+    memoryEnabled?: boolean,
+    messageId?: string
   ) => Promise<Session>;
   extensionManager?: AgentRuntimeExtensionManager;
   workspaceMountVirtualPath: string;
@@ -92,8 +93,14 @@ export class SessionManagerFacadeSupport {
   async compactSession(sessionId: string, customInstructions?: string) {
     return compactSession(this.deps, (id) => this.stopSession(id), sessionId, customInstructions);
   }
-  async handoffSession(sessionId: string, customInstructions?: string) {
-    return handoffSession(this.deps, (id) => this.stopSession(id), sessionId, customInstructions);
+  async handoffSession(sessionId: string, customInstructions?: string, messageId?: string) {
+    return handoffSession(
+      this.deps,
+      (id) => this.stopSession(id),
+      sessionId,
+      customInstructions,
+      messageId
+    );
   }
   async forkSessionFromMessage(sessionId: string, messageId: string) {
     return forkSessionFromMessage(

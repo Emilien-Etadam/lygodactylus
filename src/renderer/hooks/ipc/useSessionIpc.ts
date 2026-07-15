@@ -116,6 +116,10 @@ export function useSessionIpc({
 
       // Electron mode
       try {
+        // Generate the message id renderer-side and share it with the backend so
+        // the optimistic UI message and the persisted one keep the same id
+        // (required for fork / edit prompt actions).
+        const messageId = `msg-user-${crypto.randomUUID()}`;
         const session = await invoke<Session>({
           type: 'session.start',
           payload: {
@@ -123,6 +127,7 @@ export function useSessionIpc({
             prompt,
             cwd,
             content, // Send full content blocks including images
+            messageId,
           },
         });
         if (session) {
@@ -131,7 +136,7 @@ export function useSessionIpc({
 
           // Immediately add user message to UI
           const userMessage: Message = {
-            id: `msg-user-${Date.now()}`,
+            id: messageId,
             sessionId: session.id,
             role: 'user',
             content,
@@ -194,7 +199,9 @@ export function useSessionIpc({
       const hasPending = (ss?.pendingTurns?.length ?? 0) > 0;
       const shouldQueue = isSessionRunning || hasPending;
       const userMessage: Message = {
-        id: `msg-user-${Date.now()}`,
+        // Shared with the backend (session.continue payload) so the persisted
+        // message keeps this id — fork / edit prompt look messages up by id.
+        id: `msg-user-${crypto.randomUUID()}`,
         sessionId,
         role: 'user',
         content,
@@ -242,6 +249,7 @@ export function useSessionIpc({
             sessionId,
             prompt,
             content, // Send full content blocks including images
+            messageId: userMessage.id,
           },
         });
         // Loading will be reset when we receive session.status event
@@ -319,6 +327,9 @@ export function useSessionIpc({
 
       setLoading(true);
       try {
+        // Same id renderer/backend so fork / edit prompt keep working on the
+        // first message of the handoff session.
+        const messageId = `msg-user-${crypto.randomUUID()}`;
         const result = await invoke<{
           success: boolean;
           newSession?: Session;
@@ -327,7 +338,7 @@ export function useSessionIpc({
           error?: string;
         } | null>({
           type: 'session.handoff',
-          payload: { sessionId, customInstructions },
+          payload: { sessionId, customInstructions, messageId },
         });
 
         if (!result?.success || !result.newSession) {
@@ -356,7 +367,7 @@ export function useSessionIpc({
             : [{ type: 'text', text: '' }];
 
         const userMessage: Message = {
-          id: `msg-user-${Date.now()}`,
+          id: messageId,
           sessionId: newSession.id,
           role: 'user',
           content,
