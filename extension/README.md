@@ -62,6 +62,10 @@ En cas d’erreur **401**, l’extension affiche un message rappelant d’utilis
 
 ## Utilisation
 
+### Bouton de barre d'outils (menu)
+
+Cliquez sur l’icône **Lygodactylus Web** dans la barre d’outils : un menu propose **Traduire**, **Résumer**, **Extraire…**, **Prompt libre…**, l’ouverture du **panneau latéral** et les **Options**. Les actions ouvrent le panneau latéral et se comportent comme le menu contextuel.
+
 ### Menu contextuel (clic droit)
 
 - **Traduire la sélection** — envoie la sélection au serveur, remplace le texte **in-place** à la fin du flux. Un bandeau **Annuler** sur la page restaure le texte original.
@@ -123,6 +127,8 @@ extension/
   manifest.json
   background.js
   content.js
+  icons/          # logo décliné en 16–128 px (barre d'outils, gestionnaire de modules)
+  popup/          # menu du bouton de barre d'outils (mêmes actions que le menu contextuel)
   sidebar/
   options/
   lib/extract.js
