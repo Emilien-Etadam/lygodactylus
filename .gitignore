@@ -104,3 +104,4 @@ DEV_LOG.md
 !resources/*.png
 !resources/icon.iconset/*.png
 !resources/chat-lan/icons/*.png
+!extension/icons/*.png

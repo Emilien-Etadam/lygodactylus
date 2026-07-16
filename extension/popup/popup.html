@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Lygodactylus Web</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="header">
+      <img src="../icons/icon-32.png" alt="" width="20" height="20" />
+      <span class="title">Lygodactylus Web</span>
+    </header>
+    <nav class="menu">
+      <button type="button" class="menu-item" data-action="translate">
+        <span class="icon">🌐</span> Traduire la sélection / la page
+      </button>
+      <button type="button" class="menu-item" data-action="summarize">
+        <span class="icon">📝</span> Résumer la page
+      </button>
+      <button type="button" class="menu-item" data-action="extract">
+        <span class="icon">🔍</span> Extraire…
+      </button>
+      <button type="button" class="menu-item" data-action="custom">
+        <span class="icon">✨</span> Prompt libre…
+      </button>
+    </nav>
+    <hr class="separator" />
+    <nav class="menu">
+      <button type="button" class="menu-item" id="open-sidebar">
+        <span class="icon">📌</span> Ouvrir le panneau latéral
+      </button>
+      <button type="button" class="menu-item" id="open-options">
+        <span class="icon">⚙️</span> Options
+      </button>
+    </nav>
+    <p id="status" class="status" hidden></p>
+    <script src="popup.js"></script>
+  </body>
+</html>

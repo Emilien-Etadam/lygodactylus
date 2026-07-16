@@ -444,6 +444,20 @@ browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return false;
   }
 
+  if (message.type === 'setPendingSidebarIntent') {
+    const action = message.action;
+    const tabId = message.tabId;
+    if ((action !== 'extract' && action !== 'custom') || typeof tabId !== 'number') {
+      sendResponse({ ok: false, error: 'Paramètres invalides.' });
+      return false;
+    }
+    pendingSidebarIntent = { action, tabId };
+    // Couvre le cas où le panneau latéral est déjà ouvert (il ne re-pollera pas).
+    browser.runtime.sendMessage({ type: 'sidebarIntent', action, tabId }).catch(() => {});
+    sendResponse({ ok: true });
+    return false;
+  }
+
   if (message.type === 'getActiveTabId') {
     getActiveTab().then((tab) => sendResponse({ tabId: tab?.id ?? null }));
     return true;
