@@ -5,7 +5,7 @@ import {
   type ScheduledTask,
   type ScheduledTaskStore,
 } from '../src/main/schedule/scheduled-task-manager';
-import { buildScheduledTaskTitle } from '../src/shared/schedule/task-title';
+import { buildScheduledTaskTitle } from '../src/main/schedule/schedule-title-i18n';
 
 function createTask(overrides: Partial<ScheduledTask> = {}): ScheduledTask {
   const now = Date.now();

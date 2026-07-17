@@ -19,7 +19,8 @@
     "install": "Installieren",
     "optional": "optional",
     "appLogoAlt": "Lygodactylus Logo",
-    "pastedImageAlt": "Eingefügt {{index}}"
+    "pastedImageAlt": "Eingefügt {{index}}",
+    "copy": "Kopieren"
   },
   "welcome": {
     "title": "Wie kann ich Ihnen heute helfen?",
@@ -404,8 +405,11 @@
         "ollama_no_models_loaded": "Der Endpunkt ist erreichbar, lieferte aber keine Modelle. Laden Sie zuerst ein Modell in Ollama.",
         "ollama_model_not_listed": "Modell {{model}} ist nicht in der Modellliste des Endpunkts. Wählen Sie ein erkanntes Modell oder wechseln Sie zur manuellen Eingabe.",
         "ollama_model_loading": "Modell {{model}} wird möglicherweise noch geladen. Versuchen Sie die tiefe Prüfung gleich erneut.",
-        "model_cold_start": "Das Modell wird möglicherweise noch in den GPU-/CPU-Speicher geladen. Große Modelle (7B+) können bei der ersten Nutzung 30–120 Sekunden dauern. Versuchen Sie es in Kürze erneut."
-      }
+        "model_cold_start": "Das Modell wird möglicherweise noch in den GPU-/CPU-Speicher geladen. Große Modelle (7B+) können bei der ersten Nutzung 30–120 Sekunden dauern. Versuchen Sie es in Kürze erneut.",
+        "auth_probe_deferred": "Authentifizierungsprüfung verschoben; Weiter mit der Modellprüfung.",
+        "models_list_not_supported": "Dieser Anbieter unterstützt den Models-List-Endpunkt nicht. Weiter mit der Modellprüfung."
+      },
+      "skipped": "Diagnose übersprungen: Ein anderer Lauf läuft bereits."
     }
   },
   "window": {
@@ -566,7 +570,8 @@
     "commandRequired": "Befehl ist erforderlich",
     "urlRequired": "URL ist erforderlich",
     "toolCount": "{{count}} Tools",
-    "callCount": "{{count}} Aufrufe"
+    "callCount": "{{count}} Aufrufe",
+    "disabled": "Deaktiviert"
   },
   "credentials": {
     "envVars": "Umgebungsvariablen",

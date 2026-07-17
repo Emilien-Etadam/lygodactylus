@@ -11,6 +11,7 @@ import { validateCommandSandbox } from './command-sandbox-validation';
 import { formatFileSize } from './format-file-size';
 import { runWebSearch } from '../../shared/web-search';
 import { configStore } from '../config/config-store';
+import { mt } from '../i18n';
 
 /**
  * ToolExecutor - Secure tool execution framework
@@ -160,7 +161,7 @@ export class ToolExecutor {
   }
 
   /**
-   * 获取网页并返回文本内容
+   * Fetch a web page and return its text content.
    */
   async webFetch(url: string): Promise<string> {
     const trimmed = url.trim();
@@ -190,7 +191,7 @@ export class ToolExecutor {
         error instanceof Error &&
         (error.name === 'AbortError' || error.name === 'TimeoutError')
       ) {
-        throw new Error('请求超时，请检查网络连接后重试');
+        throw new Error(mt('errFetchTimeout'));
       }
       throw error;
     }

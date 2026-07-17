@@ -16,8 +16,8 @@ import nlTranslations from './locales/nl.json';
 import roTranslations from './locales/ro.json';
 
 const initPromise = i18n
-  .use(LanguageDetector) // 自动检测浏览器语言
-  .use(initReactI18next) // 初始化 react-i18next
+  .use(LanguageDetector)
+  .use(initReactI18next)
   .init({
     resources: {
       en: {
@@ -57,23 +57,23 @@ const initPromise = i18n
         translation: roTranslations,
       },
     },
-    // 默认语言；挪威语 nb/nn 回退到 no
+    // Ultimate fallback when detection fails; active UI language still wins via
+    // LanguageDetector (localStorage / navigator) and is mirrored to the backend.
     fallbackLng: { nb: ['no'], nn: ['no'], default: ['en'] },
-    supportedLngs: ['en', 'zh', 'es', 'fr', 'de', 'it', 'uk', 'pl', 'sv', 'no', 'nl', 'ro'], // 支持的语言
-    nonExplicitSupportedLngs: true, // 接受区域变体，例如 es-ES → es、zh-CN → zh
+    supportedLngs: ['en', 'zh', 'es', 'fr', 'de', 'it', 'uk', 'pl', 'sv', 'no', 'nl', 'ro'],
+    nonExplicitSupportedLngs: true, // Accept regional variants, e.g. es-ES → es, zh-CN → zh
     interpolation: {
-      escapeValue: false, // React 已经处理了 XSS
+      escapeValue: false, // React already handles XSS
     },
-    pluralSeparator: '_', // 复数分隔符
-    contextSeparator: '_', // 上下文分隔符
+    pluralSeparator: '_',
+    contextSeparator: '_',
     detection: {
-      order: ['localStorage', 'navigator'], // 先检查 localStorage，再检查浏览器语言
-      caches: ['localStorage'], // 将语言选择保存到 localStorage
-      lookupLocalStorage: 'i18nextLng', // localStorage key
+      order: ['localStorage', 'navigator'],
+      caches: ['localStorage'],
+      lookupLocalStorage: 'i18nextLng',
     },
   });
 
-// 将渲染进程的语言镜像到主进程配置，使后端字符串（错误、对话框）使用同一语言。
 // Mirror the renderer language into the main-process config so backend-produced
 // strings (errors, dialogs, the default config-set name) match the UI. Fires for
 // the initially detected language and whenever the user switches.

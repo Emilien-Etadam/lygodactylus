@@ -19,7 +19,8 @@
     "install": "Installera",
     "optional": "valfritt",
     "appLogoAlt": "Lygodactylus-logotyp",
-    "pastedImageAlt": "Inklistrad {{index}}"
+    "pastedImageAlt": "Inklistrad {{index}}",
+    "copy": "Kopiera"
   },
   "welcome": {
     "title": "Hur kan jag hjälpa dig idag?",
@@ -404,8 +405,11 @@
         "ollama_no_models_loaded": "Slutpunkten är nåbar, men den returnerade inga modeller. Hämta en modell i Ollama först.",
         "ollama_model_not_listed": "Modellen {{model}} finns inte i slutpunktens modellista. Välj en identifierad modell eller byt till manuell inmatning.",
         "ollama_model_loading": "Modellen {{model}} läses kanske fortfarande in. Prova den djupa kontrollen igen om en stund.",
-        "model_cold_start": "Modellen läses kanske fortfarande in i GPU-/CPU-minnet. Stora modeller (7B+) kan ta 30–120 sekunder vid första användningen. Försök igen om en stund."
-      }
+        "model_cold_start": "Modellen läses kanske fortfarande in i GPU-/CPU-minnet. Stora modeller (7B+) kan ta 30–120 sekunder vid första användningen. Försök igen om en stund.",
+        "auth_probe_deferred": "Autentiseringskontroll uppskjuten; fortsätter med modellverifiering.",
+        "models_list_not_supported": "Denna leverantör stöder inte models list-slutpunkten. Fortsätter med modellverifiering."
+      },
+      "skipped": "Diagnostik hoppades över: en annan körning pågår redan."
     }
   },
   "window": {
@@ -566,7 +570,8 @@
     "commandRequired": "Kommando krävs",
     "urlRequired": "URL krävs",
     "toolCount": "{{count}} verktyg",
-    "callCount": "{{count}} anrop"
+    "callCount": "{{count}} anrop",
+    "disabled": "Inaktiverad"
   },
   "credentials": {
     "envVars": "Miljövariabler",

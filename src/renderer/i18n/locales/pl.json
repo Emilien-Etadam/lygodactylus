@@ -19,7 +19,8 @@
     "install": "Zainstaluj",
     "optional": "opcjonalne",
     "appLogoAlt": "Logo Lygodactylus",
-    "pastedImageAlt": "Wklejono {{index}}"
+    "pastedImageAlt": "Wklejono {{index}}",
+    "copy": "Kopiuj"
   },
   "welcome": {
     "title": "W czym mogę dziś pomóc?",
@@ -404,8 +405,11 @@
         "ollama_no_models_loaded": "Punkt końcowy jest osiągalny, ale nie zwrócił żadnych modeli. Najpierw pobierz model w Ollama.",
         "ollama_model_not_listed": "Modelu {{model}} nie ma na liście modeli punktu końcowego. Wybierz wykryty model lub przełącz się na wprowadzanie ręczne.",
         "ollama_model_loading": "Model {{model}} może wciąż się ładować. Spróbuj ponownie głębokiej kontroli za chwilę.",
-        "model_cold_start": "Model może wciąż ładować się do pamięci GPU/CPU. Duże modele (7B+) mogą zająć od 30 do 120 sekund przy pierwszym użyciu. Spróbuj ponownie za chwilę."
-      }
+        "model_cold_start": "Model może wciąż ładować się do pamięci GPU/CPU. Duże modele (7B+) mogą zająć od 30 do 120 sekund przy pierwszym użyciu. Spróbuj ponownie za chwilę.",
+        "auth_probe_deferred": "Sondowanie uwierzytelniania odroczone; kontynuacja weryfikacji modelu.",
+        "models_list_not_supported": "Ten dostawca nie obsługuje punktu końcowego listy modeli. Kontynuacja weryfikacji modelu."
+      },
+      "skipped": "Pominięto diagnostykę: trwa już inne uruchomienie."
     }
   },
   "window": {
@@ -566,7 +570,8 @@
     "commandRequired": "Polecenie jest wymagane",
     "urlRequired": "URL jest wymagany",
     "toolCount": "{{count}} narzędzi",
-    "callCount": "{{count}} wywołań"
+    "callCount": "{{count}} wywołań",
+    "disabled": "Wyłączono"
   },
   "credentials": {
     "envVars": "Zmienne środowiskowe",

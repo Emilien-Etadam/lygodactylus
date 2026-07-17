@@ -14,7 +14,7 @@
 import {
   buildScheduledTaskFallbackTitle,
   buildScheduledTaskTitle,
-} from '../../shared/schedule/task-title';
+} from './schedule-title-i18n';
 import { log, logError } from '../utils/logger';
 
 export type ScheduleRepeatUnit = 'minute' | 'hour' | 'day';

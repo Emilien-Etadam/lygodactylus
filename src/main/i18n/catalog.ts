@@ -1,10 +1,10 @@
 // Main-process (backend) localization catalog.
 //
-// Chinese (zh) is the source language and the default — the project owner ships
-// a Chinese-first product, so any key missing from another language falls back
-// to zh (see ./index.ts). The keys below cover the backend strings that surface
-// directly in the UI: model/network error messages, the "no credentials" prompt,
-// the startup-failure dialog, and the default config-set name.
+// Strings follow the user's chosen UI language (mirrored from the renderer as
+// `uiLanguage`). English (`en`) is only the ultimate fallback when the locale
+// is missing/unknown (see ./index.ts). The keys below cover backend strings
+// that surface directly in the UI: model/network errors, MCP/tool failures,
+// scheduled-task titles, the startup-failure dialog, and the default config-set name.
 //
 // Placeholders use the {{name}} syntax and are interpolated by mt(); `\n`
 // produces a real newline at runtime, and leading/trailing underscores are
@@ -34,7 +34,16 @@ export type BackendMessageKey =
   | 'startupFailedTitle'
   | 'startupFailedBody'
   | 'configDefaultSetName'
-  | 'configFallbackSetName';
+  | 'configFallbackSetName'
+  | 'errFetchTimeout'
+  | 'errChromeNotReady'
+  | 'errNodeRuntimeUnavailable'
+  | 'hintMacosScreenRecording'
+  | 'hintMacosAccessibility'
+  | 'hintMacosAccessibilityAutomation'
+  | 'scheduleTitlePrefix'
+  | 'scheduleEmptyTitle'
+  | 'traceRequestTimedOut';
 
 export type BackendMessages = Record<BackendMessageKey, string>;
 
@@ -53,7 +62,7 @@ export const SUPPORTED_BACKEND_LANGUAGES = [
   'ro',
 ] as const;
 
-export const DEFAULT_BACKEND_LANGUAGE = 'zh';
+export const DEFAULT_BACKEND_LANGUAGE = 'en';
 
 export const backendCatalog: Record<string, BackendMessages> = {
   zh: {
@@ -88,6 +97,19 @@ export const backendCatalog: Record<string, BackendMessages> = {
     startupFailedBody: '{{message}}\n\n请查看日志获取更多信息。',
     configDefaultSetName: '默认方案',
     configFallbackSetName: '方案 {{index}}',
+    errFetchTimeout: '请求超时，请检查网络连接后重试',
+    errChromeNotReady: 'Chrome 浏览器未就绪，无法执行此操作: {{detail}}',
+    errNodeRuntimeUnavailable:
+      'Node.js 运行时暂不可用，首次使用 MCP 时将自动下载。\n\n请连接网络后重试启动 MCP 服务器。',
+    hintMacosScreenRecording:
+      '\n\nmacOS 权限提示：\n- 系统设置 → 隐私与安全性 → 屏幕录制：允许 Lygodactylus\n- 重新启动应用后再试\n',
+    hintMacosAccessibility:
+      '\n\nmacOS 权限提示：\n- 系统设置 → 隐私与安全性 → 辅助功能：允许 Lygodactylus\n- 如果是终端运行：允许 Terminal/iTerm\n- 授权后请重启 Lygodactylus 再重试\n',
+    hintMacosAccessibilityAutomation:
+      '\n\nmacOS 权限提示：\n- 系统设置 → 隐私与安全性 → 辅助功能：允许 Lygodactylus\n- 系统设置 → 隐私与安全性 → 自动化：允许 Lygodactylus 控制 “System Events”\n',
+    scheduleTitlePrefix: '[定时任务]',
+    scheduleEmptyTitle: '未命名任务',
+    traceRequestTimedOut: '请求超时',
   },
   en: {
     errModelTimeout:
@@ -126,6 +148,19 @@ export const backendCatalog: Record<string, BackendMessages> = {
     startupFailedBody: '{{message}}\n\nPlease check the logs for more information.',
     configDefaultSetName: 'Default',
     configFallbackSetName: 'Configuration {{index}}',
+    errFetchTimeout: 'Request timed out. Check your network connection and try again.',
+    errChromeNotReady: 'Chrome browser is not ready, cannot perform this action: {{detail}}',
+    errNodeRuntimeUnavailable:
+      'Node.js runtime is not available yet. The app will download it on first MCP use.\n\nConnect to the internet and retry opening MCP servers.',
+    hintMacosScreenRecording:
+      '\n\nmacOS permissions hint:\n- System Settings → Privacy & Security → Screen Recording: allow Lygodactylus\n- Restart the app and try again\n',
+    hintMacosAccessibility:
+      '\n\nmacOS permissions hint:\n- System Settings → Privacy & Security → Accessibility: allow Lygodactylus\n- If launched from a terminal: allow Terminal/iTerm\n- After granting permission, restart Lygodactylus and try again\n',
+    hintMacosAccessibilityAutomation:
+      '\n\nmacOS permissions hint:\n- System Settings → Privacy & Security → Accessibility: allow Lygodactylus\n- System Settings → Privacy & Security → Automation: allow Lygodactylus to control “System Events”\n',
+    scheduleTitlePrefix: '[Scheduled Task]',
+    scheduleEmptyTitle: 'Untitled task',
+    traceRequestTimedOut: 'Request timed out',
   },
   es: {
     errModelTimeout:
@@ -164,6 +199,19 @@ export const backendCatalog: Record<string, BackendMessages> = {
     startupFailedBody: '{{message}}\n\nConsulta los registros para obtener más información.',
     configDefaultSetName: 'Predeterminada',
     configFallbackSetName: 'Configuración {{index}}',
+    errFetchTimeout: 'Se agotó el tiempo de espera. Comprueba tu conexión de red e inténtalo de nuevo.',
+    errChromeNotReady: 'El navegador Chrome no está listo; no se puede realizar esta acción: {{detail}}',
+    errNodeRuntimeUnavailable:
+      'El runtime de Node.js aún no está disponible. La aplicación lo descargará en el primer uso de MCP.\n\nConéctate a Internet e intenta abrir de nuevo los servidores MCP.',
+    hintMacosScreenRecording:
+      '\n\nAviso de permisos de macOS:\n- Ajustes del Sistema → Privacidad y seguridad → Grabación de pantalla: permitir Lygodactylus\n- Reinicia la aplicación e inténtalo de nuevo\n',
+    hintMacosAccessibility:
+      '\n\nAviso de permisos de macOS:\n- Ajustes del Sistema → Privacidad y seguridad → Accesibilidad: permitir Lygodactylus\n- Si se lanza desde un terminal: permitir Terminal/iTerm\n- Tras conceder el permiso, reinicia Lygodactylus e inténtalo de nuevo\n',
+    hintMacosAccessibilityAutomation:
+      '\n\nAviso de permisos de macOS:\n- Ajustes del Sistema → Privacidad y seguridad → Accesibilidad: permitir Lygodactylus\n- Ajustes del Sistema → Privacidad y seguridad → Automatización: permitir que Lygodactylus controle “System Events”\n',
+    scheduleTitlePrefix: '[Tarea programada]',
+    scheduleEmptyTitle: 'Tarea sin nombre',
+    traceRequestTimedOut: 'Tiempo de espera agotado',
   },
   fr: {
     errModelTimeout:
@@ -202,6 +250,19 @@ export const backendCatalog: Record<string, BackendMessages> = {
     startupFailedBody: '{{message}}\n\nVeuillez consulter les journaux pour plus d’informations.',
     configDefaultSetName: 'Par défaut',
     configFallbackSetName: 'Configuration {{index}}',
+    errFetchTimeout: "Délai d'attente dépassé. Vérifiez votre connexion réseau puis réessayez.",
+    errChromeNotReady: "Le navigateur Chrome n'est pas prêt, impossible d'effectuer cette opération : {{detail}}",
+    errNodeRuntimeUnavailable:
+      "Le runtime Node.js n'est pas encore disponible. L'application le téléchargera lors de la première utilisation de MCP.\n\nConnectez-vous à Internet puis réessayez d'ouvrir les serveurs MCP.",
+    hintMacosScreenRecording:
+      '\n\nConseil permissions macOS :\n- Réglages Système → Confidentialité et sécurité → Enregistrement de l’écran : autoriser Lygodactylus\n- Redémarrez l’application puis réessayez\n',
+    hintMacosAccessibility:
+      '\n\nConseil permissions macOS :\n- Réglages Système → Confidentialité et sécurité → Accessibilité : autoriser Lygodactylus\n- Si lancé depuis un terminal : autoriser Terminal/iTerm\n- Après l’autorisation, redémarrez Lygodactylus puis réessayez\n',
+    hintMacosAccessibilityAutomation:
+      '\n\nConseil permissions macOS :\n- Réglages Système → Confidentialité et sécurité → Accessibilité : autoriser Lygodactylus\n- Réglages Système → Confidentialité et sécurité → Automatisation : autoriser Lygodactylus à contrôler “System Events”\n',
+    scheduleTitlePrefix: '[Tâche planifiée]',
+    scheduleEmptyTitle: 'Tâche sans nom',
+    traceRequestTimedOut: 'Délai dépassé',
   },
   de: {
     errModelTimeout:
@@ -240,6 +301,19 @@ export const backendCatalog: Record<string, BackendMessages> = {
     startupFailedBody: '{{message}}\n\nWeitere Informationen finden Sie in den Protokollen.',
     configDefaultSetName: 'Standard',
     configFallbackSetName: 'Konfiguration {{index}}',
+    errFetchTimeout: 'Zeitüberschreitung. Bitte Netzwerkverbindung prüfen und erneut versuchen.',
+    errChromeNotReady: 'Chrome-Browser ist nicht bereit, Vorgang nicht möglich: {{detail}}',
+    errNodeRuntimeUnavailable:
+      'Die Node.js-Laufzeitumgebung ist noch nicht verfügbar. Die App lädt sie beim ersten MCP-Einsatz herunter.\n\nBitte mit dem Internet verbinden und das Öffnen der MCP-Server erneut versuchen.',
+    hintMacosScreenRecording:
+      '\n\nmacOS-Berechtigungshinweis:\n- Systemeinstellungen → Datenschutz & Sicherheit → Bildschirmaufnahme: Lygodactylus erlauben\n- App neu starten und erneut versuchen\n',
+    hintMacosAccessibility:
+      '\n\nmacOS-Berechtigungshinweis:\n- Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen: Lygodactylus erlauben\n- Bei Start aus dem Terminal: Terminal/iTerm erlauben\n- Nach der Freigabe Lygodactylus neu starten und erneut versuchen\n',
+    hintMacosAccessibilityAutomation:
+      '\n\nmacOS-Berechtigungshinweis:\n- Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen: Lygodactylus erlauben\n- Systemeinstellungen → Datenschutz & Sicherheit → Automatisierung: Lygodactylus die Steuerung von “System Events” erlauben\n',
+    scheduleTitlePrefix: '[Geplante Aufgabe]',
+    scheduleEmptyTitle: 'Unbenannte Aufgabe',
+    traceRequestTimedOut: 'Zeitüberschreitung',
   },
   it: {
     errModelTimeout:
@@ -279,6 +353,19 @@ export const backendCatalog: Record<string, BackendMessages> = {
     startupFailedBody: '{{message}}\n\nControlla i log per maggiori informazioni.',
     configDefaultSetName: 'Predefinito',
     configFallbackSetName: 'Configurazione {{index}}',
+    errFetchTimeout: 'Timeout della richiesta. Controlla la connessione di rete e riprova.',
+    errChromeNotReady: 'Il browser Chrome non è pronto, impossibile eseguire questa operazione: {{detail}}',
+    errNodeRuntimeUnavailable:
+      'Il runtime Node.js non è ancora disponibile. L’app lo scaricherà al primo utilizzo di MCP.\n\nConnettiti a Internet e riprova ad aprire i server MCP.',
+    hintMacosScreenRecording:
+      '\n\nSuggerimento autorizzazioni macOS:\n- Impostazioni di Sistema → Privacy e sicurezza → Registrazione schermo: consenti Lygodactylus\n- Riavvia l’app e riprova\n',
+    hintMacosAccessibility:
+      '\n\nSuggerimento autorizzazioni macOS:\n- Impostazioni di Sistema → Privacy e sicurezza → Accessibilità: consenti Lygodactylus\n- Se avviato da un terminale: consenti Terminal/iTerm\n- Dopo l’autorizzazione, riavvia Lygodactylus e riprova\n',
+    hintMacosAccessibilityAutomation:
+      '\n\nSuggerimento autorizzazioni macOS:\n- Impostazioni di Sistema → Privacy e sicurezza → Accessibilità: consenti Lygodactylus\n- Impostazioni di Sistema → Privacy e sicurezza → Automazione: consenti a Lygodactylus di controllare “System Events”\n',
+    scheduleTitlePrefix: '[Scheduled Task]',
+    scheduleEmptyTitle: 'Attività senza titolo',
+    traceRequestTimedOut: 'Timeout della richiesta',
   },
   uk: {
     errModelTimeout:
@@ -317,6 +404,19 @@ export const backendCatalog: Record<string, BackendMessages> = {
     startupFailedBody: '{{message}}\n\nПерегляньте журнали для отримання додаткової інформації.',
     configDefaultSetName: 'За замовчуванням',
     configFallbackSetName: 'Конфігурація {{index}}',
+    errFetchTimeout: 'Час очікування вичерпано. Перевірте мережеве з’єднання та спробуйте знову.',
+    errChromeNotReady: 'Браузер Chrome не готовий, неможливо виконати цю дію: {{detail}}',
+    errNodeRuntimeUnavailable:
+      'Середовище виконання Node.js ще недоступне. Програма завантажить його під час першого використання MCP.\n\nПідключіться до Інтернету та спробуйте знову відкрити сервери MCP.',
+    hintMacosScreenRecording:
+      '\n\nПідказка щодо дозволів macOS:\n- Системні параметри → Конфіденційність і безпека → Запис екрана: дозволити Lygodactylus\n- Перезапустіть програму та спробуйте знову\n',
+    hintMacosAccessibility:
+      '\n\nПідказка щодо дозволів macOS:\n- Системні параметри → Конфіденційність і безпека → Універсальний доступ: дозволити Lygodactylus\n- Якщо запущено з термінала: дозволити Terminal/iTerm\n- Після надання дозволу перезапустіть Lygodactylus і спробуйте знову\n',
+    hintMacosAccessibilityAutomation:
+      '\n\nПідказка щодо дозволів macOS:\n- Системні параметри → Конфіденційність і безпека → Універсальний доступ: дозволити Lygodactylus\n- Системні параметри → Конфіденційність і безпека → Автоматизація: дозволити Lygodactylus керувати “System Events”\n',
+    scheduleTitlePrefix: '[Scheduled Task]',
+    scheduleEmptyTitle: 'Завдання без назви',
+    traceRequestTimedOut: 'Час очікування вичерпано',
   },
   pl: {
     errModelTimeout:
@@ -355,6 +455,19 @@ export const backendCatalog: Record<string, BackendMessages> = {
     startupFailedBody: '{{message}}\n\nSprawdź dzienniki, aby uzyskać więcej informacji.',
     configDefaultSetName: 'Domyślny',
     configFallbackSetName: 'Konfiguracja {{index}}',
+    errFetchTimeout: 'Przekroczono limit czasu. Sprawdź połączenie sieciowe i spróbuj ponownie.',
+    errChromeNotReady: 'Przeglądarka Chrome nie jest gotowa, nie można wykonać tej operacji: {{detail}}',
+    errNodeRuntimeUnavailable:
+      'Środowisko uruchomieniowe Node.js nie jest jeszcze dostępne. Aplikacja pobierze je przy pierwszym użyciu MCP.\n\nPołącz się z internetem i ponownie spróbuj otworzyć serwery MCP.',
+    hintMacosScreenRecording:
+      '\n\nWskazówka dotycząca uprawnień macOS:\n- Ustawienia systemowe → Prywatność i bezpieczeństwo → Nagrywanie ekranu: zezwól Lygodactylus\n- Uruchom ponownie aplikację i spróbuj jeszcze raz\n',
+    hintMacosAccessibility:
+      '\n\nWskazówka dotycząca uprawnień macOS:\n- Ustawienia systemowe → Prywatność i bezpieczeństwo → Dostępność: zezwól Lygodactylus\n- Jeśli uruchomiono z terminala: zezwól Terminal/iTerm\n- Po udzieleniu uprawnienia uruchom ponownie Lygodactylus i spróbuj jeszcze raz\n',
+    hintMacosAccessibilityAutomation:
+      '\n\nWskazówka dotycząca uprawnień macOS:\n- Ustawienia systemowe → Prywatność i bezpieczeństwo → Dostępność: zezwól Lygodactylus\n- Ustawienia systemowe → Prywatność i bezpieczeństwo → Automatyzacja: zezwól Lygodactylus na sterowanie “System Events”\n',
+    scheduleTitlePrefix: '[Zadanie zaplanowane]',
+    scheduleEmptyTitle: 'Zadanie bez nazwy',
+    traceRequestTimedOut: 'Przekroczono limit czasu',
   },
   sv: {
     errModelTimeout:
@@ -393,6 +506,19 @@ export const backendCatalog: Record<string, BackendMessages> = {
     startupFailedBody: '{{message}}\n\nKontrollera loggarna för mer information.',
     configDefaultSetName: 'Standard',
     configFallbackSetName: 'Konfiguration {{index}}',
+    errFetchTimeout: 'Tidsgränsen överskreds. Kontrollera nätverksanslutningen och försök igen.',
+    errChromeNotReady: 'Chrome-webbläsaren är inte redo, åtgärden kan inte utföras: {{detail}}',
+    errNodeRuntimeUnavailable:
+      'Node.js-körningsmiljön är ännu inte tillgänglig. Appen laddar ner den vid första MCP-användningen.\n\nAnslut till internet och försök öppna MCP-servrarna igen.',
+    hintMacosScreenRecording:
+      '\n\nTips om macOS-behörigheter:\n- Systeminställningar → Integritet och säkerhet → Skärminspelning: tillåt Lygodactylus\n- Starta om appen och försök igen\n',
+    hintMacosAccessibility:
+      '\n\nTips om macOS-behörigheter:\n- Systeminställningar → Integritet och säkerhet → Hjälpmedel: tillåt Lygodactylus\n- Om den startas från en terminal: tillåt Terminal/iTerm\n- Efter att behörighet getts, starta om Lygodactylus och försök igen\n',
+    hintMacosAccessibilityAutomation:
+      '\n\nTips om macOS-behörigheter:\n- Systeminställningar → Integritet och säkerhet → Hjälpmedel: tillåt Lygodactylus\n- Systeminställningar → Integritet och säkerhet → Automatisering: tillåt Lygodactylus att styra “System Events”\n',
+    scheduleTitlePrefix: '[Schemalagd uppgift]',
+    scheduleEmptyTitle: 'Namnlös uppgift',
+    traceRequestTimedOut: 'Tidsgräns överskriden',
   },
   no: {
     errModelTimeout:
@@ -431,6 +557,19 @@ export const backendCatalog: Record<string, BackendMessages> = {
     startupFailedBody: '{{message}}\n\nSjekk loggene for mer informasjon.',
     configDefaultSetName: 'Standard',
     configFallbackSetName: 'Konfigurasjon {{index}}',
+    errFetchTimeout: 'Forespørselen tidsavbrutt. Sjekk nettverkstilkoblingen og prøv igjen.',
+    errChromeNotReady: 'Chrome-nettleseren er ikke klar, kan ikke utføre denne handlingen: {{detail}}',
+    errNodeRuntimeUnavailable:
+      'Node.js-kjøretiden er ikke tilgjengelig ennå. Appen laster den ned ved første MCP-bruk.\n\nKoble til internett og prøv å åpne MCP-serverne på nytt.',
+    hintMacosScreenRecording:
+      '\n\nTips om macOS-tillatelser:\n- Systeminnstillinger → Personvern og sikkerhet → Skjermopptak: tillat Lygodactylus\n- Start appen på nytt og prøv igjen\n',
+    hintMacosAccessibility:
+      '\n\nTips om macOS-tillatelser:\n- Systeminnstillinger → Personvern og sikkerhet → Tilgjengelighet: tillat Lygodactylus\n- Hvis startet fra en terminal: tillat Terminal/iTerm\n- Etter at tillatelsen er gitt, start Lygodactylus på nytt og prøv igjen\n',
+    hintMacosAccessibilityAutomation:
+      '\n\nTips om macOS-tillatelser:\n- Systeminnstillinger → Personvern og sikkerhet → Tilgjengelighet: tillat Lygodactylus\n- Systeminnstillinger → Personvern og sikkerhet → Automatisering: tillat Lygodactylus å styre “System Events”\n',
+    scheduleTitlePrefix: '[Planlagt oppgave]',
+    scheduleEmptyTitle: 'Oppgave uten navn',
+    traceRequestTimedOut: 'Forespørsel tidsavbrutt',
   },
   nl: {
     errModelTimeout:
@@ -469,6 +608,19 @@ export const backendCatalog: Record<string, BackendMessages> = {
     startupFailedBody: '{{message}}\n\nRaadpleeg de logbestanden voor meer informatie.',
     configDefaultSetName: 'Standaard',
     configFallbackSetName: 'Configuratie {{index}}',
+    errFetchTimeout: 'Time-out van het verzoek. Controleer je netwerkverbinding en probeer het opnieuw.',
+    errChromeNotReady: 'Chrome-browser is niet gereed, deze actie kan niet worden uitgevoerd: {{detail}}',
+    errNodeRuntimeUnavailable:
+      'De Node.js-runtime is nog niet beschikbaar. De app downloadt deze bij het eerste MCP-gebruik.\n\nMaak verbinding met internet en probeer de MCP-servers opnieuw te openen.',
+    hintMacosScreenRecording:
+      '\n\nHint voor macOS-machtigingen:\n- Systeeminstellingen → Privacy en beveiliging → Schermopname: Lygodactylus toestaan\n- Herstart de app en probeer het opnieuw\n',
+    hintMacosAccessibility:
+      '\n\nHint voor macOS-machtigingen:\n- Systeeminstellingen → Privacy en beveiliging → Toegankelijkheid: Lygodactylus toestaan\n- Indien gestart vanuit een terminal: Terminal/iTerm toestaan\n- Na het verlenen van toestemming Lygodactylus herstarten en opnieuw proberen\n',
+    hintMacosAccessibilityAutomation:
+      '\n\nHint voor macOS-machtigingen:\n- Systeeminstellingen → Privacy en beveiliging → Toegankelijkheid: Lygodactylus toestaan\n- Systeeminstellingen → Privacy en beveiliging → Automatisering: Lygodactylus toestaan “System Events” te bedienen\n',
+    scheduleTitlePrefix: '[Scheduled Task]',
+    scheduleEmptyTitle: 'Naamloze taak',
+    traceRequestTimedOut: 'Verzoek time-out',
   },
   ro: {
     errModelTimeout:
@@ -507,5 +659,18 @@ export const backendCatalog: Record<string, BackendMessages> = {
     startupFailedBody: '{{message}}\n\nVerifică jurnalele pentru mai multe informații.',
     configDefaultSetName: 'Implicit',
     configFallbackSetName: 'Configurația {{index}}',
+    errFetchTimeout: 'Cererea a expirat. Verifică conexiunea la rețea și încearcă din nou.',
+    errChromeNotReady: 'Browserul Chrome nu este gata, această acțiune nu poate fi efectuată: {{detail}}',
+    errNodeRuntimeUnavailable:
+      'Runtime-ul Node.js nu este încă disponibil. Aplicația îl va descărca la prima utilizare MCP.\n\nConectează-te la internet și încearcă din nou să deschizi serverele MCP.',
+    hintMacosScreenRecording:
+      '\n\nSugestie pentru permisiunile macOS:\n- Setări sistem → Confidențialitate și securitate → Înregistrare ecran: permite Lygodactylus\n- Repornește aplicația și încearcă din nou\n',
+    hintMacosAccessibility:
+      '\n\nSugestie pentru permisiunile macOS:\n- Setări sistem → Confidențialitate și securitate → Accesibilitate: permite Lygodactylus\n- Dacă este lansat dintr-un terminal: permite Terminal/iTerm\n- După acordarea permisiunii, repornește Lygodactylus și încearcă din nou\n',
+    hintMacosAccessibilityAutomation:
+      '\n\nSugestie pentru permisiunile macOS:\n- Setări sistem → Confidențialitate și securitate → Accesibilitate: permite Lygodactylus\n- Setări sistem → Confidențialitate și securitate → Automatizare: permite Lygodactylus să controleze “System Events”\n',
+    scheduleTitlePrefix: '[Scheduled Task]',
+    scheduleEmptyTitle: 'Sarcină fără nume',
+    traceRequestTimedOut: 'Cererea a expirat',
   },
 };

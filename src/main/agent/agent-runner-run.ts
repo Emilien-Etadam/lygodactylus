@@ -34,10 +34,10 @@ export async function executeAgentRun(
 
   const controller = new AbortController();
   try {
-    // SDK 会在同一 AbortSignal 上挂载较多监听器，放开上限避免无意义告警干扰排错。
+    // The SDK attaches many listeners on the same AbortSignal; raise the cap to avoid noisy warnings.
     setMaxListeners(0, controller.signal);
   } catch {
-    // 旧运行时不支持 EventTarget 调整监听上限时忽略即可。
+    // Older runtimes that cannot adjust EventTarget listener limits can be ignored.
   }
   ctx.activeControllers.set(session.id, controller);
 

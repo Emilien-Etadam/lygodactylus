@@ -19,7 +19,8 @@
     "install": "Installer",
     "optional": "facultatif",
     "appLogoAlt": "Logo Lygodactylus",
-    "pastedImageAlt": "Collé {{index}}"
+    "pastedImageAlt": "Collé {{index}}",
+    "copy": "Copier"
   },
   "welcome": {
     "title": "Comment puis-je vous aider aujourd'hui ?",
@@ -434,8 +435,11 @@
         "ollama_no_models_loaded": "Le point de terminaison est accessible, mais il n'a renvoyé aucun modèle. Téléchargez d'abord un modèle dans Ollama.",
         "ollama_model_not_listed": "Le modèle {{model}} n'est pas dans la liste des modèles du point de terminaison. Choisissez un modèle détecté ou passez à la saisie manuelle.",
         "ollama_model_loading": "Le modèle {{model}} est peut-être encore en cours de chargement. Réessayez la vérification approfondie dans un instant.",
-        "model_cold_start": "Le modèle est peut-être encore en cours de chargement en mémoire GPU/CPU. Les grands modèles (7B+) peuvent prendre 30 à 120 secondes à la première utilisation. Réessayez sous peu."
-      }
+        "model_cold_start": "Le modèle est peut-être encore en cours de chargement en mémoire GPU/CPU. Les grands modèles (7B+) peuvent prendre 30 à 120 secondes à la première utilisation. Réessayez sous peu.",
+        "auth_probe_deferred": "Sonde d’authentification différée ; poursuite avec la vérification du modèle.",
+        "models_list_not_supported": "Ce fournisseur ne prend pas en charge l’endpoint de liste des modèles. Poursuite avec la vérification du modèle."
+      },
+      "skipped": "Diagnostic ignoré : une autre exécution est déjà en cours."
     }
   },
   "window": {
@@ -596,7 +600,8 @@
     "commandRequired": "La commande est requise",
     "urlRequired": "L'URL est requise",
     "toolCount": "{{count}} outils",
-    "callCount": "{{count}} appels"
+    "callCount": "{{count}} appels",
+    "disabled": "Désactivé"
   },
   "credentials": {
     "envVars": "Variables d'environnement",

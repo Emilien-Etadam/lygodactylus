@@ -320,7 +320,8 @@ export function createWindow() {
     try {
       allowedOrigins.add(new URL(process.env.VITE_DEV_SERVER_URL).origin);
     } catch {
-      // 忽略无效的开发服务地址
+      // Ignore invalid development server addresses
+
     }
   }
   const allowedProtocols = new Set<string>(['file:', 'devtools:']);

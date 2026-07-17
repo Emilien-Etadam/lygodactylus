@@ -36,7 +36,7 @@ import {
   getDefaultTitleFromPrompt,
   normalizeGeneratedTitle,
 } from './session-title-utils';
-import { buildScheduledTaskTitle } from '../../shared/schedule/task-title';
+import { buildScheduledTaskTitle } from '../schedule/schedule-title-i18n';
 
 const WORKSPACE_MOUNT_VIRTUAL_PATH = '/mnt/workspace';
 type AgentRunner = SessionManagerFacadeAgentRunner;

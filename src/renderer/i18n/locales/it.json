@@ -19,7 +19,8 @@
     "install": "Installa",
     "optional": "facoltativo",
     "appLogoAlt": "Logo Lygodactylus",
-    "pastedImageAlt": "Incollata {{index}}"
+    "pastedImageAlt": "Incollata {{index}}",
+    "copy": "Copia"
   },
   "welcome": {
     "title": "Come posso aiutarti oggi?",
@@ -404,8 +405,11 @@
         "ollama_no_models_loaded": "L'endpoint è raggiungibile, ma non ha restituito alcun modello. Scarica prima un modello in Ollama.",
         "ollama_model_not_listed": "Il modello {{model}} non è nell'elenco dei modelli dell'endpoint. Scegli un modello rilevato o passa all'inserimento manuale.",
         "ollama_model_loading": "Il modello {{model}} potrebbe essere ancora in caricamento. Riprova la verifica approfondita tra poco.",
-        "model_cold_start": "Il modello potrebbe essere ancora in caricamento nella memoria GPU/CPU. I modelli di grandi dimensioni (7B+) possono richiedere 30-120 secondi al primo utilizzo. Riprova tra poco."
-      }
+        "model_cold_start": "Il modello potrebbe essere ancora in caricamento nella memoria GPU/CPU. I modelli di grandi dimensioni (7B+) possono richiedere 30-120 secondi al primo utilizzo. Riprova tra poco.",
+        "auth_probe_deferred": "Sonda di autenticazione differita; si continua con la verifica del modello.",
+        "models_list_not_supported": "Questo provider non supporta l'endpoint dell'elenco modelli. Si continua con la verifica del modello."
+      },
+      "skipped": "Diagnostica saltata: un'altra esecuzione è già in corso."
     }
   },
   "window": {
@@ -566,7 +570,8 @@
     "commandRequired": "Il comando è obbligatorio",
     "urlRequired": "L'URL è obbligatorio",
     "toolCount": "{{count}} strumenti",
-    "callCount": "{{count}} chiamate"
+    "callCount": "{{count}} chiamate",
+    "disabled": "Disattivato"
   },
   "credentials": {
     "envVars": "Variabili d'ambiente",

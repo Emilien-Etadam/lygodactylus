@@ -19,7 +19,8 @@
     "install": "Installeren",
     "optional": "optioneel",
     "appLogoAlt": "Lygodactylus-logo",
-    "pastedImageAlt": "Geplakt {{index}}"
+    "pastedImageAlt": "Geplakt {{index}}",
+    "copy": "Kopiëren"
   },
   "welcome": {
     "title": "Waarmee kan ik je vandaag helpen?",
@@ -404,8 +405,11 @@
         "ollama_no_models_loaded": "Het eindpunt is bereikbaar, maar gaf geen modellen terug. Haal eerst een model op in Ollama.",
         "ollama_model_not_listed": "Model {{model}} staat niet in de modellijst van het eindpunt. Kies een gedetecteerd model of schakel over naar handmatige invoer.",
         "ollama_model_loading": "Model {{model}} wordt mogelijk nog geladen. Probeer de diepe controle zo meteen opnieuw.",
-        "model_cold_start": "Het model wordt mogelijk nog in het GPU/CPU-geheugen geladen. Grote modellen (7B+) kunnen bij het eerste gebruik 30-120 seconden duren. Probeer het zo meteen opnieuw."
-      }
+        "model_cold_start": "Het model wordt mogelijk nog in het GPU/CPU-geheugen geladen. Grote modellen (7B+) kunnen bij het eerste gebruik 30-120 seconden duren. Probeer het zo meteen opnieuw.",
+        "auth_probe_deferred": "Authenticatiecontrole uitgesteld; doorgaan met modelverificatie.",
+        "models_list_not_supported": "Deze provider ondersteunt het models list-eindpunt niet. Doorgaan met modelverificatie."
+      },
+      "skipped": "Diagnose overgeslagen: er is al een andere run bezig."
     }
   },
   "window": {
@@ -566,7 +570,8 @@
     "commandRequired": "Commando is vereist",
     "urlRequired": "URL is vereist",
     "toolCount": "{{count}} tools",
-    "callCount": "{{count}} aanroepen"
+    "callCount": "{{count}} aanroepen",
+    "disabled": "Uitgeschakeld"
   },
   "credentials": {
     "envVars": "Omgevingsvariabelen",

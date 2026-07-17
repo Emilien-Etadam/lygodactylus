@@ -18,16 +18,13 @@ export interface MCPManagerEnvContext {
 }
 
 import { ensureNodeRuntime } from '../runtime/node-runtime.js';
+import { mt } from '../i18n';
 
 export async function checkNpxInPath(ctx: MCPManagerEnvContext): Promise<void> {
   await ensureNodeRuntime();
   const bundledNode = ctx.getBundledNodePath();
   if (!bundledNode) {
-    const errorMessage =
-      'Node.js runtime is not available yet. The app will download it on first MCP use.\n' +
-      'Node.js 运行时暂不可用，首次使用 MCP 时将自动下载。\n\n' +
-      'Connect to the internet and retry opening MCP servers.\n' +
-      '请连接网络后重试启动 MCP 服务器。';
+    const errorMessage = mt('errNodeRuntimeUnavailable');
 
     logError('[MCPManager] Bundled Node.js not found');
     throw new Error(errorMessage);

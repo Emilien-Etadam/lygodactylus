@@ -143,6 +143,6 @@ export function sendTimeoutMessage(
   ctx.renderer.sendMessage(sessionId, errorMsg);
   ctx.renderer.sendTraceUpdate(sessionId, thinkingStepId, {
     status: 'error',
-    title: 'Request timed out',
+    title: mt('traceRequestTimedOut'),
   });
 }

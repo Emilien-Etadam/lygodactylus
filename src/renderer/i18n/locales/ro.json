@@ -19,7 +19,8 @@
     "install": "Instalează",
     "optional": "opțional",
     "appLogoAlt": "Logo Lygodactylus",
-    "pastedImageAlt": "Lipit {{index}}"
+    "pastedImageAlt": "Lipit {{index}}",
+    "copy": "Copiază"
   },
   "welcome": {
     "title": "Cu ce te pot ajuta astăzi?",
@@ -404,8 +405,11 @@
         "ollama_no_models_loaded": "Endpoint-ul este accesibil, dar nu a returnat niciun model. Descarcă mai întâi un model în Ollama.",
         "ollama_model_not_listed": "Modelul {{model}} nu se află în lista de modele a endpoint-ului. Alege un model detectat sau comută la introducerea manuală.",
         "ollama_model_loading": "Modelul {{model}} s-ar putea să se încarce încă. Încearcă verificarea profundă din nou în câteva momente.",
-        "model_cold_start": "Modelul s-ar putea să se încarce încă în memoria GPU/CPU. Modelele mari (7B+) pot dura 30–120 de secunde la prima utilizare. Încearcă din nou în scurt timp."
-      }
+        "model_cold_start": "Modelul s-ar putea să se încarce încă în memoria GPU/CPU. Modelele mari (7B+) pot dura 30–120 de secunde la prima utilizare. Încearcă din nou în scurt timp.",
+        "auth_probe_deferred": "Sondarea autentificării a fost amânată; se continuă cu verificarea modelului.",
+        "models_list_not_supported": "Acest furnizor nu suportă endpoint-ul de listă a modelelor. Se continuă cu verificarea modelului."
+      },
+      "skipped": "Diagnostic omis: o altă rulare este deja în curs."
     }
   },
   "window": {
@@ -566,7 +570,8 @@
     "commandRequired": "Comanda este obligatorie",
     "urlRequired": "URL-ul este obligatoriu",
     "toolCount": "{{count}} instrumente",
-    "callCount": "{{count}} apeluri"
+    "callCount": "{{count}} apeluri",
+    "disabled": "Dezactivat"
   },
   "credentials": {
     "envVars": "Variabile de mediu",

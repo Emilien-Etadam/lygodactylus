@@ -11,7 +11,7 @@ import {
 import {
   buildScheduledTaskFallbackTitle,
   buildScheduledTaskTitle,
-} from '../../shared/schedule/task-title';
+} from '../schedule/schedule-title-i18n';
 import { logError } from '../utils/logger';
 import { mainAppState } from '../main-app-state';
 import { sendToRenderer } from '../main-renderer-bridge';

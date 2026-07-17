@@ -47,13 +47,13 @@ export async function analyzeScreenshotWithVision(
     const base64Image = imageBuffer.toString('base64');
     const imageDims = await getImageDimensions(annotatedPath);
 
-    const prompt = `给我${elementDescription}的grounding坐标。
+    const prompt = `Give me the grounding coordinates for: ${elementDescription}.
 
-**注意**：图片上可能有黄色圆圈标记，这些是之前点击过的位置（仅用于相对位置参考，它们并不一定是正确的点击位置），标记格式为"#序号"和已经归一化之后的"[y,x]"坐标。这些标记不是界面的一部分，请忽略它们，只定位实际的界面元素。
+**Note**: The image may contain yellow circle markers for previously clicked positions (relative-position reference only — they are not necessarily correct click targets). Markers look like "#N" and a normalized "[y,x]" coordinate. These markers are not part of the UI; ignore them and locate the actual interface element.
 
-坐标格式：归一化到0-1000，格式为[ymin, xmin, ymax, xmax]
+Coordinate format: normalized to 0-1000 as [ymin, xmin, ymax, xmax]
 
-返回JSON（不要markdown）:
+Return JSON only (no markdown):
 {"box_2d": [ymin, xmin, ymax, xmax], "confidence": <0-100>}`;
 
     writeMCPLog(`[analyzeScreenshotWithVision] Prompt: ${prompt}`);

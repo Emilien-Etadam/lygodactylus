@@ -16,6 +16,7 @@ import { isUncPath } from '../../shared/local-file-path';
 import { isPathWithinRoot } from './path-containment';
 import { runWebSearch } from '../../shared/web-search';
 import { configStore } from '../config/config-store';
+import { mt } from '../i18n';
 
 /**
  * SandboxToolExecutor - Executes tools through the sandbox
@@ -318,7 +319,7 @@ export class SandboxToolExecutor {
         error instanceof Error &&
         (error.name === 'AbortError' || error.name === 'TimeoutError')
       ) {
-        throw new Error('请求超时，请检查网络连接后重试');
+        throw new Error(mt('errFetchTimeout'));
       }
       throw error;
     }
