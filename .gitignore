@@ -105,3 +105,4 @@ DEV_LOG.md
 !resources/icon.iconset/*.png
 !resources/chat-lan/icons/*.png
 !extension/icons/*.png
+!extension-thunderbird/icons/*.png
