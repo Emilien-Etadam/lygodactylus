@@ -1099,12 +1099,13 @@
     "qrHint": "Skanna med telefonen för att logga in direkt. QR-koden innehåller åtkomsttoken: dela den inte.",
     "installHint": "På Android: Chrome-menyn → ”Lägg till på startskärmen”. Via en HTTPS-URL installeras appen i helskärm med offlinestöd.",
     "extensionInstallTitle": "Firefox-tillägget ”Lygodactylus Web”",
-    "extensionInstallHint": "Laddar ner det signerade tillägget (.xpi) från GitHub-releaserna och öppnar det i Firefox. Bekräfta installationen med ett klick och klistra sedan in tilläggstoken (kopieras automatiskt) i tilläggets inställningar.",
+    "extensionInstallHint": "Laddar ner det signerade tillägget (.xpi) från GitHub-releaserna och öppnar det i Firefox eller en kompatibel fork (Waterfox, LibreWolf, Floorp, Mullvad, Zen…). Bekräfta installationen med ett klick och klistra sedan in tilläggstoken (kopieras automatiskt) i tilläggets inställningar.",
     "extensionInstallButton": "Installera i Firefox",
     "extensionInstallOpenReleases": "Release-sida",
     "extensionInstallStarted": "Firefox öppnas — bekräfta att tillägget läggs till. Tilläggstoken har kopierats: klistra in den i tilläggets inställningar.",
     "extensionInstallErrorNoRelease": "Inget signerat tillägg (.xpi) hittades i GitHub-releaserna.",
     "extensionInstallErrorDownload": "Det gick inte att ladda ner tillägget. Kontrollera nätverksanslutningen och försök igen.",
-    "extensionInstallErrorFirefoxNotFound": "Firefox hittades inte. .xpi-filen finns i mappen Hämtningar — installera den via about:addons → ”Installera tillägg från fil…”."
+    "extensionInstallErrorFirefoxNotFound": "Ingen kompatibel webbläsare (Firefox, Waterfox, LibreWolf, Floorp, Mullvad, Zen…) hittades. .xpi-filen finns i mappen Hämtningar — installera den via about:addons → ”Installera tillägg från fil…”.",
+    "extensionChooseBrowser": "Flera kompatibla webbläsare hittades. Välj vilken som ska användas:"
   }
 }

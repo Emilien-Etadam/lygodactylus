@@ -30,6 +30,7 @@ export function SettingsChatLan() {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [isInstallingExtension, setIsInstallingExtension] = useState(false);
   const [extensionInstallError, setExtensionInstallError] = useState<string | null>(null);
+  const [browserChoices, setBrowserChoices] = useState<{ id: string; name: string }[] | null>(null);
 
   const refresh = useCallback(async () => {
     const [nextConfig, nextStatus] = await Promise.all([
@@ -130,17 +131,20 @@ export function SettingsChatLan() {
     setMessage(t('chatLan.extensionTokenCopied'));
   };
 
-  const installFirefoxExtension = async () => {
+  const installFirefoxExtension = async (browserId?: string) => {
     setIsInstallingExtension(true);
     setMessage(null);
     setExtensionInstallError(null);
+    setBrowserChoices(null);
     try {
-      const result = await window.electronAPI.chatLan.installFirefoxExtension();
+      const result = await window.electronAPI.chatLan.installFirefoxExtension(browserId);
       if (result.ok) {
         if (config?.extensionToken) {
           await navigator.clipboard.writeText(config.extensionToken);
         }
         setMessage(t('chatLan.extensionInstallStarted'));
+      } else if (result.error === 'choose-browser') {
+        setBrowserChoices(result.browsers ?? []);
       } else if (result.error === 'firefox-not-found') {
         setExtensionInstallError(
           result.detail
@@ -293,6 +297,24 @@ export function SettingsChatLan() {
             {t('chatLan.extensionInstallOpenReleases')}
           </button>
         </div>
+        {browserChoices && browserChoices.length > 0 && (
+          <div className="space-y-2 pt-1">
+            <p className="text-[11px] text-text-muted">{t('chatLan.extensionChooseBrowser')}</p>
+            <div className="flex flex-wrap gap-2">
+              {browserChoices.map((browser) => (
+                <button
+                  key={browser.id}
+                  type="button"
+                  disabled={isInstallingExtension}
+                  onClick={() => void installFirefoxExtension(browser.id)}
+                  className="px-3 py-1.5 rounded-lg border border-border text-sm text-text-primary"
+                >
+                  {browser.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {extensionInstallError && (
           <p className="text-xs text-red-500 break-all">{extensionInstallError}</p>
         )}

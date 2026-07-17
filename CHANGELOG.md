@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.2.1] - 2026-07-17
+
+### Changed
+
+- **Installation de l'extension dans les forks Firefox** : le bouton « Installer dans Firefox » détecte désormais toute la famille Firefox — Firefox (+ Developer Edition / Nightly / ESR), Waterfox, LibreWolf, Floorp, Mullvad Browser, Zen — sur Windows, macOS et Linux. Le `.xpi` signé AMO s'y installe puisque ces navigateurs honorent la signature Mozilla. Quand plusieurs navigateurs compatibles sont présents, l'app propose de choisir lequel utiliser ; sinon elle ouvre le seul détecté (types partagés `src/shared/firefox-extension.ts`, détection testée par plateforme)
+
 ## [6.2.0] - 2026-07-15
 
 ### Added

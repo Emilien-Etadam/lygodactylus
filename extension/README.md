@@ -8,9 +8,11 @@ Technologie : JavaScript vanilla, API `browser.*` (Firefox uniquement, pas de po
 
 ## Installation depuis l’application (recommandé)
 
-Dans Lygodactylus → **Réglages** → **Chat LAN**, cliquez sur **Installer dans Firefox** (bloc « Extension Firefox »). L’application télécharge le dernier `.xpi` signé depuis les [releases GitHub](https://github.com/Emilien-Etadam/lygodactylus/releases) (tags `ext-v*`) dans votre dossier Téléchargements, puis l’ouvre dans Firefox : confirmez l’installation en un clic dans la bannière du navigateur. Le **token extension** est copié automatiquement dans le presse-papier — collez-le dans les options de l’extension avec l’URL du serveur.
+Dans Lygodactylus → **Réglages** → **Chat LAN**, cliquez sur **Installer dans Firefox** (bloc « Extension Firefox »). L’application télécharge le dernier `.xpi` signé depuis les [releases GitHub](https://github.com/Emilien-Etadam/lygodactylus/releases) (tags `ext-v*`) dans votre dossier Téléchargements, puis l’ouvre dans le navigateur : confirmez l’installation en un clic dans la bannière. Le **token extension** est copié automatiquement dans le presse-papier — collez-le dans les options de l’extension avec l’URL du serveur.
 
-Si Firefox est introuvable, le `.xpi` reste dans le dossier Téléchargements : installez-le via `about:addons` → **Installer un module depuis un fichier…**
+Le `.xpi` étant signé par Mozilla (AMO), il s’installe aussi bien dans **Firefox** que dans ses **forks compatibles** — Waterfox, LibreWolf, Floorp, Mullvad Browser, Zen, Firefox Developer Edition / Nightly / ESR. L’application détecte ceux qui sont installés ; si plusieurs sont présents, elle vous laisse choisir lequel utiliser.
+
+Si aucun navigateur compatible n’est trouvé, le `.xpi` reste dans le dossier Téléchargements : installez-le via `about:addons` → **Installer un module depuis un fichier…**
 
 > Une installation totalement silencieuse n’est pas possible sur Firefox : le navigateur demande toujours une confirmation à l’utilisateur.
 

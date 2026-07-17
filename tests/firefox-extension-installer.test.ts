@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  BROWSER_CATALOG,
+  browserCandidatePaths,
+  detectFirefoxBrowsers,
   parseExtensionTag,
   pickLatestExtensionXpi,
   type GitHubRelease,
@@ -58,5 +61,76 @@ describe('pickLatestExtensionXpi', () => {
       { tag_name: 'ext-v1.9.0', assets: [xpi('b.xpi')] },
     ];
     expect(pickLatestExtensionXpi(releases)?.version).toBe('1.10.0');
+  });
+});
+
+describe('browserCandidatePaths', () => {
+  const firefox = BROWSER_CATALOG.find((b) => b.id === 'firefox')!;
+  const waterfox = BROWSER_CATALOG.find((b) => b.id === 'waterfox')!;
+
+  it('probes macOS app bundles under /Applications and ~/Applications', () => {
+    const paths = browserCandidatePaths(waterfox, 'darwin', {}, '/Users/me');
+    expect(paths).toEqual([
+      { kind: 'mac-app', path: '/Applications/Waterfox.app' },
+      { kind: 'mac-app', path: '/Users/me/Applications/Waterfox.app' },
+    ]);
+  });
+
+  it('probes Windows exe bases (Program Files + LocalAppData)', () => {
+    const paths = browserCandidatePaths(
+      firefox,
+      'win32',
+      { ProgramFiles: 'C:\\PF', 'ProgramFiles(x86)': 'C:\\PF86', LOCALAPPDATA: 'C:\\LA' },
+      'C:\\Users\\me'
+    );
+    expect(paths.map((p) => p.path)).toEqual([
+      'C:\\PF\\Mozilla Firefox\\firefox.exe',
+      'C:\\PF86\\Mozilla Firefox\\firefox.exe',
+      'C:\\LA\\Mozilla Firefox\\firefox.exe',
+    ]);
+    expect(paths.every((p) => p.kind === 'exe')).toBe(true);
+  });
+
+  it('resolves Linux binaries against PATH and common install dirs', () => {
+    const paths = browserCandidatePaths(waterfox, 'linux', { PATH: '/opt/bin' }, '/home/me');
+    const resolved = paths.map((p) => p.path);
+    expect(resolved).toContain('/opt/bin/waterfox');
+    expect(resolved).toContain('/usr/bin/waterfox');
+    expect(resolved).toContain('/snap/bin/waterfox');
+    expect(resolved).toContain('/var/lib/flatpak/exports/bin/waterfox');
+  });
+});
+
+describe('detectFirefoxBrowsers', () => {
+  it('detects only the browsers whose path exists, in catalog order', async () => {
+    const present = new Set([
+      '/Applications/Firefox.app',
+      '/Applications/Waterfox.app',
+      '/Applications/LibreWolf.app',
+    ]);
+    const detected = await detectFirefoxBrowsers(
+      'darwin',
+      {},
+      '/Users/me',
+      async (p) => present.has(p)
+    );
+    expect(detected.map((b) => b.id)).toEqual(['firefox', 'waterfox', 'librewolf']);
+    expect(detected.every((b) => b.kind === 'mac-app')).toBe(true);
+  });
+
+  it('returns an empty list when no browser is installed', async () => {
+    const detected = await detectFirefoxBrowsers('linux', { PATH: '/usr/bin' }, '/home/me', async () => false);
+    expect(detected).toEqual([]);
+  });
+
+  it('picks the first existing candidate per browser (no duplicates)', async () => {
+    const detected = await detectFirefoxBrowsers(
+      'win32',
+      { ProgramFiles: 'C:\\PF', 'ProgramFiles(x86)': 'C:\\PF86' },
+      'C:\\Users\\me',
+      async (p) => p === 'C:\\PF\\Waterfox\\waterfox.exe' || p === 'C:\\PF86\\Waterfox\\waterfox.exe'
+    );
+    expect(detected).toHaveLength(1);
+    expect(detected[0]).toMatchObject({ id: 'waterfox', path: 'C:\\PF\\Waterfox\\waterfox.exe' });
   });
 });

@@ -1,33 +1,35 @@
 /**
  * @module main/firefox-extension-installer
  *
- * One-click install of the "Lygodactylus Web" Firefox extension: downloads the
+ * One-click install of the "Lygodactylus Web" browser extension: downloads the
  * AMO-signed .xpi from the latest `ext-v*` GitHub release into the user's
- * Downloads folder, then opens it with Firefox so the browser shows its native
- * install prompt. Fully silent install is not possible on Firefox release —
- * the user always confirms with one click.
+ * Downloads folder, then opens it with a Firefox-family browser so the browser
+ * shows its native install prompt. The signed .xpi installs not only in Firefox
+ * but in its forks (Waterfox, LibreWolf, Floorp, Mullvad Browser, Zen…), which
+ * honour AMO signatures — so we detect those too. Fully silent install is not
+ * possible; the user always confirms with one click.
  */
 import { spawn } from 'node:child_process';
 import { createWriteStream } from 'node:fs';
 import { access } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
-import { join } from 'node:path';
+import { delimiter, join, posix as pathPosix, win32 as pathWin32 } from 'node:path';
 import { homedir } from 'node:os';
 import { app } from 'electron';
 import { log, logError } from './utils/logger';
+import type { FirefoxExtensionInstallResult } from '../shared/firefox-extension';
+
+export type {
+  FirefoxExtensionInstallError,
+  FirefoxExtensionInstallResult,
+} from '../shared/firefox-extension';
 
 const GITHUB_OWNER = 'Emilien-Etadam';
 const GITHUB_REPO = 'lygodactylus';
 const RELEASES_API_URL = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases?per_page=30`;
 export const RELEASES_PAGE_URL = `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases`;
 const EXTENSION_TAG_PREFIX = 'ext-v';
-
-export type FirefoxExtensionInstallError = 'no-release' | 'download-failed' | 'firefox-not-found';
-
-export type FirefoxExtensionInstallResult =
-  | { ok: true; version: string; xpiPath: string }
-  | { ok: false; error: FirefoxExtensionInstallError; detail?: string };
 
 export interface GitHubReleaseAsset {
   name: string;
@@ -108,9 +110,9 @@ async function fetchLatestExtensionXpi(): Promise<{
 }
 
 /**
- * Download into the user's Downloads folder: sandboxed Firefox builds
+ * Download into the user's Downloads folder: sandboxed browser builds
  * (snap/flatpak on Linux) cannot read dot-directories like userData, and the
- * user can retry manually from there if Firefox is missing.
+ * user can retry manually from there if no browser is detected.
  */
 async function downloadXpi(asset: GitHubReleaseAsset): Promise<string> {
   const response = await fetch(asset.browser_download_url, {
@@ -124,16 +126,162 @@ async function downloadXpi(asset: GitHubReleaseAsset): Promise<string> {
   return targetPath;
 }
 
-async function firstExistingPath(candidates: string[]): Promise<string | null> {
-  for (const candidate of candidates) {
-    try {
-      await access(candidate);
-      return candidate;
-    } catch {
-      // keep looking
+/** A Firefox-family browser and how to locate it on each platform. */
+interface BrowserCatalogEntry {
+  id: string;
+  name: string;
+  /** macOS `.app` bundle names, probed under /Applications and ~/Applications. */
+  macApps: string[];
+  /** Windows exe subpaths, probed under Program Files / LocalAppData bases. */
+  winPaths: string[];
+  /** Linux binary names, resolved against PATH and common install dirs. */
+  linuxBins: string[];
+}
+
+/**
+ * Firefox and the forks that accept AMO-signed extensions. Firefox first, then
+ * forks — the order is the display order in the picker.
+ */
+export const BROWSER_CATALOG: BrowserCatalogEntry[] = [
+  {
+    id: 'firefox',
+    name: 'Firefox',
+    macApps: ['Firefox.app'],
+    winPaths: ['Mozilla Firefox\\firefox.exe'],
+    linuxBins: ['firefox', 'firefox-esr'],
+  },
+  {
+    id: 'firefox-developer',
+    name: 'Firefox Developer Edition',
+    macApps: ['Firefox Developer Edition.app'],
+    winPaths: ['Firefox Developer Edition\\firefox.exe'],
+    linuxBins: ['firefox-developer-edition', 'firefox-dev'],
+  },
+  {
+    id: 'firefox-nightly',
+    name: 'Firefox Nightly',
+    macApps: ['Firefox Nightly.app'],
+    winPaths: ['Firefox Nightly\\firefox.exe'],
+    linuxBins: ['firefox-nightly'],
+  },
+  {
+    id: 'waterfox',
+    name: 'Waterfox',
+    macApps: ['Waterfox.app'],
+    winPaths: ['Waterfox\\waterfox.exe'],
+    linuxBins: ['waterfox'],
+  },
+  {
+    id: 'librewolf',
+    name: 'LibreWolf',
+    macApps: ['LibreWolf.app'],
+    winPaths: ['LibreWolf\\librewolf.exe'],
+    linuxBins: ['librewolf'],
+  },
+  {
+    id: 'floorp',
+    name: 'Floorp',
+    macApps: ['Floorp.app'],
+    winPaths: ['Floorp\\floorp.exe'],
+    linuxBins: ['floorp'],
+  },
+  {
+    id: 'mullvad-browser',
+    name: 'Mullvad Browser',
+    macApps: ['Mullvad Browser.app'],
+    winPaths: ['Mullvad Browser\\mullvadbrowser.exe'],
+    linuxBins: ['mullvad-browser'],
+  },
+  {
+    id: 'zen',
+    name: 'Zen Browser',
+    macApps: ['Zen Browser.app', 'Zen.app'],
+    winPaths: ['Zen Browser\\zen.exe', 'Zen\\zen.exe'],
+    linuxBins: ['zen', 'zen-browser'],
+  },
+];
+
+export interface DetectedBrowser {
+  id: string;
+  name: string;
+  /** 'mac-app' → open via `open -a`; 'exe' → spawn the path directly. */
+  kind: 'mac-app' | 'exe';
+  path: string;
+}
+
+/** Ordered list of absolute candidate paths for an entry on a given platform. */
+export function browserCandidatePaths(
+  entry: BrowserCatalogEntry,
+  platform: NodeJS.Platform,
+  env: NodeJS.ProcessEnv,
+  home: string
+): { kind: 'mac-app' | 'exe'; path: string }[] {
+  if (platform === 'darwin') {
+    return entry.macApps.flatMap((appName) => [
+      { kind: 'mac-app' as const, path: `/Applications/${appName}` },
+      { kind: 'mac-app' as const, path: pathPosix.join(home, 'Applications', appName) },
+    ]);
+  }
+
+  if (platform === 'win32') {
+    const bases = [
+      env['ProgramFiles'] ?? 'C:\\Program Files',
+      env['ProgramFiles(x86)'] ?? 'C:\\Program Files (x86)',
+      env['LOCALAPPDATA'] ?? pathWin32.join(home, 'AppData', 'Local'),
+    ];
+    return entry.winPaths.flatMap((rel) =>
+      bases.map((base) => ({ kind: 'exe' as const, path: pathWin32.join(base, rel) }))
+    );
+  }
+
+  // Linux and other POSIX: resolve each binary name against PATH plus the
+  // common absolute dirs that native, snap and flatpak installs use. Split on
+  // the POSIX delimiter regardless of host so detection is deterministic.
+  const pathSeparator = platform === (process.platform as NodeJS.Platform) ? delimiter : ':';
+  const pathDirs = (env['PATH'] ?? '').split(pathSeparator).filter(Boolean);
+  const extraDirs = [
+    '/usr/bin',
+    '/usr/local/bin',
+    '/snap/bin',
+    '/var/lib/flatpak/exports/bin',
+    pathPosix.join(home, '.local', 'share', 'flatpak', 'exports', 'bin'),
+    pathPosix.join(home, '.local', 'bin'),
+  ];
+  const dirs = Array.from(new Set([...pathDirs, ...extraDirs]));
+  return entry.linuxBins.flatMap((bin) =>
+    dirs.map((dir) => ({ kind: 'exe' as const, path: pathPosix.join(dir, bin) }))
+  );
+}
+
+/**
+ * Detect installed Firefox-family browsers. `exists` is injectable for testing;
+ * it defaults to a real filesystem access check.
+ */
+export async function detectFirefoxBrowsers(
+  platform: NodeJS.Platform = process.platform,
+  env: NodeJS.ProcessEnv = process.env,
+  home: string = homedir(),
+  exists: (path: string) => Promise<boolean> = pathExists
+): Promise<DetectedBrowser[]> {
+  const detected: DetectedBrowser[] = [];
+  for (const entry of BROWSER_CATALOG) {
+    for (const candidate of browserCandidatePaths(entry, platform, env, home)) {
+      if (await exists(candidate.path)) {
+        detected.push({ id: entry.id, name: entry.name, kind: candidate.kind, path: candidate.path });
+        break;
+      }
     }
   }
-  return null;
+  return detected;
+}
+
+async function pathExists(path: string): Promise<boolean> {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function spawnDetached(command: string, args: string[]): Promise<void> {
@@ -147,54 +295,30 @@ function spawnDetached(command: string, args: string[]): Promise<void> {
   });
 }
 
-/** Open the .xpi with Firefox; resolves false when no Firefox binary is found. */
-export async function openXpiWithFirefox(xpiPath: string): Promise<boolean> {
-  if (process.platform === 'darwin') {
-    const appPath = await firstExistingPath([
-      '/Applications/Firefox.app',
-      join(homedir(), 'Applications', 'Firefox.app'),
-    ]);
-    if (!appPath) {
-      return false;
-    }
-    await spawnDetached('open', ['-a', appPath, xpiPath]);
-    return true;
+/** Open the .xpi with a detected browser. */
+async function launchBrowser(browser: DetectedBrowser, xpiPath: string): Promise<void> {
+  if (browser.kind === 'mac-app') {
+    await spawnDetached('open', ['-a', browser.path, xpiPath]);
+    return;
   }
-
-  if (process.platform === 'win32') {
-    const programFiles = process.env['ProgramFiles'] ?? 'C:\\Program Files';
-    const programFilesX86 = process.env['ProgramFiles(x86)'] ?? 'C:\\Program Files (x86)';
-    const localAppData = process.env['LOCALAPPDATA'] ?? join(homedir(), 'AppData', 'Local');
-    const exePath = await firstExistingPath([
-      join(programFiles, 'Mozilla Firefox', 'firefox.exe'),
-      join(programFilesX86, 'Mozilla Firefox', 'firefox.exe'),
-      join(localAppData, 'Mozilla Firefox', 'firefox.exe'),
-    ]);
-    if (!exePath) {
-      return false;
-    }
-    await spawnDetached(exePath, [xpiPath]);
-    return true;
-  }
-
-  // Linux: rely on PATH (covers native, snap and flatpak wrapper scripts).
-  for (const binary of ['firefox', 'firefox-esr']) {
-    try {
-      await spawnDetached(binary, [xpiPath]);
-      return true;
-    } catch {
-      // try the next candidate
-    }
-  }
-  return false;
+  await spawnDetached(browser.path, [xpiPath]);
 }
 
 /**
- * Full flow: locate the latest signed .xpi, download it, open it with Firefox.
- * On `firefox-not-found` the .xpi is already on disk — `detail` carries its path
- * so the UI can point the user at a manual install via about:addons.
+ * Full flow: locate the latest signed .xpi, download it, then open it with a
+ * Firefox-family browser.
+ *
+ * - `browserId` set → open that specific detected browser (the UI's second call
+ *   after the user picks one).
+ * - no browser installed → `firefox-not-found` (`detail` carries the .xpi path
+ *   so the UI can point at a manual install via about:addons).
+ * - exactly one browser → open it.
+ * - several browsers → `choose-browser` with the candidate list (nothing opened
+ *   yet); the UI prompts and calls again with a `browserId`.
  */
-export async function installFirefoxExtension(): Promise<FirefoxExtensionInstallResult> {
+export async function installFirefoxExtension(
+  browserId?: string
+): Promise<FirefoxExtensionInstallResult> {
   let picked: { version: string; asset: GitHubReleaseAsset } | null;
   try {
     picked = await fetchLatestExtensionXpi();
@@ -222,15 +346,36 @@ export async function installFirefoxExtension(): Promise<FirefoxExtensionInstall
     };
   }
 
-  try {
-    if (!(await openXpiWithFirefox(xpiPath))) {
-      return { ok: false, error: 'firefox-not-found', detail: xpiPath };
-    }
-  } catch (error) {
-    logError('[FirefoxExtension] Failed to launch Firefox:', error);
+  const browsers = await detectFirefoxBrowsers();
+
+  if (browsers.length === 0) {
     return { ok: false, error: 'firefox-not-found', detail: xpiPath };
   }
 
-  log(`[FirefoxExtension] Opened ${xpiPath} (v${picked.version}) with Firefox`);
-  return { ok: true, version: picked.version, xpiPath };
+  let target: DetectedBrowser | undefined;
+  if (browserId) {
+    target = browsers.find((b) => b.id === browserId);
+    if (!target) {
+      return { ok: false, error: 'firefox-not-found', detail: xpiPath };
+    }
+  } else if (browsers.length === 1) {
+    target = browsers[0];
+  } else {
+    return {
+      ok: false,
+      error: 'choose-browser',
+      xpiPath,
+      browsers: browsers.map((b) => ({ id: b.id, name: b.name })),
+    };
+  }
+
+  try {
+    await launchBrowser(target, xpiPath);
+  } catch (error) {
+    logError('[FirefoxExtension] Failed to launch browser:', error);
+    return { ok: false, error: 'firefox-not-found', detail: xpiPath };
+  }
+
+  log(`[FirefoxExtension] Opened ${xpiPath} (v${picked.version}) with ${target.name}`);
+  return { ok: true, version: picked.version, xpiPath, browser: target.id };
 }
