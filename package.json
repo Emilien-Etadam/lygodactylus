@@ -1,6 +1,6 @@
 {
   "name": "lygodactylus",
-  "version": "6.2.0",
+  "version": "6.2.1",
   "description": "Lygodactylus — open-source local AI agent desktop app for Windows, macOS & Linux with Ollama/vLLM support, MCP tools, Skills, and sandbox isolation",
   "keywords": [
     "ai-agent",

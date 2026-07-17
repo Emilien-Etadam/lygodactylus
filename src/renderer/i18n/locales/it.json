@@ -1099,12 +1099,13 @@
     "qrHint": "Scansiona con il telefono per accedere all'istante. Il QR contiene il token di accesso: non condividerlo.",
     "installHint": "Su Android: menu Chrome → «Aggiungi a schermata Home». Con un URL HTTPS l'app si installa a schermo intero con supporto offline.",
     "extensionInstallTitle": "Estensione Firefox «Lygodactylus Web»",
-    "extensionInstallHint": "Scarica il componente aggiuntivo firmato (.xpi) dalle release GitHub e lo apre in Firefox. Conferma l'installazione con un clic, poi incolla il token estensione (copiato automaticamente) nelle opzioni del componente.",
+    "extensionInstallHint": "Scarica il componente aggiuntivo firmato (.xpi) dalle release GitHub e lo apre in Firefox o in un fork compatibile (Waterfox, LibreWolf, Floorp, Mullvad, Zen…). Conferma l'installazione con un clic, poi incolla il token estensione (copiato automaticamente) nelle opzioni del componente.",
     "extensionInstallButton": "Installa in Firefox",
     "extensionInstallOpenReleases": "Pagina delle release",
     "extensionInstallStarted": "Firefox si aprirà: conferma l'aggiunta del componente. Il token estensione è stato copiato — incollalo nelle opzioni dell'estensione.",
     "extensionInstallErrorNoRelease": "Nessun componente firmato (.xpi) trovato nelle release GitHub.",
     "extensionInstallErrorDownload": "Download del componente non riuscito. Verifica la connessione di rete e riprova.",
-    "extensionInstallErrorFirefoxNotFound": "Firefox non trovato. Il file .xpi è nella cartella Download — installalo da about:addons → «Installa componente aggiuntivo da file…»."
+    "extensionInstallErrorFirefoxNotFound": "Nessun browser compatibile (Firefox, Waterfox, LibreWolf, Floorp, Mullvad, Zen…) trovato. Il file .xpi è nella cartella Download — installalo da about:addons → «Installa componente aggiuntivo da file…».",
+    "extensionChooseBrowser": "Rilevati più browser compatibili. Scegli quale usare:"
   }
 }

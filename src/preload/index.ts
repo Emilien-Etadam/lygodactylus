@@ -32,6 +32,7 @@ import type {
 } from '../renderer/types';
 import type { DiagnosticInput, DiagnosticResult } from '../renderer/types';
 import type { McpServerConfig, McpTool, McpServerStatus, McpPresetsMap } from '../shared/ipc-types';
+import type { FirefoxExtensionInstallResult } from '../shared/firefox-extension';
 import { subscribeServerEvents } from './server-event-bus';
 import { isAllowedClientEventType } from '../shared/client-event-allowlist';
 
@@ -361,10 +362,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       extensionToken: string;
       status: { running: boolean; port: number; enabled: boolean; urls: string[] };
     }> => ipcRenderer.invoke('chatLan.regenerateExtensionToken'),
-    installFirefoxExtension: (): Promise<
-      | { ok: true; version: string; xpiPath: string }
-      | { ok: false; error: 'no-release' | 'download-failed' | 'firefox-not-found'; detail?: string }
-    > => ipcRenderer.invoke('chatLan.installFirefoxExtension'),
+    installFirefoxExtension: (browserId?: string): Promise<FirefoxExtensionInstallResult> =>
+      ipcRenderer.invoke('chatLan.installFirefoxExtension', browserId),
   },
 
   memory: {
@@ -622,14 +621,7 @@ declare global {
           extensionToken: string;
           status: { running: boolean; port: number; enabled: boolean; urls: string[] };
         }>;
-        installFirefoxExtension: () => Promise<
-          | { ok: true; version: string; xpiPath: string }
-          | {
-              ok: false;
-              error: 'no-release' | 'download-failed' | 'firefox-not-found';
-              detail?: string;
-            }
-        >;
+        installFirefoxExtension: (browserId?: string) => Promise<FirefoxExtensionInstallResult>;
       };
       memory: {
         getOverview: (cwd?: string) => Promise<MemoryOverview>;

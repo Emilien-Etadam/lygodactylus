@@ -63,9 +63,9 @@ export function registerChatLanIpc(): void {
 
   ipcMain.handle(
     'chatLan.installFirefoxExtension',
-    async (): Promise<FirefoxExtensionInstallResult> => {
+    async (_event, browserId?: string): Promise<FirefoxExtensionInstallResult> => {
       try {
-        return await installFirefoxExtension();
+        return await installFirefoxExtension(typeof browserId === 'string' ? browserId : undefined);
       } catch (error) {
         logError('[ChatLan] installFirefoxExtension failed:', error);
         return {

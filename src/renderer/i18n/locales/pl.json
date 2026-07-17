@@ -1099,12 +1099,13 @@
     "qrHint": "Zeskanuj telefonem, aby zalogować się natychmiast. Kod QR zawiera token dostępu: nie udostępniaj go.",
     "installHint": "Na Androidzie: menu Chrome → „Dodaj do ekranu głównego”. Przez adres HTTPS aplikacja instaluje się na pełnym ekranie z obsługą offline.",
     "extensionInstallTitle": "Rozszerzenie Firefox „Lygodactylus Web”",
-    "extensionInstallHint": "Pobiera podpisany dodatek (.xpi) z wydań GitHub i otwiera go w Firefoksie. Potwierdź instalację jednym kliknięciem, a następnie wklej token rozszerzenia (skopiowany automatycznie) w opcjach dodatku.",
+    "extensionInstallHint": "Pobiera podpisany dodatek (.xpi) z wydań GitHub i otwiera go w Firefoksie lub kompatybilnym forku (Waterfox, LibreWolf, Floorp, Mullvad, Zen…). Potwierdź instalację jednym kliknięciem, a następnie wklej token rozszerzenia (skopiowany automatycznie) w opcjach dodatku.",
     "extensionInstallButton": "Zainstaluj w Firefoksie",
     "extensionInstallOpenReleases": "Strona wydań",
     "extensionInstallStarted": "Firefox się otworzy — potwierdź dodanie dodatku. Token rozszerzenia został skopiowany: wklej go w opcjach rozszerzenia.",
     "extensionInstallErrorNoRelease": "Nie znaleziono podpisanego dodatku (.xpi) w wydaniach GitHub.",
     "extensionInstallErrorDownload": "Nie udało się pobrać dodatku. Sprawdź połączenie sieciowe i spróbuj ponownie.",
-    "extensionInstallErrorFirefoxNotFound": "Nie znaleziono Firefoksa. Plik .xpi jest w folderze Pobrane — zainstaluj go przez about:addons → „Zainstaluj dodatek z pliku…”."
+    "extensionInstallErrorFirefoxNotFound": "Nie znaleziono kompatybilnej przeglądarki (Firefox, Waterfox, LibreWolf, Floorp, Mullvad, Zen…). Plik .xpi jest w folderze Pobrane — zainstaluj go przez about:addons → „Zainstaluj dodatek z pliku…”.",
+    "extensionChooseBrowser": "Wykryto kilka kompatybilnych przeglądarek. Wybierz, której użyć:"
   }
 }

@@ -1099,12 +1099,13 @@
     "qrHint": "Scanează cu telefonul pentru a te conecta instantaneu. Codul QR conține tokenul de acces: nu îl distribui.",
     "installHint": "Pe Android: meniul Chrome → „Adaugă la ecranul de pornire”. Printr-un URL HTTPS aplicația se instalează pe tot ecranul cu suport offline.",
     "extensionInstallTitle": "Extensia Firefox „Lygodactylus Web”",
-    "extensionInstallHint": "Descarcă suplimentul semnat (.xpi) din release-urile GitHub și îl deschide în Firefox. Confirmați instalarea cu un clic, apoi lipiți tokenul extensiei (copiat automat) în opțiunile suplimentului.",
+    "extensionInstallHint": "Descarcă suplimentul semnat (.xpi) din release-urile GitHub și îl deschide în Firefox sau într-un fork compatibil (Waterfox, LibreWolf, Floorp, Mullvad, Zen…). Confirmați instalarea cu un clic, apoi lipiți tokenul extensiei (copiat automat) în opțiunile suplimentului.",
     "extensionInstallButton": "Instalează în Firefox",
     "extensionInstallOpenReleases": "Pagina release-urilor",
     "extensionInstallStarted": "Firefox se va deschide — confirmați adăugarea suplimentului. Tokenul extensiei a fost copiat: lipiți-l în opțiunile extensiei.",
     "extensionInstallErrorNoRelease": "Nu s-a găsit niciun supliment semnat (.xpi) în release-urile GitHub.",
     "extensionInstallErrorDownload": "Descărcarea suplimentului a eșuat. Verificați conexiunea la rețea și încercați din nou.",
-    "extensionInstallErrorFirefoxNotFound": "Firefox nu a fost găsit. Fișierul .xpi este în dosarul Descărcări — instalați-l prin about:addons → „Instalează un supliment din fișier…”."
+    "extensionInstallErrorFirefoxNotFound": "Nu a fost găsit niciun browser compatibil (Firefox, Waterfox, LibreWolf, Floorp, Mullvad, Zen…). Fișierul .xpi este în dosarul Descărcări — instalați-l prin about:addons → „Instalează un supliment din fișier…”.",
+    "extensionChooseBrowser": "Au fost detectate mai multe browsere compatibile. Alegeți pe care să îl folosiți:"
   }
 }

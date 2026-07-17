@@ -1099,12 +1099,13 @@
     "qrHint": "Відскануйте телефоном, щоб миттєво увійти. QR-код містить токен доступу: не діліться ним.",
     "installHint": "На Android: меню Chrome → «Додати на головний екран». Через HTTPS-адресу застосунок встановлюється на весь екран із підтримкою офлайн.",
     "extensionInstallTitle": "Розширення Firefox «Lygodactylus Web»",
-    "extensionInstallHint": "Завантажує підписаний додаток (.xpi) з релізів GitHub і відкриває його у Firefox. Підтвердьте встановлення одним кліком, а потім вставте токен розширення (скопійовано автоматично) у налаштування додатка.",
+    "extensionInstallHint": "Завантажує підписаний додаток (.xpi) з релізів GitHub і відкриває його у Firefox або сумісному форку (Waterfox, LibreWolf, Floorp, Mullvad, Zen…). Підтвердьте встановлення одним кліком, а потім вставте токен розширення (скопійовано автоматично) у налаштування додатка.",
     "extensionInstallButton": "Встановити у Firefox",
     "extensionInstallOpenReleases": "Сторінка релізів",
     "extensionInstallStarted": "Firefox відкриється — підтвердьте додавання розширення. Токен розширення скопійовано: вставте його в налаштування розширення.",
     "extensionInstallErrorNoRelease": "Підписаний додаток (.xpi) не знайдено в релізах GitHub.",
     "extensionInstallErrorDownload": "Не вдалося завантажити додаток. Перевірте з'єднання з мережею та спробуйте ще раз.",
-    "extensionInstallErrorFirefoxNotFound": "Firefox не знайдено. Файл .xpi у теці «Завантаження» — встановіть його через about:addons → «Встановити додаток з файлу…»."
+    "extensionInstallErrorFirefoxNotFound": "Сумісний браузер (Firefox, Waterfox, LibreWolf, Floorp, Mullvad, Zen…) не знайдено. Файл .xpi у теці «Завантаження» — встановіть його через about:addons → «Встановити додаток з файлу…».",
+    "extensionChooseBrowser": "Виявлено кілька сумісних браузерів. Виберіть, який використати:"
   }
 }
