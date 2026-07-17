@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lygodactylus Mail</title>
+    <link rel="stylesheet" href="result.css" />
+  </head>
+  <body>
+    <header class="header">
+      <img src="../icons/icon-32.png" alt="" width="20" height="20" />
+      <div>
+        <div class="title" id="action-title">Lygodactylus Mail</div>
+        <div class="subtitle" id="source-title"></div>
+      </div>
+    </header>
+
+    <section id="prompt-box" class="prompt-box" hidden>
+      <label for="prompt-input">Votre consigne</label>
+      <textarea id="prompt-input" rows="3" placeholder="Ex. : réécris en plus concis, liste les actions à faire…"></textarea>
+      <button type="button" id="run-btn" class="primary">Lancer</button>
+    </section>
+
+    <pre id="output" class="output" aria-live="polite"></pre>
+    <p id="status" class="status" hidden></p>
+
+    <footer class="actions">
+      <button type="button" id="copy-btn" disabled>Copier</button>
+      <button type="button" id="insert-btn" class="primary" hidden disabled>Insérer dans l’e-mail</button>
+      <button type="button" id="cancel-btn" hidden>Annuler</button>
+    </footer>
+
+    <script src="result.js"></script>
+  </body>
+</html>

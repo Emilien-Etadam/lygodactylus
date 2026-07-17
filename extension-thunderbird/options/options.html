@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lygodactylus Mail — Options</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: system-ui, sans-serif;
+        line-height: 1.5;
+      }
+      body {
+        max-width: 560px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      h1 {
+        font-size: 1.25rem;
+      }
+      label {
+        display: block;
+        margin-top: 16px;
+        font-weight: 600;
+      }
+      input {
+        width: 100%;
+        margin-top: 6px;
+        padding: 8px 10px;
+        font: inherit;
+      }
+      .hint {
+        margin-top: 6px;
+        font-size: 0.9rem;
+        opacity: 0.85;
+      }
+      .status {
+        margin-top: 12px;
+        min-height: 1.2em;
+      }
+      button {
+        margin-top: 20px;
+        padding: 8px 14px;
+        font: inherit;
+        cursor: pointer;
+      }
+      .note {
+        margin-top: 24px;
+        padding: 12px;
+        border-radius: 8px;
+        background: rgba(127, 127, 127, 0.12);
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Lygodactylus Mail — Options</h1>
+
+    <form id="options-form">
+      <label for="server-url">URL du serveur Chat LAN</label>
+      <input id="server-url" type="url" placeholder="http://localhost:19890" required />
+
+      <label for="extension-token">Token extension</label>
+      <input id="extension-token" type="password" autocomplete="off" />
+      <p class="hint">
+        À copier depuis Lygodactylus &gt; Réglages &gt; Chat LAN &gt; Token extension.
+        Ce token donne accès uniquement à l’endpoint <code>/api/web-action</code>.
+      </p>
+
+      <label for="default-target-lang">Langue des réponses / de traduction</label>
+      <input id="default-target-lang" type="text" placeholder="fr" required />
+
+      <button type="submit">Enregistrer</button>
+      <p id="status" class="status" aria-live="polite"></p>
+    </form>
+
+    <div class="note">
+      <strong>Important :</strong> n’utilisez pas le token global du chat LAN ici. Seul le
+      <em>token extension</em> est accepté (même token que l’extension Firefox « Lygodactylus Web »).
+    </div>
+
+    <script src="options.js"></script>
+  </body>
+</html>

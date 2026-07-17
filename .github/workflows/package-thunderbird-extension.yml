@@ -1,0 +1,64 @@
+name: Package Thunderbird Extension
+
+on:
+  push:
+    tags:
+      - 'tbext-v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag de release (tbext-vX.Y.Z) — créé sur le commit courant s'il n'existe pas encore"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  package-extension:
+    name: Lint & package XPI (unsigned)
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Verify tag version matches manifest
+        run: |
+          set -euo pipefail
+          TAG="${RELEASE_TAG}"
+          if [[ ! "$TAG" =~ ^tbext-v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Tag invalide : ${TAG}. Attendu : tbext-vX.Y.Z (ex. tbext-v1.0.0)."
+            exit 1
+          fi
+          TAG_VERSION="${TAG#tbext-v}"
+          MANIFEST_VERSION=$(python3 -c "import json; print(json.load(open('extension-thunderbird/manifest.json'))['version'])")
+          if [ "$TAG_VERSION" != "$MANIFEST_VERSION" ]; then
+            echo "::error::La version du tag (${TAG} → ${TAG_VERSION}) ne correspond pas à extension-thunderbird/manifest.json (version: ${MANIFEST_VERSION})."
+            exit 1
+          fi
+          echo "Version OK : ${TAG_VERSION}"
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 'lts/*'
+
+      # Thunderbird permissions (messagesRead, compose…) are flagged by the
+      # Firefox-oriented linter; keep lint non-blocking.
+      - name: Lint extension (non-blocking)
+        run: npx --yes web-ext@8 lint --source-dir extension-thunderbird/ || true
+
+      - name: Build XPI
+        run: |
+          set -euo pipefail
+          npx --yes web-ext@8 build --source-dir extension-thunderbird/ --artifacts-dir web-ext-artifacts --overwrite-dest
+          # web-ext emits a .zip; publish it as .xpi for Thunderbird install.
+          built=$(ls web-ext-artifacts/*.zip | head -1)
+          mv "$built" "web-ext-artifacts/lygodactylus_mail-${RELEASE_TAG#tbext-v}.xpi"
+          ls -la web-ext-artifacts
+
+      - name: Upload XPI to GitHub Release
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v2
+        with:
+          files: web-ext-artifacts/*.xpi
+          tag_name: ${{ inputs.tag || github.ref_name }}

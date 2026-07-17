@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Extension Thunderbird / Betterbird « Lygodactylus Mail »** (`extension-thunderbird/`) — pendant courrier de l'extension Firefox : résumer, traduire, analyser le ton/l'intention, expliquer et vérifier un e-mail affiché ; suggérer une réponse ou reformuler un brouillon (tons : standard, formel, amical, concis, développé, poli), avec insertion directe dans la fenêtre de composition. Client léger du **Chat LAN** (mêmes URL + token extension) : toute la logique de modèle reste dans Lygodactylus, aucun fournisseur ni clé d'API à configurer dans l'extension, **aucune modification serveur** (actions `custom`/`translate` de `/api/web-action`, CORS `moz-extension://` déjà compatible Thunderbird). Prompts et intégration Thunderbird repris et retravaillés depuis aimailsupport (MIT). Packaging `.xpi` via `package-thunderbird-extension.yml` (tags `tbext-v*`)
+
 ## [6.2.1] - 2026-07-17
 
 ### Changed
