@@ -51,7 +51,7 @@ describe('SessionManager scheduled title generation', () => {
     };
     const fakeManager = {
       withTimeout: vi.fn(async (promise: Promise<string | null>) => await promise),
-      generateTitleWithConfig: vi.fn(async () => '论文检索总结'),
+      generateTitleWithConfig: vi.fn(async () => 'Synthèse articles'),
       generateSessionTitleFromPrompt: proto.generateSessionTitleFromPrompt,
     };
 
@@ -64,7 +64,7 @@ describe('SessionManager scheduled title generation', () => {
     expect(fakeManager.generateTitleWithConfig).toHaveBeenCalledWith(
       buildTitlePrompt('请帮我总结过去一周 Agent 论文')
     );
-    expect(title).toBe('[定时任务] 论文检索总结');
+    expect(title).toBe('[Tâche planifiée] Synthèse articles');
   });
 
   it('falls back to default prompt title when model title generation returns null', async () => {

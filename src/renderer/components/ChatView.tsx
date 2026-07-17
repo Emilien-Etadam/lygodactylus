@@ -284,7 +284,7 @@ export function ChatView() {
     const container = scrollContainerRef.current;
     if (!container) return;
     updateScrollState();
-    // 用户阅读旧消息时，阻止新消息自动滚动打断视线
+    // While the user is reading older messages, avoid auto-scrolling that jumps the viewport
     const onScroll = () => updateScrollState();
     container.addEventListener('scroll', onScroll, { passive: true });
     return () => container.removeEventListener('scroll', onScroll);

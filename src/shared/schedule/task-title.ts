@@ -1,7 +1,8 @@
-const SCHEDULE_TITLE_PREFIX = '[定时任务]';
-const EMPTY_TITLE_FALLBACK = '未命名任务';
+const SCHEDULE_TITLE_PREFIX = '[Tâche planifiée]';
+const EMPTY_TITLE_FALLBACK = 'Tâche sans nom';
 const DEFAULT_SUMMARY_MAX_LENGTH = 48;
-const PREFIX_PATTERN = /^\s*\[定时任务\]\s*/;
+/** Accept the current French prefix and the legacy Chinese prefix when stripping. */
+const PREFIX_PATTERN = /^\s*\[(?:Tâche planifiée|定时任务)\]\s*/;
 
 function normalizeTitlePart(value: string): string {
   return value

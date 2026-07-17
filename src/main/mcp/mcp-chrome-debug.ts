@@ -209,7 +209,7 @@ export async function ensureChromeReady(serverName: string, client: Client): Pro
       logError(`[MCPManager]   1. Chrome failed to start`);
       logError(`[MCPManager]   2. Another process is using port 9222`);
       logError(`[MCPManager]   3. Firewall blocking the port`);
-      throw new Error('Chrome 浏览器未就绪，无法执行此操作: debug port did not become ready');
+      throw new Error('Chrome browser is not ready, cannot perform this action: debug port did not become ready');
     }
 
     log(`[MCPManager] ✓ Chrome debug port is now ready`);
@@ -237,7 +237,7 @@ export async function ensureChromeReady(serverName: string, client: Client): Pro
           logError(`[MCPManager] Last error code: ${ve.code}, message: ${ve.message}`);
           logError(`[MCPManager] The chrome-devtools-mcp server may not be working correctly`);
           throw new Error(
-            'Chrome 浏览器未就绪，无法执行此操作: MCP connection verification failed after 5 attempts'
+            'Chrome browser is not ready, cannot perform this action: MCP connection verification failed after 5 attempts'
           );
         }
       }
@@ -246,6 +246,6 @@ export async function ensureChromeReady(serverName: string, client: Client): Pro
     logError(`[MCPManager] ❌ Failed to start Chrome with debugging`);
     const startErrMsg = startError instanceof Error ? startError.message : String(startError);
     logError(`[MCPManager] Error: ${startErrMsg}`);
-    throw new Error(`Chrome 浏览器未就绪，无法执行此操作: ${startErrMsg}`);
+    throw new Error(`Chrome browser is not ready, cannot perform this action: ${startErrMsg}`);
   }
 }

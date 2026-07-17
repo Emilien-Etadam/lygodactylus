@@ -12,16 +12,16 @@ import { getBackendLanguage, mt, setBackendLanguage } from '../../main/i18n';
 afterEach(() => setBackendLanguage(DEFAULT_BACKEND_LANGUAGE));
 
 describe('backend i18n catalog', () => {
-  const zhKeys = Object.keys(backendCatalog.zh).sort();
+  const frKeys = Object.keys(backendCatalog.fr).sort();
 
-  it('defaults to Chinese (the project is Chinese-first)', () => {
-    expect(DEFAULT_BACKEND_LANGUAGE).toBe('zh');
+  it('defaults to French (the project is French-first)', () => {
+    expect(DEFAULT_BACKEND_LANGUAGE).toBe('fr');
   });
 
-  it('every supported language has exactly the same keys as the zh source', () => {
+  it('every supported language has exactly the same keys as the fr source', () => {
     for (const lang of SUPPORTED_BACKEND_LANGUAGES) {
       expect(backendCatalog[lang], `missing table for ${lang}`).toBeDefined();
-      expect(Object.keys(backendCatalog[lang]).sort(), `key drift in ${lang}`).toEqual(zhKeys);
+      expect(Object.keys(backendCatalog[lang]).sort(), `key drift in ${lang}`).toEqual(frKeys);
     }
   });
 
@@ -44,6 +44,8 @@ describe('mt()', () => {
     expect(mt('startupFailedTitle')).toBe('Lygodactylus failed to start');
     setBackendLanguage('zh');
     expect(mt('startupFailedTitle')).toBe('Lygodactylus 启动失败');
+    setBackendLanguage('fr');
+    expect(mt('startupFailedTitle')).toBe("Échec du démarrage d'Lygodactylus");
   });
 
   it('interpolates {{params}} and leaves none behind', () => {
@@ -67,7 +69,7 @@ describe('mt()', () => {
   it('falls back to the default language for unknown locales', () => {
     setBackendLanguage('xx-YY');
     expect(getBackendLanguage()).toBe(DEFAULT_BACKEND_LANGUAGE);
-    expect(mt('configDefaultSetName')).toBe(backendCatalog.zh.configDefaultSetName);
+    expect(mt('configDefaultSetName')).toBe(backendCatalog.fr.configDefaultSetName);
   });
 
   it('falls back to the key name for an unknown key', () => {

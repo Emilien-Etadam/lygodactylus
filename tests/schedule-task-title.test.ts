@@ -6,16 +6,28 @@ import {
 } from '../src/shared/schedule/task-title';
 
 describe('scheduled task title', () => {
-  it('always prefixes with [定时任务]', () => {
-    expect(buildScheduledTaskTitle('帮我整理今天的待办')).toBe('[定时任务] 帮我整理今天的待办');
+  it('always prefixes with [Tâche planifiée]', () => {
+    expect(buildScheduledTaskTitle('Résumer les tâches du jour')).toBe(
+      '[Tâche planifiée] Résumer les tâches du jour'
+    );
   });
 
   it('normalizes whitespace and line breaks', () => {
-    expect(buildScheduledTaskTitle('  第一行\n\n第二行   第三行  ')).toBe('[定时任务] 第一行 第二行 第三行');
+    expect(buildScheduledTaskTitle('  Première ligne\n\nDeuxième ligne   Troisième ligne  ')).toBe(
+      '[Tâche planifiée] Première ligne Deuxième ligne Troisième ligne'
+    );
   });
 
   it('strips duplicated schedule prefix', () => {
-    expect(buildScheduledTaskTitle('[定时任务] 每日汇总')).toBe('[定时任务] 每日汇总');
+    expect(buildScheduledTaskTitle('[Tâche planifiée] Synthèse quotidienne')).toBe(
+      '[Tâche planifiée] Synthèse quotidienne'
+    );
+  });
+
+  it('strips legacy Chinese schedule prefix when rebuilding titles', () => {
+    expect(buildScheduledTaskTitle('[定时任务] Synthèse quotidienne')).toBe(
+      '[Tâche planifiée] Synthèse quotidienne'
+    );
   });
 
   it('truncates very long prompt summary', () => {
@@ -24,12 +36,12 @@ describe('scheduled task title', () => {
   });
 
   it('falls back for empty prompt', () => {
-    expect(buildScheduledTaskTitle('   ')).toBe('[定时任务] 未命名任务');
+    expect(buildScheduledTaskTitle('   ')).toBe('[Tâche planifiée] Tâche sans nom');
   });
 
   it('builds fallback title from prompt summary', () => {
-    expect(buildScheduledTaskFallbackTitle('请帮我查一下近一周内的 Agent 论文')).toBe(
-      '[定时任务] 请帮我查一下近一周内的 Agent 论文'
-    );
+    expect(
+      buildScheduledTaskFallbackTitle('Recherche des articles Agent de la semaine')
+    ).toBe('[Tâche planifiée] Recherche des articles Agent de la semaine');
   });
 });

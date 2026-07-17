@@ -24,10 +24,8 @@ export async function checkNpxInPath(ctx: MCPManagerEnvContext): Promise<void> {
   const bundledNode = ctx.getBundledNodePath();
   if (!bundledNode) {
     const errorMessage =
-      'Node.js runtime is not available yet. The app will download it on first MCP use.\n' +
-      'Node.js 运行时暂不可用，首次使用 MCP 时将自动下载。\n\n' +
-      'Connect to the internet and retry opening MCP servers.\n' +
-      '请连接网络后重试启动 MCP 服务器。';
+      'Node.js runtime is not available yet. The app will download it on first MCP use.\n\n' +
+      'Connect to the internet and retry opening MCP servers.';
 
     logError('[MCPManager] Bundled Node.js not found');
     throw new Error(errorMessage);

@@ -1,10 +1,10 @@
 // Main-process (backend) localization catalog.
 //
-// Chinese (zh) is the source language and the default — the project owner ships
-// a Chinese-first product, so any key missing from another language falls back
-// to zh (see ./index.ts). The keys below cover the backend strings that surface
-// directly in the UI: model/network error messages, the "no credentials" prompt,
-// the startup-failure dialog, and the default config-set name.
+// French (fr) is the default and ultimate fallback — the product ships
+// French-first. Keys missing from another language fall back to fr
+// (see ./index.ts). The keys below cover backend strings that surface
+// directly in the UI: model/network error messages, the "no credentials"
+// prompt, the startup-failure dialog, and the default config-set name.
 //
 // Placeholders use the {{name}} syntax and are interpolated by mt(); `\n`
 // produces a real newline at runtime, and leading/trailing underscores are
@@ -53,7 +53,7 @@ export const SUPPORTED_BACKEND_LANGUAGES = [
   'ro',
 ] as const;
 
-export const DEFAULT_BACKEND_LANGUAGE = 'zh';
+export const DEFAULT_BACKEND_LANGUAGE = 'fr';
 
 export const backendCatalog: Record<string, BackendMessages> = {
   zh: {

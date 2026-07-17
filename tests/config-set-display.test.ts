@@ -42,11 +42,11 @@ describe('getConfigSetDisplayName', () => {
     };
 
     const t = makeT({
-      'api.defaultConfigSetName': '默认方案',
-      'api.defaultSetTag': '默认',
+      'api.defaultConfigSetName': 'Schéma par défaut',
+      'api.defaultSetTag': 'Défaut',
     });
 
-    expect(getConfigSetDisplayName(set, t)).toBe('默认方案 (默认)');
+    expect(getConfigSetDisplayName(set, t)).toBe('Schéma par défaut (Défaut)');
   });
 
   it('keeps custom config set names unchanged', () => {
