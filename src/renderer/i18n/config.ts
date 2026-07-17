@@ -57,8 +57,9 @@ const initPromise = i18n
         translation: roTranslations,
       },
     },
-    // Default language; Norwegian nb/nn fall back to no
-    fallbackLng: { nb: ['no'], nn: ['no'], default: ['fr'] },
+    // Ultimate fallback when detection fails; active UI language still wins via
+    // LanguageDetector (localStorage / navigator) and is mirrored to the backend.
+    fallbackLng: { nb: ['no'], nn: ['no'], default: ['en'] },
     supportedLngs: ['en', 'zh', 'es', 'fr', 'de', 'it', 'uk', 'pl', 'sv', 'no', 'nl', 'ro'],
     nonExplicitSupportedLngs: true, // Accept regional variants, e.g. es-ES → es, zh-CN → zh
     interpolation: {

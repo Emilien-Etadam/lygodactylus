@@ -1,5 +1,5 @@
 import type { ContentBlock, Message, ServerEvent, Session } from '../../renderer/types';
-import { buildScheduledTaskTitle } from '../../shared/schedule/task-title';
+import { buildScheduledTaskTitle } from '../schedule/schedule-title-i18n';
 import { generateTitleWithPiAi } from '../agent/pi-ai-one-shot';
 import { configStore } from '../config/config-store';
 import type { DatabaseInstance } from '../db/database';

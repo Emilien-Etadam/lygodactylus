@@ -11,6 +11,7 @@ import { validateCommandSandbox } from './command-sandbox-validation';
 import { formatFileSize } from './format-file-size';
 import { runWebSearch } from '../../shared/web-search';
 import { configStore } from '../config/config-store';
+import { mt } from '../i18n';
 
 /**
  * ToolExecutor - Secure tool execution framework
@@ -190,7 +191,7 @@ export class ToolExecutor {
         error instanceof Error &&
         (error.name === 'AbortError' || error.name === 'TimeoutError')
       ) {
-        throw new Error('Request timed out. Check your network connection and try again.');
+        throw new Error(mt('errFetchTimeout'));
       }
       throw error;
     }

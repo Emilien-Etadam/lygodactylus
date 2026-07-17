@@ -3,8 +3,8 @@
 // The renderer owns the active UI language (react-i18next) and mirrors it into
 // the config store as `uiLanguage`; the main process reads that value and calls
 // `setBackendLanguage()` so backend-produced strings (errors, dialogs, the
-// default config-set name) match what the user picked. French is the default
-// and the ultimate fallback — the product is French-first.
+// default config-set name) match what the user picked. English is only the
+// ultimate fallback when the locale is missing or unsupported.
 
 import { backendCatalog, DEFAULT_BACKEND_LANGUAGE, type BackendMessageKey } from './catalog';
 
@@ -38,7 +38,7 @@ export function getBackendLanguage(): string {
 
 /**
  * Translate a backend message key into the active language, falling back to the
- * default (French) table and finally to the key itself. `params` are
+ * default (English) table and finally to the key itself. `params` are
  * interpolated into `{{name}}` placeholders.
  */
 export function mt(key: BackendMessageKey, params?: Record<string, string | number>): string {

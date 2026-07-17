@@ -8,6 +8,7 @@ import { PLATFORM } from './constants.js';
 import { getDisplayConfiguration } from './display.js';
 import { executeAppleScript, executeCommandSafe, executeJXAScript } from './platform-common.js';
 import type { DockItemInfo } from './types.js';
+import { mt } from '../../i18n';
 
 async function pathExists(filePath: string): Promise<boolean> {
   try {
@@ -890,11 +891,7 @@ export async function executeCliclick(
     );
 
     if (/Accessibility privileges not enabled/i.test(result.stderr || '')) {
-      const hint =
-        '\n\nmacOS permissions hint:\n' +
-        '- System Settings → Privacy & Security → Accessibility: allow Lygodactylus\n' +
-        '- If launched from a terminal: allow Terminal/iTerm\n' +
-        '- After granting permission, restart Lygodactylus and try again\n';
+      const hint = mt('hintMacosAccessibility');
       throw new Error(
         `cliclick cannot control UI because Accessibility permission is not enabled.${hint}`
       );
@@ -903,10 +900,7 @@ export async function executeCliclick(
     return result;
   } catch (error: unknown) {
     const baseMessage = error instanceof Error ? error.message : String(error);
-    const hint =
-      '\n\nmacOS permissions hint:\n' +
-      '- System Settings → Privacy & Security → Accessibility: allow Lygodactylus\n' +
-      '- System Settings → Privacy & Security → Automation: allow Lygodactylus to control “System Events”\n';
+    const hint = mt('hintMacosAccessibilityAutomation');
     throw new Error(`${baseMessage}${hint}`);
   }
 }

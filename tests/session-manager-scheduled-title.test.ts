@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('electron', () => {
   const electron = {
@@ -41,17 +41,22 @@ import {
   buildTitlePrompt,
   getDefaultTitleFromPrompt,
 } from '../src/main/session/session-title-utils';
-import { buildScheduledTaskTitle } from '../src/shared/schedule/task-title';
+import { buildScheduledTaskTitle } from '../src/main/schedule/schedule-title-i18n';
+import { setBackendLanguage } from '../src/main/i18n';
+import { DEFAULT_BACKEND_LANGUAGE } from '../src/main/i18n/catalog';
 
 describe('SessionManager scheduled title generation', () => {
+  afterEach(() => setBackendLanguage(DEFAULT_BACKEND_LANGUAGE));
+
   it('uses session title generation flow and prefixes scheduled title', async () => {
+    setBackendLanguage('en');
     const proto = SessionManager.prototype as unknown as {
       generateSessionTitleFromPrompt(prompt: string, cwd?: string): Promise<string>;
       generateScheduledTaskTitle(prompt: string, cwd?: string): Promise<string>;
     };
     const fakeManager = {
       withTimeout: vi.fn(async (promise: Promise<string | null>) => await promise),
-      generateTitleWithConfig: vi.fn(async () => 'Synthèse articles'),
+      generateTitleWithConfig: vi.fn(async () => 'Paper summary'),
       generateSessionTitleFromPrompt: proto.generateSessionTitleFromPrompt,
     };
 
@@ -64,10 +69,11 @@ describe('SessionManager scheduled title generation', () => {
     expect(fakeManager.generateTitleWithConfig).toHaveBeenCalledWith(
       buildTitlePrompt('请帮我总结过去一周 Agent 论文')
     );
-    expect(title).toBe('[Tâche planifiée] Synthèse articles');
+    expect(title).toBe('[Scheduled Task] Paper summary');
   });
 
   it('falls back to default prompt title when model title generation returns null', async () => {
+    setBackendLanguage('en');
     const proto = SessionManager.prototype as unknown as {
       generateSessionTitleFromPrompt(prompt: string, cwd?: string): Promise<string>;
       generateScheduledTaskTitle(prompt: string, cwd?: string): Promise<string>;

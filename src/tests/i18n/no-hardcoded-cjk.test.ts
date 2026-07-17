@@ -15,7 +15,6 @@ const ALLOWLIST_SUFFIXES = [
   '/main/mcp/gui-operate/click-history.ts',
   '/main/memory/memory-eval-harness.ts',
   '/renderer/components/settings/SettingsGeneral.tsx',
-  '/shared/schedule/task-title.ts', // legacy Chinese prefix in strip regex only
 ];
 
 const CODE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.json', '.html']);

@@ -12,16 +12,16 @@ import { getBackendLanguage, mt, setBackendLanguage } from '../../main/i18n';
 afterEach(() => setBackendLanguage(DEFAULT_BACKEND_LANGUAGE));
 
 describe('backend i18n catalog', () => {
-  const frKeys = Object.keys(backendCatalog.fr).sort();
+  const enKeys = Object.keys(backendCatalog.en).sort();
 
-  it('defaults to French (the project is French-first)', () => {
-    expect(DEFAULT_BACKEND_LANGUAGE).toBe('fr');
+  it('defaults to English as the ultimate fallback (active language still follows the user)', () => {
+    expect(DEFAULT_BACKEND_LANGUAGE).toBe('en');
   });
 
-  it('every supported language has exactly the same keys as the fr source', () => {
+  it('every supported language has exactly the same keys as the en source', () => {
     for (const lang of SUPPORTED_BACKEND_LANGUAGES) {
       expect(backendCatalog[lang], `missing table for ${lang}`).toBeDefined();
-      expect(Object.keys(backendCatalog[lang]).sort(), `key drift in ${lang}`).toEqual(frKeys);
+      expect(Object.keys(backendCatalog[lang]).sort(), `key drift in ${lang}`).toEqual(enKeys);
     }
   });
 
@@ -31,6 +31,7 @@ describe('backend i18n catalog', () => {
       expect(table.errBadRequest, `${lang} errBadRequest`).toContain('{{error}}');
       expect(table.startupFailedBody, `${lang} startupFailedBody`).toContain('{{message}}');
       expect(table.configFallbackSetName, `${lang} configFallbackSetName`).toContain('{{index}}');
+      expect(table.errChromeNotReady, `${lang} errChromeNotReady`).toContain('{{detail}}');
       expect(table.errCheckConfigHint.startsWith('_'), `${lang} hint italics`).toBe(true);
       expect(table.errCheckConfigHint.endsWith('_'), `${lang} hint italics`).toBe(true);
     }
@@ -69,7 +70,7 @@ describe('mt()', () => {
   it('falls back to the default language for unknown locales', () => {
     setBackendLanguage('xx-YY');
     expect(getBackendLanguage()).toBe(DEFAULT_BACKEND_LANGUAGE);
-    expect(mt('configDefaultSetName')).toBe(backendCatalog.fr.configDefaultSetName);
+    expect(mt('configDefaultSetName')).toBe(backendCatalog.en.configDefaultSetName);
   });
 
   it('falls back to the key name for an unknown key', () => {

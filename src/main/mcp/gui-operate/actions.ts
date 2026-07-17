@@ -28,6 +28,7 @@ import {
   updateScreenshotCache,
 } from './state.js';
 import type { ClickType, InputMethod, Region, ScrollDirection } from './types.js';
+import { mt } from '../../i18n';
 import {
   windowsGetMousePosition,
   windowsMoveMouse,
@@ -617,10 +618,7 @@ export async function takeScreenshot(
     await executeCommandSafe('/usr/sbin/screencapture', screencaptureArgs);
   } catch (error: unknown) {
     const baseMessage = error instanceof Error ? error.message : String(error);
-    const hint =
-      '\n\nmacOS permissions hint:\n' +
-      '- System Settings → Privacy & Security → Screen Recording: allow Lygodactylus\n' +
-      '- Restart the app and try again\n';
+    const hint = mt('hintMacosScreenRecording');
     throw new Error(`${baseMessage}${hint}`);
   }
 
