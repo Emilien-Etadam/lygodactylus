@@ -19,7 +19,8 @@
     "install": "Install",
     "optional": "optional",
     "appLogoAlt": "Lygodactylus logo",
-    "pastedImageAlt": "Pasted {{index}}"
+    "pastedImageAlt": "Pasted {{index}}",
+    "copy": "Copy"
   },
   "welcome": {
     "title": "How can I help you today?",
@@ -434,8 +435,11 @@
         "ollama_no_models_loaded": "The endpoint is reachable, but it did not return any models. Pull a model in Ollama first.",
         "ollama_model_not_listed": "Model {{model}} is not in the endpoint model list. Pick a detected model or switch to manual entry.",
         "ollama_model_loading": "Model {{model}} may still be loading. Try the deep check again in a moment.",
-        "model_cold_start": "The model may still be loading into GPU/CPU memory. Large models (7B+) can take 30–120 seconds on first use. Try again shortly."
-      }
+        "model_cold_start": "The model may still be loading into GPU/CPU memory. Large models (7B+) can take 30–120 seconds on first use. Try again shortly.",
+        "auth_probe_deferred": "Authentication probe deferred; continuing with model verification.",
+        "models_list_not_supported": "This provider does not support the models list endpoint. Continuing with model verification."
+      },
+      "skipped": "Diagnostics skipped: another run is already in progress."
     }
   },
   "window": {
@@ -596,7 +600,8 @@
     "commandRequired": "Command is required",
     "urlRequired": "URL is required",
     "toolCount": "{{count}} tools",
-    "callCount": "{{count}} calls"
+    "callCount": "{{count}} calls",
+    "disabled": "Disabled"
   },
   "credentials": {
     "envVars": "Environment Variables",

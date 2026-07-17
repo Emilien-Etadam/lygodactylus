@@ -19,7 +19,8 @@
     "install": "Instalar",
     "optional": "opcional",
     "appLogoAlt": "Logotipo de Lygodactylus",
-    "pastedImageAlt": "Pegado {{index}}"
+    "pastedImageAlt": "Pegado {{index}}",
+    "copy": "Copiar"
   },
   "welcome": {
     "title": "¿Cómo puedo ayudarte hoy?",
@@ -404,8 +405,11 @@
         "ollama_no_models_loaded": "El endpoint es accesible, pero no devolvió ningún modelo. Descarga primero un modelo en Ollama.",
         "ollama_model_not_listed": "El modelo {{model}} no está en la lista de modelos del endpoint. Elige un modelo detectado o cambia a la entrada manual.",
         "ollama_model_loading": "Es posible que el modelo {{model}} todavía se esté cargando. Vuelve a intentar la comprobación profunda en un momento.",
-        "model_cold_start": "Es posible que el modelo todavía se esté cargando en la memoria de la GPU/CPU. Los modelos grandes (7B+) pueden tardar de 30 a 120 segundos en el primer uso. Inténtalo de nuevo en breve."
-      }
+        "model_cold_start": "Es posible que el modelo todavía se esté cargando en la memoria de la GPU/CPU. Los modelos grandes (7B+) pueden tardar de 30 a 120 segundos en el primer uso. Inténtalo de nuevo en breve.",
+        "auth_probe_deferred": "Sondeo de autenticación aplazado; se continúa con la verificación del modelo.",
+        "models_list_not_supported": "Este proveedor no admite el endpoint de lista de modelos. Se continúa con la verificación del modelo."
+      },
+      "skipped": "Diagnóstico omitido: ya hay otra ejecución en curso."
     }
   },
   "window": {
@@ -566,7 +570,8 @@
     "commandRequired": "Se requiere el comando",
     "urlRequired": "Se requiere la URL",
     "toolCount": "{{count}} herramientas",
-    "callCount": "{{count}} llamadas"
+    "callCount": "{{count}} llamadas",
+    "disabled": "Desactivado"
   },
   "credentials": {
     "envVars": "Variables de entorno",

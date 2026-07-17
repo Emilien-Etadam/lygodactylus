@@ -19,7 +19,8 @@
     "install": "Installer",
     "optional": "valgfritt",
     "appLogoAlt": "Lygodactylus-logo",
-    "pastedImageAlt": "Limt inn {{index}}"
+    "pastedImageAlt": "Limt inn {{index}}",
+    "copy": "Kopier"
   },
   "welcome": {
     "title": "Hvordan kan jeg hjelpe deg i dag?",
@@ -404,8 +405,11 @@
         "ollama_no_models_loaded": "Endepunktet er tilgjengelig, men det returnerte ingen modeller. Hent en modell i Ollama først.",
         "ollama_model_not_listed": "Modellen {{model}} er ikke i endepunktets modelliste. Velg en oppdaget modell eller bytt til manuell inntasting.",
         "ollama_model_loading": "Modellen {{model}} lastes kanskje fortsatt. Prøv dypsjekken igjen om litt.",
-        "model_cold_start": "Modellen lastes kanskje fortsatt inn i GPU-/CPU-minnet. Store modeller (7B+) kan ta 30–120 sekunder ved første bruk. Prøv igjen snart."
-      }
+        "model_cold_start": "Modellen lastes kanskje fortsatt inn i GPU-/CPU-minnet. Store modeller (7B+) kan ta 30–120 sekunder ved første bruk. Prøv igjen snart.",
+        "auth_probe_deferred": "Autentiseringssjekk utsatt; fortsetter med modellverifisering.",
+        "models_list_not_supported": "Denne leverandøren støtter ikke models list-endepunktet. Fortsetter med modellverifisering."
+      },
+      "skipped": "Diagnostikk hoppet over: en annen kjøring pågår allerede."
     }
   },
   "window": {
@@ -566,7 +570,8 @@
     "commandRequired": "Kommando er påkrevd",
     "urlRequired": "URL er påkrevd",
     "toolCount": "{{count}} verktøy",
-    "callCount": "{{count}} kall"
+    "callCount": "{{count}} kall",
+    "disabled": "Deaktivert"
   },
   "credentials": {
     "envVars": "Miljøvariabler",

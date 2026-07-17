@@ -19,7 +19,8 @@
     "install": "安装",
     "optional": "可选",
     "appLogoAlt": "Lygodactylus 标志",
-    "pastedImageAlt": "粘贴图片 {{index}}"
+    "pastedImageAlt": "粘贴图片 {{index}}",
+    "copy": "复制"
   },
   "welcome": {
     "title": "今天我能为您做些什么？",
@@ -404,8 +405,11 @@
         "ollama_no_models_loaded": "端点可访问，但当前没有返回任何可选模型，请先在 Ollama 中拉取模型。",
         "ollama_model_not_listed": "当前模型 {{model}} 不在端点返回的模型列表中，请从列表重新选择或改用手动输入。",
         "ollama_model_loading": "模型 {{model}} 可能仍在加载中，稍后再试深度验证。",
-        "model_cold_start": "模型可能仍在加载到 GPU/CPU 内存中。大型模型（7B+）首次使用可能需要 30–120 秒，请稍后重试。"
-      }
+        "model_cold_start": "模型可能仍在加载到 GPU/CPU 内存中。大型模型（7B+）首次使用可能需要 30–120 秒，请稍后重试。",
+        "auth_probe_deferred": "认证探测已推迟，继续进行模型验证。",
+        "models_list_not_supported": "该提供商不支持模型列表接口，继续进行模型验证。"
+      },
+      "skipped": "已跳过诊断：另有诊断正在进行中。"
     }
   },
   "window": {
@@ -566,7 +570,8 @@
     "commandRequired": "命令不能为空",
     "urlRequired": "URL 不能为空",
     "toolCount": "{{count}} 个工具",
-    "callCount": "{{count}} 次调用"
+    "callCount": "{{count}} 次调用",
+    "disabled": "已停用"
   },
   "credentials": {
     "envVars": "环境变量",
