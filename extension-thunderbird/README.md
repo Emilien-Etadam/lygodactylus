@@ -55,6 +55,12 @@ En cas d’erreur **401**, vérifiez que vous avez bien collé le *token extensi
 
 ## Installation
 
+### Depuis l’application (recommandé)
+
+Dans Lygodactylus → **Réglages** → **Chat LAN**, bloc « Extension Thunderbird » → **Installer dans Thunderbird**. L’app télécharge le dernier `.xpi` (`tbext-v*`), détecte Thunderbird / Betterbird et l’ouvre pour l’installation ; le **token extension** est copié automatiquement. Voir la note sur la signature ci-dessous : si l’installation est refusée, passez `xpinstall.signatures.required` à `false` ou utilisez une version signée.
+
+### Manuellement
+
 Le `.xpi` de l’extension est attaché aux [releases GitHub](https://github.com/Emilien-Etadam/lygodactylus/releases) (tags `tbext-v*`).
 
 ### Installation permanente

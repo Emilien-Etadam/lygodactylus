@@ -144,7 +144,13 @@
     "extensionInstallErrorNoRelease": "Aucun module signé (.xpi) trouvé dans les releases GitHub.",
     "extensionInstallErrorDownload": "Échec du téléchargement du module. Vérifiez la connexion réseau puis réessayez.",
     "extensionInstallErrorFirefoxNotFound": "Aucun navigateur compatible (Firefox, Waterfox, LibreWolf, Floorp, Mullvad, Zen…) n’a été trouvé. Le fichier .xpi est dans votre dossier Téléchargements — installez-le via about:addons → « Installer un module depuis un fichier… ».",
-    "extensionChooseBrowser": "Plusieurs navigateurs compatibles détectés. Choisissez celui à utiliser :"
+    "extensionChooseBrowser": "Plusieurs navigateurs compatibles détectés. Choisissez celui à utiliser :",
+    "extensionTbInstallTitle": "Extension Thunderbird « Lygodactylus Mail »",
+    "extensionTbInstallHint": "Télécharge le dernier module e-mail (.xpi) depuis les releases GitHub et l'ouvre dans Thunderbird ou Betterbird. Résumé, traduction, analyse d'e-mails et suggestions de réponses via ce même Chat LAN ; le token extension est copié automatiquement.",
+    "extensionTbInstallButton": "Installer dans Thunderbird",
+    "extensionTbInstallStarted": "Thunderbird va s'ouvrir : confirmez l'ajout du module. Le token extension a été copié — collez-le dans les options du module.",
+    "extensionTbInstallErrorNotFound": "Thunderbird ou Betterbird est introuvable. Le fichier .xpi est dans votre dossier Téléchargements — installez-le via Modules complémentaires → « Installer un module depuis un fichier… ».",
+    "extensionTbSignatureNote": "Thunderbird exige des modules signés : si l'installation est refusée, passez xpinstall.signatures.required à false dans about:config, ou utilisez une version signée (ATN)."
   },
   "memory": {
     "title": "Mémoire",

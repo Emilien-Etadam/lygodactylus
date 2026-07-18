@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.3.0] - 2026-07-17
+
 ### Added
 
 - **Extension Thunderbird / Betterbird « Lygodactylus Mail »** (`extension-thunderbird/`) — pendant courrier de l'extension Firefox : résumer, traduire, analyser le ton/l'intention, expliquer et vérifier un e-mail affiché ; suggérer une réponse ou reformuler un brouillon (tons : standard, formel, amical, concis, développé, poli), avec insertion directe dans la fenêtre de composition. Client léger du **Chat LAN** (mêmes URL + token extension) : toute la logique de modèle reste dans Lygodactylus, aucun fournisseur ni clé d'API à configurer dans l'extension, **aucune modification serveur** (actions `custom`/`translate` de `/api/web-action`, CORS `moz-extension://` déjà compatible Thunderbird). Prompts et intégration Thunderbird repris et retravaillés depuis aimailsupport (MIT). Packaging `.xpi` via `package-thunderbird-extension.yml` (tags `tbext-v*`)
+- **Installation de l'extension Thunderbird depuis l'app** : nouveau bloc « Extension Thunderbird » dans Réglages → Chat LAN — télécharge le dernier `.xpi` (`tbext-v*`), détecte Thunderbird / Betterbird (Windows, macOS, Linux) et l'ouvre pour l'installation, avec copie automatique du token extension. Moteur d'installation généralisé et partagé avec le bouton Firefox (`src/main/browser-extension-installer.ts`). Note UI : Thunderbird exige une signature — l'app rappelle d'utiliser `xpinstall.signatures.required=false` ou une version signée ATN si l'installation est refusée
+
+### Changed
+
+- **Installeur d'extension refactorisé** : la logique commune (récupération de la release, détection multi-navigateurs par plateforme, ouverture du `.xpi`) est extraite dans un moteur générique ; `firefox-extension-installer.ts` et `thunderbird-extension-installer.ts` n'en sont plus que des configurations (préfixe de tag + catalogue de navigateurs)
 
 ## [6.2.1] - 2026-07-17
 

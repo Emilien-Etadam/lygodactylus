@@ -364,6 +364,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     }> => ipcRenderer.invoke('chatLan.regenerateExtensionToken'),
     installFirefoxExtension: (browserId?: string): Promise<FirefoxExtensionInstallResult> =>
       ipcRenderer.invoke('chatLan.installFirefoxExtension', browserId),
+    installThunderbirdExtension: (browserId?: string): Promise<FirefoxExtensionInstallResult> =>
+      ipcRenderer.invoke('chatLan.installThunderbirdExtension', browserId),
   },
 
   memory: {
@@ -622,6 +624,7 @@ declare global {
           status: { running: boolean; port: number; enabled: boolean; urls: string[] };
         }>;
         installFirefoxExtension: (browserId?: string) => Promise<FirefoxExtensionInstallResult>;
+        installThunderbirdExtension: (browserId?: string) => Promise<FirefoxExtensionInstallResult>;
       };
       memory: {
         getOverview: (cwd?: string) => Promise<MemoryOverview>;

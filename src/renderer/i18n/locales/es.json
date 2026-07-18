@@ -1106,6 +1106,12 @@
     "extensionInstallErrorNoRelease": "No se encontró ningún complemento firmado (.xpi) en las releases de GitHub.",
     "extensionInstallErrorDownload": "Error al descargar el complemento. Compruebe la conexión de red e inténtelo de nuevo.",
     "extensionInstallErrorFirefoxNotFound": "No se encontró ningún navegador compatible (Firefox, Waterfox, LibreWolf, Floorp, Mullvad, Zen…). El archivo .xpi está en su carpeta de Descargas: instálelo desde about:addons → «Instalar complemento desde archivo…».",
-    "extensionChooseBrowser": "Se detectaron varios navegadores compatibles. Elija cuál usar:"
+    "extensionChooseBrowser": "Se detectaron varios navegadores compatibles. Elija cuál usar:",
+    "extensionTbInstallTitle": "Extensión de Thunderbird «Lygodactylus Mail»",
+    "extensionTbInstallHint": "Descarga el último complemento de correo (.xpi) desde las releases de GitHub y lo abre en Thunderbird o Betterbird. Resumir, traducir, analizar correos y sugerir respuestas mediante el mismo Chat LAN; el token de extensión se copia automáticamente.",
+    "extensionTbInstallButton": "Instalar en Thunderbird",
+    "extensionTbInstallStarted": "Thunderbird se abrirá: confirme la adición del complemento. El token de extensión se ha copiado; péguelo en las opciones del complemento.",
+    "extensionTbInstallErrorNotFound": "No se encontró Thunderbird ni Betterbird. El archivo .xpi está en su carpeta de Descargas: instálelo desde Complementos → «Instalar complemento desde archivo…».",
+    "extensionTbSignatureNote": "Thunderbird exige complementos firmados: si se rechaza la instalación, ponga xpinstall.signatures.required en false en about:config, o use una versión firmada (ATN)."
   }
 }

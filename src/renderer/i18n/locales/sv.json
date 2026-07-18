@@ -1106,6 +1106,12 @@
     "extensionInstallErrorNoRelease": "Inget signerat tillägg (.xpi) hittades i GitHub-releaserna.",
     "extensionInstallErrorDownload": "Det gick inte att ladda ner tillägget. Kontrollera nätverksanslutningen och försök igen.",
     "extensionInstallErrorFirefoxNotFound": "Ingen kompatibel webbläsare (Firefox, Waterfox, LibreWolf, Floorp, Mullvad, Zen…) hittades. .xpi-filen finns i mappen Hämtningar — installera den via about:addons → ”Installera tillägg från fil…”.",
-    "extensionChooseBrowser": "Flera kompatibla webbläsare hittades. Välj vilken som ska användas:"
+    "extensionChooseBrowser": "Flera kompatibla webbläsare hittades. Välj vilken som ska användas:",
+    "extensionTbInstallTitle": "Thunderbird-tillägget ”Lygodactylus Mail”",
+    "extensionTbInstallHint": "Laddar ner det senaste e-posttillägget (.xpi) från GitHub-releaserna och öppnar det i Thunderbird eller Betterbird. Sammanfatta, översätt, analysera e-post och föreslå svar via samma Chat LAN; tilläggstoken kopieras automatiskt.",
+    "extensionTbInstallButton": "Installera i Thunderbird",
+    "extensionTbInstallStarted": "Thunderbird öppnas — bekräfta att tillägget läggs till. Tilläggstoken har kopierats: klistra in den i tilläggets inställningar.",
+    "extensionTbInstallErrorNotFound": "Thunderbird eller Betterbird hittades inte. .xpi-filen finns i mappen Hämtningar — installera den via Tillägg → ”Installera tillägg från fil…”.",
+    "extensionTbSignatureNote": "Thunderbird kräver signerade tillägg: om installationen nekas, sätt xpinstall.signatures.required till false i about:config, eller använd en ATN-signerad version."
   }
 }
