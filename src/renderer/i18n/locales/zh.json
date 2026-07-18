@@ -1106,6 +1106,12 @@
     "extensionInstallErrorNoRelease": "在 GitHub Releases 中未找到已签名的扩展（.xpi）。",
     "extensionInstallErrorDownload": "扩展下载失败。请检查网络连接后重试。",
     "extensionInstallErrorFirefoxNotFound": "未找到兼容的浏览器（Firefox、Waterfox、LibreWolf、Floorp、Mullvad、Zen…）。.xpi 文件已下载到「下载」文件夹——请通过 about:addons →「从文件安装附加组件…」安装。",
-    "extensionChooseBrowser": "检测到多个兼容的浏览器。请选择要使用的浏览器："
+    "extensionChooseBrowser": "检测到多个兼容的浏览器。请选择要使用的浏览器：",
+    "extensionTbInstallTitle": "Thunderbird 扩展「Lygodactylus Mail」",
+    "extensionTbInstallHint": "从 GitHub Releases 下载最新的邮件扩展（.xpi）并在 Thunderbird 或 Betterbird 中打开。通过同一个 Chat LAN 进行邮件摘要、翻译、分析和回复建议；扩展令牌会自动复制。",
+    "extensionTbInstallButton": "在 Thunderbird 中安装",
+    "extensionTbInstallStarted": "Thunderbird 即将打开——请确认添加扩展。扩展令牌已复制：请将其粘贴到扩展选项中。",
+    "extensionTbInstallErrorNotFound": "未找到 Thunderbird 或 Betterbird。.xpi 文件已下载到「下载」文件夹——请通过 附加组件 →「从文件安装附加组件…」安装。",
+    "extensionTbSignatureNote": "Thunderbird 要求扩展经过签名：如果安装被拒绝，请在 about:config 中将 xpinstall.signatures.required 设为 false，或使用经 ATN 签名的版本。"
   }
 }

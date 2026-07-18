@@ -1106,6 +1106,12 @@
     "extensionInstallErrorNoRelease": "Nu s-a găsit niciun supliment semnat (.xpi) în release-urile GitHub.",
     "extensionInstallErrorDownload": "Descărcarea suplimentului a eșuat. Verificați conexiunea la rețea și încercați din nou.",
     "extensionInstallErrorFirefoxNotFound": "Nu a fost găsit niciun browser compatibil (Firefox, Waterfox, LibreWolf, Floorp, Mullvad, Zen…). Fișierul .xpi este în dosarul Descărcări — instalați-l prin about:addons → „Instalează un supliment din fișier…”.",
-    "extensionChooseBrowser": "Au fost detectate mai multe browsere compatibile. Alegeți pe care să îl folosiți:"
+    "extensionChooseBrowser": "Au fost detectate mai multe browsere compatibile. Alegeți pe care să îl folosiți:",
+    "extensionTbInstallTitle": "Extensia Thunderbird „Lygodactylus Mail”",
+    "extensionTbInstallHint": "Descarcă cel mai recent supliment de e-mail (.xpi) din release-urile GitHub și îl deschide în Thunderbird sau Betterbird. Rezumare, traducere, analiză de e-mailuri și sugestii de răspuns prin același Chat LAN; tokenul extensiei este copiat automat.",
+    "extensionTbInstallButton": "Instalează în Thunderbird",
+    "extensionTbInstallStarted": "Thunderbird se va deschide — confirmați adăugarea suplimentului. Tokenul extensiei a fost copiat: lipiți-l în opțiunile suplimentului.",
+    "extensionTbInstallErrorNotFound": "Thunderbird sau Betterbird nu a fost găsit. Fișierul .xpi este în dosarul Descărcări — instalați-l prin Suplimente → „Instalează un supliment din fișier…”.",
+    "extensionTbSignatureNote": "Thunderbird necesită suplimente semnate: dacă instalarea este respinsă, setați xpinstall.signatures.required pe false în about:config sau folosiți o versiune semnată (ATN)."
   }
 }

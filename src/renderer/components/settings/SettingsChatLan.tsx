@@ -31,6 +31,11 @@ export function SettingsChatLan() {
   const [isInstallingExtension, setIsInstallingExtension] = useState(false);
   const [extensionInstallError, setExtensionInstallError] = useState<string | null>(null);
   const [browserChoices, setBrowserChoices] = useState<{ id: string; name: string }[] | null>(null);
+  const [isInstallingTb, setIsInstallingTb] = useState(false);
+  const [tbInstallError, setTbInstallError] = useState<string | null>(null);
+  const [tbBrowserChoices, setTbBrowserChoices] = useState<{ id: string; name: string }[] | null>(
+    null
+  );
 
   const refresh = useCallback(async () => {
     const [nextConfig, nextStatus] = await Promise.all([
@@ -131,37 +136,50 @@ export function SettingsChatLan() {
     setMessage(t('chatLan.extensionTokenCopied'));
   };
 
-  const installFirefoxExtension = async (browserId?: string) => {
-    setIsInstallingExtension(true);
+  const runInstall = async (target: 'firefox' | 'thunderbird', browserId?: string) => {
+    const isFirefox = target === 'firefox';
+    const invoke = isFirefox
+      ? window.electronAPI.chatLan.installFirefoxExtension
+      : window.electronAPI.chatLan.installThunderbirdExtension;
+    const setInstalling = isFirefox ? setIsInstallingExtension : setIsInstallingTb;
+    const setError = isFirefox ? setExtensionInstallError : setTbInstallError;
+    const setChoices = isFirefox ? setBrowserChoices : setTbBrowserChoices;
+    const notFoundKey = isFirefox
+      ? 'chatLan.extensionInstallErrorFirefoxNotFound'
+      : 'chatLan.extensionTbInstallErrorNotFound';
+    const startedKey = isFirefox
+      ? 'chatLan.extensionInstallStarted'
+      : 'chatLan.extensionTbInstallStarted';
+
+    setInstalling(true);
     setMessage(null);
-    setExtensionInstallError(null);
-    setBrowserChoices(null);
+    setError(null);
+    setChoices(null);
     try {
-      const result = await window.electronAPI.chatLan.installFirefoxExtension(browserId);
+      const result = await invoke(browserId);
       if (result.ok) {
         if (config?.extensionToken) {
           await navigator.clipboard.writeText(config.extensionToken);
         }
-        setMessage(t('chatLan.extensionInstallStarted'));
+        setMessage(t(startedKey));
       } else if (result.error === 'choose-browser') {
-        setBrowserChoices(result.browsers ?? []);
+        setChoices(result.browsers ?? []);
       } else if (result.error === 'firefox-not-found') {
-        setExtensionInstallError(
-          result.detail
-            ? `${t('chatLan.extensionInstallErrorFirefoxNotFound')} (${result.detail})`
-            : t('chatLan.extensionInstallErrorFirefoxNotFound')
-        );
+        setError(result.detail ? `${t(notFoundKey)} (${result.detail})` : t(notFoundKey));
       } else if (result.error === 'no-release') {
-        setExtensionInstallError(t('chatLan.extensionInstallErrorNoRelease'));
+        setError(t('chatLan.extensionInstallErrorNoRelease'));
       } else {
-        setExtensionInstallError(t('chatLan.extensionInstallErrorDownload'));
+        setError(t('chatLan.extensionInstallErrorDownload'));
       }
     } catch {
-      setExtensionInstallError(t('chatLan.extensionInstallErrorDownload'));
+      setError(t('chatLan.extensionInstallErrorDownload'));
     } finally {
-      setIsInstallingExtension(false);
+      setInstalling(false);
     }
   };
+
+  const installFirefoxExtension = (browserId?: string) => runInstall('firefox', browserId);
+  const installThunderbirdExtension = (browserId?: string) => runInstall('thunderbird', browserId);
 
   if (!config) {
     return (
@@ -318,6 +336,45 @@ export function SettingsChatLan() {
         {extensionInstallError && (
           <p className="text-xs text-red-500 break-all">{extensionInstallError}</p>
         )}
+      </div>
+
+      <div className="rounded-lg border border-border-muted bg-background-secondary/50 p-3 space-y-2 max-w-xl">
+        <p className="text-xs font-medium text-text-primary flex items-center gap-1.5">
+          <Puzzle className="w-3.5 h-3.5" />
+          {t('chatLan.extensionTbInstallTitle')}
+        </p>
+        <p className="text-[11px] text-text-muted">{t('chatLan.extensionTbInstallHint')}</p>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={isInstallingTb}
+            onClick={() => void installThunderbirdExtension()}
+            className="px-3 py-2 rounded-lg bg-accent text-white text-sm font-medium flex items-center gap-2"
+          >
+            {isInstallingTb && <Loader2 className="w-4 h-4 animate-spin" />}
+            {t('chatLan.extensionTbInstallButton')}
+          </button>
+        </div>
+        <p className="text-[11px] text-text-muted">{t('chatLan.extensionTbSignatureNote')}</p>
+        {tbBrowserChoices && tbBrowserChoices.length > 0 && (
+          <div className="space-y-2 pt-1">
+            <p className="text-[11px] text-text-muted">{t('chatLan.extensionChooseBrowser')}</p>
+            <div className="flex flex-wrap gap-2">
+              {tbBrowserChoices.map((client) => (
+                <button
+                  key={client.id}
+                  type="button"
+                  disabled={isInstallingTb}
+                  onClick={() => void installThunderbirdExtension(client.id)}
+                  className="px-3 py-1.5 rounded-lg border border-border text-sm text-text-primary"
+                >
+                  {client.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {tbInstallError && <p className="text-xs text-red-500 break-all">{tbInstallError}</p>}
       </div>
 
       <div className="grid gap-2 max-w-xl">

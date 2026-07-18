@@ -1106,6 +1106,12 @@
     "extensionInstallErrorNoRelease": "Nie znaleziono podpisanego dodatku (.xpi) w wydaniach GitHub.",
     "extensionInstallErrorDownload": "Nie udało się pobrać dodatku. Sprawdź połączenie sieciowe i spróbuj ponownie.",
     "extensionInstallErrorFirefoxNotFound": "Nie znaleziono kompatybilnej przeglądarki (Firefox, Waterfox, LibreWolf, Floorp, Mullvad, Zen…). Plik .xpi jest w folderze Pobrane — zainstaluj go przez about:addons → „Zainstaluj dodatek z pliku…”.",
-    "extensionChooseBrowser": "Wykryto kilka kompatybilnych przeglądarek. Wybierz, której użyć:"
+    "extensionChooseBrowser": "Wykryto kilka kompatybilnych przeglądarek. Wybierz, której użyć:",
+    "extensionTbInstallTitle": "Rozszerzenie Thunderbird „Lygodactylus Mail”",
+    "extensionTbInstallHint": "Pobiera najnowszy dodatek pocztowy (.xpi) z wydań GitHub i otwiera go w Thunderbird lub Betterbird. Podsumowywanie, tłumaczenie, analiza e-maili i sugestie odpowiedzi przez ten sam Chat LAN; token rozszerzenia jest kopiowany automatycznie.",
+    "extensionTbInstallButton": "Zainstaluj w Thunderbird",
+    "extensionTbInstallStarted": "Thunderbird się otworzy — potwierdź dodanie dodatku. Token rozszerzenia został skopiowany: wklej go w opcjach dodatku.",
+    "extensionTbInstallErrorNotFound": "Nie znaleziono Thunderbird ani Betterbird. Plik .xpi jest w folderze Pobrane — zainstaluj go przez Dodatki → „Zainstaluj dodatek z pliku…”.",
+    "extensionTbSignatureNote": "Thunderbird wymaga podpisanych dodatków: jeśli instalacja zostanie odrzucona, ustaw xpinstall.signatures.required na false w about:config lub użyj wersji podpisanej (ATN)."
   }
 }

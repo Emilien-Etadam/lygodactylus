@@ -1106,6 +1106,12 @@
     "extensionInstallErrorNoRelease": "Kein signiertes Add-on (.xpi) in den GitHub-Releases gefunden.",
     "extensionInstallErrorDownload": "Download des Add-ons fehlgeschlagen. Prüfen Sie die Netzwerkverbindung und versuchen Sie es erneut.",
     "extensionInstallErrorFirefoxNotFound": "Kein kompatibler Browser (Firefox, Waterfox, LibreWolf, Floorp, Mullvad, Zen…) gefunden. Die .xpi-Datei liegt im Downloads-Ordner — installieren Sie sie über about:addons → „Add-on aus Datei installieren…“.",
-    "extensionChooseBrowser": "Mehrere kompatible Browser erkannt. Wählen Sie den zu verwendenden aus:"
+    "extensionChooseBrowser": "Mehrere kompatible Browser erkannt. Wählen Sie den zu verwendenden aus:",
+    "extensionTbInstallTitle": "Thunderbird-Erweiterung „Lygodactylus Mail“",
+    "extensionTbInstallHint": "Lädt das neueste Mail-Add-on (.xpi) von den GitHub-Releases herunter und öffnet es in Thunderbird oder Betterbird. Zusammenfassen, Übersetzen, E-Mails analysieren und Antworten vorschlagen über dasselbe Chat LAN; das Erweiterungs-Token wird automatisch kopiert.",
+    "extensionTbInstallButton": "In Thunderbird installieren",
+    "extensionTbInstallStarted": "Thunderbird wird geöffnet — bestätigen Sie das Hinzufügen des Add-ons. Das Erweiterungs-Token wurde kopiert: Fügen Sie es in die Add-on-Einstellungen ein.",
+    "extensionTbInstallErrorNotFound": "Thunderbird oder Betterbird nicht gefunden. Die .xpi-Datei liegt im Downloads-Ordner — installieren Sie sie über Add-ons → „Add-on aus Datei installieren…“.",
+    "extensionTbSignatureNote": "Thunderbird verlangt signierte Add-ons: Wird die Installation abgelehnt, setzen Sie xpinstall.signatures.required in about:config auf false oder verwenden Sie eine ATN-signierte Version."
   }
 }

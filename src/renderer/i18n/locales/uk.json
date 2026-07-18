@@ -1106,6 +1106,12 @@
     "extensionInstallErrorNoRelease": "Підписаний додаток (.xpi) не знайдено в релізах GitHub.",
     "extensionInstallErrorDownload": "Не вдалося завантажити додаток. Перевірте з'єднання з мережею та спробуйте ще раз.",
     "extensionInstallErrorFirefoxNotFound": "Сумісний браузер (Firefox, Waterfox, LibreWolf, Floorp, Mullvad, Zen…) не знайдено. Файл .xpi у теці «Завантаження» — встановіть його через about:addons → «Встановити додаток з файлу…».",
-    "extensionChooseBrowser": "Виявлено кілька сумісних браузерів. Виберіть, який використати:"
+    "extensionChooseBrowser": "Виявлено кілька сумісних браузерів. Виберіть, який використати:",
+    "extensionTbInstallTitle": "Розширення Thunderbird «Lygodactylus Mail»",
+    "extensionTbInstallHint": "Завантажує останній поштовий додаток (.xpi) з релізів GitHub і відкриває його у Thunderbird або Betterbird. Резюмування, переклад, аналіз листів і пропозиції відповідей через той самий Chat LAN; токен розширення копіюється автоматично.",
+    "extensionTbInstallButton": "Встановити у Thunderbird",
+    "extensionTbInstallStarted": "Thunderbird відкриється — підтвердьте додавання розширення. Токен розширення скопійовано: вставте його в налаштування розширення.",
+    "extensionTbInstallErrorNotFound": "Thunderbird або Betterbird не знайдено. Файл .xpi у теці «Завантаження» — встановіть його через Додатки → «Встановити додаток з файлу…».",
+    "extensionTbSignatureNote": "Thunderbird вимагає підписаних додатків: якщо встановлення відхилено, встановіть xpinstall.signatures.required у false в about:config або використайте підписану версію (ATN)."
   }
 }

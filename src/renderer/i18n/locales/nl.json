@@ -1106,6 +1106,12 @@
     "extensionInstallErrorNoRelease": "Geen ondertekende add-on (.xpi) gevonden in de GitHub-releases.",
     "extensionInstallErrorDownload": "Downloaden van de add-on is mislukt. Controleer de netwerkverbinding en probeer het opnieuw.",
     "extensionInstallErrorFirefoxNotFound": "Geen compatibele browser (Firefox, Waterfox, LibreWolf, Floorp, Mullvad, Zen…) gevonden. Het .xpi-bestand staat in uw map Downloads — installeer het via about:addons → “Add-on installeren vanuit bestand…”.",
-    "extensionChooseBrowser": "Meerdere compatibele browsers gedetecteerd. Kies welke u wilt gebruiken:"
+    "extensionChooseBrowser": "Meerdere compatibele browsers gedetecteerd. Kies welke u wilt gebruiken:",
+    "extensionTbInstallTitle": "Thunderbird-extensie “Lygodactylus Mail”",
+    "extensionTbInstallHint": "Downloadt de nieuwste e-mail-add-on (.xpi) van de GitHub-releases en opent deze in Thunderbird of Betterbird. Samenvatten, vertalen, e-mails analyseren en antwoorden voorstellen via hetzelfde Chat LAN; het extensietoken wordt automatisch gekopieerd.",
+    "extensionTbInstallButton": "Installeren in Thunderbird",
+    "extensionTbInstallStarted": "Thunderbird wordt geopend — bevestig het toevoegen van de add-on. Het extensietoken is gekopieerd: plak het in de opties van de add-on.",
+    "extensionTbInstallErrorNotFound": "Thunderbird of Betterbird niet gevonden. Het .xpi-bestand staat in uw map Downloads — installeer het via Add-ons → “Add-on installeren vanuit bestand…”.",
+    "extensionTbSignatureNote": "Thunderbird vereist ondertekende add-ons: als de installatie wordt geweigerd, zet xpinstall.signatures.required op false in about:config, of gebruik een ATN-ondertekende versie."
   }
 }
