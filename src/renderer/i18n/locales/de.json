@@ -1125,5 +1125,22 @@
     "extensionTbInstallStarted": "Thunderbird wird geöffnet — bestätigen Sie das Hinzufügen des Add-ons. Das Erweiterungs-Token wurde kopiert: Fügen Sie es in die Add-on-Einstellungen ein.",
     "extensionTbInstallErrorNotFound": "Thunderbird oder Betterbird nicht gefunden. Die .xpi-Datei liegt im Downloads-Ordner — installieren Sie sie über Add-ons → „Add-on aus Datei installieren…“.",
     "extensionTbSignatureNote": "Thunderbird verlangt signierte Add-ons: Wird die Installation abgelehnt, setzen Sie xpinstall.signatures.required in about:config auf false oder verwenden Sie eine ATN-signierte Version."
+  },
+  "quickAsk": {
+    "title": "Quick Ask",
+    "subtitle": "Schnelle Frage, lokale Antwort",
+    "placeholder": "Frage stellen…",
+    "send": "Senden",
+    "openInApp": "In App öffnen",
+    "emptyHint": "Frage eingeben und Enter drücken. Die Antwort erscheint hier.",
+    "thinking": "Denke nach…",
+    "settingsTitle": "Quick Ask",
+    "settingsDesc": "Globaler Shortcut für ein kleines Immer-im-Vordergrund-Fenster. Standardmäßig aus.",
+    "shortcutLabel": "Tastenkürzel",
+    "shortcutHint": "Electron-Accelerator-Format, z. B. CommandOrControl+Shift+Space",
+    "shortcutInvalid": "Ungültiges Shortcut-Format.",
+    "shortcutTaken": "Dieses Tastenkürzel ist bereits vom System oder einer anderen App belegt.",
+    "shortcutRegisterFailed": "Globaler Shortcut konnte nicht registriert werden.",
+    "sessionTitle": "Quick Ask"
   }
 }

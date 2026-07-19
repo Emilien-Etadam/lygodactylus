@@ -24,8 +24,12 @@ import { SandboxSetupDialog } from './components/SandboxSetupDialog';
 import { SandboxSyncToast } from './components/SandboxSyncToast';
 import { GlobalNoticeToast } from './components/GlobalNoticeToast';
 import { PanelErrorBoundary } from './components/PanelErrorBoundary';
+import { QuickAskView } from './components/QuickAskView';
+import { isQuickAskView } from './utils/is-quick-ask-view';
 import type { AppConfig } from './types';
 import type { GlobalNoticeAction } from './store';
+
+const IS_QUICK_ASK_VIEW = isQuickAskView();
 
 const ChatView = lazy(() =>
   import('./components/ChatView').then((module) => ({ default: module.ChatView }))
@@ -57,7 +61,30 @@ function ContextPanelFallback() {
   );
 }
 
-function App() {
+/** Minimal shell for the Quick Ask floating window (theme + chat IPC only). */
+function QuickAskApp() {
+  const settings = useSettings();
+  const systemDarkMode = useSystemDarkMode();
+
+  useEffect(() => {
+    const effectiveTheme =
+      settings.theme === 'system' ? (systemDarkMode ? 'dark' : 'light') : settings.theme;
+
+    if (effectiveTheme === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+  }, [settings.theme, systemDarkMode]);
+
+  const effectiveTheme =
+    settings.theme === 'system' ? (systemDarkMode ? 'dark' : 'light') : settings.theme;
+  useHighlightTheme(effectiveTheme);
+
+  return <QuickAskView />;
+}
+
+function MainApp() {
   // --- Store state via selectors (each subscription is minimally scoped) ---
   const activeSessionId = useActiveSessionId();
   const settings = useSettings();
@@ -261,6 +288,13 @@ function App() {
       />
     </div>
   );
+}
+
+function App() {
+  if (IS_QUICK_ASK_VIEW) {
+    return <QuickAskApp />;
+  }
+  return <MainApp />;
 }
 
 export default App;

@@ -1125,5 +1125,22 @@
     "extensionTbInstallStarted": "Thunderbird se va deschide — confirmați adăugarea suplimentului. Tokenul extensiei a fost copiat: lipiți-l în opțiunile suplimentului.",
     "extensionTbInstallErrorNotFound": "Thunderbird sau Betterbird nu a fost găsit. Fișierul .xpi este în dosarul Descărcări — instalați-l prin Suplimente → „Instalează un supliment din fișier…”.",
     "extensionTbSignatureNote": "Thunderbird necesită suplimente semnate: dacă instalarea este respinsă, setați xpinstall.signatures.required pe false în about:config sau folosiți o versiune semnată (ATN)."
+  },
+  "quickAsk": {
+    "title": "Quick Ask",
+    "subtitle": "Întrebare rapidă, răspuns local",
+    "placeholder": "Pune o întrebare…",
+    "send": "Trimite",
+    "openInApp": "Deschide în aplicație",
+    "emptyHint": "Tastează o întrebare și apasă Enter. Răspunsul apare aici.",
+    "thinking": "Gândesc…",
+    "settingsTitle": "Quick Ask",
+    "settingsDesc": "Scurtătură globală pentru o fereastră mică deasupra tuturor. Dezactivată implicit.",
+    "shortcutLabel": "Scurtătură tastatură",
+    "shortcutHint": "Format Accelerator Electron, ex. CommandOrControl+Shift+Space",
+    "shortcutInvalid": "Format de scurtătură invalid.",
+    "shortcutTaken": "Această scurtătură este deja folosită de sistem sau altă aplicație.",
+    "shortcutRegisterFailed": "Nu s-a putut înregistra scurtătura globală.",
+    "sessionTitle": "Quick Ask"
   }
 }

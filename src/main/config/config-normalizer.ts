@@ -20,8 +20,10 @@ import {
   isThinkingLevel,
   normalizeMemoryRuntimeConfig,
   normalizeOllamaKeepAlive,
+  normalizeQuickAskShortcut,
   normalizeWebSearchConfig,
   nowISO,
+  DEFAULT_QUICK_ASK_SHORTCUT,
   profileKeyFromProvider,
   toBoolean,
   toNonEmptyString,
@@ -378,6 +380,11 @@ export function normalizeConfig(rawConfig: Partial<AppConfig> | undefined): AppC
       raw.speechSynthesisEnabled,
       defaultConfig.speechSynthesisEnabled
     ),
+    quickAskEnabled: toBoolean(raw.quickAskEnabled, defaultConfig.quickAskEnabled),
+    quickAskShortcut:
+      normalizeQuickAskShortcut(raw.quickAskShortcut) ||
+      defaultConfig.quickAskShortcut ||
+      DEFAULT_QUICK_ASK_SHORTCUT,
     ollamaKeepAlive: normalizeOllamaKeepAlive(
       typeof raw.ollamaKeepAlive === 'string' || typeof raw.ollamaKeepAlive === 'number'
         ? raw.ollamaKeepAlive

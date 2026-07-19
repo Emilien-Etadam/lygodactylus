@@ -485,6 +485,8 @@ export type ClientEvent =
         content?: ContentBlock[];
         memoryEnabled?: boolean;
         messageId?: string;
+        /** Optional Plan/Act mode at creation (e.g. Quick Ask → 'plan'). */
+        mode?: SessionMode;
       };
     }
   | {
@@ -620,6 +622,16 @@ export type ServerEvent =
       type: 'navigate.to';
       payload: { page: 'welcome' | 'settings' | 'session'; tab?: string; sessionId?: string };
     }
+  | {
+      type: 'quickAsk.status';
+      payload: {
+        enabled: boolean;
+        shortcut: string;
+        registered: boolean;
+        error: string | null;
+      };
+    }
+  | { type: 'quickAsk.opened' }
   | { type: 'native-theme.changed'; payload: { shouldUseDarkColors: boolean } }
   | { type: 'new-session' }
   | { type: 'navigate'; payload: string }
@@ -766,6 +778,10 @@ export interface AppConfig {
   enableThinking?: boolean;
   thinkingLevel?: ThinkingLevel;
   speechSynthesisEnabled?: boolean;
+  /** Global Quick Ask floating window. Off by default. */
+  quickAskEnabled?: boolean;
+  /** Electron Accelerator for the Quick Ask global shortcut. */
+  quickAskShortcut?: string;
   /** Ollama keep_alive duration (e.g. "30m"). Soft-defaulted in main when missing. */
   ollamaKeepAlive?: string;
   isConfigured: boolean;

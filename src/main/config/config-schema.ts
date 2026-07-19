@@ -11,12 +11,17 @@ import {
   normalizeOllamaKeepAlive,
 } from '../../shared/ollama-keep-alive';
 import {
+  DEFAULT_QUICK_ASK_SHORTCUT,
+  normalizeQuickAskShortcut,
+} from '../../shared/quick-ask';
+import {
   DEFAULT_WEB_SEARCH_CONFIG,
   normalizeWebSearchConfig,
   type WebSearchConfig,
 } from '../../shared/web-search';
 
 export { DEFAULT_OLLAMA_KEEP_ALIVE, normalizeOllamaKeepAlive };
+export { DEFAULT_QUICK_ASK_SHORTCUT, normalizeQuickAskShortcut };
 
 export type ProviderType = 'openai' | 'anthropic';
 export type CustomProtocolType = 'anthropic' | 'openai';
@@ -82,6 +87,12 @@ export interface AppConfig {
   /** Offline speechSynthesis for assistant replies (Chromium voices). Off by default. */
   speechSynthesisEnabled: boolean;
   /**
+   * Global Quick Ask floating window (Phase 1). Off by default — opt-in in Settings.
+   */
+  quickAskEnabled: boolean;
+  /** Electron Accelerator for the Quick Ask global shortcut. */
+  quickAskShortcut: string;
+  /**
    * Ollama keep_alive duration (e.g. "30m", "1h", "-1").
    * Only sent when the active endpoint is detected as Ollama.
    */
@@ -146,6 +157,8 @@ export const DIRECT_READ_KEYS = new Set<keyof AppConfig>([
   'enableThinking',
   'thinkingLevel',
   'speechSynthesisEnabled',
+  'quickAskEnabled',
+  'quickAskShortcut',
   'ollamaKeepAlive',
   'isConfigured',
 ]);
@@ -257,6 +270,8 @@ export const defaultConfig: AppConfig = {
   enableThinking: false,
   thinkingLevel: 'medium',
   speechSynthesisEnabled: false,
+  quickAskEnabled: false,
+  quickAskShortcut: DEFAULT_QUICK_ASK_SHORTCUT,
   ollamaKeepAlive: DEFAULT_OLLAMA_KEEP_ALIVE,
   isConfigured: false,
 };

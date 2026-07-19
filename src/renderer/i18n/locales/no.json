@@ -1125,5 +1125,22 @@
     "extensionTbInstallStarted": "Thunderbird åpnes — bekreft at utvidelsen legges til. Utvidelsestokenet er kopiert: lim det inn i utvidelsens innstillinger.",
     "extensionTbInstallErrorNotFound": "Fant ikke Thunderbird eller Betterbird. .xpi-filen ligger i Nedlastinger-mappen — installer den via Utvidelser → «Installer utvidelse fra fil…».",
     "extensionTbSignatureNote": "Thunderbird krever signerte utvidelser: hvis installasjonen avvises, sett xpinstall.signatures.required til false i about:config, eller bruk en ATN-signert versjon."
+  },
+  "quickAsk": {
+    "title": "Quick Ask",
+    "subtitle": "Raskt spørsmål, lokalt svar",
+    "placeholder": "Still et spørsmål…",
+    "send": "Send",
+    "openInApp": "Åpne i appen",
+    "emptyHint": "Skriv et spørsmål og trykk Enter. Svaret streames her.",
+    "thinking": "Tenker…",
+    "settingsTitle": "Quick Ask",
+    "settingsDesc": "Global snarvei for et lite vindu øverst. Av som standard.",
+    "shortcutLabel": "Tastatursnarvei",
+    "shortcutHint": "Electron Accelerator-format, f.eks. CommandOrControl+Shift+Space",
+    "shortcutInvalid": "Ugyldig snarveiformat.",
+    "shortcutTaken": "Denne snarveien er allerede i bruk av systemet eller en annen app.",
+    "shortcutRegisterFailed": "Kunne ikke registrere den globale snarveien.",
+    "sessionTitle": "Quick Ask"
   }
 }

@@ -1125,5 +1125,22 @@
     "description": "An unexpected error occurred in the application. You can try to recover by clicking the button below.",
     "details": "Error details",
     "retry": "Try again"
+  },
+  "quickAsk": {
+    "title": "Quick Ask",
+    "subtitle": "Quick question, local answer",
+    "placeholder": "Ask a question…",
+    "send": "Send",
+    "openInApp": "Open in app",
+    "emptyHint": "Type a question and press Enter. The answer streams here.",
+    "thinking": "Thinking…",
+    "settingsTitle": "Quick Ask",
+    "settingsDesc": "Global shortcut to open a small always-on-top question window. Off by default.",
+    "shortcutLabel": "Keyboard shortcut",
+    "shortcutHint": "Electron accelerator format, e.g. CommandOrControl+Shift+Space",
+    "shortcutInvalid": "Invalid shortcut format.",
+    "shortcutTaken": "This shortcut is already taken by the OS or another app.",
+    "shortcutRegisterFailed": "Could not register the global shortcut.",
+    "sessionTitle": "Quick Ask"
   }
 }

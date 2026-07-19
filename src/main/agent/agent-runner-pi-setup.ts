@@ -58,12 +58,14 @@ import {
   filterToolsForSessionMode,
   getPlanModeExcludedBuiltinTools,
   normalizeSessionMode,
+  PLAN_MODE_SYSTEM_PROMPT,
 } from '../../shared/session-mode';
 import { mt } from '../i18n';
 import { buildPiSessionRuntimeSignature } from './pi-session-runtime';
 import { getSharedAuthStorage } from './shared-auth';
 import { createWindowsBashOperations } from './windows-bash-operations';
 import { createWslSandboxBashOperations } from './wsl-sandbox-bash-operations';
+import { isQuickAskSessionTitle, QUICK_ASK_SYSTEM_PROMPT } from '../../shared/quick-ask';
 
 type PiModel = ReturnType<typeof buildSyntheticPiModel>;
 
@@ -378,7 +380,11 @@ export async function preparePiSessionRun({
   buildMcpServers(ctx, imageCapable);
   logTiming('after building MCP servers config', runStartTime);
 
-  const coworkAppendPrompt = buildCoworkAppendPrompt(
+  // Tool gating uses session.mode via session-mode.ts (single point). Quick Ask
+  // sessions are created with mode='plan'; we only customize the system prompt:
+  // replace PLAN_MODE_SYSTEM_PROMPT with QUICK_ASK_SYSTEM_PROMPT so the model
+  // answers concisely instead of producing a numbered action plan.
+  let coworkAppendPrompt = buildCoworkAppendPrompt(
     ctx,
     workingDir,
     sandboxPath,
@@ -386,6 +392,12 @@ export async function preparePiSessionRun({
     configStore.get('sandboxLanNetworkEnabled') === true,
     sessionMode
   );
+  if (isQuickAskSessionTitle(session.title)) {
+    coworkAppendPrompt = [
+      ...coworkAppendPrompt.filter((section) => section !== PLAN_MODE_SYSTEM_PROMPT),
+      QUICK_ASK_SYSTEM_PROMPT,
+    ];
+  }
   const mcpCustomTools = ctx.mcpManager ? buildMcpCustomTools(ctx.mcpManager) : [];
   const webSearchCustomTools = buildWebSearchCustomTools();
   const nativeCustomTools = buildNativeCustomTools({

@@ -1125,5 +1125,22 @@
     "extensionTbInstallStarted": "Thunderbird się otworzy — potwierdź dodanie dodatku. Token rozszerzenia został skopiowany: wklej go w opcjach dodatku.",
     "extensionTbInstallErrorNotFound": "Nie znaleziono Thunderbird ani Betterbird. Plik .xpi jest w folderze Pobrane — zainstaluj go przez Dodatki → „Zainstaluj dodatek z pliku…”.",
     "extensionTbSignatureNote": "Thunderbird wymaga podpisanych dodatków: jeśli instalacja zostanie odrzucona, ustaw xpinstall.signatures.required na false w about:config lub użyj wersji podpisanej (ATN)."
+  },
+  "quickAsk": {
+    "title": "Quick Ask",
+    "subtitle": "Szybkie pytanie, lokalna odpowiedź",
+    "placeholder": "Zadaj pytanie…",
+    "send": "Wyślij",
+    "openInApp": "Otwórz w aplikacji",
+    "emptyHint": "Wpisz pytanie i naciśnij Enter. Odpowiedź pojawi się tutaj.",
+    "thinking": "Myślę…",
+    "settingsTitle": "Quick Ask",
+    "settingsDesc": "Globalny skrót otwierający małe okno zawsze na wierzchu. Domyślnie wyłączony.",
+    "shortcutLabel": "Skrót klawiszowy",
+    "shortcutHint": "Format Accelerator Electron, np. CommandOrControl+Shift+Space",
+    "shortcutInvalid": "Nieprawidłowy format skrótu.",
+    "shortcutTaken": "Ten skrót jest już zajęty przez system lub inną aplikację.",
+    "shortcutRegisterFailed": "Nie udało się zarejestrować globalnego skrótu.",
+    "sessionTitle": "Quick Ask"
   }
 }

@@ -6,6 +6,7 @@ import type {
   Message,
   TraceStep,
   ContentBlock,
+  SessionMode,
 } from '../../types';
 import i18n from '../../i18n/config';
 import { isElectron } from './constants';
@@ -43,7 +44,12 @@ export function useSessionIpc({
 }: SessionIpcDeps) {
   // Start a new session
   const startSession = useCallback(
-    async (title: string, promptOrContent: string | ContentBlock[], cwd?: string) => {
+    async (
+      title: string,
+      promptOrContent: string | ContentBlock[],
+      cwd?: string,
+      mode?: SessionMode
+    ) => {
       setLoading(true);
       console.log('[useIPC] Starting session:', title);
 
@@ -79,7 +85,7 @@ export function useSessionIpc({
             'grep',
           ],
           memoryEnabled: true,
-          mode: 'act' as const,
+          mode: mode === 'plan' ? 'plan' : 'act',
         };
 
         addSession(session);
@@ -129,6 +135,7 @@ export function useSessionIpc({
             cwd,
             content, // Send full content blocks including images
             messageId,
+            mode,
           },
         });
         if (session) {

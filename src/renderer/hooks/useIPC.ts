@@ -305,6 +305,40 @@ export function useIPC() {
             }
             break;
 
+          case 'navigate.to':
+            if (event.payload.page === 'settings') {
+              store.setShowSettings(true);
+            } else if (event.payload.page === 'welcome') {
+              store.setShowSettings(false);
+              store.setActiveSession(null);
+            } else if (event.payload.page === 'session' && event.payload.sessionId) {
+              const targetSessionId = event.payload.sessionId;
+              store.setShowSettings(false);
+              store.setActiveSession(targetSessionId);
+              // Load persisted messages when jumping from Quick Ask → main window.
+              void (async () => {
+                try {
+                  const messages = await window.electronAPI.invoke<
+                    import('../types').Message[]
+                  >({
+                    type: 'session.getMessages',
+                    payload: { sessionId: targetSessionId },
+                  });
+                  if (messages && messages.length > 0) {
+                    useAppStore.getState().setMessages(targetSessionId, messages);
+                  }
+                } catch (error) {
+                  console.error('[useIPC] Failed to load messages for navigate.to:', error);
+                }
+              })();
+            }
+            break;
+
+          case 'quickAsk.status':
+          case 'quickAsk.opened':
+            // Handled by SettingsGeneral / QuickAskView subscribers.
+            break;
+
           default:
             console.log('[useIPC] Unknown server event:', event);
         }

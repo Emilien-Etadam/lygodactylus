@@ -1125,5 +1125,22 @@
     "extensionTbInstallStarted": "Thunderbird se abrirá: confirme la adición del complemento. El token de extensión se ha copiado; péguelo en las opciones del complemento.",
     "extensionTbInstallErrorNotFound": "No se encontró Thunderbird ni Betterbird. El archivo .xpi está en su carpeta de Descargas: instálelo desde Complementos → «Instalar complemento desde archivo…».",
     "extensionTbSignatureNote": "Thunderbird exige complementos firmados: si se rechaza la instalación, ponga xpinstall.signatures.required en false en about:config, o use una versión firmada (ATN)."
+  },
+  "quickAsk": {
+    "title": "Quick Ask",
+    "subtitle": "Pregunta rápida, respuesta local",
+    "placeholder": "Haz una pregunta…",
+    "send": "Enviar",
+    "openInApp": "Abrir en la app",
+    "emptyHint": "Escribe una pregunta y pulsa Enter. La respuesta aparece aquí.",
+    "thinking": "Pensando…",
+    "settingsTitle": "Quick Ask",
+    "settingsDesc": "Atajo global para abrir una ventana pequeña siempre visible. Desactivado por defecto.",
+    "shortcutLabel": "Atajo de teclado",
+    "shortcutHint": "Formato Accelerator de Electron, p. ej. CommandOrControl+Shift+Space",
+    "shortcutInvalid": "Formato de atajo no válido.",
+    "shortcutTaken": "Este atajo ya está en uso por el sistema u otra aplicación.",
+    "shortcutRegisterFailed": "No se pudo registrar el atajo global.",
+    "sessionTitle": "Quick Ask"
   }
 }
