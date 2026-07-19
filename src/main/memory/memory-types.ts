@@ -53,6 +53,8 @@ export interface ChunkMemoryItem {
   sessionDate: string;
   createdAt: string;
   ingestedAt: string;
+  /** Confiance optionnelle [0, 1] ; absente → neutre côté ranker. */
+  confidence?: number;
   embedding: number[];
 }
 
@@ -71,6 +73,8 @@ export interface SessionMemoryItem {
   sessionDate: string;
   createdAt: string;
   ingestedAt: string;
+  /** Confiance optionnelle [0, 1] ; absente → neutre côté ranker. */
+  confidence?: number;
   embedding: number[];
 }
 

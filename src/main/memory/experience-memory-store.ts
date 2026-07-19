@@ -28,6 +28,17 @@ function toNumberArray(value: unknown): number[] {
     : [];
 }
 
+/** Confiance optionnelle [0, 1] depuis le JSON ; invalide → undefined (neutre). */
+function toOptionalConfidence(value: unknown): number | undefined {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return undefined;
+  }
+  if (value < 0 || value > 1) {
+    return undefined;
+  }
+  return value;
+}
+
 function normalizeWorkspace(value: unknown): string | null {
   return typeof value === 'string' && value.trim() ? normalizeWorkspaceKey(value) : null;
 }
@@ -64,6 +75,7 @@ function normalizeChunk(item: Record<string, unknown>): ChunkMemoryItem | null {
     sessionDate: typeof item.session_date === 'string' ? item.session_date : '',
     createdAt: typeof item.created_at === 'string' ? item.created_at : '',
     ingestedAt: typeof item.ingested_at === 'string' ? item.ingested_at : '',
+    confidence: toOptionalConfidence(item.confidence),
     embedding: toNumberArray(item.embedding),
   };
 }
@@ -119,6 +131,7 @@ function normalizeSession(item: Record<string, unknown>): SessionMemoryItem | nu
     sessionDate: typeof item.session_date === 'string' ? item.session_date : '',
     createdAt: typeof item.created_at === 'string' ? item.created_at : '',
     ingestedAt: typeof item.ingested_at === 'string' ? item.ingested_at : '',
+    confidence: toOptionalConfidence(item.confidence),
     embedding: toNumberArray(item.embedding),
   };
 }
@@ -140,6 +153,7 @@ function chunkToFileRecord(item: ChunkMemoryItem): Record<string, unknown> {
     session_date: item.sessionDate,
     created_at: item.createdAt,
     ingested_at: item.ingestedAt,
+    ...(item.confidence !== undefined ? { confidence: item.confidence } : {}),
     embedding: item.embedding,
   };
 }
@@ -160,6 +174,7 @@ function sessionToFileRecord(item: SessionMemoryItem): Record<string, unknown> {
     session_date: item.sessionDate,
     created_at: item.createdAt,
     ingested_at: item.ingestedAt,
+    ...(item.confidence !== undefined ? { confidence: item.confidence } : {}),
     embedding: item.embedding,
   };
 }
@@ -431,7 +446,13 @@ export class ExperienceMemoryStore {
   }
 
   private rankItems<
-    T extends { embedding: number[]; ingestedAt: string; sourceWorkspace?: string | null },
+    T extends {
+      embedding: number[];
+      createdAt: string;
+      ingestedAt: string;
+      sourceWorkspace?: string | null;
+      confidence?: number;
+    },
   >(
     query: string,
     items: T[],
@@ -449,7 +470,9 @@ export class ExperienceMemoryStore {
           recordEmbedding: record.embedding,
           currentWorkspace,
           sourceWorkspace: record.sourceWorkspace,
+          createdAt: record.createdAt,
           ingestedAt: record.ingestedAt,
+          confidence: record.confidence,
         });
         return { record, score, evidenceScore };
       })
