@@ -124,7 +124,7 @@ Current stable fork baseline: **`6.0.2`** — [CHANGELOG](CHANGELOG.md)
 - **Schema naming**: `claude_session_id`, `claudeCodePath` → `agent_session_id`, `agentCliPath` — **done v5.5** (migration auto, champs legacy conservés en lecture)
 - **Tool Completeness**: Native TodoWrite, AskUserQuestion, Glob, Grep, WebFetch, WebSearch tool schemas + handlers for API key users — **done v5.7**
 - **Memory System Enhancements**: Prompt injection controls, cross-session retrieval UX, memory source inspection, reranking quality — **done v5.6**
-- **Memory Freshness & Confidence**: recency-decay term in `memory-ranker.ts` (reuse stored `createdAt`/`timestamp`) + optional per-entry `confidence` score used at ranking — inspiré du "confidence tracking + freshness decay" de moltagent, adapté à un usage 100% local mono-utilisateur. Self-contained, pas de nouveau sous-système ; tests dans `memory-ranker.test.ts`. — _planned_
+- **Memory Freshness & Confidence**: recency-decay term in `memory-ranker.ts` (demi-vie 30 j, plancher 0.35, timestamps existants) + champ `confidence` optionnel pris en compte au ranking — inspiré du "confidence tracking + freshness decay" de moltagent. — **done** (PR #133)
 - **Scheduled Tasks**: Cron-like scheduling with UI management (backend exists; polish UX and edge cases)
 - **Log Management**: Structured logging with rotation, size limits, log viewer improvements
 - **Installation Experience**: Smoother first-run — auto-detect dependencies, clearer errors, one-click setup
@@ -133,18 +133,21 @@ Current stable fork baseline: **`6.0.2`** — [CHANGELOG](CHANGELOG.md)
 - **Skill Lockfile & Pinning**: enregistrer à l'install le commit sha résolu + un hash d'intégrité dans `marketplace-installed-store` (aujourd'hui : install à un `ref` de catalogue, sans lockfile). Reproductibilité, détection/rollback de dérive, et sécurité supply-chain (un skill exécute du code dans le sandbox). Inspiré du `skills.lock` de trivium ; extension du store existant, pas un sous-système. — _planned_
 - **Chat Organization**: groupes/dossiers de chats par projet + **sous-chats** (brancher une discussion annexe sans polluer le contexte principal) — UX locale self-contained, prolonge le fork/édition de messages existant. Inspiré d'Atlantis (roia.io). — _candidate_
 
-### Prochain lot — veille concurrentielle 2026-07 (prioritaire)
+### Lot veille 2026-07 — ✅ livré (PRs #131–#139)
 
-_Issu d'une veille (moltagent, LM Studio Bionic, trivium, Atlantis, Jan/Cline/Aider/Khoj/llama.cpp…). Items validés, petits et self-contained, dans l'ADN local-first + fiabilité des modèles locaux._
+_Issu d'une veille (moltagent, LM Studio Bionic, trivium, Atlantis, Jan/Cline/Aider/Khoj/llama.cpp…). Prompts : `docs/cursor-prompts-veille-2026-07.md` ; codé par Cursor, revu par Claude._
 
-- **Constrained Output (grammar / JSON-schema)**: passer le JSON Schema de l'outil (ou une grammaire GBNF) en champ de requête — Ollama `format`, llama.cpp `grammar`/`json_schema`, vLLM guided — pour forcer un JSON/tool-call valide côté serveur. Évolution *préventive* du tool-call guard ; pur changement client. — _planned_
-- **Global Quick-Ask Launcher**: hotkey système ouvrant une fenêtre frameless « quick ask » sans focaliser l'app, + actions sur le texte sélectionné (résumer/traduire/reformuler). Electron `globalShortcut` + BrowserWindow non-activante (paste-back = seule part M). Absent de tous les peers runner-de-modèles. — _planned_
-- **Read-Aloud (TTS)**: lecture vocale des réponses via `speechSynthesis` de Chromium (offline, zéro-dep), Piper/Kokoro en upgrade. Miroir du STT planifié, complète la boucle voix. — _planned_
-- **Plan/Act Mode**: phase plan en lecture seule (explore + propose) gâtée avant toute exécution, puis bascule exécution. Toggle + gating d'outils ; améliore nettement les petits modèles locaux. — _planned_
-- **Local Inference Latency**: préfixe système stable + réutilisation cache KV/prompt (`cache_prompt`) + contrôle keep-alive/warm-model (`keep_alive`, préchargement au focus, unload idle) pour tuer le cold-start. Gains quasi gratuits. — _planned_
-- **Local Reranker (mémoire / RAG)**: cross-encoder local — llama.cpp `/v1/rerank` ou ONNX transformers.js in-process — qui re-score le top-N récupéré avant injection. Plus gros lift qualité-retrieval ; booste la task #1 mémoire. — _planned_
+- **Constrained Output (grammar / JSON-schema)**: sonde de capacités par endpoint (Ollama `format`, vLLM/llama.cpp `response_format.json_schema`) + injection `onPayload` sur les one-shots JSON internes, cache invalidé sur changement URL/modèle, retry sans champ. Tool-call guard conservé en filet. — **done** (PR #137)
+- **Global Quick-Ask Launcher**: hotkey global + fenêtre frameless lecture-seule (session `mode: 'plan'`), même preload/allowlist que la fenêtre principale, « Ouvrir dans l'app ». Phase 1 (sans capture de sélection). — **done** (PR #136)
+- **Read-Aloud (TTS)**: lecture vocale offline via `speechSynthesis` (zéro dépendance), markdown « parlable », OFF par défaut. — **done** (PR #131)
+- **Plan/Act Mode**: mode par session persisté, gating allowlist en un point unique + `excludeTools` SDK, MCP bloqués en plan, garde backend pendant un run. — **done** (PR #135)
+- **Local Inference Latency**: préfixe système déterministe (tris skills/MCP/mémoire core) pour le prefix caching vLLM/llama.cpp + `keep_alive` et warm-up Ollama. — **done** (PR #134)
+- **Local Reranker (mémoire)**: client `POST /v1/rerank` opt-in (OFF), branché sur recherche **et** injection, fallback ordre d'origine, fraîcheur/confiance multiplicatifs par-dessus. — **done** (PR #138)
+- _Suivi_ : nettoyage code miroir / prompts / test tautologique — **done** (PR #139)
 
 ### 2e lot — veille cadrée avec le mainteneur (2026-07)
+
+_Prompts Cursor : `docs/cursor-prompts-lot2-2026-07.md` (même workflow : Cursor code, Claude vérifie)._
 
 - **Autonomy / Safety Modes (Prudent / Normal / Autonome)**: un sélecteur de niveau qui regroupe 4 mécanismes — validation par diff avant écriture (Prudent), application d'édition robuste avec retry auto (Normal+), boucle auto-fix lint/test (Autonome) — au-dessus de **checkpoints/rollback toujours actifs** (snapshots shadow-git dans app-data) comme filet de sécurité. Réf. Cline (Plan/Act + auto-approve), Aider (edit-formats + auto-lint/test), Roo/Plandex (checkpoints). — _planned_
 - **Semantic File Search**: outil « grep par le sens » — index d'embeddings local + recherche langage naturel renvoyant des hits `file:line`, complément du grep/glob littéral. Réutilise l'embed/cosine existant ; `grepai` testable en MCP. — _planned_
@@ -176,4 +179,4 @@ _Écartés volontairement par le mainteneur : RAG « chat avec mes docs » (risq
 
 ---
 
-_Last updated: 2026-07-19 (veille : 2e lot cadré ajouté — autonomy modes, semantic search, citations, history search, project rules, presets, model stats, @-mention, artifacts, PII scrub, content watch)_
+_Last updated: 2026-07-19 (lot veille 1 livré — PRs #131–#139 : TTS, mémoire freshness/confiance, latence, Plan/Act, Quick-Ask, constrained output, reranker, cleanup ; prompts du 2e lot publiés)_
