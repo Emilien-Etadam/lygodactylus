@@ -74,6 +74,7 @@ function makeConfig(timeoutMs: number, overrides: Partial<AppConfig> = {}): AppC
     webSearch: { ...DEFAULT_WEB_SEARCH_CONFIG },
     enableThinking: false,
     thinkingLevel: 'medium',
+    speechSynthesisEnabled: false,
     isConfigured: true,
     ...overrides,
   };

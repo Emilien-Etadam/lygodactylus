@@ -147,6 +147,7 @@ export class ConfigStore {
             key === 'sandboxLanNetworkEnabled' ||
             key === 'memoryEnabled' ||
             key === 'enableThinking' ||
+            key === 'speechSynthesisEnabled' ||
             key === 'isConfigured') &&
           typeof rawValue !== 'boolean'
         ) {
@@ -427,6 +428,10 @@ export class ConfigStore {
       thinkingLevel: isThinkingLevel(updates.thinkingLevel)
         ? updates.thinkingLevel
         : current.thinkingLevel,
+      speechSynthesisEnabled:
+        updates.speechSynthesisEnabled !== undefined
+          ? updates.speechSynthesisEnabled
+          : current.speechSynthesisEnabled,
       isConfigured:
         updates.isConfigured !== undefined ? updates.isConfigured : current.isConfigured,
     });

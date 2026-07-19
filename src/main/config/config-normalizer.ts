@@ -373,6 +373,10 @@ export function normalizeConfig(rawConfig: Partial<AppConfig> | undefined): AppC
     thinkingLevel: isThinkingLevel(raw.thinkingLevel)
       ? raw.thinkingLevel
       : defaultConfig.thinkingLevel,
+    speechSynthesisEnabled: toBoolean(
+      raw.speechSynthesisEnabled,
+      defaultConfig.speechSynthesisEnabled
+    ),
     isConfigured: toBoolean(raw.isConfigured, defaultConfig.isConfigured),
   };
   normalizeModelIds(result);

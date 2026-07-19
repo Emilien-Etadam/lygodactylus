@@ -92,7 +92,9 @@
     "updateError": "Update check failed: {{error}}",
     "updateManualDownload": "Download the latest installer from GitHub.",
     "updateDownloading": "Downloading update…",
-    "updateDownloadError": "Automatic download failed: {{error}}"
+    "updateDownloadError": "Automatic download failed: {{error}}",
+    "speechSynthesis": "Uppläsning",
+    "speechSynthesisDesc": "Visar en högtalarknapp på assistentens meddelanden för offlineuppläsning med systemrösten."
   },
   "webSearch": {
     "title": "Web search",
@@ -781,7 +783,9 @@
     "questionClosed": "Fråga stängd",
     "submitAnswers": "Skicka svar",
     "copyBlock": "Kopiera block",
-    "copyThinking": "Kopiera tänkande"
+    "copyThinking": "Kopiera tänkande",
+    "speakMessage": "Läs upp",
+    "stopSpeaking": "Stoppa uppläsning"
   },
   "schedule": {
     "createTitle": "Skapa schema",

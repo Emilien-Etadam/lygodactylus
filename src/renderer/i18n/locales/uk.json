@@ -92,7 +92,9 @@
     "updateError": "Update check failed: {{error}}",
     "updateManualDownload": "Download the latest installer from GitHub.",
     "updateDownloading": "Downloading update…",
-    "updateDownloadError": "Automatic download failed: {{error}}"
+    "updateDownloadError": "Automatic download failed: {{error}}",
+    "speechSynthesis": "Озвучення",
+    "speechSynthesisDesc": "Показує кнопку динаміка на відповідях асистента для офлайн-озвучення системним голосом."
   },
   "webSearch": {
     "title": "Web search",
@@ -781,7 +783,9 @@
     "questionClosed": "Питання закрито",
     "submitAnswers": "Надіслати відповіді",
     "copyBlock": "Копіювати блок",
-    "copyThinking": "Копіювати мислення"
+    "copyThinking": "Копіювати мислення",
+    "speakMessage": "Озвучити повідомлення",
+    "stopSpeaking": "Зупинити озвучення"
   },
   "schedule": {
     "createTitle": "Створити розклад",

@@ -92,7 +92,9 @@
     "updateError": "Échec de la vérification : {{error}}",
     "updateManualDownload": "Téléchargez le dernier installateur sur GitHub.",
     "updateDownloading": "Téléchargement de la mise à jour en cours…",
-    "updateDownloadError": "Échec du téléchargement automatique : {{error}}"
+    "updateDownloadError": "Échec du téléchargement automatique : {{error}}",
+    "speechSynthesis": "Lecture vocale",
+    "speechSynthesisDesc": "Affiche un bouton haut-parleur sur les réponses de l'assistant pour les lire hors ligne avec la voix système."
   },
   "webSearch": {
     "title": "Recherche web",
@@ -870,7 +872,9 @@
     "questionClosed": "Question fermée",
     "submitAnswers": "Envoyer les réponses",
     "copyBlock": "Copier le bloc",
-    "copyThinking": "Copier la réflexion"
+    "copyThinking": "Copier la réflexion",
+    "speakMessage": "Lire le message",
+    "stopSpeaking": "Arrêter la lecture"
   },
   "schedule": {
     "createTitle": "Créer une planification",

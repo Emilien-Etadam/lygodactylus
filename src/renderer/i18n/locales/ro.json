@@ -92,7 +92,9 @@
     "updateError": "Update check failed: {{error}}",
     "updateManualDownload": "Download the latest installer from GitHub.",
     "updateDownloading": "Downloading update…",
-    "updateDownloadError": "Automatic download failed: {{error}}"
+    "updateDownloadError": "Automatic download failed: {{error}}",
+    "speechSynthesis": "Citire vocală",
+    "speechSynthesisDesc": "Afișează un buton de difuzor pe mesajele asistentului pentru citire offline cu vocea sistemului."
   },
   "webSearch": {
     "title": "Web search",
@@ -781,7 +783,9 @@
     "questionClosed": "Întrebare închisă",
     "submitAnswers": "Trimite răspunsurile",
     "copyBlock": "Copiază blocul",
-    "copyThinking": "Copiază gândirea"
+    "copyThinking": "Copiază gândirea",
+    "speakMessage": "Citește mesajul",
+    "stopSpeaking": "Oprește citirea"
   },
   "schedule": {
     "createTitle": "Creează programare",
