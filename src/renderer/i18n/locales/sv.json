@@ -726,7 +726,12 @@
       "low": "Låg",
       "medium": "Medel",
       "high": "Hög"
-    }
+    },
+    "planActToggle": "Plan- / Act-läge",
+    "planMode": "Plan",
+    "actMode": "Act",
+    "switchToAct": "Byt till Act",
+    "planModeBadge": "Planeringsläge"
   },
   "context": {
     "progress": "Förlopp",

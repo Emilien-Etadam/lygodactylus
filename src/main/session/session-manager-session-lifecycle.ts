@@ -1,5 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
-import type { Session } from '../../renderer/types';
+import type { Session, SessionMode } from '../../renderer/types';
+import {
+  DEFAULT_SESSION_MODE,
+  isSessionMode,
+  normalizeSessionMode,
+} from '../../shared/session-mode';
 import { configStore } from '../config/config-store';
 import { forgetSessionPermissions } from '../config/permission-rules-store';
 import {
@@ -69,6 +74,7 @@ export function createSession(
       'grep',
     ],
     memoryEnabled: resolvedMemoryEnabled,
+    mode: DEFAULT_SESSION_MODE,
     model: configStore.get('model') || undefined,
     createdAt: now,
     updatedAt: now,
@@ -96,6 +102,56 @@ export function updateSessionMemoryEnabled(
   deps.sendToRenderer({
     type: 'session.update',
     payload: { sessionId, updates: { memoryEnabled, updatedAt: updated.updatedAt } },
+  });
+  return updated;
+}
+
+export function getSessionMode(
+  deps: SessionManagerFacadeSupportDeps,
+  sessionId: string
+): { mode: SessionMode } {
+  const session = deps.store.loadSession(sessionId);
+  if (!session) {
+    throw new Error('Session not found');
+  }
+  return { mode: normalizeSessionMode(session.mode) };
+}
+
+export function updateSessionMode(
+  deps: SessionManagerFacadeSupportDeps,
+  sessionId: string,
+  mode: SessionMode
+): Session {
+  if (!isSessionMode(mode)) {
+    throw new Error(`Invalid session mode: ${String(mode)}`);
+  }
+  const session = deps.store.loadSession(sessionId);
+  if (!session) {
+    throw new Error('Session not found');
+  }
+  if (session.status === 'running' || deps.activeSessions.has(sessionId)) {
+    throw new Error('Cannot change session mode while a run is in progress');
+  }
+
+  const nextMode = normalizeSessionMode(mode);
+  if (normalizeSessionMode(session.mode) === nextMode) {
+    return session;
+  }
+
+  const updated: Session = {
+    ...session,
+    mode: nextMode,
+    updatedAt: Date.now(),
+  };
+  deps.db.sessions.update(sessionId, {
+    mode: nextMode,
+    updated_at: updated.updatedAt,
+  });
+  // Mode changes the toolset + system prompt; drop the cached pi session.
+  deps.getAgentRunner().clearSdkSession?.(sessionId);
+  deps.sendToRenderer({
+    type: 'session.update',
+    payload: { sessionId, updates: { mode: nextMode, updatedAt: updated.updatedAt } },
   });
   return updated;
 }

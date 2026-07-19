@@ -79,6 +79,7 @@ export function useSessionIpc({
             'grep',
           ],
           memoryEnabled: true,
+          mode: 'act' as const,
         };
 
         addSession(session);

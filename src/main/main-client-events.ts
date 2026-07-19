@@ -105,6 +105,12 @@ export async function handleClientEvent(event: ClientEvent): Promise<unknown> {
     case 'session.setMemoryEnabled':
       return sm.setSessionMemoryEnabled(event.payload.sessionId, event.payload.memoryEnabled);
 
+    case 'session.setMode':
+      return sm.setSessionMode(event.payload.sessionId, event.payload.mode);
+
+    case 'session.getMode':
+      return sm.getSessionMode(event.payload.sessionId);
+
     case 'session.list': {
       const sessions = sm.listSessions();
       sendToRenderer({ type: 'session.list', payload: { sessions } });

@@ -66,6 +66,8 @@ export interface SessionRow {
   mounted_paths: string; // JSON string
   allowed_tools: string; // JSON string
   memory_enabled: number;
+  /** 'plan' | 'act' — defaults to 'act' for existing rows. */
+  mode: string;
   model: string | null;
   created_at: number;
   updated_at: number;
@@ -244,6 +246,7 @@ function initializeSchema(database: Database.Database): void {
     ensureColumn(database, 'sessions', 'openai_thread_id', 'openai_thread_id TEXT');
     ensureColumn(database, 'sessions', 'model', 'model TEXT');
     ensureColumn(database, 'sessions', 'agent_session_id', 'agent_session_id TEXT');
+    ensureColumn(database, 'sessions', 'mode', "mode TEXT NOT NULL DEFAULT 'act'");
     migrateLegacySessionIds(database);
 
     // Create messages table
@@ -445,8 +448,8 @@ export function initDatabase(): DatabaseInstance {
   // Prepare statements for better performance
   const insertSession = rawDb.prepare(`
     INSERT OR REPLACE INTO sessions
-    (id, title, claude_session_id, agent_session_id, openai_thread_id, status, cwd, mounted_paths, allowed_tools, memory_enabled, model, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (id, title, claude_session_id, agent_session_id, openai_thread_id, status, cwd, mounted_paths, allowed_tools, memory_enabled, mode, model, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   // Note: Dynamic update queries are built in sessions.update() for flexibility
@@ -546,6 +549,7 @@ export function initDatabase(): DatabaseInstance {
           session.mounted_paths,
           session.allowed_tools,
           session.memory_enabled,
+          session.mode || 'act',
           session.model,
           session.created_at,
           session.updated_at

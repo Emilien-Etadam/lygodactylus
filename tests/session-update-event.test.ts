@@ -19,6 +19,7 @@ describe('applySessionUpdate', () => {
       mountedPaths: [],
       allowedTools: [],
       memoryEnabled: false,
+      mode: 'act',
     };
     const updated = applySessionUpdate(sessions, 's-new', updates);
     expect(updated).toHaveLength(1);

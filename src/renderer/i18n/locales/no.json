@@ -726,7 +726,12 @@
       "low": "Lav",
       "medium": "Middels",
       "high": "Høy"
-    }
+    },
+    "planActToggle": "Plan- / Act-modus",
+    "planMode": "Plan",
+    "actMode": "Act",
+    "switchToAct": "Bytt til Act",
+    "planModeBadge": "Planleggingsmodus"
   },
   "context": {
     "progress": "Fremdrift",

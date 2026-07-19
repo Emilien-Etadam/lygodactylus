@@ -38,6 +38,7 @@ export function sessionRowToSession(row: SessionRow): MemoryIngestionInput['sess
     mountedPaths: [],
     allowedTools: [],
     memoryEnabled: row.memory_enabled === 1,
+    mode: row.mode === 'plan' ? 'plan' : 'act',
     model: row.model || undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

@@ -1,3 +1,7 @@
+import type { SessionMode } from '../../shared/session-mode';
+
+export type { SessionMode };
+
 // Session types
 export interface Session {
   id: string;
@@ -9,6 +13,8 @@ export interface Session {
   mountedPaths: MountedPath[];
   allowedTools: string[];
   memoryEnabled: boolean;
+  /** Plan = read-only exploration; Act = full tools (default). */
+  mode: SessionMode;
   model?: string;
   createdAt: number;
   updatedAt: number;
@@ -505,6 +511,8 @@ export type ClientEvent =
   | { type: 'session.delete'; payload: { sessionId: string } }
   | { type: 'session.batchDelete'; payload: { sessionIds: string[] } }
   | { type: 'session.setMemoryEnabled'; payload: { sessionId: string; memoryEnabled: boolean } }
+  | { type: 'session.setMode'; payload: { sessionId: string; mode: SessionMode } }
+  | { type: 'session.getMode'; payload: { sessionId: string } }
   | { type: 'session.list'; payload: Record<string, never> }
   | { type: 'session.getMessages'; payload: { sessionId: string } }
   | { type: 'session.getTraceSteps'; payload: { sessionId: string } }

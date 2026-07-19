@@ -405,6 +405,8 @@ interface CreatePiSessionOptions {
   thinkingLevel: PiThinkingLevel;
   authStorage: PiAuthStorage;
   customTools: ToolDefinition[];
+  /** Built-in tools to disable (e.g. bash/edit/write in plan mode). */
+  excludeTools?: string[];
   skillPaths: string[];
   promptTemplatePaths: string[];
   coworkAppendPrompt: string[];
@@ -424,6 +426,7 @@ export async function createPiSession({
   thinkingLevel,
   authStorage,
   customTools,
+  excludeTools,
   skillPaths,
   promptTemplatePaths,
   coworkAppendPrompt,
@@ -478,6 +481,7 @@ export async function createPiSession({
         authStorage,
         modelRegistry: ModelRegistry.create(authStorage),
         customTools,
+        ...(excludeTools && excludeTools.length > 0 ? { excludeTools } : {}),
         sessionManager: PiSessionManager.inMemory(),
         settingsManager: PiSettingsManager.inMemory({
           compaction: compactionSettings,

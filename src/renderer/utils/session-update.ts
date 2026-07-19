@@ -26,6 +26,7 @@ function isInsertableSessionUpdate(updates: Partial<Session>): updates is Sessio
     typeof updates.updatedAt === 'number' &&
     Array.isArray(updates.mountedPaths) &&
     Array.isArray(updates.allowedTools) &&
-    typeof updates.memoryEnabled === 'boolean'
+    typeof updates.memoryEnabled === 'boolean' &&
+    (updates.mode === 'plan' || updates.mode === 'act')
   );
 }

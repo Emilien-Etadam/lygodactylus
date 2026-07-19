@@ -1,4 +1,10 @@
-import type { ContentBlock, Message, ServerEvent, Session } from '../../renderer/types';
+import type {
+  ContentBlock,
+  Message,
+  ServerEvent,
+  Session,
+  SessionMode,
+} from '../../renderer/types';
 import { buildScheduledTaskTitle } from '../schedule/schedule-title-i18n';
 import { generateTitleWithPiAi } from '../agent/pi-ai-one-shot';
 import { configStore } from '../config/config-store';
@@ -14,10 +20,12 @@ import {
   createSession,
   deleteSession,
   ensureSandboxInitialized,
+  getSessionMode,
   reloadSandbox,
   stopSession,
   updateSessionCwd,
   updateSessionMemoryEnabled,
+  updateSessionMode,
 } from './session-manager-session-lifecycle';
 import { SessionManagerStore } from './session-manager-store';
 import { maybeGenerateSessionTitle } from './session-title-flow';
@@ -130,6 +138,14 @@ export class SessionManagerFacadeSupport {
 
   updateSessionMemoryEnabled(sessionId: string, memoryEnabled: boolean): Session {
     return updateSessionMemoryEnabled(this.deps, sessionId, memoryEnabled);
+  }
+
+  getSessionMode(sessionId: string): { mode: SessionMode } {
+    return getSessionMode(this.deps, sessionId);
+  }
+
+  updateSessionMode(sessionId: string, mode: SessionMode): Session {
+    return updateSessionMode(this.deps, sessionId, mode);
   }
 
   updateSessionStatus(sessionId: string, status: Session['status']): void {

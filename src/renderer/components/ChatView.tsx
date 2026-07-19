@@ -14,7 +14,7 @@ import { useAppStore } from '../store';
 import { useIPC } from '../hooks/useIPC';
 import { useChatAttachments } from '../hooks/useChatAttachments';
 import { MessageCard } from './MessageCard';
-import type { Message, ContentBlock } from '../types';
+import type { Message, ContentBlock, SessionMode } from '../types';
 import { formatAttachmentSize } from '../../shared/long-paste';
 import type { PluginSlashCommandInfo } from '../../shared/plugin-slash-commands';
 import {
@@ -27,7 +27,8 @@ import {
 } from '../../shared/slash-commands';
 import { SlashCommandMenu } from './SlashCommandMenu';
 import { ThinkingLevelToggle } from './ThinkingLevelToggle';
-import { Send, Square, Plus, Loader2, Plug, X, Clock, ChevronDown, StickyNote, FileText } from 'lucide-react';
+import { PlanActToggle } from './PlanActToggle';
+import { Send, Square, Plus, Loader2, Plug, X, Clock, ChevronDown, StickyNote, FileText, Zap } from 'lucide-react';
 import { MemoryContextBar } from './MemoryContextBar';
 import { stopSpeechSynthesis } from '../utils/speech-synthesis';
 
@@ -52,6 +53,7 @@ export function ChatView() {
     rewindSessionForEdit,
     stopSession,
     setSessionMemoryEnabled,
+    setSessionMode,
     isElectron,
   } = useIPC();
   const setActiveSession = useAppStore((s) => s.setActiveSession);
@@ -112,6 +114,21 @@ export function ChatView() {
   const pendingCount = pendingTurns.length;
   const isSessionRunning = activeSession?.status === 'running';
   const canStop = isSessionRunning || hasActiveTurn || pendingCount > 0;
+  const sessionMode: SessionMode = activeSession?.mode === 'plan' ? 'plan' : 'act';
+  const showSwitchToAct =
+    sessionMode === 'plan' &&
+    !canStop &&
+    messages.some((message) => message.role === 'assistant');
+
+  const handleSessionModeChange = useCallback(
+    (mode: SessionMode) => {
+      if (!activeSession || canStop || mode === sessionMode) {
+        return;
+      }
+      void setSessionMode(activeSession.id, mode);
+    },
+    [activeSession, canStop, sessionMode, setSessionMode]
+  );
 
   const slashQuery = useMemo(() => {
     if (pastedImages.length > 0 || attachedFiles.length > 0) {
@@ -570,12 +587,19 @@ export function ChatView() {
         <div className="text-[11px] font-medium tracking-[0.08em] uppercase text-text-muted">
           Lygodactylus
         </div>
-        <h2
-          ref={titleRef}
-          className="text-[15px] font-medium text-text-primary text-center truncate max-w-[40vw] lg:max-w-[32rem]"
-        >
-          {activeSession.title}
-        </h2>
+        <div className="flex items-center justify-center gap-2 min-w-0">
+          <h2
+            ref={titleRef}
+            className="text-[15px] font-medium text-text-primary text-center truncate max-w-[40vw] lg:max-w-[32rem]"
+          >
+            {activeSession.title}
+          </h2>
+          {sessionMode === 'plan' && (
+            <span className="shrink-0 px-2 py-0.5 rounded-full border border-accent/30 bg-accent/10 text-[11px] font-medium text-accent">
+              {t('chat.planModeBadge')}
+            </span>
+          )}
+        </div>
         {activeConnectors.length > 0 && (
           <>
             <div
@@ -691,6 +715,18 @@ export function ChatView() {
           </button>
         )}
         <div className="max-w-[920px] mx-auto px-5 lg:px-8 py-5">
+          {showSwitchToAct && (
+            <div className="flex justify-center mb-3">
+              <button
+                type="button"
+                onClick={() => handleSessionModeChange('act')}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-accent/40 bg-accent/10 text-accent text-xs font-medium hover:bg-accent/15 transition-colors"
+              >
+                <Zap className="w-3.5 h-3.5" />
+                {t('chat.switchToAct')}
+              </button>
+            </div>
+          )}
           <form
             onSubmit={handleSubmit}
             onDragOver={handleDragOver}
@@ -843,6 +879,12 @@ export function ChatView() {
               />
 
               <div className="flex items-center gap-2">
+                <PlanActToggle
+                  mode={sessionMode}
+                  disabled={canStop}
+                  onChange={handleSessionModeChange}
+                />
+
                 {/* Reasoning level toggle */}
                 <ThinkingLevelToggle />
 

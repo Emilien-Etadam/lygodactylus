@@ -726,7 +726,12 @@
       "low": "Niski",
       "medium": "Średni",
       "high": "Wysoki"
-    }
+    },
+    "planActToggle": "Tryb Plan / Act",
+    "planMode": "Plan",
+    "actMode": "Act",
+    "switchToAct": "Przełącz na Act",
+    "planModeBadge": "Tryb planowania"
   },
   "context": {
     "progress": "Postęp",

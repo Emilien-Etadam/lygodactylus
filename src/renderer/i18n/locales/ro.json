@@ -726,7 +726,12 @@
       "low": "Scăzut",
       "medium": "Mediu",
       "high": "Ridicat"
-    }
+    },
+    "planActToggle": "Mod Plan / Act",
+    "planMode": "Plan",
+    "actMode": "Act",
+    "switchToAct": "Treci la Act",
+    "planModeBadge": "Mod planificare"
   },
   "context": {
     "progress": "Progres",

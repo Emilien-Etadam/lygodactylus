@@ -726,7 +726,12 @@
       "low": "低",
       "medium": "中",
       "high": "高"
-    }
+    },
+    "planActToggle": "计划 / 执行模式",
+    "planMode": "计划",
+    "actMode": "执行",
+    "switchToAct": "切换到执行",
+    "planModeBadge": "计划模式"
   },
   "context": {
     "progress": "进度",

@@ -726,7 +726,12 @@
       "low": "Bajo",
       "medium": "Medio",
       "high": "Alto"
-    }
+    },
+    "planActToggle": "Modo Plan / Act",
+    "planMode": "Plan",
+    "actMode": "Act",
+    "switchToAct": "Pasar a Act",
+    "planModeBadge": "Modo planificación"
   },
   "context": {
     "progress": "Progreso",

@@ -18,6 +18,7 @@ describe('SessionState unified store', () => {
     mountedPaths: [] as MountedPath[],
     allowedTools: [] as string[],
     memoryEnabled: false,
+    mode: 'act' as const,
   });
 
   describe('addSession', () => {
