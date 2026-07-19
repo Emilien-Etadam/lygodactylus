@@ -1125,5 +1125,22 @@
     "description": "Une erreur inattendue s'est produite dans l'application. Vous pouvez essayer de récupérer en cliquant sur le bouton ci-dessous.",
     "details": "Détails de l'erreur",
     "retry": "Réessayer"
+  },
+  "quickAsk": {
+    "title": "Quick Ask",
+    "subtitle": "Question rapide, réponse locale",
+    "placeholder": "Posez une question…",
+    "send": "Envoyer",
+    "openInApp": "Ouvrir dans l'app",
+    "emptyHint": "Tapez une question puis Entrée. La réponse s'affiche ici.",
+    "thinking": "Réflexion…",
+    "settingsTitle": "Quick Ask",
+    "settingsDesc": "Raccourci global pour ouvrir une petite fenêtre de question au-dessus de tout. Désactivé par défaut.",
+    "shortcutLabel": "Raccourci clavier",
+    "shortcutHint": "Format Electron, ex. CommandOrControl+Shift+Space",
+    "shortcutInvalid": "Format de raccourci invalide.",
+    "shortcutTaken": "Ce raccourci est déjà utilisé par le système ou une autre application.",
+    "shortcutRegisterFailed": "Impossible d'enregistrer le raccourci global.",
+    "sessionTitle": "Quick Ask"
   }
 }

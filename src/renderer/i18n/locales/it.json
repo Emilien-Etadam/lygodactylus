@@ -1125,5 +1125,22 @@
     "extensionTbInstallStarted": "Thunderbird si aprirà: conferma l'aggiunta del componente. Il token estensione è stato copiato — incollalo nelle opzioni del componente.",
     "extensionTbInstallErrorNotFound": "Thunderbird o Betterbird non trovato. Il file .xpi è nella cartella Download — installalo da Componenti aggiuntivi → «Installa componente aggiuntivo da file…».",
     "extensionTbSignatureNote": "Thunderbird richiede componenti firmati: se l’installazione viene rifiutata, imposta xpinstall.signatures.required a false in about:config, oppure usa una versione firmata (ATN)."
+  },
+  "quickAsk": {
+    "title": "Quick Ask",
+    "subtitle": "Domanda rapida, risposta locale",
+    "placeholder": "Fai una domanda…",
+    "send": "Invia",
+    "openInApp": "Apri nell'app",
+    "emptyHint": "Digita una domanda e premi Invio. La risposta compare qui.",
+    "thinking": "Sto pensando…",
+    "settingsTitle": "Quick Ask",
+    "settingsDesc": "Scorciatoia globale per aprire una piccola finestra sempre in primo piano. Disattivata di default.",
+    "shortcutLabel": "Scorciatoia da tastiera",
+    "shortcutHint": "Formato Accelerator Electron, es. CommandOrControl+Shift+Space",
+    "shortcutInvalid": "Formato scorciatoia non valido.",
+    "shortcutTaken": "Questa scorciatoia è già usata dal sistema o da un'altra app.",
+    "shortcutRegisterFailed": "Impossibile registrare la scorciatoia globale.",
+    "sessionTitle": "Quick Ask"
   }
 }

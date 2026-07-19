@@ -143,11 +143,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('config.discover-local', payload),
   },
 
-  // Window control methods
+  // Window control methods (shared by main + Quick Ask — same allowlist)
   window: {
     minimize: () => ipcRenderer.send('window.minimize'),
     maximize: () => ipcRenderer.send('window.maximize'),
     close: () => ipcRenderer.send('window.close'),
+    openSessionInMain: (sessionId: string) =>
+      ipcRenderer.send('window.openSessionInMain', sessionId),
+    hideQuickAsk: () => ipcRenderer.send('window.hideQuickAsk'),
   },
 
   // MCP methods
@@ -451,6 +454,8 @@ declare global {
         minimize: () => void;
         maximize: () => void;
         close: () => void;
+        openSessionInMain: (sessionId: string) => void;
+        hideQuickAsk: () => void;
       };
       mcp: {
         getServers: () => Promise<McpServerConfig[]>;

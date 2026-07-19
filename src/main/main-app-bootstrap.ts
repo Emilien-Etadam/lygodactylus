@@ -37,7 +37,10 @@ export function registerAppBootstrap(createWindow: () => void): void {
       const existingWindow =
         mainAppState.mainWindow && !mainAppState.mainWindow.isDestroyed()
           ? mainAppState.mainWindow
-          : BrowserWindow.getAllWindows().find((window) => !window.isDestroyed());
+          : BrowserWindow.getAllWindows().find(
+              (window) =>
+                !window.isDestroyed() && window !== mainAppState.quickAskWindow
+            );
 
       if (!existingWindow) {
         log('[App] No existing window found, creating new one');

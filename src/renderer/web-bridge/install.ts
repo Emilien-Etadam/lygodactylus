@@ -172,6 +172,8 @@ function makeWebElectronApi(): Record<string, unknown> {
       minimize: () => undefined,
       maximize: () => undefined,
       close: () => undefined,
+      openSessionInMain: () => undefined,
+      hideQuickAsk: () => undefined,
     },
 
     artifacts: namespaceProxy('artifacts'),

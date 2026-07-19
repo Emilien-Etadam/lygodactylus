@@ -1125,5 +1125,22 @@
     "extensionTbInstallStarted": "Thunderbird öppnas — bekräfta att tillägget läggs till. Tilläggstoken har kopierats: klistra in den i tilläggets inställningar.",
     "extensionTbInstallErrorNotFound": "Thunderbird eller Betterbird hittades inte. .xpi-filen finns i mappen Hämtningar — installera den via Tillägg → ”Installera tillägg från fil…”.",
     "extensionTbSignatureNote": "Thunderbird kräver signerade tillägg: om installationen nekas, sätt xpinstall.signatures.required till false i about:config, eller använd en ATN-signerad version."
+  },
+  "quickAsk": {
+    "title": "Quick Ask",
+    "subtitle": "Snabb fråga, lokalt svar",
+    "placeholder": "Ställ en fråga…",
+    "send": "Skicka",
+    "openInApp": "Öppna i appen",
+    "emptyHint": "Skriv en fråga och tryck Enter. Svaret streamas här.",
+    "thinking": "Tänker…",
+    "settingsTitle": "Quick Ask",
+    "settingsDesc": "Global genväg för ett litet fönster överst. Avstängt som standard.",
+    "shortcutLabel": "Tangentbordsgenväg",
+    "shortcutHint": "Electron Accelerator-format, t.ex. CommandOrControl+Shift+Space",
+    "shortcutInvalid": "Ogiltigt genvägsformat.",
+    "shortcutTaken": "Denna genväg används redan av systemet eller en annan app.",
+    "shortcutRegisterFailed": "Kunde inte registrera den globala genvägen.",
+    "sessionTitle": "Quick Ask"
   }
 }

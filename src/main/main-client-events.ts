@@ -66,7 +66,10 @@ export async function handleClientEvent(event: ClientEvent): Promise<unknown> {
         event.payload.allowedTools,
         event.payload.content,
         event.payload.memoryEnabled,
-        event.payload.messageId
+        event.payload.messageId,
+        event.payload.mode === 'plan' || event.payload.mode === 'act'
+          ? event.payload.mode
+          : undefined
       );
 
     case 'session.continue':

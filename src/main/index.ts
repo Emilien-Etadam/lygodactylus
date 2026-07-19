@@ -42,6 +42,7 @@ import { registerAppBootstrap } from './main-app-bootstrap';
 import { registerAppLifecycle } from './main-app-lifecycle';
 import { registerMainIpc } from './ipc/register-main-ipc';
 import { createScheduledTaskManager } from './ipc/ipc-schedule-memory';
+import { syncQuickAskFromConfig } from './quick-ask/quick-ask-controller';
 
 const envPath = resolve(__dirname, '../../.env');
 log('[dotenv] Loading from:', envPath);
@@ -139,6 +140,7 @@ app
     buildApplicationMenu();
     setupTray();
     createWindow();
+    syncQuickAskFromConfig();
 
     if (process.platform === 'darwin') {
       const dockMenu = Menu.buildFromTemplate([
@@ -193,8 +195,12 @@ app
     mainAppState.scheduledTaskManager.start();
 
     app.on('activate', () => {
-      const hasVisibleWindow = BrowserWindow.getAllWindows().some((w) => !w.isDestroyed());
-      if (!hasVisibleWindow) {
+      const hasMainWindow =
+        (mainAppState.mainWindow && !mainAppState.mainWindow.isDestroyed()) ||
+        BrowserWindow.getAllWindows().some(
+          (w) => !w.isDestroyed() && w !== mainAppState.quickAskWindow
+        );
+      if (!hasMainWindow) {
         createWindow();
       }
     });

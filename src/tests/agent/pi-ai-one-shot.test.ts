@@ -70,6 +70,8 @@ function makeConfig(): AppConfig {
     enableThinking: false,
     thinkingLevel: 'medium',
     speechSynthesisEnabled: false,
+    quickAskEnabled: false,
+    quickAskShortcut: 'CommandOrControl+Shift+Space',
     ollamaKeepAlive: '30m',
     isConfigured: true,
   };

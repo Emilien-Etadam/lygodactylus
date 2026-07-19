@@ -9,8 +9,11 @@ import { broadcastChatLanEvent } from './chat-lan-server/chat-lan-event-bus';
 
 export function sendToRenderer(event: ServerEvent): void {
   broadcastChatLanEvent(event);
-  const { mainWindow } = mainAppState;
+  const { mainWindow, quickAskWindow } = mainAppState;
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('server-event', event);
+  }
+  if (quickAskWindow && !quickAskWindow.isDestroyed()) {
+    quickAskWindow.webContents.send('server-event', event);
   }
 }

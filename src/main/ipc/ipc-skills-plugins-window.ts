@@ -6,6 +6,8 @@ import { configStore } from '../config/config-store';
 import { logError } from '../utils/logger';
 import { mainAppState } from '../main-app-state';
 import { sendToRenderer } from '../main-renderer-bridge';
+import { openQuickAskSessionInMain } from '../quick-ask/quick-ask-controller';
+import { hideQuickAskWindow } from '../quick-ask/quick-ask-window';
 import { notifyPluginCommandsChanged } from './plugin-commands-notify';
 
 export function registerSkillsPluginsWindowIpc(): void {
@@ -228,6 +230,26 @@ export function registerSkillsPluginsWindowIpc(): void {
       mainAppState.mainWindow?.close();
     } catch (error) {
       logError('[Window] Error closing:', error);
+    }
+  });
+
+  // Shared by main + Quick Ask windows (same preload). Focuses main on a session.
+  ipcMain.on('window.openSessionInMain', (_event, sessionId: unknown) => {
+    try {
+      if (typeof sessionId !== 'string' || !sessionId.trim()) {
+        return;
+      }
+      openQuickAskSessionInMain(sessionId.trim());
+    } catch (error) {
+      logError('[Window] Error opening session in main:', error);
+    }
+  });
+
+  ipcMain.on('window.hideQuickAsk', () => {
+    try {
+      hideQuickAskWindow();
+    } catch (error) {
+      logError('[Window] Error hiding Quick Ask:', error);
     }
   });
 }

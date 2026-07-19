@@ -1125,5 +1125,22 @@
     "extensionTbInstallStarted": "Thunderbird 即将打开——请确认添加扩展。扩展令牌已复制：请将其粘贴到扩展选项中。",
     "extensionTbInstallErrorNotFound": "未找到 Thunderbird 或 Betterbird。.xpi 文件已下载到「下载」文件夹——请通过 附加组件 →「从文件安装附加组件…」安装。",
     "extensionTbSignatureNote": "Thunderbird 要求扩展经过签名：如果安装被拒绝，请在 about:config 中将 xpinstall.signatures.required 设为 false，或使用经 ATN 签名的版本。"
+  },
+  "quickAsk": {
+    "title": "快速提问",
+    "subtitle": "快速提问，本地回答",
+    "placeholder": "输入问题…",
+    "send": "发送",
+    "openInApp": "在应用中打开",
+    "emptyHint": "输入问题后按 Enter，回答会在此流式显示。",
+    "thinking": "思考中…",
+    "settingsTitle": "快速提问",
+    "settingsDesc": "全局快捷键打开置顶小窗口提问。默认关闭。",
+    "shortcutLabel": "键盘快捷键",
+    "shortcutHint": "Electron 加速键格式，例如 CommandOrControl+Shift+Space",
+    "shortcutInvalid": "快捷键格式无效。",
+    "shortcutTaken": "该快捷键已被系统或其他应用占用。",
+    "shortcutRegisterFailed": "无法注册全局快捷键。",
+    "sessionTitle": "Quick Ask"
   }
 }

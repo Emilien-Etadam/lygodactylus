@@ -52,6 +52,8 @@ import {
   normalizeCustomProtocol,
   normalizeMemoryRuntimeConfig,
   normalizeOllamaKeepAlive,
+  normalizeQuickAskShortcut,
+  DEFAULT_QUICK_ASK_SHORTCUT,
   normalizeWebSearchConfig,
   nowISO,
   PROFILE_KEYS,
@@ -149,6 +151,7 @@ export class ConfigStore {
             key === 'memoryEnabled' ||
             key === 'enableThinking' ||
             key === 'speechSynthesisEnabled' ||
+            key === 'quickAskEnabled' ||
             key === 'isConfigured') &&
           typeof rawValue !== 'boolean'
         ) {
@@ -433,6 +436,16 @@ export class ConfigStore {
         updates.speechSynthesisEnabled !== undefined
           ? updates.speechSynthesisEnabled
           : current.speechSynthesisEnabled,
+      quickAskEnabled:
+        updates.quickAskEnabled !== undefined
+          ? updates.quickAskEnabled
+          : current.quickAskEnabled,
+      quickAskShortcut:
+        updates.quickAskShortcut !== undefined
+          ? normalizeQuickAskShortcut(updates.quickAskShortcut) ||
+            current.quickAskShortcut ||
+            DEFAULT_QUICK_ASK_SHORTCUT
+          : current.quickAskShortcut,
       ollamaKeepAlive:
         updates.ollamaKeepAlive !== undefined
           ? normalizeOllamaKeepAlive(updates.ollamaKeepAlive)

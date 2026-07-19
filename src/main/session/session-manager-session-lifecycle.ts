@@ -35,7 +35,8 @@ export function createSession(
   title: string,
   cwd?: string,
   allowedTools?: string[],
-  memoryEnabled?: boolean
+  memoryEnabled?: boolean,
+  mode?: SessionMode
 ): Session {
   const now = Date.now();
   const envCwd = process.env.COWORK_WORKDIR || process.env.WORKDIR || process.env.DEFAULT_CWD;
@@ -74,7 +75,7 @@ export function createSession(
       'grep',
     ],
     memoryEnabled: resolvedMemoryEnabled,
-    mode: DEFAULT_SESSION_MODE,
+    mode: normalizeSessionMode(mode ?? DEFAULT_SESSION_MODE),
     model: configStore.get('model') || undefined,
     createdAt: now,
     updatedAt: now,

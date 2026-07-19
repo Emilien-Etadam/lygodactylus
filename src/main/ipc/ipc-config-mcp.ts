@@ -24,6 +24,7 @@ import { runWebSearchConfigTest } from '../config/web-search-test';
 import { log, logError } from '../utils/logger';
 import { mainAppState } from '../main-app-state';
 import { sendToRenderer } from '../main-renderer-bridge';
+import { syncQuickAskFromConfig } from '../quick-ask/quick-ask-controller';
 
 const buildAgentRuntimeSignature = (config: AppConfig): string =>
   JSON.stringify({
@@ -123,7 +124,18 @@ export function registerConfigMcpIpc(): void {
     configStore.update(newConfig);
     const updatedConfig = await syncConfigAfterMutation(previousConfig);
 
-    return { success: true, config: updatedConfig };
+    const quickAskChanged =
+      previousConfig.quickAskEnabled !== updatedConfig.quickAskEnabled ||
+      previousConfig.quickAskShortcut !== updatedConfig.quickAskShortcut;
+    if (quickAskChanged) {
+      syncQuickAskFromConfig();
+    }
+
+    return {
+      success: true,
+      config: updatedConfig,
+      quickAskShortcutError: mainAppState.quickAskShortcutError,
+    };
   });
 
   ipcMain.handle('config.createSet', async (_event, payload: CreateConfigSetPayload) => {

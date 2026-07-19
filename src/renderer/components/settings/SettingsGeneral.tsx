@@ -7,6 +7,7 @@ import { formatEeDisplayVersion } from '../../../shared/app-version';
 import type { UpdateCheckResult } from '../../../shared/update-check';
 import { stopSpeechSynthesis } from '../../utils/speech-synthesis';
 import { SettingsChatLan } from './SettingsChatLan';
+import { SettingsQuickAsk } from './SettingsQuickAsk';
 import { SettingsWebSearch } from './SettingsWebSearch';
 
 const isElectron = typeof window !== 'undefined' && window.electronAPI !== undefined;
@@ -255,6 +256,8 @@ export function SettingsGeneral() {
           </button>
         </div>
       </section>
+
+      <SettingsQuickAsk />
 
       <div className="space-y-3 pt-4 border-t border-border">
         <h4 className="text-sm font-medium text-text-primary">{t('general.updates')}</h4>

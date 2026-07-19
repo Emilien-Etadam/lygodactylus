@@ -97,8 +97,17 @@ export class SessionManager {
       loadSession: (sessionId) => this.loadSession(sessionId),
       getMessages: (sessionId) => this.getMessages(sessionId),
       saveMessage: (message) => this.saveMessage(message),
-      startSession: (title, prompt, cwd, allowedTools, content, memoryEnabled, messageId) =>
-        this.startSession(title, prompt, cwd, allowedTools, content, memoryEnabled, messageId),
+      startSession: (title, prompt, cwd, allowedTools, content, memoryEnabled, messageId, mode) =>
+        this.startSession(
+          title,
+          prompt,
+          cwd,
+          allowedTools,
+          content,
+          memoryEnabled,
+          messageId,
+          mode
+        ),
       extensionManager: this.extensionManager,
       workspaceMountVirtualPath: WORKSPACE_MOUNT_VIRTUAL_PATH,
     });
@@ -189,10 +198,17 @@ export class SessionManager {
     allowedTools?: string[],
     content?: ContentBlock[],
     memoryEnabled?: boolean,
-    messageId?: string
+    messageId?: string,
+    mode?: SessionMode
   ): Promise<Session> {
     log('[SessionManager] Starting new session:', title);
-    const session = this.facadeSupport.createSession(title, cwd, allowedTools, memoryEnabled);
+    const session = this.facadeSupport.createSession(
+      title,
+      cwd,
+      allowedTools,
+      memoryEnabled,
+      mode
+    );
     this.store.saveSession(session);
     this.enqueuePrompt(session, prompt, content, messageId);
     return session;

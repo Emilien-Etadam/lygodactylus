@@ -13,6 +13,9 @@ import type { ScheduledTaskManager } from './schedule/scheduled-task-manager';
 
 export const mainAppState = {
   mainWindow: null as BrowserWindow | null,
+  quickAskWindow: null as BrowserWindow | null,
+  quickAskShortcutRegistered: false,
+  quickAskShortcutError: null as string | null,
   sessionManager: null as SessionManager | null,
   skillsManager: null as SkillsManager | null,
   pluginRuntimeService: null as PluginRuntimeService | null,

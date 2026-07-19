@@ -1125,5 +1125,22 @@
     "extensionTbInstallStarted": "Thunderbird відкриється — підтвердьте додавання розширення. Токен розширення скопійовано: вставте його в налаштування розширення.",
     "extensionTbInstallErrorNotFound": "Thunderbird або Betterbird не знайдено. Файл .xpi у теці «Завантаження» — встановіть його через Додатки → «Встановити додаток з файлу…».",
     "extensionTbSignatureNote": "Thunderbird вимагає підписаних додатків: якщо встановлення відхилено, встановіть xpinstall.signatures.required у false в about:config або використайте підписану версію (ATN)."
+  },
+  "quickAsk": {
+    "title": "Quick Ask",
+    "subtitle": "Швидке питання, локальна відповідь",
+    "placeholder": "Поставте питання…",
+    "send": "Надіслати",
+    "openInApp": "Відкрити в застосунку",
+    "emptyHint": "Введіть питання й натисніть Enter. Відповідь з’явиться тут.",
+    "thinking": "Думаю…",
+    "settingsTitle": "Quick Ask",
+    "settingsDesc": "Глобальна комбінація клавіш для невеликого вікна поверх усіх. Вимкнено за замовчуванням.",
+    "shortcutLabel": "Комбінація клавіш",
+    "shortcutHint": "Формат Accelerator Electron, напр. CommandOrControl+Shift+Space",
+    "shortcutInvalid": "Недійсний формат комбінації.",
+    "shortcutTaken": "Цю комбінацію вже зайнято системою або іншою програмою.",
+    "shortcutRegisterFailed": "Не вдалося зареєструвати глобальну комбінацію.",
+    "sessionTitle": "Quick Ask"
   }
 }
