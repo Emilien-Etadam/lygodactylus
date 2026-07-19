@@ -129,6 +129,7 @@ Current stable fork baseline: **`6.0.2`** — [CHANGELOG](CHANGELOG.md)
 - **Log Management**: Structured logging with rotation, size limits, log viewer improvements
 - **Installation Experience**: Smoother first-run — auto-detect dependencies, clearer errors, one-click setup
 - **Linux Support**: First-class Linux builds — **done v5.6** (AppImage CI release; deb/rpm later)
+- **Model Location Picker (UX)**: sélecteur clair de *où* tourne chaque modèle (local vs machine distante via Chat LAN) — version allégée du « compute location as control plane » de LM Studio Bionic, sans cloud. UX polish, pas un sous-système. — _candidate_
 
 ### Mid-term (v3.5.0+)
 
@@ -142,7 +143,8 @@ Current stable fork baseline: **`6.0.2`** — [CHANGELOG](CHANGELOG.md)
 - **Collaborative Mode**: Multiple users sharing a workspace
 - **Mobile Companion**: Lightweight mobile app for monitoring and quick interactions — **first step done**: the Chat LAN web UI is now an installable PWA (QR pairing, Android home-screen install, SSE auto-reconnect, reverse-proxy/HTTPS support); a richer client may follow
 - **Local Voice Input (STT)**: clavier vocal 100% local — voice-to-text on-device via un modèle embarqué (ex. whisper.cpp / faster-whisper), push-to-talk vers la zone de saisie du chat. Surfacé par la transcription locale de LM Studio Bionic ; seule capacité purement locale qui manque aujourd'hui. Ajout de feature (capture audio + modèle local) : évaluer le périmètre avant de s'engager. — _candidate_
+- **Remote Access — option Tailscale**: chemin d'accès distant type LM Link (Tailscale, chiffré E2E) en complément de Chat LAN + WireGuard, pour réduire la friction d'appairage. À surveiller/documenter, pas à reconstruire. — _candidate_
 
 ---
 
-_Last updated: 2026-07-19 (planned: memory freshness/confidence ; candidate: local voice STT)_
+_Last updated: 2026-07-19 (planned: memory freshness/confidence ; candidates: local voice STT, model-location picker, Tailscale remote)_
