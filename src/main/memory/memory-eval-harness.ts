@@ -194,6 +194,7 @@ export class MemoryEvalHarness {
           mountedPaths: [],
           allowedTools: [],
           memoryEnabled: true,
+          mode: 'act' as const,
           createdAt: testCase.messages[0]?.timestamp || Date.now(),
           updatedAt: testCase.messages[testCase.messages.length - 1]?.timestamp || Date.now(),
         },

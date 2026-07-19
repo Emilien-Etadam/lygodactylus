@@ -723,7 +723,12 @@
       "low": "Низький",
       "medium": "Середній",
       "high": "Високий"
-    }
+    },
+    "planActToggle": "Режим Plan / Act",
+    "planMode": "Plan",
+    "actMode": "Act",
+    "switchToAct": "Перейти в Act",
+    "planModeBadge": "Режим планування"
   },
   "context": {
     "progress": "Прогрес",

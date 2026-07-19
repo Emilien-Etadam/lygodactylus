@@ -53,6 +53,11 @@ import {
   parseSlashCommand,
   normalizePluginSlashPromptForExpansion,
 } from '../../shared/slash-commands';
+import {
+  filterToolsForSessionMode,
+  getPlanModeExcludedBuiltinTools,
+  normalizeSessionMode,
+} from '../../shared/session-mode';
 import { mt } from '../i18n';
 import { buildPiSessionRuntimeSignature } from './pi-session-runtime';
 import { getSharedAuthStorage } from './shared-auth';
@@ -277,6 +282,7 @@ export async function preparePiSessionRun({
     (configStore.get('enableThinking') ?? false) ? configStore.get('thinkingLevel') : 'off';
   logCtx('[AgentRunner] Enable thinking mode:', thinkingLevel);
 
+  const sessionMode = normalizeSessionMode(session.mode);
   const sessionRuntimeSignature = buildPiSessionRuntimeSignature({
     configProvider: runtimeConfig.provider,
     customProtocol: runtimeConfig.customProtocol,
@@ -285,6 +291,7 @@ export async function preparePiSessionRun({
     modelBaseUrl: piModel.baseUrl,
     effectiveCwd,
     apiKey,
+    sessionMode,
   });
   const pluginSlashCommands = ctx.skillsPaths.listPluginSlashCommands();
   const slashParsed = parseSlashCommand(prompt.trim(), pluginSlashCommands);
@@ -368,7 +375,8 @@ export async function preparePiSessionRun({
     workingDir,
     sandboxPath,
     useSandboxIsolation,
-    configStore.get('sandboxLanNetworkEnabled') === true
+    configStore.get('sandboxLanNetworkEnabled') === true,
+    sessionMode
   );
   const mcpCustomTools = ctx.mcpManager ? buildMcpCustomTools(ctx.mcpManager) : [];
   const webSearchCustomTools = buildWebSearchCustomTools();
@@ -442,7 +450,8 @@ export async function preparePiSessionRun({
     effectiveCwd,
     ctx.requestSudoPassword
   ).find((tool) => tool.name === 'bash');
-  const allCustomTools = [
+  // Assemble the full toolset, then filter once for plan mode (single gating point).
+  const assembledCustomTools = [
     ...(wrappedBash ? [wrappedBash] : []),
     ...nativeCustomTools,
     ...scheduleCustomTools,
@@ -450,10 +459,17 @@ export async function preparePiSessionRun({
     ...mcpCustomTools,
     ...extensionCustomTools,
   ];
+  const allCustomTools = filterToolsForSessionMode(assembledCustomTools, sessionMode);
+  const excludeBuiltinTools = getPlanModeExcludedBuiltinTools(sessionMode);
 
   logCtx(`[AgentRunner] Session reuse check: cached=${!!cachedSession}`);
   logCtx(`[AgentRunner] Model=${piModel.id}, thinkingLevel=${thinkingLevel}`);
-  log('[AgentRunner] Built-in tools: read, bash, edit, write');
+  logCtx(`[AgentRunner] Session mode: ${sessionMode}`);
+  log(
+    sessionMode === 'plan'
+      ? '[AgentRunner] Built-in tools (plan): read'
+      : '[AgentRunner] Built-in tools: read, bash, edit, write'
+  );
   log(
     '[AgentRunner] Native tools: glob, grep, web_fetch, http_request, todo_write, ask_user_question (+ aliases)'
   );
@@ -504,6 +520,7 @@ export async function preparePiSessionRun({
     thinkingLevel,
     authStorage,
     customTools: allCustomTools,
+    excludeTools: excludeBuiltinTools,
     skillPaths,
     promptTemplatePaths,
     coworkAppendPrompt,

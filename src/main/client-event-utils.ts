@@ -14,6 +14,8 @@ export function eventRequiresSessionManager(event: ClientEvent): boolean {
     case 'session.handoff':
     case 'session.forkFromMessage':
     case 'session.rewindToMessage':
+    case 'session.setMode':
+    case 'session.getMode':
     case 'permission.response':
     case 'question.response':
       return true;

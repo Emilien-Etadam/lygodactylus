@@ -812,7 +812,12 @@
       "low": "Faible",
       "medium": "Moyen",
       "high": "Élevé"
-    }
+    },
+    "planActToggle": "Mode Plan / Act",
+    "planMode": "Plan",
+    "actMode": "Act",
+    "switchToAct": "Passer en Act",
+    "planModeBadge": "Mode planification"
   },
   "context": {
     "progress": "Progression",

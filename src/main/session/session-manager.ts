@@ -5,6 +5,7 @@ import type {
   QuestionItem,
   ServerEvent,
   Session,
+  SessionMode,
   TraceStep,
 } from '../../renderer/types';
 import type { DatabaseInstance } from '../db/database';
@@ -297,6 +298,14 @@ export class SessionManager {
 
   setSessionMemoryEnabled(sessionId: string, memoryEnabled: boolean): Session {
     return this.facadeSupport.updateSessionMemoryEnabled(sessionId, memoryEnabled);
+  }
+
+  getSessionMode(sessionId: string): { mode: SessionMode } {
+    return this.facadeSupport.getSessionMode(sessionId);
+  }
+
+  setSessionMode(sessionId: string, mode: SessionMode): Session {
+    return this.facadeSupport.updateSessionMode(sessionId, mode);
   }
 
   clearAllCachedAgentSessions(): void {

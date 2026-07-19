@@ -723,7 +723,12 @@
       "low": "Laag",
       "medium": "Gemiddeld",
       "high": "Hoog"
-    }
+    },
+    "planActToggle": "Plan- / Act-modus",
+    "planMode": "Plan",
+    "actMode": "Act",
+    "switchToAct": "Overschakelen naar Act",
+    "planModeBadge": "Planningsmodus"
   },
   "context": {
     "progress": "Voortgang",

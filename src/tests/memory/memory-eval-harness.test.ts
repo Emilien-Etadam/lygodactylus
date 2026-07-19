@@ -18,6 +18,7 @@ const mockConfigState = vi.hoisted(() => ({
     theme: 'light',
     sandboxEnabled: false,
     memoryEnabled: true,
+    mode: 'act' as const,
     memoryRuntime: {
       llm: {
         inheritFromActive: true,

@@ -1,3 +1,8 @@
+import {
+  normalizeSessionMode,
+  PLAN_MODE_SYSTEM_PROMPT,
+  type SessionMode,
+} from '../../shared/session-mode';
 import { type AgentRunnerRunContext, VIRTUAL_WORKSPACE_PATH } from './agent-runner-run-context';
 
 export function buildWorkspaceInfoPrompt(
@@ -22,7 +27,8 @@ export function buildCoworkAppendPrompt(
   workingDir: string | undefined,
   sandboxPath: string | null,
   useSandboxIsolation: boolean,
-  sandboxLanNetworkEnabled: boolean
+  sandboxLanNetworkEnabled: boolean,
+  sessionMode: SessionMode = 'act'
 ): string[] {
   const workspaceInfoPrompt = buildWorkspaceInfoPrompt(
     workingDir,
@@ -44,6 +50,9 @@ LAN network access from the sandbox is disabled in Settings. Enable "Sandbox LAN
 </sandbox_network>`
         : '';
 
+  const mode = normalizeSessionMode(sessionMode);
+  const planModePrompt = mode === 'plan' ? PLAN_MODE_SYSTEM_PROMPT : '';
+
   return [
     'You are an Lygodactylus assistant. Be concise, accurate, and tool-capable.',
     `CRITICAL BEHAVIORAL RULES:
@@ -52,6 +61,7 @@ LAN network access from the sandbox is disabled in Settings. Enable "Sandbox LAN
 3. For relative time windows like "within two days" in browsing or research tasks, assume the most recent two relevant publication days unless the user explicitly defines another date range.
 4. For bracketed placeholders like [Agent], [Topic], etc., treat the word inside brackets as the literal search keyword unless the user says otherwise.
 5. When given a task, START DOING IT. Do not restate the task, do not list what you will do, do not ask for confirmation. Just execute.`,
+    planModePrompt,
     workspaceInfoPrompt,
     `<citation_requirements>
 If your answer uses linkable content from MCP tools, include a "Sources:" section and otherwise use standard Markdown links: [Title](https://claude.ai/chat/URL).
