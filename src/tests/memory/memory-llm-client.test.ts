@@ -78,6 +78,8 @@ function makeConfig(timeoutMs: number, overrides: Partial<AppConfig> = {}): AppC
     quickAskEnabled: false,
     quickAskShortcut: 'CommandOrControl+Shift+Space',
     isConfigured: true,
+    constrainedOutput: 'auto',
+    constrainedOutputCapability: null,
     ...overrides,
     ollamaKeepAlive: overrides.ollamaKeepAlive ?? '30m',
   };
@@ -151,6 +153,41 @@ describe('MemoryLLMClient', () => {
     );
     expect(runPiAiOneShotMock).not.toHaveBeenCalled();
     expect(response).toEqual({ text: '{"ok":true}' });
+  });
+
+  it('prefers pi-ai constrained schema when endpoint capability is cached', async () => {
+    const client = new MemoryLLMClient(() =>
+      makeConfig(5000, {
+        baseUrl: 'http://localhost:11434/v1',
+        model: 'qwen3.5:0.8b',
+        constrainedOutput: 'auto',
+        constrainedOutputCapability: {
+          baseUrl: 'http://localhost:11434/v1',
+          model: 'qwen3.5:0.8b',
+          supported: true,
+          field: 'ollama_format',
+          probedAt: '2026-01-01T00:00:00.000Z',
+        },
+      })
+    );
+
+    const response = await client.complete({
+      systemPrompt: 'memory system',
+      userPrompt: 'memory user',
+      jsonMode: true,
+    });
+
+    expect(chatCompletionsCreateMock).not.toHaveBeenCalled();
+    expect(runPiAiOneShotMock).toHaveBeenCalledWith(
+      'memory user',
+      'memory system',
+      expect.objectContaining({ model: 'qwen3.5:0.8b' }),
+      expect.objectContaining({
+        responseSchema: { type: 'object' },
+        responseSchemaName: 'memory_json',
+      })
+    );
+    expect(response).toEqual({ text: 'pi-ai response' });
   });
 
   it('uses pi-ai when jsonMode is not enabled', async () => {

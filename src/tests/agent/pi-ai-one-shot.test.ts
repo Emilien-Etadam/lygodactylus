@@ -73,6 +73,8 @@ function makeConfig(): AppConfig {
     quickAskEnabled: false,
     quickAskShortcut: 'CommandOrControl+Shift+Space',
     ollamaKeepAlive: '30m',
+    constrainedOutput: 'auto',
+    constrainedOutputCapability: null,
     isConfigured: true,
   };
 }

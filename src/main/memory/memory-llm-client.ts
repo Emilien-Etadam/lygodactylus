@@ -2,6 +2,10 @@ import type { AppConfig, CustomProtocolType, ProviderType } from '../config/conf
 import { configStore } from '../config/config-store';
 import { normalizeOpenAICompatibleBaseUrl, resolveOpenAICredentials, isOfficialOpenAIBaseUrl, OPENAI_PLATFORM_BASE_URL } from '../config/auth-utils';
 import { detectCommonProviderSetup } from '../../shared/api-provider-guidance';
+import {
+  GENERIC_JSON_OBJECT_SCHEMA,
+  resolveActiveConstraintField,
+} from '../config/endpoint-capabilities';
 import { runPiAiOneShot } from '../agent/pi-ai-one-shot';
 import { logWarn } from '../utils/logger';
 
@@ -11,6 +15,9 @@ export interface MemoryCompletionRequest {
   temperature?: number;
   maxTokens?: number;
   jsonMode?: boolean;
+  /** Flat JSON Schema for server-side constrained decoding when the endpoint supports it. */
+  responseSchema?: Record<string, unknown>;
+  responseSchemaName?: string;
 }
 
 export interface MemoryCompletionResponse {
@@ -115,20 +122,38 @@ export class MemoryLLMClient implements MemoryLLMClientLike {
       appConfig.model
     );
 
-    const runPiAiCompletion = (): Promise<MemoryCompletionResponse> =>
+    const effectiveSchema =
+      request.responseSchema ||
+      (request.jsonMode === true ? { ...GENERIC_JSON_OBJECT_SCHEMA } : undefined);
+    const oneShotConfig = buildAppConfig(appConfig, llmConfig);
+    const canConstrain =
+      Boolean(effectiveSchema) && resolveActiveConstraintField(oneShotConfig) !== null;
+
+    const runPiAiCompletion = (withSchema: boolean): Promise<MemoryCompletionResponse> =>
       runWithMemoryTimeout(llmConfig.timeoutMs, async (signal) => {
         const result = await runPiAiOneShot(
           request.userPrompt,
           request.systemPrompt,
-          buildAppConfig(appConfig, llmConfig),
+          oneShotConfig,
           {
             temperature: request.temperature ?? 0,
             maxTokens: request.maxTokens ?? 16_000,
             signal,
+            ...(withSchema && effectiveSchema
+              ? {
+                  responseSchema: effectiveSchema,
+                  responseSchemaName: request.responseSchemaName || 'memory_json',
+                }
+              : {}),
           }
         );
         return { text: result.text };
       });
+
+    // Prefer server-side json_schema / format when capability was probed.
+    if (canConstrain) {
+      return runPiAiCompletion(true);
+    }
 
     if (request.jsonMode === true && llmConfig.provider === 'openai') {
       try {
@@ -168,11 +193,11 @@ export class MemoryLLMClient implements MemoryLLMClientLike {
           '[MemoryLLMClient] OpenAI JSON mode completion failed; falling back to pi-ai:',
           error
         );
-        return runPiAiCompletion();
+        return runPiAiCompletion(false);
       }
     }
 
-    return runPiAiCompletion();
+    return runPiAiCompletion(Boolean(effectiveSchema));
   }
 
   async embed(text: string): Promise<number[]> {

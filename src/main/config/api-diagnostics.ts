@@ -29,6 +29,7 @@ import type {
 } from '../../renderer/types';
 import { log, logWarn } from '../utils/logger';
 import { probeWithPiAi } from '../agent/pi-ai-one-shot';
+import { refreshConstrainedOutputCapability } from './endpoint-capabilities';
 import { fetchOllamaModelIndex } from './ollama-api';
 
 const STEP_NAMES: DiagnosticStepName[] = ['dns', 'tcp', 'tls', 'auth', 'model'];
@@ -670,6 +671,28 @@ async function runDiagnosticsImpl(input: DiagnosticInput): Promise<DiagnosticRes
 
   if (overallOk) {
     log('[Diagnostics] All checks passed', { totalLatencyMs });
+    // Best-effort constrained-output capability probe — never affects diagnostic result.
+    void (async () => {
+      try {
+        await refreshConstrainedOutputCapability(
+          {
+            provider: input.provider,
+            customProtocol: input.customProtocol,
+            apiKey: input.apiKey,
+            baseUrl: input.baseUrl,
+            model: input.model || '',
+          },
+          {
+            getConfig: () => configStore.getAll(),
+            saveCapability: (cache) => {
+              configStore.update({ constrainedOutputCapability: cache });
+            },
+          }
+        );
+      } catch (error) {
+        logWarn('[Diagnostics] Constrained-output capability probe failed silently:', error);
+      }
+    })();
   } else {
     logWarn('[Diagnostics] Failed', {
       failedAt: result.failedAt,
