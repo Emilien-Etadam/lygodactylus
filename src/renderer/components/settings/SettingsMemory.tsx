@@ -37,6 +37,14 @@ const DEFAULT_MEMORY_RUNTIME: MemoryRuntimeConfig = {
   sessionTopK: 5,
   injectionPolicy: 'escape',
   showInjectedMemoryInChat: true,
+  memoryReranker: {
+    enabled: false,
+    baseUrl: '',
+    model: '',
+    topN: 20,
+    keep: 8,
+    timeoutMs: 800,
+  },
   storageRoot: '',
   evalEnabled: false,
   evalWorkspaces: [],
@@ -59,6 +67,10 @@ function cloneRuntimeConfig(runtime?: MemoryRuntimeConfig): MemoryRuntimeConfig 
     injectionPolicy: source.injectionPolicy ?? DEFAULT_MEMORY_RUNTIME.injectionPolicy,
     showInjectedMemoryInChat:
       source.showInjectedMemoryInChat ?? DEFAULT_MEMORY_RUNTIME.showInjectedMemoryInChat,
+    memoryReranker: {
+      ...DEFAULT_MEMORY_RUNTIME.memoryReranker,
+      ...(source.memoryReranker || {}),
+    },
     storageRoot: source.storageRoot ?? DEFAULT_MEMORY_RUNTIME.storageRoot,
     evalEnabled: source.evalEnabled ?? DEFAULT_MEMORY_RUNTIME.evalEnabled,
     evalWorkspaces: Array.isArray(source.evalWorkspaces)
@@ -97,6 +109,8 @@ export function SettingsMemory() {
   );
   const [isBusy, setIsBusy] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+  const [rerankTestStatus, setRerankTestStatus] = useState<string | null>(null);
+  const [isTestingRerank, setIsTestingRerank] = useState(false);
 
   const enabled = overview?.enabled ?? appConfig?.memoryEnabled ?? true;
 
@@ -264,6 +278,32 @@ export function SettingsMemory() {
       setStatus(error instanceof Error ? error.message : String(error));
     } finally {
       setIsBusy(false);
+    }
+  };
+
+  const handleTestReranker = async () => {
+    if (!window.electronAPI?.memory?.testReranker) {
+      return;
+    }
+    setIsTestingRerank(true);
+    setRerankTestStatus(null);
+    try {
+      const result = await window.electronAPI.memory.testReranker({
+        baseUrl: runtimeDraft.memoryReranker.baseUrl,
+        model: runtimeDraft.memoryReranker.model,
+        timeoutMs: runtimeDraft.memoryReranker.timeoutMs,
+      });
+      if (!result.ok) {
+        setRerankTestStatus(result.error || t('memory.rerankerTestFailed'));
+        return;
+      }
+      setRerankTestStatus(
+        t('memory.rerankerTestSuccess', { ms: result.latencyMs ?? 0 })
+      );
+    } catch (error) {
+      setRerankTestStatus(error instanceof Error ? error.message : String(error));
+    } finally {
+      setIsTestingRerank(false);
     }
   };
 
@@ -551,6 +591,127 @@ export function SettingsMemory() {
                 }))
               }
             />
+          </div>
+
+          <div className="space-y-3 rounded-lg border border-border-muted bg-background/80 p-3">
+            <div>
+              <p className="text-sm font-medium text-text-primary">{t('memory.rerankerTitle')}</p>
+              <p className="mt-1 text-xs text-text-muted">{t('memory.rerankerDescription')}</p>
+            </div>
+            <ToggleField
+              label={t('memory.rerankerEnabled')}
+              checked={runtimeDraft.memoryReranker.enabled}
+              onChange={(checked) =>
+                setRuntimeDraft((prev) => ({
+                  ...prev,
+                  memoryReranker: { ...prev.memoryReranker, enabled: checked },
+                }))
+              }
+            />
+            <div className="grid gap-4 md:grid-cols-2">
+              <LabeledField label={t('memory.rerankerBaseUrl')}>
+                <input
+                  value={runtimeDraft.memoryReranker.baseUrl}
+                  onChange={(event) =>
+                    setRuntimeDraft((prev) => ({
+                      ...prev,
+                      memoryReranker: { ...prev.memoryReranker, baseUrl: event.target.value },
+                    }))
+                  }
+                  placeholder="http://127.0.0.1:8080"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent"
+                />
+              </LabeledField>
+              <LabeledField label={t('memory.rerankerModel')}>
+                <input
+                  value={runtimeDraft.memoryReranker.model}
+                  onChange={(event) =>
+                    setRuntimeDraft((prev) => ({
+                      ...prev,
+                      memoryReranker: { ...prev.memoryReranker, model: event.target.value },
+                    }))
+                  }
+                  placeholder="rerank-model"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent"
+                />
+              </LabeledField>
+              <LabeledField label={t('memory.rerankerTopN')}>
+                <input
+                  type="number"
+                  min={1}
+                  max={50}
+                  value={runtimeDraft.memoryReranker.topN}
+                  onChange={(event) =>
+                    setRuntimeDraft((prev) => ({
+                      ...prev,
+                      memoryReranker: {
+                        ...prev.memoryReranker,
+                        topN: Number(event.target.value || 20),
+                      },
+                    }))
+                  }
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent"
+                />
+              </LabeledField>
+              <LabeledField label={t('memory.rerankerKeep')}>
+                <input
+                  type="number"
+                  min={1}
+                  max={50}
+                  value={runtimeDraft.memoryReranker.keep}
+                  onChange={(event) =>
+                    setRuntimeDraft((prev) => ({
+                      ...prev,
+                      memoryReranker: {
+                        ...prev.memoryReranker,
+                        keep: Number(event.target.value || 8),
+                      },
+                    }))
+                  }
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent"
+                />
+              </LabeledField>
+              <LabeledField label={t('memory.rerankerTimeoutMs')}>
+                <input
+                  type="number"
+                  min={100}
+                  max={30000}
+                  value={runtimeDraft.memoryReranker.timeoutMs}
+                  onChange={(event) =>
+                    setRuntimeDraft((prev) => ({
+                      ...prev,
+                      memoryReranker: {
+                        ...prev.memoryReranker,
+                        timeoutMs: Number(event.target.value || 800),
+                      },
+                    }))
+                  }
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent"
+                />
+              </LabeledField>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  void handleTestReranker();
+                }}
+                disabled={
+                  isTestingRerank ||
+                  !runtimeDraft.memoryReranker.baseUrl.trim() ||
+                  !runtimeDraft.memoryReranker.model.trim()
+                }
+                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isTestingRerank ? t('memory.rerankerTesting') : t('memory.rerankerTest')}
+              </button>
+              {rerankTestStatus && (
+                <p className="text-xs text-text-muted">{rerankTestStatus}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
             <ToggleField
               label={t('memory.evalEnabled')}
               checked={runtimeDraft.evalEnabled ?? false}

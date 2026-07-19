@@ -241,7 +241,19 @@
     "noFiles": "Aucun fichier de mémoire pour l'instant",
     "fileContent": "Contenu du fichier",
     "emptyFile": "Le fichier est vide",
-    "selectFileHint": "Sélectionnez un fichier à gauche pour afficher son JSON brut."
+    "selectFileHint": "Sélectionnez un fichier à gauche pour afficher son JSON brut.",
+    "rerankerTitle": "Rerank local",
+    "rerankerDescription": "Optionnel. Réordonne les souvenirs récupérés via un endpoint local POST /v1/rerank (ex. llama.cpp --reranking). Désactivé par défaut ; en cas d’échec, le classement actuel est conservé.",
+    "rerankerEnabled": "Activer le rerank local",
+    "rerankerBaseUrl": "URL de base du reranker",
+    "rerankerModel": "Modèle de rerank",
+    "rerankerTopN": "Top-N candidaté",
+    "rerankerKeep": "Résultats conservés",
+    "rerankerTimeoutMs": "Délai max (ms)",
+    "rerankerTest": "Tester",
+    "rerankerTesting": "Test en cours…",
+    "rerankerTestSuccess": "Rerank OK ({{ms}} ms).",
+    "rerankerTestFailed": "Échec du test de rerank."
   },
   "language": {
     "english": "Anglais",

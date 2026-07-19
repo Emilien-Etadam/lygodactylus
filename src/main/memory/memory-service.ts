@@ -85,6 +85,7 @@ export class MemoryService {
       getSessionTitle: (sessionId) => this.db.sessions.get(sessionId)?.title || undefined,
       embedQuery: (text: string) => embedText(this.contextHost, text),
       useEmbedding: () => this.getAppConfig().memoryRuntime.useEmbedding,
+      getRerankerConfig: () => this.getAppConfig().memoryRuntime.memoryReranker,
     });
     this.tools = createMemoryTools(this);
     this.queryHost = {

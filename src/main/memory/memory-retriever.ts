@@ -1,3 +1,4 @@
+import type { MemoryRerankerConfig } from '../config/config-schema';
 import type {
   CoreMemoryEntry,
   MemoryReadResult,
@@ -7,6 +8,7 @@ import type {
 } from './memory-types';
 import { ExperienceMemoryStore } from './experience-memory-store';
 import { computeMemoryRankScore } from './memory-ranker';
+import { maybeRerankMemoryItems } from './memory-reranker-client';
 import { lexicalScore, normalizeWorkspaceKey, summarizeText } from './memory-utils';
 
 function buildSearchId(kind: string, recordId: string): string {
@@ -40,6 +42,15 @@ function buildSourceExcerpt(
   return summarizeText(turns.map((turn) => `${turn.role}: ${turn.content}`).join('\n'), 320);
 }
 
+interface RankedSearchHit {
+  result: MemorySearchResult;
+  baseScore: number;
+  freshnessFactor: number;
+  confidenceFactor: number;
+  documentText: string;
+  score: number;
+}
+
 export class MemoryRetriever {
   constructor(
     private readonly deps: {
@@ -50,6 +61,8 @@ export class MemoryRetriever {
       getSessionTitle: (sessionId: string) => string | undefined;
       embedQuery?: (query: string) => Promise<number[]>;
       useEmbedding?: () => boolean;
+      getRerankerConfig?: () => MemoryRerankerConfig;
+      rerankFetch?: typeof fetch;
     }
   ) {}
 
@@ -70,13 +83,13 @@ export class MemoryRetriever {
       this.deps.useEmbedding?.() && this.deps.embedQuery
         ? await this.deps.embedQuery(query)
         : undefined;
-    const results: MemorySearchResult[] = [];
+    const hits: RankedSearchHit[] = [];
 
     if (scope !== 'workspace') {
-      results.push(...this.searchCore(query));
+      hits.push(...this.searchCore(query));
     }
     if (scope !== 'global') {
-      results.push(
+      hits.push(
         ...(await this.searchExperience(
           query,
           experienceWorkspace,
@@ -86,11 +99,39 @@ export class MemoryRetriever {
       );
     }
 
-    return results
-      .sort(
-        (a, b) => b.score - a.score || (b.updatedAt || b.createdAt) - (a.updatedAt || a.createdAt)
-      )
-      .slice(0, limit);
+    // Classement actuel (evidence + workspace + fraîcheur × confiance).
+    const ranked = hits.sort(
+      (a, b) =>
+        b.score - a.score ||
+        (b.result.updatedAt || b.result.createdAt) - (a.result.updatedAt || a.result.createdAt)
+    );
+
+    const reranker = this.deps.getRerankerConfig?.();
+    if (!reranker?.enabled) {
+      return ranked.slice(0, limit).map((hit) => ({ ...hit.result, score: hit.score }));
+    }
+
+    // Rerank = pertinence sémantique sur le top-N ; fraîcheur/confiance restent
+    // multiplicatifs sur le score final (voir applyRerankHits). En échec → ordre inchangé.
+    const reranked = await maybeRerankMemoryItems({
+      enabled: true,
+      config: reranker,
+      query,
+      items: ranked.map((hit) => ({
+        ...hit,
+        documentText: hit.documentText,
+        score: hit.score,
+        freshnessFactor: hit.freshnessFactor,
+        confidenceFactor: hit.confidenceFactor,
+      })),
+      fetchImpl: this.deps.rerankFetch,
+      logLabel: 'search',
+    });
+
+    return reranked.slice(0, limit).map((hit) => ({
+      ...hit.result,
+      score: hit.score,
+    }));
   }
 
   read(id: string): MemoryReadResult | null {
@@ -174,15 +215,15 @@ export class MemoryRetriever {
     };
   }
 
-  private searchCore(query: string): MemorySearchResult[] {
+  private searchCore(query: string): RankedSearchHit[] {
     return this.deps
       .getCoreEntries()
-      .map((entry): MemorySearchResult | null => {
+      .map((entry): RankedSearchHit | null => {
         const score = lexicalScore(query, `${entry.combinedKey} ${entry.value}`);
         if (score <= 0) {
           return null;
         }
-        return {
+        const result: MemorySearchResult = {
           id: buildSearchId('core', entry.combinedKey),
           recordId: entry.combinedKey,
           kind: 'core',
@@ -195,8 +236,16 @@ export class MemoryRetriever {
           createdAt: 0,
           updatedAt: 0,
         };
+        return {
+          result,
+          baseScore: score,
+          freshnessFactor: 1,
+          confidenceFactor: 1,
+          documentText: `${entry.combinedKey}\n${entry.value}`,
+          score,
+        };
       })
-      .filter((item): item is MemorySearchResult => Boolean(item));
+      .filter((item): item is RankedSearchHit => Boolean(item));
   }
 
   private async searchExperience(
@@ -204,9 +253,9 @@ export class MemoryRetriever {
     sourceWorkspace: string | null,
     currentWorkspace: string | null,
     queryEmbedding?: number[]
-  ): Promise<MemorySearchResult[]> {
+  ): Promise<RankedSearchHit[]> {
     const store = this.deps.getExperienceStore();
-    const results: MemorySearchResult[] = [];
+    const results: RankedSearchHit[] = [];
 
     for (const item of store.sessions) {
       if (sourceWorkspace && item.sourceWorkspace !== sourceWorkspace) {
@@ -218,7 +267,7 @@ export class MemoryRetriever {
         item.sourceWorkspace || '',
         item.sourceSessionTitle || '',
       ].join(' ');
-      const { score, evidenceScore } = computeMemoryRankScore({
+      const ranked = computeMemoryRankScore({
         query,
         text,
         queryEmbedding,
@@ -229,10 +278,18 @@ export class MemoryRetriever {
         ingestedAt: item.ingestedAt,
         confidence: item.confidence,
       });
-      if (evidenceScore <= 0) {
+      if (ranked.evidenceScore <= 0) {
         continue;
       }
-      results.push(this.mapSessionResult(item, score));
+      const result = this.mapSessionResult(item, ranked.score);
+      results.push({
+        result,
+        baseScore: ranked.baseScore,
+        freshnessFactor: ranked.freshnessFactor,
+        confidenceFactor: ranked.confidenceFactor,
+        documentText: text,
+        score: ranked.score,
+      });
     }
 
     for (const item of store.chunks) {
@@ -240,7 +297,7 @@ export class MemoryRetriever {
         continue;
       }
       const text = [item.summary, item.details, item.rawText, ...item.keywords].join(' ');
-      const { score, evidenceScore } = computeMemoryRankScore({
+      const ranked = computeMemoryRankScore({
         query,
         text,
         queryEmbedding,
@@ -251,10 +308,10 @@ export class MemoryRetriever {
         ingestedAt: item.ingestedAt,
         confidence: item.confidence,
       });
-      if (evidenceScore <= 0) {
+      if (ranked.evidenceScore <= 0) {
         continue;
       }
-      results.push({
+      const result: MemorySearchResult = {
         id: buildSearchId('experience_chunk', item.id),
         recordId: item.id,
         kind: 'experience_chunk',
@@ -268,11 +325,19 @@ export class MemoryRetriever {
         sourceSessionTitle: item.sourceSessionTitle,
         sessionId: item.sessionId,
         sessionTitle: this.deps.getSessionTitle(item.sessionId),
-        score,
+        score: ranked.score,
         createdAt: Date.parse(item.createdAt) || Date.now(),
         updatedAt: Date.parse(item.ingestedAt) || undefined,
         keywords: item.keywords,
         sourceFile: this.deps.getExperienceFilePath(),
+      };
+      results.push({
+        result,
+        baseScore: ranked.baseScore,
+        freshnessFactor: ranked.freshnessFactor,
+        confidenceFactor: ranked.confidenceFactor,
+        documentText: text,
+        score: ranked.score,
       });
     }
     return results;
