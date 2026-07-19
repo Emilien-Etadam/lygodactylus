@@ -758,6 +758,8 @@ export interface AppConfig {
   enableThinking?: boolean;
   thinkingLevel?: ThinkingLevel;
   speechSynthesisEnabled?: boolean;
+  /** Ollama keep_alive duration (e.g. "30m"). Soft-defaulted in main when missing. */
+  ollamaKeepAlive?: string;
   isConfigured: boolean;
 }
 

@@ -30,6 +30,7 @@ interface UseApiConfigActionsParams {
   customProtocol: CustomProtocolType;
   dispatch: Dispatch<ApiConfigAction>;
   enableThinking: boolean;
+  ollamaKeepAlive: string;
   hasUnsavedChanges: boolean;
   model: string;
   onSave?: (config: Partial<AppConfig>) => Promise<void>;
@@ -60,6 +61,7 @@ export function useApiConfigActions({
   customProtocol,
   dispatch,
   enableThinking,
+  ollamaKeepAlive,
   hasUnsavedChanges,
   model,
   onSave,
@@ -105,6 +107,7 @@ export function useApiConfigActions({
     customProtocol,
     dispatch,
     enableThinking,
+    ollamaKeepAlive,
     hasUnsavedChanges,
     model,
     onSave,

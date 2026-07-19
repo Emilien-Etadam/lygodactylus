@@ -9,6 +9,10 @@ import type {
 } from '../../types';
 import type { CommonProviderSetup } from '../../../shared/api-provider-guidance';
 import {
+  DEFAULT_OLLAMA_KEEP_ALIVE,
+  normalizeOllamaKeepAlive,
+} from '../../../shared/ollama-keep-alive';
+import {
   PROFILE_KEYS,
   type ApiConfigBootstrap,
   type ApiConfigState,
@@ -77,6 +81,9 @@ export function buildApiConfigSnapshot(
     activeProfileKey,
     profiles,
     enableThinking: Boolean(config?.enableThinking),
+    ollamaKeepAlive: normalizeOllamaKeepAlive(
+      config?.ollamaKeepAlive ?? DEFAULT_OLLAMA_KEEP_ALIVE
+    ),
   };
 }
 
@@ -103,12 +110,14 @@ export function toPersistedProfiles(
 export function buildApiConfigDraftSignature(
   activeProfileKey: ProviderProfileKey,
   profiles: Record<ProviderProfileKey, UIProviderProfile>,
-  enableThinking: boolean
+  enableThinking: boolean,
+  ollamaKeepAlive: string = DEFAULT_OLLAMA_KEEP_ALIVE
 ): string {
   const persisted = toPersistedProfiles(profiles);
   return JSON.stringify({
     activeProfileKey,
     enableThinking,
+    ollamaKeepAlive: normalizeOllamaKeepAlive(ollamaKeepAlive),
     profiles: PROFILE_KEYS.map((key) => ({
       key,
       apiKey: persisted[key]?.apiKey || '',
@@ -219,6 +228,9 @@ export function buildInitialApiConfigState(
     pendingConfigSetAction: null,
     isMutatingConfigSet: false,
     enableThinking: Boolean(config?.enableThinking),
+    ollamaKeepAlive: normalizeOllamaKeepAlive(
+      config?.ollamaKeepAlive ?? bootstrap.snapshot.ollamaKeepAlive
+    ),
     discoveredModels: {},
     isLoadingConfig: true,
     savedDraftSignature: '',
@@ -247,6 +259,7 @@ export function buildLoadedApiConfigStatePayload(
   profiles: Record<ProviderProfileKey, UIProviderProfile>;
   activeProfileKey: ProviderProfileKey;
   enableThinking: boolean;
+  ollamaKeepAlive: string;
   configSets: ApiConfigSet[];
   activeConfigSetId: string;
   savedDraftSignature: string;
@@ -258,12 +271,14 @@ export function buildLoadedApiConfigStatePayload(
     profiles: bootstrap.snapshot.profiles,
     activeProfileKey: bootstrap.snapshot.activeProfileKey,
     enableThinking: bootstrap.snapshot.enableThinking,
+    ollamaKeepAlive: bootstrap.snapshot.ollamaKeepAlive,
     configSets: bootstrap.configSets,
     activeConfigSetId: bootstrap.activeConfigSetId,
     savedDraftSignature: buildApiConfigDraftSignature(
       bootstrap.snapshot.activeProfileKey,
       bootstrap.snapshot.profiles,
-      bootstrap.snapshot.enableThinking
+      bootstrap.snapshot.enableThinking,
+      bootstrap.snapshot.ollamaKeepAlive
     ),
   };
 }

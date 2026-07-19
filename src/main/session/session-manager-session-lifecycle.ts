@@ -38,6 +38,15 @@ export function createSession(
   const resolvedMemoryEnabled =
     typeof memoryEnabled === 'boolean' ? memoryEnabled : configStore.get('memoryEnabled') !== false;
 
+  // Fire-and-forget Ollama warm-up when opening a session (does not block UI).
+  void import('../config/ollama-warmup-scheduler')
+    .then(({ scheduleWarmUpFromAppConfig }) => {
+      scheduleWarmUpFromAppConfig(configStore.getAll());
+    })
+    .catch(() => {
+      // ignore dynamic-import failures in constrained test envs
+    });
+
   return {
     id: uuidv4(),
     title,

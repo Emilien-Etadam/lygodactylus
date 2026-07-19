@@ -77,6 +77,7 @@ function makeConfig(timeoutMs: number, overrides: Partial<AppConfig> = {}): AppC
     speechSynthesisEnabled: false,
     isConfigured: true,
     ...overrides,
+    ollamaKeepAlive: overrides.ollamaKeepAlive ?? '30m',
   };
 }
 

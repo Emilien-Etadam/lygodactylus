@@ -449,7 +449,10 @@
         "models_list_not_supported": "This provider does not support the models list endpoint. Continuing with model verification."
       },
       "skipped": "Diagnostics skipped: another run is already in progress."
-    }
+    },
+    "ollamaKeepAlive": "Ollama keep-alive",
+    "ollamaKeepAlivePlaceholder": "30m",
+    "ollamaKeepAliveHint": "How long to keep the model loaded in memory (e.g. 30m, 1h, -1 for unlimited). Reduces cold-start latency between requests."
   },
   "window": {
     "minimize": "Minimize",

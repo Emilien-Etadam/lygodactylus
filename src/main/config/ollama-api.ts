@@ -3,6 +3,17 @@ import * as crypto from 'crypto';
 import { isLoopbackBaseUrl } from '../../shared/network/loopback';
 import { normalizeOllamaBaseUrl } from './auth-utils';
 import { ollamaNativeBaseUrl } from '../../shared/ollama-base-url';
+import {
+  normalizeOllamaKeepAlive,
+  toOllamaKeepAlivePayload,
+} from '../../shared/ollama-keep-alive';
+import { log } from '../utils/logger';
+
+export { normalizeOllamaKeepAlive, toOllamaKeepAlivePayload } from '../../shared/ollama-keep-alive';
+export { DEFAULT_OLLAMA_KEEP_ALIVE } from '../../shared/ollama-keep-alive';
+
+/** Short timeout for background model pre-load; never block the UI. */
+export const OLLAMA_WARMUP_TIMEOUT_MS = 5000;
 
 export const REQUEST_TIMEOUT_MS = 120000;
 export const OLLAMA_MODELS_TIMEOUT_LOCAL_MS = 5000;
@@ -234,6 +245,95 @@ const modelInfoCache = new Map<string, { expiresAt: number; result: OllamaModelI
 
 export function resetOllamaModelInfoCache(): void {
   modelInfoCache.clear();
+}
+
+// --- Ollama keep_alive warm-up (native /api/generate) ---
+
+const warmupInflight = new Map<string, Promise<void>>();
+
+export function resetOllamaWarmupInflight(): void {
+  warmupInflight.clear();
+}
+
+export interface WarmUpOllamaModelInput {
+  baseUrl?: string;
+  model: string;
+  apiKey?: string;
+  keepAlive?: string;
+  /** Override abort timeout (tests). Defaults to OLLAMA_WARMUP_TIMEOUT_MS. */
+  timeoutMs?: number;
+  /** Injected fetch for tests. */
+  fetchImpl?: typeof fetch;
+}
+
+/**
+ * Background ping that loads the model into Ollama VRAM/RAM with keep_alive.
+ * Failures are swallowed and logged at debug level — never thrown to callers.
+ */
+export async function warmUpOllamaModel(input: WarmUpOllamaModelInput): Promise<void> {
+  const model = input.model?.trim();
+  if (!model) {
+    return;
+  }
+
+  const openaiBase = buildBaseUrl(input.baseUrl);
+  const nativeBase = ollamaNativeBaseUrl(openaiBase);
+  const keepAlive = normalizeOllamaKeepAlive(input.keepAlive);
+  const cacheKey = `${nativeBase}::${model}::${keepAlive}`;
+
+  const existing = warmupInflight.get(cacheKey);
+  if (existing) {
+    return existing;
+  }
+
+  const fetchImpl = input.fetchImpl ?? fetch;
+  const timeoutMs = input.timeoutMs ?? OLLAMA_WARMUP_TIMEOUT_MS;
+
+  const request = (async () => {
+    try {
+      const response = await fetchImpl(`${nativeBase}/api/generate`, {
+        method: 'POST',
+        headers: buildHeaders(input.apiKey),
+        body: JSON.stringify({
+          model,
+          prompt: '',
+          stream: false,
+          keep_alive: toOllamaKeepAlivePayload(keepAlive),
+        }),
+        signal: AbortSignal.timeout(timeoutMs),
+      });
+      // Drain body to free the socket; ignore content.
+      await response.text().catch(() => undefined);
+      if (!response.ok) {
+        log(
+          '[OllamaWarmup][debug] warm-up HTTP',
+          response.status,
+          'for',
+          model,
+          'at',
+          nativeBase
+        );
+      }
+    } catch (error) {
+      log('[OllamaWarmup][debug] warm-up failed (ignored):', extractErrorMessage(error));
+    }
+  })();
+
+  warmupInflight.set(cacheKey, request);
+  try {
+    await request;
+  } finally {
+    warmupInflight.delete(cacheKey);
+  }
+}
+
+/**
+ * Fire-and-forget warm-up. Never rejects.
+ */
+export function scheduleOllamaWarmUp(input: WarmUpOllamaModelInput): void {
+  void warmUpOllamaModel(input).catch((error) => {
+    log('[OllamaWarmup][debug] unexpected warm-up rejection (ignored):', extractErrorMessage(error));
+  });
 }
 
 export async function fetchOllamaModelInfo(input: {

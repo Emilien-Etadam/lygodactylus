@@ -7,10 +7,16 @@ import { mt, DEFAULT_BACKEND_LANGUAGE } from '../i18n';
 
 import { defaultProtocolForSharedProvider } from '../../shared/api-model-presets';
 import {
+  DEFAULT_OLLAMA_KEEP_ALIVE,
+  normalizeOllamaKeepAlive,
+} from '../../shared/ollama-keep-alive';
+import {
   DEFAULT_WEB_SEARCH_CONFIG,
   normalizeWebSearchConfig,
   type WebSearchConfig,
 } from '../../shared/web-search';
+
+export { DEFAULT_OLLAMA_KEEP_ALIVE, normalizeOllamaKeepAlive };
 
 export type ProviderType = 'openai' | 'anthropic';
 export type CustomProtocolType = 'anthropic' | 'openai';
@@ -75,6 +81,11 @@ export interface AppConfig {
   thinkingLevel: ThinkingLevel;
   /** Offline speechSynthesis for assistant replies (Chromium voices). Off by default. */
   speechSynthesisEnabled: boolean;
+  /**
+   * Ollama keep_alive duration (e.g. "30m", "1h", "-1").
+   * Only sent when the active endpoint is detected as Ollama.
+   */
+  ollamaKeepAlive: string;
   isConfigured: boolean;
 }
 
@@ -135,6 +146,7 @@ export const DIRECT_READ_KEYS = new Set<keyof AppConfig>([
   'enableThinking',
   'thinkingLevel',
   'speechSynthesisEnabled',
+  'ollamaKeepAlive',
   'isConfigured',
 ]);
 
@@ -245,6 +257,7 @@ export const defaultConfig: AppConfig = {
   enableThinking: false,
   thinkingLevel: 'medium',
   speechSynthesisEnabled: false,
+  ollamaKeepAlive: DEFAULT_OLLAMA_KEEP_ALIVE,
   isConfigured: false,
 };
 

@@ -12,6 +12,7 @@ import {
   normalizeOpenAICompatibleBaseUrl,
 } from '../config/auth-utils';
 import { fetchOllamaModelInfo } from '../config/ollama-api';
+import { scheduleWarmUpFromAppConfig } from '../config/ollama-warmup-scheduler';
 import { fetchRemoteModelContextWindow } from '../config/provider-models-api';
 import { detectCommonProviderSetup } from '../../shared/api-provider-guidance';
 import type { BeforeSessionRunResult } from '../extensions/agent-runtime-extension';
@@ -170,6 +171,10 @@ export async function preparePiSessionRun({
   const provider = runtimeConfig.provider || 'anthropic';
   const effectiveModelBaseUrl = piModel.baseUrl || runtimeConfig.baseUrl || '';
   const isOllamaEndpoint = detectCommonProviderSetup(effectiveModelBaseUrl)?.id === 'ollama';
+  // Pre-load the model in the background (keep_alive). Never blocks the UI.
+  if (isOllamaEndpoint) {
+    scheduleWarmUpFromAppConfig(runtimeConfig);
+  }
   // The serving endpoint is the authority on the usable context window: local
   // deployments routinely cap it below the model family's nominal size
   // (vLLM --max-model-len, Ollama num_ctx). Trusting the hardcoded spec makes
@@ -355,6 +360,9 @@ export async function preparePiSessionRun({
   if (cachedSession) {
     logCtx('[AgentRunner] Reusing existing SDK session for:', session.id);
   }
+  // Memory (and other extension prefixes) vary per turn: keep them on the USER
+  // prompt, AFTER the stable system prefix, so llama.cpp cache_prompt / vLLM
+  // prefix caching can reuse the system prefix across turns.
   if (extensionResult.promptPrefix?.trim()) {
     contextualPrompt = `${extensionResult.promptPrefix.trim()}\n\n${contextualPrompt}`;
   }

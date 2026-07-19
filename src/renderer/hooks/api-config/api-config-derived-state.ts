@@ -26,6 +26,7 @@ interface UseApiConfigDerivedStateParams {
   configSets: ApiConfigState['configSets'];
   discoveredModels: ApiConfigState['discoveredModels'];
   enableThinking: boolean;
+  ollamaKeepAlive: string;
   error: string;
   pendingConfigSetAction: ApiConfigState['pendingConfigSetAction'];
   presets: ProviderPresets;
@@ -45,6 +46,7 @@ export function useApiConfigDerivedState({
   configSets,
   discoveredModels,
   enableThinking,
+  ollamaKeepAlive,
   error,
   pendingConfigSetAction,
   presets,
@@ -207,8 +209,9 @@ export function useApiConfigDerivedState({
   ]);
 
   const currentDraftSignature = useMemo(
-    () => buildApiConfigDraftSignature(activeProfileKey, profiles, enableThinking),
-    [activeProfileKey, enableThinking, profiles]
+    () =>
+      buildApiConfigDraftSignature(activeProfileKey, profiles, enableThinking, ollamaKeepAlive),
+    [activeProfileKey, enableThinking, ollamaKeepAlive, profiles]
   );
 
   return {

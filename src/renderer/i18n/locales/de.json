@@ -412,7 +412,10 @@
         "models_list_not_supported": "Dieser Anbieter unterstützt den Models-List-Endpunkt nicht. Weiter mit der Modellprüfung."
       },
       "skipped": "Diagnose übersprungen: Ein anderer Lauf läuft bereits."
-    }
+    },
+    "ollamaKeepAlive": "Ollama Keep-alive",
+    "ollamaKeepAlivePlaceholder": "30m",
+    "ollamaKeepAliveHint": "Wie lange das Modell im Speicher geladen bleibt (z. B. 30m, 1h, -1 unbegrenzt). Verringert Kaltstart-Latenz zwischen Anfragen."
   },
   "window": {
     "minimize": "Minimieren",

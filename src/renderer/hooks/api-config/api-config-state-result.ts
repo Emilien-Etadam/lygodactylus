@@ -31,6 +31,7 @@ export function buildApiConfigStateResult({
   diagnosticResult,
   discardAndContinuePendingConfigSetAction,
   enableThinking,
+  ollamaKeepAlive,
   error,
   friendlyTestDetails,
   handleDeepDiagnose,
@@ -68,6 +69,7 @@ export function buildApiConfigStateResult({
   setContextWindow,
   setCustomModel,
   setEnableThinking,
+  setOllamaKeepAlive,
   setError,
   setMaxTokens,
   setModel,
@@ -109,6 +111,7 @@ export function buildApiConfigStateResult({
   diagnosticResult: DiagnosticResult | null;
   discardAndContinuePendingConfigSetAction: () => Promise<void>;
   enableThinking: boolean;
+  ollamaKeepAlive: string;
   error: string;
   friendlyTestDetails: string;
   handleDeepDiagnose: () => Promise<void>;
@@ -146,6 +149,7 @@ export function buildApiConfigStateResult({
   setContextWindow: (value: string) => void;
   setCustomModel: (value: string) => void;
   setEnableThinking: (value: boolean) => void;
+  setOllamaKeepAlive: (value: string) => void;
   setError: (text: string) => void;
   setMaxTokens: (value: string) => void;
   setModel: (value: string) => void;
@@ -177,6 +181,7 @@ export function buildApiConfigStateResult({
     modelInputPlaceholder: modelInputGuidance.placeholder,
     modelInputHint: modelInputGuidance.hint,
     enableThinking,
+    ollamaKeepAlive,
     isSaving,
     isTesting,
     isRefreshingModels,
@@ -222,6 +227,7 @@ export function buildApiConfigStateResult({
     setMaxTokens,
     toggleCustomModel,
     setEnableThinking,
+    setOllamaKeepAlive,
     applyCommonProviderSetup,
     changeProvider,
     requestConfigSetSwitch,
