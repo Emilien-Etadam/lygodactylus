@@ -4,10 +4,35 @@ import type { AppConfig } from '../src/main/config/config-store';
 
 const mocks = vi.hoisted(() => ({
   probeWithPiAi: vi.fn(),
+  refreshConstrainedOutputCapability: vi.fn(),
 }));
 
 vi.mock('../src/main/agent/pi-ai-one-shot', () => ({
   probeWithPiAi: mocks.probeWithPiAi,
+}));
+
+vi.mock('../src/main/config/endpoint-capabilities', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../src/main/config/endpoint-capabilities')>();
+  return {
+    ...actual,
+    refreshConstrainedOutputCapability: mocks.refreshConstrainedOutputCapability,
+  };
+});
+
+vi.mock('../src/main/config/config-store', () => ({
+  configStore: {
+    getAll: vi.fn(() => ({
+      provider: 'openai',
+      apiKey: 'sk-test',
+      baseUrl: 'https://api.openai.com/v1',
+      customProtocol: 'openai',
+      model: 'gpt-4.1',
+      constrainedOutput: 'auto',
+      constrainedOutputCapability: null,
+      isConfigured: true,
+    })),
+    update: vi.fn(),
+  },
 }));
 
 import { runConfigApiTest } from '../src/main/config/config-test-routing';
@@ -29,6 +54,8 @@ function createConfig(): AppConfig {
     enableDevLogs: true,
     sandboxEnabled: false,
     enableThinking: false,
+    constrainedOutput: 'auto',
+    constrainedOutputCapability: null,
     isConfigured: true,
   };
 }
@@ -36,6 +63,8 @@ function createConfig(): AppConfig {
 describe('runConfigApiTest', () => {
   beforeEach(() => {
     mocks.probeWithPiAi.mockReset();
+    mocks.refreshConstrainedOutputCapability.mockReset();
+    mocks.refreshConstrainedOutputCapability.mockResolvedValue(null);
   });
 
   it('routes all providers through probeWithPiAi', async () => {

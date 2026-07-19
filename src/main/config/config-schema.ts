@@ -18,6 +18,18 @@ import {
 
 export { DEFAULT_OLLAMA_KEEP_ALIVE, normalizeOllamaKeepAlive };
 
+export type ConstrainedOutputMode = 'auto' | 'off';
+
+export type ConstrainedOutputField = 'ollama_format' | 'openai_json_schema';
+
+export interface ConstrainedOutputCapabilityCache {
+  baseUrl: string;
+  model: string;
+  supported: boolean;
+  field: ConstrainedOutputField | null;
+  probedAt: string;
+}
+
 export type ProviderType = 'openai' | 'anthropic';
 export type CustomProtocolType = 'anthropic' | 'openai';
 export const THINKING_LEVELS = ['low', 'medium', 'high'] as const;
@@ -86,6 +98,13 @@ export interface AppConfig {
    * Only sent when the active endpoint is detected as Ollama.
    */
   ollamaKeepAlive: string;
+  /**
+   * When 'auto', use server-side JSON-schema constrained decoding for internal
+   * JSON one-shots if the endpoint was probed as capable. 'off' disables it.
+   */
+  constrainedOutput: ConstrainedOutputMode;
+  /** Cached probe result for the active endpoint+model (invalidated on URL/model change). */
+  constrainedOutputCapability: ConstrainedOutputCapabilityCache | null;
   isConfigured: boolean;
 }
 
@@ -147,6 +166,8 @@ export const DIRECT_READ_KEYS = new Set<keyof AppConfig>([
   'thinkingLevel',
   'speechSynthesisEnabled',
   'ollamaKeepAlive',
+  'constrainedOutput',
+  'constrainedOutputCapability',
   'isConfigured',
 ]);
 
@@ -258,6 +279,8 @@ export const defaultConfig: AppConfig = {
   thinkingLevel: 'medium',
   speechSynthesisEnabled: false,
   ollamaKeepAlive: DEFAULT_OLLAMA_KEEP_ALIVE,
+  constrainedOutput: 'auto',
+  constrainedOutputCapability: null,
   isConfigured: false,
 };
 

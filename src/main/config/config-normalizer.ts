@@ -35,6 +35,10 @@ import {
   type ProviderProfileKey,
   type ProviderType,
 } from './config-schema';
+import {
+  normalizeConstrainedOutputCapability,
+  normalizeConstrainedOutputMode,
+} from './endpoint-capabilities';
 
 function getDefaultProfile(profileKey: ProviderProfileKey): ProviderProfile {
   const fallback = defaultProfiles[profileKey];
@@ -382,6 +386,10 @@ export function normalizeConfig(rawConfig: Partial<AppConfig> | undefined): AppC
       typeof raw.ollamaKeepAlive === 'string' || typeof raw.ollamaKeepAlive === 'number'
         ? raw.ollamaKeepAlive
         : defaultConfig.ollamaKeepAlive
+    ),
+    constrainedOutput: normalizeConstrainedOutputMode(raw.constrainedOutput),
+    constrainedOutputCapability: normalizeConstrainedOutputCapability(
+      raw.constrainedOutputCapability
     ),
     isConfigured: toBoolean(raw.isConfigured, defaultConfig.isConfigured),
   };

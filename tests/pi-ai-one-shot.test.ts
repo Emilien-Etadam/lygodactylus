@@ -125,6 +125,8 @@ function createConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     enableDevLogs: true,
     sandboxEnabled: false,
     enableThinking: false,
+    constrainedOutput: 'auto',
+    constrainedOutputCapability: null,
     isConfigured: true,
     ...overrides,
   };

@@ -12,6 +12,10 @@ import {
 } from '../config/auth-utils';
 import { log, logWarn } from '../utils/logger';
 import { normalizeGeneratedTitle } from '../session/session-title-utils';
+import {
+  resolveActiveConstraintField,
+  withConstrainedOutputFallback,
+} from '../config/endpoint-capabilities';
 import { getSharedAuthStorage } from './shared-auth';
 import {
   applyPiModelRuntimeOverrides,
@@ -22,6 +26,15 @@ import {
   resolvePiRouteProtocol,
   resolveSyntheticPiModelFallback,
 } from './pi-model-resolution';
+
+export interface PiAiOneShotOptions {
+  temperature?: number;
+  maxTokens?: number;
+  signal?: AbortSignal;
+  /** When set and the endpoint was probed as capable, inject server-side JSON schema constraint. */
+  responseSchema?: Record<string, unknown>;
+  responseSchemaName?: string;
+}
 
 const NETWORK_ERROR_RE =
   /enotfound|econnrefused|etimedout|eai_again|enetunreach|timed?\s*out|timeout|abort|network\s*error/i;
@@ -202,16 +215,14 @@ function preparePiModelForOneShot(config: AppConfig): PreparedPiOneShotModel {
 
 /**
  * Run a simple one-shot prompt via pi-ai model directly (no agent session needed).
+ * Optional responseSchema uses pi-ai `onPayload` to inject response_format / format
+ * when the endpoint was probed as capable; constraint errors retry without the field.
  */
 export async function runPiAiOneShot(
   prompt: string,
   systemPrompt: string,
   config: AppConfig,
-  options?: {
-    temperature?: number;
-    maxTokens?: number;
-    signal?: AbortSignal;
-  }
+  options?: PiAiOneShotOptions
 ): Promise<{ text: string; hasThinking: boolean; durationMs: number }> {
   const { resolvedModel, apiKey } = preparePiModelForOneShot(config);
   const start = Date.now();
@@ -226,22 +237,39 @@ export async function runPiAiOneShot(
     'api:',
     resolvedModel.api
   );
-  const response = await completeSimple(
-    resolvedModel,
-    {
-      systemPrompt,
-      messages: [userMsg],
-    },
-    { ...options, apiKey: apiKey || undefined }
-  );
 
-  // pi-ai resolves (not rejects) on provider errors — the error details
-  // live in stopReason/errorMessage on the response object.  Surface them
-  // so callers (probe, title-gen) get a meaningful error via mapPiAiError.
-  if (response.stopReason === 'error' || response.stopReason === 'aborted') {
-    logWarn('[OneShot] Provider error-as-resolve:', response.stopReason, response.errorMessage);
-    throw new Error(response.errorMessage || 'Provider returned an error');
-  }
+  const constraintField = options?.responseSchema
+    ? resolveActiveConstraintField(config)
+    : null;
+  const { temperature, maxTokens, signal, responseSchema, responseSchemaName } = options || {};
+
+  const response = await withConstrainedOutputFallback({
+    field: constraintField,
+    schema: responseSchema,
+    schemaName: responseSchemaName,
+    run: async (onPayload) => {
+      const result = await completeSimple(
+        resolvedModel,
+        {
+          systemPrompt,
+          messages: [userMsg],
+        },
+        {
+          temperature,
+          maxTokens,
+          signal,
+          apiKey: apiKey || undefined,
+          ...(onPayload ? { onPayload } : {}),
+        }
+      );
+      // pi-ai resolves (not rejects) on provider errors — surface as throw so
+      // withConstrainedOutputFallback can retry without the constraint field.
+      if (result.stopReason === 'error' || result.stopReason === 'aborted') {
+        throw new Error(result.errorMessage || 'Provider returned an error');
+      }
+      return result;
+    },
+  });
 
   // Extract text and thinking content from response
   const textBlocks = response.content.filter((b) => b.type === 'text');

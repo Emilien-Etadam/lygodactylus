@@ -65,6 +65,11 @@ import {
   type CreateSetMode,
   type CustomProtocolType,
 } from './config-schema';
+import {
+  normalizeConstrainedOutputCapability,
+  normalizeConstrainedOutputMode,
+  shouldInvalidateCapabilityCache,
+} from './endpoint-capabilities';
 
 export * from './config-schema';
 export { getPiAiModelPresets, PROVIDER_PRESETS } from './config-provider-runtime';
@@ -392,6 +397,23 @@ export class ConfigStore {
     }
 
     const projectedConfig = composeProjectedConfig(current, nextConfigSets, activeConfigSetId);
+
+    let nextCapability =
+      updates.constrainedOutputCapability !== undefined
+        ? normalizeConstrainedOutputCapability(updates.constrainedOutputCapability)
+        : current.constrainedOutputCapability;
+    // Explicit capability updates (probe results) win; otherwise invalidate on URL/model change.
+    if (
+      updates.constrainedOutputCapability === undefined &&
+      shouldInvalidateCapabilityCache(
+        nextCapability,
+        projectedConfig.baseUrl,
+        projectedConfig.model
+      )
+    ) {
+      nextCapability = null;
+    }
+
     this.saveConfig({
       ...projectedConfig,
       agentCliPath:
@@ -437,6 +459,11 @@ export class ConfigStore {
         updates.ollamaKeepAlive !== undefined
           ? normalizeOllamaKeepAlive(updates.ollamaKeepAlive)
           : current.ollamaKeepAlive,
+      constrainedOutput:
+        updates.constrainedOutput !== undefined
+          ? normalizeConstrainedOutputMode(updates.constrainedOutput)
+          : current.constrainedOutput,
+      constrainedOutputCapability: nextCapability,
       isConfigured:
         updates.isConfigured !== undefined ? updates.isConfigured : current.isConfigured,
     });

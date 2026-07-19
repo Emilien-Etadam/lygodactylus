@@ -51,10 +51,21 @@ vi.mock('../src/main/config/config-store', () => ({
       profiles: {},
       activeConfigSetId: 'default',
       configSets: [],
+      constrainedOutput: 'auto',
+      constrainedOutputCapability: null,
       isConfigured: true,
     }),
+    update: vi.fn(),
   },
 }));
+
+vi.mock('../src/main/config/endpoint-capabilities', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../src/main/config/endpoint-capabilities')>();
+  return {
+    ...actual,
+    refreshConstrainedOutputCapability: vi.fn().mockResolvedValue(null),
+  };
+});
 
 vi.mock('../src/main/agent/pi-ai-one-shot', () => ({
   probeWithPiAi: mocks.probeWithPiAi,

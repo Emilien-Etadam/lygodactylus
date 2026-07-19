@@ -768,6 +768,15 @@ export interface AppConfig {
   speechSynthesisEnabled?: boolean;
   /** Ollama keep_alive duration (e.g. "30m"). Soft-defaulted in main when missing. */
   ollamaKeepAlive?: string;
+  /** 'auto' enables server-side JSON schema constraints when probed; 'off' disables. */
+  constrainedOutput?: 'auto' | 'off';
+  constrainedOutputCapability?: {
+    baseUrl: string;
+    model: string;
+    supported: boolean;
+    field: 'ollama_format' | 'openai_json_schema' | null;
+    probedAt: string;
+  } | null;
   isConfigured: boolean;
 }
 

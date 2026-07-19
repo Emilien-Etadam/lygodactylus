@@ -71,6 +71,8 @@ function makeConfig(): AppConfig {
     thinkingLevel: 'medium',
     speechSynthesisEnabled: false,
     ollamaKeepAlive: '30m',
+    constrainedOutput: 'auto',
+    constrainedOutputCapability: null,
     isConfigured: true,
   };
 }

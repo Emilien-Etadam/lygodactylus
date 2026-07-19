@@ -25,6 +25,8 @@ export class MemoryNavigator {
       ].join('\n'),
       temperature: 0,
       maxTokens: 2_000,
+      jsonMode: true,
+      responseSchemaName: 'memory_navigation',
     });
     const payload = extractJson(response.text);
     if (!payload || typeof payload !== 'object') {
