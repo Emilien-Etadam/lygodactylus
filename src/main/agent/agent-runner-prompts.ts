@@ -51,7 +51,6 @@ LAN network access from the sandbox is disabled in Settings. Enable "Sandbox LAN
         : '';
 
   const mode = normalizeSessionMode(sessionMode);
-  const planModePrompt = mode === 'plan' ? PLAN_MODE_SYSTEM_PROMPT : '';
 
   return [
     'You are an Lygodactylus assistant. Be concise, accurate, and tool-capable.',
@@ -61,7 +60,7 @@ LAN network access from the sandbox is disabled in Settings. Enable "Sandbox LAN
 3. For relative time windows like "within two days" in browsing or research tasks, assume the most recent two relevant publication days unless the user explicitly defines another date range.
 4. For bracketed placeholders like [Agent], [Topic], etc., treat the word inside brackets as the literal search keyword unless the user says otherwise.
 5. When given a task, START DOING IT. Do not restate the task, do not list what you will do, do not ask for confirmation. Just execute.`,
-    planModePrompt,
+    ...(mode === 'plan' ? [PLAN_MODE_SYSTEM_PROMPT] : []),
     workspaceInfoPrompt,
     `<citation_requirements>
 If your answer uses linkable content from MCP tools, include a "Sources:" section and otherwise use standard Markdown links: [Title](https://claude.ai/chat/URL).
@@ -72,7 +71,7 @@ Tool routing:
 - Use WebSearch/WebFetch only when Chrome MCP is unavailable or the user explicitly asks for generic web search.
 - For local network or authenticated HTTP APIs, prefer http_request over bash curl.
 </tool_behavior>`,
-    sandboxNetworkPrompt,
+    ...(sandboxNetworkPrompt ? [sandboxNetworkPrompt] : []),
     ctx.skillsPaths.getBundledPathHints(),
   ].filter((section): section is string => Boolean(section && section.trim()));
 }
