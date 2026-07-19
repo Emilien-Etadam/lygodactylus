@@ -753,6 +753,7 @@ export interface AppConfig {
   webSearch?: WebSearchConfig;
   enableThinking?: boolean;
   thinkingLevel?: ThinkingLevel;
+  speechSynthesisEnabled?: boolean;
   isConfigured: boolean;
 }
 

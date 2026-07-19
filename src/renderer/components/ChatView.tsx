@@ -29,6 +29,7 @@ import { SlashCommandMenu } from './SlashCommandMenu';
 import { ThinkingLevelToggle } from './ThinkingLevelToggle';
 import { Send, Square, Plus, Loader2, Plug, X, Clock, ChevronDown, StickyNote, FileText } from 'lucide-react';
 import { MemoryContextBar } from './MemoryContextBar';
+import { stopSpeechSynthesis } from '../utils/speech-synthesis';
 
 export function ChatView() {
   const { t } = useTranslation();
@@ -358,6 +359,17 @@ export function ChatView() {
   useEffect(() => {
     textareaRef.current?.focus();
   }, [activeSessionId]);
+
+  // Stop offline TTS when switching sessions or when a new agent stream starts.
+  useEffect(() => {
+    stopSpeechSynthesis();
+  }, [activeSessionId]);
+
+  useEffect(() => {
+    if (isSessionRunning) {
+      stopSpeechSynthesis();
+    }
+  }, [isSessionRunning]);
 
   const handleFileSelect = async () => {
     if (!isElectron || !window.electronAPI) {

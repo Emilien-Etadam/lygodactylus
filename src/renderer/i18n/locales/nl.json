@@ -92,7 +92,9 @@
     "updateError": "Update check failed: {{error}}",
     "updateManualDownload": "Download the latest installer from GitHub.",
     "updateDownloading": "Downloading update…",
-    "updateDownloadError": "Automatic download failed: {{error}}"
+    "updateDownloadError": "Automatic download failed: {{error}}",
+    "speechSynthesis": "Voorlezen",
+    "speechSynthesisDesc": "Toont een luidsprekerknop bij berichten van de assistent om ze offline voor te lezen met de systeemstem."
   },
   "webSearch": {
     "title": "Web search",
@@ -781,7 +783,9 @@
     "questionClosed": "Vraag gesloten",
     "submitAnswers": "Antwoorden verzenden",
     "copyBlock": "Blok kopiëren",
-    "copyThinking": "Denkproces kopiëren"
+    "copyThinking": "Denkproces kopiëren",
+    "speakMessage": "Voorlezen",
+    "stopSpeaking": "Stoppen met voorlezen"
   },
   "schedule": {
     "createTitle": "Planning maken",

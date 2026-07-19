@@ -92,7 +92,9 @@
     "updateError": "Update check failed: {{error}}",
     "updateManualDownload": "Download the latest installer from GitHub.",
     "updateDownloading": "Downloading update…",
-    "updateDownloadError": "Automatic download failed: {{error}}"
+    "updateDownloadError": "Automatic download failed: {{error}}",
+    "speechSynthesis": "Czytanie na głos",
+    "speechSynthesisDesc": "Pokazuje przycisk głośnika przy wiadomościach asystenta, aby odczytać je offline głosem systemowym."
   },
   "webSearch": {
     "title": "Web search",
@@ -781,7 +783,9 @@
     "questionClosed": "Pytanie zamknięte",
     "submitAnswers": "Wyślij odpowiedzi",
     "copyBlock": "Kopiuj blok",
-    "copyThinking": "Kopiuj myślenie"
+    "copyThinking": "Kopiuj myślenie",
+    "speakMessage": "Czytaj na głos",
+    "stopSpeaking": "Zatrzymaj czytanie"
   },
   "schedule": {
     "createTitle": "Utwórz harmonogram",

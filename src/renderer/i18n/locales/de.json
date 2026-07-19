@@ -92,7 +92,9 @@
     "updateError": "Update check failed: {{error}}",
     "updateManualDownload": "Download the latest installer from GitHub.",
     "updateDownloading": "Downloading update…",
-    "updateDownloadError": "Automatic download failed: {{error}}"
+    "updateDownloadError": "Automatic download failed: {{error}}",
+    "speechSynthesis": "Vorlesen",
+    "speechSynthesisDesc": "Zeigt bei Assistentennachrichten einen Lautsprecher-Button, um sie offline mit der Systemstimme vorzulesen."
   },
   "webSearch": {
     "title": "Web search",
@@ -781,7 +783,9 @@
     "questionClosed": "Frage geschlossen",
     "submitAnswers": "Antworten senden",
     "copyBlock": "Block kopieren",
-    "copyThinking": "Denkprozess kopieren"
+    "copyThinking": "Denkprozess kopieren",
+    "speakMessage": "Vorlesen",
+    "stopSpeaking": "Vorlesen stoppen"
   },
   "schedule": {
     "createTitle": "Zeitplan erstellen",

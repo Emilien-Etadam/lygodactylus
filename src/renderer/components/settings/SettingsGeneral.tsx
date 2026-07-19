@@ -2,15 +2,23 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, Loader2, RefreshCw } from 'lucide-react';
 import { useAppStore } from '../../store';
+import { useAppConfig } from '../../store/selectors';
 import { formatEeDisplayVersion } from '../../../shared/app-version';
 import type { UpdateCheckResult } from '../../../shared/update-check';
+import { stopSpeechSynthesis } from '../../utils/speech-synthesis';
 import { SettingsChatLan } from './SettingsChatLan';
 import { SettingsWebSearch } from './SettingsWebSearch';
+
+const isElectron = typeof window !== 'undefined' && window.electronAPI !== undefined;
 
 export function SettingsGeneral() {
   const { i18n, t } = useTranslation();
   const settings = useAppStore((s) => s.settings);
   const updateSettings = useAppStore((s) => s.updateSettings);
+  const setAppConfig = useAppStore((s) => s.setAppConfig);
+  const appConfig = useAppConfig();
+  const speechEnabled = appConfig?.speechSynthesisEnabled === true;
+  const [isSavingSpeech, setIsSavingSpeech] = useState(false);
   const baseLang = i18n.language.split('-')[0];
   const currentLang = baseLang === 'nb' || baseLang === 'nn' ? 'no' : baseLang;
   const [appVer, setAppVer] = useState('');
@@ -122,6 +130,30 @@ export function SettingsGeneral() {
     );
   }, []);
 
+  const handleToggleSpeech = useCallback(async () => {
+    if (!isElectron || isSavingSpeech || !window.electronAPI?.config?.save) {
+      return;
+    }
+
+    const nextEnabled = !speechEnabled;
+    setIsSavingSpeech(true);
+    try {
+      const result = await window.electronAPI.config.save({
+        speechSynthesisEnabled: nextEnabled,
+      });
+      if (result?.config) {
+        setAppConfig(result.config);
+      }
+      if (!nextEnabled) {
+        stopSpeechSynthesis();
+      }
+    } catch {
+      // Keep previous value; config.status may still sync later.
+    } finally {
+      setIsSavingSpeech(false);
+    }
+  }, [isSavingSpeech, setAppConfig, speechEnabled]);
+
   const languages = [
     { code: 'en', nativeName: 'English' },
     { code: 'zh', nativeName: '中文' },
@@ -194,6 +226,35 @@ export function SettingsGeneral() {
           ))}
         </div>
       </div>
+
+      <section className="rounded-lg border border-border-subtle bg-background px-4 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h4 className="text-sm font-semibold text-text-primary">
+              {t('general.speechSynthesis')}
+            </h4>
+            <p className="mt-1 text-xs leading-5 text-text-muted">
+              {t('general.speechSynthesisDesc')}
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={speechEnabled}
+            onClick={() => void handleToggleSpeech()}
+            disabled={isSavingSpeech}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 disabled:opacity-50 flex-shrink-0 ${
+              speechEnabled ? 'bg-accent' : 'bg-surface-muted'
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-text-primary transition-transform ${
+                speechEnabled ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
+      </section>
 
       <div className="space-y-3 pt-4 border-t border-border">
         <h4 className="text-sm font-medium text-text-primary">{t('general.updates')}</h4>

@@ -92,7 +92,9 @@
     "updateError": "Update check failed: {{error}}",
     "updateManualDownload": "Download the latest installer from GitHub.",
     "updateDownloading": "Downloading update…",
-    "updateDownloadError": "Automatic download failed: {{error}}"
+    "updateDownloadError": "Automatic download failed: {{error}}",
+    "speechSynthesis": "Opplesing",
+    "speechSynthesisDesc": "Viser en høyttalerknapp på assistentens meldinger for frakoblet opplesing med systemstemmen."
   },
   "webSearch": {
     "title": "Web search",
@@ -781,7 +783,9 @@
     "questionClosed": "Spørsmål lukket",
     "submitAnswers": "Send svar",
     "copyBlock": "Kopier blokk",
-    "copyThinking": "Kopier tenking"
+    "copyThinking": "Kopier tenking",
+    "speakMessage": "Les opp",
+    "stopSpeaking": "Stopp opplesing"
   },
   "schedule": {
     "createTitle": "Opprett tidsplan",

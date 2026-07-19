@@ -4,8 +4,10 @@ import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Clock, XCircle, GitBranch, Pencil } from 'lucide-react';
 import type { Message, ContentBlock, ToolUseContent, ToolResultContent } from '../types';
+import { useAppConfig } from '../store/selectors';
 import { ContentBlockView } from './message/ContentBlockView';
 import { CopyButton } from './message/CopyButton';
+import { SpeakButton } from './message/SpeakButton';
 
 interface MessageCardProps {
   message: Message;
@@ -21,14 +23,18 @@ export const MessageCard = memo(function MessageCard({
   onEditPrompt,
 }: MessageCardProps) {
   const { t } = useTranslation();
+  const appConfig = useAppConfig();
+  const speechEnabled = appConfig?.speechSynthesisEnabled === true;
   const isUser = message.role === 'user';
   const isSystem = message.role === 'system';
   const isQueued = message.localStatus === 'queued';
   const isCancelled = message.localStatus === 'cancelled';
-  const rawContent = message.content as unknown;
-  const contentBlocks = Array.isArray(rawContent)
-    ? (rawContent as ContentBlock[])
-    : [{ type: 'text', text: String(rawContent ?? '') } as ContentBlock];
+  const contentBlocks = useMemo(() => {
+    const rawContent = message.content as unknown;
+    return Array.isArray(rawContent)
+      ? (rawContent as ContentBlock[])
+      : [{ type: 'text', text: String(rawContent ?? '') } as ContentBlock];
+  }, [message.content]);
   // Build a set of tool_result IDs that have a matching tool_use (for merging)
   const mergedResultIds = useMemo(() => {
     const ids = new Set<string>();
@@ -44,14 +50,17 @@ export const MessageCard = memo(function MessageCard({
     return ids;
   }, [contentBlocks]);
 
-  // Extract text content for copying
-  const getTextContent = () =>
-    contentBlocks
-      .filter((block) => block.type === 'text')
-      .map((block) => (block as { type: 'text'; text: string }).text)
-      .join('\n');
+  // Extract text content for copying / speech
+  const textContent = useMemo(
+    () =>
+      contentBlocks
+        .filter((block) => block.type === 'text')
+        .map((block) => (block as { type: 'text'; text: string }).text)
+        .join('\n'),
+    [contentBlocks]
+  );
 
-  const hasCopyableText = getTextContent().length > 0;
+  const hasCopyableText = textContent.length > 0;
 
   return (
     <div className="animate-fade-in">
@@ -92,7 +101,7 @@ export const MessageCard = memo(function MessageCard({
           </div>
           <div className="mt-1 flex flex-col gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all">
             {hasCopyableText && (
-              <CopyButton text={getTextContent()} title={t('messageCard.copyMessage')} />
+              <CopyButton text={textContent} title={t('messageCard.copyMessage')} />
             )}
             {onFork && (
               <button
@@ -133,8 +142,9 @@ export const MessageCard = memo(function MessageCard({
         // Assistant message — no bubble, direct content (Claude style)
         <div className="group/assistant space-y-1.5">
           {hasCopyableText && !isStreaming && (
-            <div className="flex justify-end opacity-0 group-hover/assistant:opacity-100 transition-opacity -mb-1">
-              <CopyButton text={getTextContent()} title={t('messageCard.copyMessage')} />
+            <div className="flex justify-end gap-1 opacity-0 group-hover/assistant:opacity-100 transition-opacity -mb-1">
+              {speechEnabled && <SpeakButton messageId={message.id} text={textContent} />}
+              <CopyButton text={textContent} title={t('messageCard.copyMessage')} />
             </div>
           )}
           {contentBlocks.map((block, index) => {

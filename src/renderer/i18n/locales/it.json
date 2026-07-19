@@ -92,7 +92,9 @@
     "updateError": "Update check failed: {{error}}",
     "updateManualDownload": "Download the latest installer from GitHub.",
     "updateDownloading": "Downloading update…",
-    "updateDownloadError": "Automatic download failed: {{error}}"
+    "updateDownloadError": "Automatic download failed: {{error}}",
+    "speechSynthesis": "Lettura ad alta voce",
+    "speechSynthesisDesc": "Mostra un pulsante altoparlante sui messaggi dell'assistente per leggerli offline con la voce di sistema."
   },
   "webSearch": {
     "title": "Web search",
@@ -781,7 +783,9 @@
     "questionClosed": "Domanda chiusa",
     "submitAnswers": "Invia risposte",
     "copyBlock": "Copia blocco",
-    "copyThinking": "Copia riflessione"
+    "copyThinking": "Copia riflessione",
+    "speakMessage": "Leggi ad alta voce",
+    "stopSpeaking": "Interrompi lettura"
   },
   "schedule": {
     "createTitle": "Crea pianificazione",

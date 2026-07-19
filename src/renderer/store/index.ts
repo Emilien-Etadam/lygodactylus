@@ -128,6 +128,9 @@ interface AppState {
   systemDarkMode: boolean;
   pluginCommandsRevision: number;
 
+  // Offline speechSynthesis: id of the assistant message currently being read aloud
+  speakingMessageId: string | null;
+
   // Actions
   setSessions: (sessions: Session[]) => void;
   addSession: (session: Session) => void;
@@ -203,6 +206,8 @@ interface AppState {
   setSessionMemoryContext: (sessionId: string, items: MemoryInjectedItem[]) => void;
   bumpPluginCommandsRevision: () => void;
 
+  setSpeakingMessageId: (messageId: string | null) => void;
+
   // System theme actions
   setSystemDarkMode: (dark: boolean) => void;
 }
@@ -262,6 +267,7 @@ export const useAppStore = create<AppState>((set) => ({
   skillsStorageChangeEvent: null,
   systemDarkMode: false,
   pluginCommandsRevision: 0,
+  speakingMessageId: null,
 
   // Session actions
   setSessions: (sessions) => set({ sessions }),
@@ -641,6 +647,8 @@ export const useAppStore = create<AppState>((set) => ({
 
   bumpPluginCommandsRevision: () =>
     set((state) => ({ pluginCommandsRevision: state.pluginCommandsRevision + 1 })),
+
+  setSpeakingMessageId: (messageId) => set({ speakingMessageId: messageId }),
 
   // System theme actions
   setSystemDarkMode: (dark) => set({ systemDarkMode: dark }),

@@ -73,6 +73,8 @@ export interface AppConfig {
   webSearch: WebSearchConfig;
   enableThinking: boolean;
   thinkingLevel: ThinkingLevel;
+  /** Offline speechSynthesis for assistant replies (Chromium voices). Off by default. */
+  speechSynthesisEnabled: boolean;
   isConfigured: boolean;
 }
 
@@ -132,6 +134,7 @@ export const DIRECT_READ_KEYS = new Set<keyof AppConfig>([
   'webSearch',
   'enableThinking',
   'thinkingLevel',
+  'speechSynthesisEnabled',
   'isConfigured',
 ]);
 
@@ -241,6 +244,7 @@ export const defaultConfig: AppConfig = {
   webSearch: { ...DEFAULT_WEB_SEARCH_CONFIG },
   enableThinking: false,
   thinkingLevel: 'medium',
+  speechSynthesisEnabled: false,
   isConfigured: false,
 };
 
