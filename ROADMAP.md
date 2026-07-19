@@ -124,23 +124,59 @@ Current stable fork baseline: **`6.0.2`** — [CHANGELOG](CHANGELOG.md)
 - **Schema naming**: `claude_session_id`, `claudeCodePath` → `agent_session_id`, `agentCliPath` — **done v5.5** (migration auto, champs legacy conservés en lecture)
 - **Tool Completeness**: Native TodoWrite, AskUserQuestion, Glob, Grep, WebFetch, WebSearch tool schemas + handlers for API key users — **done v5.7**
 - **Memory System Enhancements**: Prompt injection controls, cross-session retrieval UX, memory source inspection, reranking quality — **done v5.6**
+- **Memory Freshness & Confidence**: recency-decay term in `memory-ranker.ts` (demi-vie 30 j, plancher 0.35, timestamps existants) + champ `confidence` optionnel pris en compte au ranking — inspiré du "confidence tracking + freshness decay" de moltagent. — **done** (PR #133)
 - **Scheduled Tasks**: Cron-like scheduling with UI management (backend exists; polish UX and edge cases)
 - **Log Management**: Structured logging with rotation, size limits, log viewer improvements
 - **Installation Experience**: Smoother first-run — auto-detect dependencies, clearer errors, one-click setup
 - **Linux Support**: First-class Linux builds — **done v5.6** (AppImage CI release; deb/rpm later)
+- **Model Location Picker (UX)**: sélecteur clair de *où* tourne chaque modèle (local vs machine distante via Chat LAN) — version allégée du « compute location as control plane » de LM Studio Bionic, sans cloud. UX polish, pas un sous-système. — _candidate_
+- **Skill Lockfile & Pinning**: enregistrer à l'install le commit sha résolu + un hash d'intégrité dans `marketplace-installed-store` (aujourd'hui : install à un `ref` de catalogue, sans lockfile). Reproductibilité, détection/rollback de dérive, et sécurité supply-chain (un skill exécute du code dans le sandbox). Inspiré du `skills.lock` de trivium ; extension du store existant, pas un sous-système. — _planned_
+- **Chat Organization**: groupes/dossiers de chats par projet + **sous-chats** (brancher une discussion annexe sans polluer le contexte principal) — UX locale self-contained, prolonge le fork/édition de messages existant. Inspiré d'Atlantis (roia.io). — _candidate_
+
+### Lot veille 2026-07 — ✅ livré (PRs #131–#139)
+
+_Issu d'une veille (moltagent, LM Studio Bionic, trivium, Atlantis, Jan/Cline/Aider/Khoj/llama.cpp…). Prompts : `docs/cursor-prompts-veille-2026-07.md` ; codé par Cursor, revu par Claude._
+
+- **Constrained Output (grammar / JSON-schema)**: sonde de capacités par endpoint (Ollama `format`, vLLM/llama.cpp `response_format.json_schema`) + injection `onPayload` sur les one-shots JSON internes, cache invalidé sur changement URL/modèle, retry sans champ. Tool-call guard conservé en filet. — **done** (PR #137)
+- **Global Quick-Ask Launcher**: hotkey global + fenêtre frameless lecture-seule (session `mode: 'plan'`), même preload/allowlist que la fenêtre principale, « Ouvrir dans l'app ». Phase 1 (sans capture de sélection). — **done** (PR #136)
+- **Read-Aloud (TTS)**: lecture vocale offline via `speechSynthesis` (zéro dépendance), markdown « parlable », OFF par défaut. — **done** (PR #131)
+- **Plan/Act Mode**: mode par session persisté, gating allowlist en un point unique + `excludeTools` SDK, MCP bloqués en plan, garde backend pendant un run. — **done** (PR #135)
+- **Local Inference Latency**: préfixe système déterministe (tris skills/MCP/mémoire core) pour le prefix caching vLLM/llama.cpp + `keep_alive` et warm-up Ollama. — **done** (PR #134)
+- **Local Reranker (mémoire)**: client `POST /v1/rerank` opt-in (OFF), branché sur recherche **et** injection, fallback ordre d'origine, fraîcheur/confiance multiplicatifs par-dessus. — **done** (PR #138)
+- _Suivi_ : nettoyage code miroir / prompts / test tautologique — **done** (PR #139)
+
+### 2e lot — veille cadrée avec le mainteneur (2026-07)
+
+_Prompts Cursor : `docs/cursor-prompts-lot2-2026-07.md` (même workflow : Cursor code, Claude vérifie)._
+
+- **Autonomy / Safety Modes (Prudent / Normal / Autonome)**: un sélecteur de niveau qui regroupe 4 mécanismes — validation par diff avant écriture (Prudent), application d'édition robuste avec retry auto (Normal+), boucle auto-fix lint/test (Autonome) — au-dessus de **checkpoints/rollback toujours actifs** (snapshots shadow-git dans app-data) comme filet de sécurité. Réf. Cline (Plan/Act + auto-approve), Aider (edit-formats + auto-lint/test), Roo/Plandex (checkpoints). — _planned_
+- **Semantic File Search**: outil « grep par le sens » — index d'embeddings local + recherche langage naturel renvoyant des hits `file:line`, complément du grep/glob littéral. Réutilise l'embed/cosine existant ; `grepai` testable en MCP. — _planned_
+- **Inline Citations UI**: réponses avec références `[1][2]` → cartes sources (titre/favicon/extrait), sur le `web_search` SearXNG existant (puis docs). — _planned_
+- **Global Conversation Search**: index full-text local sur tout l'historique des chats. — _planned_
+- **Project Rules File (AGENTS.md)**: auto-chargement d'un fichier de consignes racine (`AGENTS.md`/`.rules`) comme contexte système du workspace. Statique, standard cross-outil. — _planned_
+- **Prompt / Persona Presets**: bibliothèque locale de prompts + presets système avec variables `{{var}}` et tokens dynamiques (`{date}`), bundle nom/avatar/system-prompt/modèle/params. — _planned_
+- **Live Model Stats**: footer tok/s + % de remplissage du contexte + méta modèle (params/quant via `/api/show`). — _planned_
+- **@-mention Context Attach**: `@file`/`@folder`/`@url`/`@diff` pour épingler du contexte exact ; réutilise glob/grep/web_fetch. — _planned_
+- **Artifacts / Canvas Panel**: preview live HTML/SVG/code en panneau latéral + sélecteur de versions (Mermaid = quick win) ; iframe sandbox, exécution possible dans le sandbox existant. — _candidate_ (plus gros, à cadrer)
+- **PII Scrub (outbound)**: détection + tokenisation réversible des données perso avant `web_search`/`web_fetch`/`http_request`/MCP, restauration en réponse. Lib JS/WASM ou sidecar Presidio. — _candidate_ (à cadrer)
+- **Content Watch + Proactive Digest**: watchers dossier/RSS/URL (mode diff) résumant seulement le nouveau contenu, surfacé en digest ; étend le cron existant. — _candidate_ (à cadrer)
+
+_Écartés volontairement par le mainteneur : RAG « chat avec mes docs » (risque d'usine à gaz) et compare multi-modèles côte à côte._
 
 ### Mid-term (v3.5.0+)
 
 - **Plugin System**: Extensible architecture for community-built integrations
 - **Multi-Agent**: Orchestrate multiple agents for complex workflows
-- **Workspace Templates**: Pre-configured environments for common use cases (coding, writing, research)
+- **Workspace Templates**: Pre-configured environments for common use cases (coding, writing, research) — peut inclure des **environnements de skills nommés** (bascule entre jeux de skills) ; réf. design : trivium (install épinglée + switch d'environnements)
 
 ### Long-term
 
 - **Computer Use (CUA)**: GUI automation via screen capture and mouse/keyboard control (GUI MCP server already provides foundation)
 - **Collaborative Mode**: Multiple users sharing a workspace
 - **Mobile Companion**: Lightweight mobile app for monitoring and quick interactions — **first step done**: the Chat LAN web UI is now an installable PWA (QR pairing, Android home-screen install, SSE auto-reconnect, reverse-proxy/HTTPS support); a richer client may follow
+- **Local Voice Input (STT)**: clavier vocal 100% local — voice-to-text on-device via un modèle embarqué (ex. whisper.cpp / faster-whisper), push-to-talk vers la zone de saisie du chat. Surfacé par la transcription locale de LM Studio Bionic ; seule capacité purement locale qui manque aujourd'hui. Ajout de feature (capture audio + modèle local) : évaluer le périmètre avant de s'engager. — _candidate_
+- **Remote Access — option Tailscale**: chemin d'accès distant type LM Link (Tailscale, chiffré E2E) en complément de Chat LAN + WireGuard, pour réduire la friction d'appairage. Variante à étudier : relais **zero-knowledge** app-level (Curve25519 + ChaCha20Poly1305, façon Atlantis) pour un accès via Internet **sans VPN**, le relais ne voyant que du chiffré. À surveiller/documenter, pas à reconstruire. — _candidate_
 
 ---
 
-_Last updated: 2026-07-08 (v6.0.2 release)_
+_Last updated: 2026-07-19 (lot veille 1 livré — PRs #131–#139 : TTS, mémoire freshness/confiance, latence, Plan/Act, Quick-Ask, constrained output, reranker, cleanup ; prompts du 2e lot publiés)_
