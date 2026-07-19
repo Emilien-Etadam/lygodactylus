@@ -225,7 +225,9 @@ export class MemoryRetriever {
         recordEmbedding: item.embedding,
         currentWorkspace,
         sourceWorkspace: item.sourceWorkspace,
+        createdAt: item.createdAt,
         ingestedAt: item.ingestedAt,
+        confidence: item.confidence,
       });
       if (evidenceScore <= 0) {
         continue;
@@ -245,7 +247,9 @@ export class MemoryRetriever {
         recordEmbedding: item.embedding,
         currentWorkspace,
         sourceWorkspace: item.sourceWorkspace,
+        createdAt: item.createdAt,
         ingestedAt: item.ingestedAt,
+        confidence: item.confidence,
       });
       if (evidenceScore <= 0) {
         continue;
