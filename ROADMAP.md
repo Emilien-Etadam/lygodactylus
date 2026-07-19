@@ -124,6 +124,7 @@ Current stable fork baseline: **`6.0.2`** — [CHANGELOG](CHANGELOG.md)
 - **Schema naming**: `claude_session_id`, `claudeCodePath` → `agent_session_id`, `agentCliPath` — **done v5.5** (migration auto, champs legacy conservés en lecture)
 - **Tool Completeness**: Native TodoWrite, AskUserQuestion, Glob, Grep, WebFetch, WebSearch tool schemas + handlers for API key users — **done v5.7**
 - **Memory System Enhancements**: Prompt injection controls, cross-session retrieval UX, memory source inspection, reranking quality — **done v5.6**
+- **Memory Freshness & Confidence**: recency-decay term in `memory-ranker.ts` (reuse stored `createdAt`/`timestamp`) + optional per-entry `confidence` score used at ranking — inspiré du "confidence tracking + freshness decay" de moltagent, adapté à un usage 100% local mono-utilisateur. Self-contained, pas de nouveau sous-système ; tests dans `memory-ranker.test.ts`. — _planned_
 - **Scheduled Tasks**: Cron-like scheduling with UI management (backend exists; polish UX and edge cases)
 - **Log Management**: Structured logging with rotation, size limits, log viewer improvements
 - **Installation Experience**: Smoother first-run — auto-detect dependencies, clearer errors, one-click setup
@@ -140,7 +141,8 @@ Current stable fork baseline: **`6.0.2`** — [CHANGELOG](CHANGELOG.md)
 - **Computer Use (CUA)**: GUI automation via screen capture and mouse/keyboard control (GUI MCP server already provides foundation)
 - **Collaborative Mode**: Multiple users sharing a workspace
 - **Mobile Companion**: Lightweight mobile app for monitoring and quick interactions — **first step done**: the Chat LAN web UI is now an installable PWA (QR pairing, Android home-screen install, SSE auto-reconnect, reverse-proxy/HTTPS support); a richer client may follow
+- **Local Voice Input (STT)**: clavier vocal 100% local — voice-to-text on-device via un modèle embarqué (ex. whisper.cpp / faster-whisper), push-to-talk vers la zone de saisie du chat. Surfacé par la transcription locale de LM Studio Bionic ; seule capacité purement locale qui manque aujourd'hui. Ajout de feature (capture audio + modèle local) : évaluer le périmètre avant de s'engager. — _candidate_
 
 ---
 
-_Last updated: 2026-07-08 (v6.0.2 release)_
+_Last updated: 2026-07-19 (planned: memory freshness/confidence ; candidate: local voice STT)_
