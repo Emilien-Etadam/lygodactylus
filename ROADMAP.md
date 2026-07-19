@@ -144,6 +144,22 @@ _Issu d'une veille (moltagent, LM Studio Bionic, trivium, Atlantis, Jan/Cline/Ai
 - **Local Inference Latency**: préfixe système stable + réutilisation cache KV/prompt (`cache_prompt`) + contrôle keep-alive/warm-model (`keep_alive`, préchargement au focus, unload idle) pour tuer le cold-start. Gains quasi gratuits. — _planned_
 - **Local Reranker (mémoire / RAG)**: cross-encoder local — llama.cpp `/v1/rerank` ou ONNX transformers.js in-process — qui re-score le top-N récupéré avant injection. Plus gros lift qualité-retrieval ; booste la task #1 mémoire. — _planned_
 
+### 2e lot — veille cadrée avec le mainteneur (2026-07)
+
+- **Autonomy / Safety Modes (Prudent / Normal / Autonome)**: un sélecteur de niveau qui regroupe 4 mécanismes — validation par diff avant écriture (Prudent), application d'édition robuste avec retry auto (Normal+), boucle auto-fix lint/test (Autonome) — au-dessus de **checkpoints/rollback toujours actifs** (snapshots shadow-git dans app-data) comme filet de sécurité. Réf. Cline (Plan/Act + auto-approve), Aider (edit-formats + auto-lint/test), Roo/Plandex (checkpoints). — _planned_
+- **Semantic File Search**: outil « grep par le sens » — index d'embeddings local + recherche langage naturel renvoyant des hits `file:line`, complément du grep/glob littéral. Réutilise l'embed/cosine existant ; `grepai` testable en MCP. — _planned_
+- **Inline Citations UI**: réponses avec références `[1][2]` → cartes sources (titre/favicon/extrait), sur le `web_search` SearXNG existant (puis docs). — _planned_
+- **Global Conversation Search**: index full-text local sur tout l'historique des chats. — _planned_
+- **Project Rules File (AGENTS.md)**: auto-chargement d'un fichier de consignes racine (`AGENTS.md`/`.rules`) comme contexte système du workspace. Statique, standard cross-outil. — _planned_
+- **Prompt / Persona Presets**: bibliothèque locale de prompts + presets système avec variables `{{var}}` et tokens dynamiques (`{date}`), bundle nom/avatar/system-prompt/modèle/params. — _planned_
+- **Live Model Stats**: footer tok/s + % de remplissage du contexte + méta modèle (params/quant via `/api/show`). — _planned_
+- **@-mention Context Attach**: `@file`/`@folder`/`@url`/`@diff` pour épingler du contexte exact ; réutilise glob/grep/web_fetch. — _planned_
+- **Artifacts / Canvas Panel**: preview live HTML/SVG/code en panneau latéral + sélecteur de versions (Mermaid = quick win) ; iframe sandbox, exécution possible dans le sandbox existant. — _candidate_ (plus gros, à cadrer)
+- **PII Scrub (outbound)**: détection + tokenisation réversible des données perso avant `web_search`/`web_fetch`/`http_request`/MCP, restauration en réponse. Lib JS/WASM ou sidecar Presidio. — _candidate_ (à cadrer)
+- **Content Watch + Proactive Digest**: watchers dossier/RSS/URL (mode diff) résumant seulement le nouveau contenu, surfacé en digest ; étend le cron existant. — _candidate_ (à cadrer)
+
+_Écartés volontairement par le mainteneur : RAG « chat avec mes docs » (risque d'usine à gaz) et compare multi-modèles côte à côte._
+
 ### Mid-term (v3.5.0+)
 
 - **Plugin System**: Extensible architecture for community-built integrations
@@ -160,4 +176,4 @@ _Issu d'une veille (moltagent, LM Studio Bionic, trivium, Atlantis, Jan/Cline/Ai
 
 ---
 
-_Last updated: 2026-07-19 (veille : batch prioritaire ajouté — constrained output, quick-ask launcher, read-aloud TTS, plan/act, inference latency, local reranker)_
+_Last updated: 2026-07-19 (veille : 2e lot cadré ajouté — autonomy modes, semantic search, citations, history search, project rules, presets, model stats, @-mention, artifacts, PII scrub, content watch)_
