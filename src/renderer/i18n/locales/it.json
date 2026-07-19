@@ -94,7 +94,9 @@
     "updateDownloading": "Downloading update…",
     "updateDownloadError": "Automatic download failed: {{error}}",
     "speechSynthesis": "Lettura ad alta voce",
-    "speechSynthesisDesc": "Mostra un pulsante altoparlante sui messaggi dell'assistente per leggerli offline con la voce di sistema."
+    "speechSynthesisDesc": "Mostra un pulsante altoparlante sui messaggi dell'assistente per leggerli offline con la voce di sistema.",
+    "modelStats": "Statistiche del modello",
+    "modelStatsDesc": "Mostra la velocità di generazione (tok/s), il riempimento del contesto e i metadati del modello (parametri/quantizzazione) quando noti."
   },
   "webSearch": {
     "title": "Web search",
@@ -776,7 +778,9 @@
     "openInFileManager": "Apri nel file manager",
     "contextUsage": "Utilizzo del contesto",
     "contextUsageLabel": "{{used}} / {{total}}",
-    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining"
+    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
+    "modelMeta": "{{meta}}",
+    "contextFillHint": "Riempimento del contesto"
   },
   "messageCard": {
     "request": "Richiesta",
@@ -805,7 +809,8 @@
     "copyBlock": "Copia blocco",
     "copyThinking": "Copia riflessione",
     "speakMessage": "Leggi ad alta voce",
-    "stopSpeaking": "Interrompi lettura"
+    "stopSpeaking": "Interrompi lettura",
+    "tokensPerSecond": "{{rate}} tok/s"
   },
   "schedule": {
     "createTitle": "Crea pianificazione",

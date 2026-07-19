@@ -188,45 +188,52 @@ export async function preparePiSessionRun({
   // the gauge and auto-compaction budgets wrong and the server rejects
   // requests long before compaction triggers. A manual contextWindow in API
   // settings always wins over detection.
-  if (provider === 'openai' && !runtimeConfig.contextWindow) {
-    if (isOllamaEndpoint) {
-      const ollamaInfo = await fetchOllamaModelInfo({
-        baseUrl: effectiveModelBaseUrl || 'http://localhost:11434/v1',
-        model: piModel.id,
+  // Ollama /api/show also yields params/quant (cached); forwarded for UI stats.
+  let modelParameterSize: string | undefined;
+  let modelQuantization: string | undefined;
+  if (provider === 'openai' && isOllamaEndpoint) {
+    const ollamaInfo = await fetchOllamaModelInfo({
+      baseUrl: effectiveModelBaseUrl || 'http://localhost:11434/v1',
+      model: piModel.id,
+      apiKey: runtimeConfig.apiKey,
+    });
+    modelParameterSize = ollamaInfo.parameterSize;
+    modelQuantization = ollamaInfo.quantization;
+    if (!runtimeConfig.contextWindow && ollamaInfo.contextWindow) {
+      log(
+        '[AgentRunner] Ollama /api/show reported contextWindow:',
+        ollamaInfo.contextWindow,
+        '(was:',
+        piModel.contextWindow,
+        ')'
+      );
+      piModel = { ...piModel, contextWindow: ollamaInfo.contextWindow };
+    }
+  } else if (
+    provider === 'openai' &&
+    !runtimeConfig.contextWindow &&
+    !isOfficialOpenAIBaseUrl(effectiveModelBaseUrl)
+  ) {
+    try {
+      const reportedContextWindow = await fetchRemoteModelContextWindow({
+        baseUrl: effectiveModelBaseUrl,
         apiKey: runtimeConfig.apiKey,
+        provider,
+        customProtocol: runtimeConfig.customProtocol,
+        model: piModel.id,
       });
-      if (ollamaInfo.contextWindow) {
+      if (reportedContextWindow && reportedContextWindow !== piModel.contextWindow) {
         log(
-          '[AgentRunner] Ollama /api/show reported contextWindow:',
-          ollamaInfo.contextWindow,
+          '[AgentRunner] Endpoint /models reported contextWindow:',
+          reportedContextWindow,
           '(was:',
           piModel.contextWindow,
           ')'
         );
-        piModel = { ...piModel, contextWindow: ollamaInfo.contextWindow };
+        piModel = { ...piModel, contextWindow: reportedContextWindow };
       }
-    } else if (!isOfficialOpenAIBaseUrl(effectiveModelBaseUrl)) {
-      try {
-        const reportedContextWindow = await fetchRemoteModelContextWindow({
-          baseUrl: effectiveModelBaseUrl,
-          apiKey: runtimeConfig.apiKey,
-          provider,
-          customProtocol: runtimeConfig.customProtocol,
-          model: piModel.id,
-        });
-        if (reportedContextWindow && reportedContextWindow !== piModel.contextWindow) {
-          log(
-            '[AgentRunner] Endpoint /models reported contextWindow:',
-            reportedContextWindow,
-            '(was:',
-            piModel.contextWindow,
-            ')'
-          );
-          piModel = { ...piModel, contextWindow: reportedContextWindow };
-        }
-      } catch (error) {
-        logWarn('[AgentRunner] Context window probe failed (using defaults):', error);
-      }
+    } catch (error) {
+      logWarn('[AgentRunner] Context window probe failed (using defaults):', error);
     }
   }
 
@@ -238,6 +245,8 @@ export async function preparePiSessionRun({
       sessionId: session.id,
       contextWindow: modelContextWindow,
       maxTokens: modelMaxTokens,
+      ...(modelParameterSize ? { parameterSize: modelParameterSize } : {}),
+      ...(modelQuantization ? { quantization: modelQuantization } : {}),
     },
   });
 

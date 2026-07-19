@@ -608,7 +608,15 @@ export type ServerEvent =
     }
   | {
       type: 'session.contextInfo';
-      payload: { sessionId: string; contextWindow: number; maxTokens: number };
+      payload: {
+        sessionId: string;
+        contextWindow: number;
+        maxTokens: number;
+        /** Ollama /api/show parameter_size when known. */
+        parameterSize?: string;
+        /** Ollama /api/show quantization_level when known. */
+        quantization?: string;
+      };
     }
   | {
       type: 'session.notice';
@@ -800,6 +808,8 @@ export interface AppConfig {
   enableThinking?: boolean;
   thinkingLevel?: ThinkingLevel;
   speechSynthesisEnabled?: boolean;
+  /** Show model stats (tok/s, context %, params/quant). On by default. */
+  modelStatsEnabled?: boolean;
   /** Global Quick Ask floating window. Off by default. */
   quickAskEnabled?: boolean;
   /** Electron Accelerator for the Quick Ask global shortcut. */

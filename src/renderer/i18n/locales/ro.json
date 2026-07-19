@@ -94,7 +94,9 @@
     "updateDownloading": "Downloading update…",
     "updateDownloadError": "Automatic download failed: {{error}}",
     "speechSynthesis": "Citire vocală",
-    "speechSynthesisDesc": "Afișează un buton de difuzor pe mesajele asistentului pentru citire offline cu vocea sistemului."
+    "speechSynthesisDesc": "Afișează un buton de difuzor pe mesajele asistentului pentru citire offline cu vocea sistemului.",
+    "modelStats": "Statistici model",
+    "modelStatsDesc": "Afișează viteza de generare (tok/s), umplerea contextului și metadatele modelului (parametri/cuantizare) când sunt cunoscute."
   },
   "webSearch": {
     "title": "Web search",
@@ -776,7 +778,9 @@
     "openInFileManager": "Deschide în managerul de fișiere",
     "contextUsage": "Utilizare context",
     "contextUsageLabel": "{{used}} / {{total}}",
-    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining"
+    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
+    "modelMeta": "{{meta}}",
+    "contextFillHint": "Umplerea contextului"
   },
   "messageCard": {
     "request": "Cerere",
@@ -805,7 +809,8 @@
     "copyBlock": "Copiază blocul",
     "copyThinking": "Copiază gândirea",
     "speakMessage": "Citește mesajul",
-    "stopSpeaking": "Oprește citirea"
+    "stopSpeaking": "Oprește citirea",
+    "tokensPerSecond": "{{rate}} tok/s"
   },
   "schedule": {
     "createTitle": "Creează programare",

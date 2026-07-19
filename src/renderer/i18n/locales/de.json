@@ -94,7 +94,9 @@
     "updateDownloading": "Downloading update…",
     "updateDownloadError": "Automatic download failed: {{error}}",
     "speechSynthesis": "Vorlesen",
-    "speechSynthesisDesc": "Zeigt bei Assistentennachrichten einen Lautsprecher-Button, um sie offline mit der Systemstimme vorzulesen."
+    "speechSynthesisDesc": "Zeigt bei Assistentennachrichten einen Lautsprecher-Button, um sie offline mit der Systemstimme vorzulesen.",
+    "modelStats": "Modellstatistiken",
+    "modelStatsDesc": "Zeigt die Generierungsgeschwindigkeit (tok/s), die Kontextauslastung und Modellmetadaten (Parameter/Quantisierung), sofern bekannt."
   },
   "webSearch": {
     "title": "Web search",
@@ -776,7 +778,9 @@
     "openInFileManager": "Im Dateimanager öffnen",
     "contextUsage": "Kontextnutzung",
     "contextUsageLabel": "{{used}} / {{total}}",
-    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining"
+    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
+    "modelMeta": "{{meta}}",
+    "contextFillHint": "Kontextauslastung"
   },
   "messageCard": {
     "request": "Anfrage",
@@ -805,7 +809,8 @@
     "copyBlock": "Block kopieren",
     "copyThinking": "Denkprozess kopieren",
     "speakMessage": "Vorlesen",
-    "stopSpeaking": "Vorlesen stoppen"
+    "stopSpeaking": "Vorlesen stoppen",
+    "tokensPerSecond": "{{rate}} tok/s"
   },
   "schedule": {
     "createTitle": "Zeitplan erstellen",

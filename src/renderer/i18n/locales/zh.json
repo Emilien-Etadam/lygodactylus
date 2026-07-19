@@ -94,7 +94,9 @@
     "updateDownloading": "Downloading update…",
     "updateDownloadError": "Automatic download failed: {{error}}",
     "speechSynthesis": "朗读",
-    "speechSynthesisDesc": "在助手消息上显示扬声器按钮，使用系统离线语音朗读。"
+    "speechSynthesisDesc": "在助手消息上显示扬声器按钮，使用系统离线语音朗读。",
+    "modelStats": "模型统计",
+    "modelStatsDesc": "显示生成速度（tok/s）、上下文占用，以及已知的模型元数据（参数量/量化）。"
   },
   "webSearch": {
     "title": "Web search",
@@ -776,7 +778,9 @@
     "openInFileManager": "在文件管理器中打开",
     "contextUsage": "上下文用量",
     "contextUsageLabel": "{{used}} / {{total}}",
-    "contextUsageDetail": "{{input}} 输入 + {{output}} 预留 · 剩余 {{remaining}}"
+    "contextUsageDetail": "{{input}} 输入 + {{output}} 预留 · 剩余 {{remaining}}",
+    "modelMeta": "{{meta}}",
+    "contextFillHint": "上下文占用"
   },
   "messageCard": {
     "request": "请求",
@@ -805,7 +809,8 @@
     "copyBlock": "复制块",
     "copyThinking": "复制思考",
     "speakMessage": "朗读消息",
-    "stopSpeaking": "停止朗读"
+    "stopSpeaking": "停止朗读",
+    "tokensPerSecond": "{{rate}} tok/s"
   },
   "schedule": {
     "createTitle": "新建定时任务",

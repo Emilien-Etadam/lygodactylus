@@ -94,7 +94,9 @@
     "updateDownloading": "Downloading update…",
     "updateDownloadError": "Automatic download failed: {{error}}",
     "speechSynthesis": "Lectura en voz alta",
-    "speechSynthesisDesc": "Muestra un botón de altavoz en los mensajes del asistente para leerlos sin conexión con la voz del sistema."
+    "speechSynthesisDesc": "Muestra un botón de altavoz en los mensajes del asistente para leerlos sin conexión con la voz del sistema.",
+    "modelStats": "Estadísticas del modelo",
+    "modelStatsDesc": "Muestra la velocidad de generación (tok/s), el llenado del contexto y los metadatos del modelo (parámetros/cuantización) cuando se conocen."
   },
   "webSearch": {
     "title": "Web search",
@@ -776,7 +778,9 @@
     "openInFileManager": "Abrir en el gestor de archivos",
     "contextUsage": "Uso del contexto",
     "contextUsageLabel": "{{used}} / {{total}}",
-    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining"
+    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
+    "modelMeta": "{{meta}}",
+    "contextFillHint": "Llenado del contexto"
   },
   "messageCard": {
     "request": "Solicitud",
@@ -805,7 +809,8 @@
     "copyBlock": "Copiar bloque",
     "copyThinking": "Copiar reflexión",
     "speakMessage": "Leer en voz alta",
-    "stopSpeaking": "Detener lectura"
+    "stopSpeaking": "Detener lectura",
+    "tokensPerSecond": "{{rate}} tok/s"
   },
   "schedule": {
     "createTitle": "Crear programación",

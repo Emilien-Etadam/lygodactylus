@@ -94,7 +94,9 @@
     "updateDownloading": "Downloading update…",
     "updateDownloadError": "Automatic download failed: {{error}}",
     "speechSynthesis": "Voorlezen",
-    "speechSynthesisDesc": "Toont een luidsprekerknop bij berichten van de assistent om ze offline voor te lezen met de systeemstem."
+    "speechSynthesisDesc": "Toont een luidsprekerknop bij berichten van de assistent om ze offline voor te lezen met de systeemstem.",
+    "modelStats": "Modelstatistieken",
+    "modelStatsDesc": "Toont generatiesnelheid (tok/s), contextvulling en modelmetadata (parameters/kwantisatie) wanneer bekend."
   },
   "webSearch": {
     "title": "Web search",
@@ -776,7 +778,9 @@
     "openInFileManager": "Openen in bestandsbeheer",
     "contextUsage": "Contextgebruik",
     "contextUsageLabel": "{{used}} / {{total}}",
-    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining"
+    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
+    "modelMeta": "{{meta}}",
+    "contextFillHint": "Contextvulling"
   },
   "messageCard": {
     "request": "Aanvraag",
@@ -805,7 +809,8 @@
     "copyBlock": "Blok kopiëren",
     "copyThinking": "Denkproces kopiëren",
     "speakMessage": "Voorlezen",
-    "stopSpeaking": "Stoppen met voorlezen"
+    "stopSpeaking": "Stoppen met voorlezen",
+    "tokensPerSecond": "{{rate}} tok/s"
   },
   "schedule": {
     "createTitle": "Planning maken",

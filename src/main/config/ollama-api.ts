@@ -238,6 +238,7 @@ export async function testOllamaConnection(input: ApiTestInput): Promise<ApiTest
 export interface OllamaModelInfo {
   contextWindow: number | undefined;
   parameterSize: string | undefined;
+  quantization: string | undefined;
 }
 
 const MODEL_INFO_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
@@ -380,12 +381,16 @@ export async function fetchOllamaModelInfo(input: {
       }
     }
 
-    const parameterSize =
+    const details =
       typeof data.details === 'object' && data.details !== null
-        ? ((data.details as Record<string, unknown>).parameter_size as string | undefined)
+        ? (data.details as Record<string, unknown>)
         : undefined;
+    const parameterSize =
+      typeof details?.parameter_size === 'string' ? details.parameter_size : undefined;
+    const quantization =
+      typeof details?.quantization_level === 'string' ? details.quantization_level : undefined;
 
-    const result: OllamaModelInfo = { contextWindow, parameterSize };
+    const result: OllamaModelInfo = { contextWindow, parameterSize, quantization };
     modelInfoCache.set(cacheKey, {
       expiresAt: now + MODEL_INFO_CACHE_TTL_MS,
       result,
@@ -393,6 +398,6 @@ export async function fetchOllamaModelInfo(input: {
     return result;
   } catch {
     // Silently degrade — don't break the normal flow
-    return { contextWindow: undefined, parameterSize: undefined };
+    return { contextWindow: undefined, parameterSize: undefined, quantization: undefined };
   }
 }

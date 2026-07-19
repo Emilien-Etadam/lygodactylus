@@ -384,6 +384,7 @@ export function normalizeConfig(rawConfig: Partial<AppConfig> | undefined): AppC
       raw.speechSynthesisEnabled,
       defaultConfig.speechSynthesisEnabled
     ),
+    modelStatsEnabled: toBoolean(raw.modelStatsEnabled, defaultConfig.modelStatsEnabled),
     quickAskEnabled: toBoolean(raw.quickAskEnabled, defaultConfig.quickAskEnabled),
     quickAskShortcut:
       normalizeQuickAskShortcut(raw.quickAskShortcut) ||

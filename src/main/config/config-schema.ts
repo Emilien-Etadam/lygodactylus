@@ -99,6 +99,11 @@ export interface AppConfig {
   /** Offline speechSynthesis for assistant replies (Chromium voices). Off by default. */
   speechSynthesisEnabled: boolean;
   /**
+   * Show model stats (tok/s, context %, params/quant) in the chat UI.
+   * On by default; opt-out in Settings.
+   */
+  modelStatsEnabled: boolean;
+  /**
    * Global Quick Ask floating window (Phase 1). Off by default — opt-in in Settings.
    */
   quickAskEnabled: boolean;
@@ -190,6 +195,7 @@ export const DIRECT_READ_KEYS = new Set<keyof AppConfig>([
   'enableThinking',
   'thinkingLevel',
   'speechSynthesisEnabled',
+  'modelStatsEnabled',
   'quickAskEnabled',
   'quickAskShortcut',
   'ollamaKeepAlive',
@@ -313,6 +319,7 @@ export const defaultConfig: AppConfig = {
   enableThinking: false,
   thinkingLevel: 'medium',
   speechSynthesisEnabled: false,
+  modelStatsEnabled: true,
   quickAskEnabled: false,
   quickAskShortcut: DEFAULT_QUICK_ASK_SHORTCUT,
   ollamaKeepAlive: DEFAULT_OLLAMA_KEEP_ALIVE,

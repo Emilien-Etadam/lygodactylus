@@ -46,3 +46,15 @@ export function formatTokenCount(value: number): string {
   if (value >= 1_000) return `${(value / 1_000).toFixed(1)}k`;
   return String(value);
 }
+
+/**
+ * Format context fill percentage for the compact indicator.
+ * Clamps to [0, 100] and rounds to the nearest integer with a % suffix.
+ */
+export function formatContextPercentage(percentage: number): string {
+  if (!Number.isFinite(percentage)) {
+    return '0%';
+  }
+  const clamped = Math.min(100, Math.max(0, percentage));
+  return `${Math.round(clamped)}%`;
+}

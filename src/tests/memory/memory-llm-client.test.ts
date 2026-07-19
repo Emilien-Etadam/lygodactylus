@@ -83,6 +83,7 @@ function makeConfig(timeoutMs: number, overrides: Partial<AppConfig> = {}): AppC
     enableThinking: false,
     thinkingLevel: 'medium',
     speechSynthesisEnabled: false,
+    modelStatsEnabled: true,
     quickAskEnabled: false,
     quickAskShortcut: 'CommandOrControl+Shift+Space',
     isConfigured: true,

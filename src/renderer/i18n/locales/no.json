@@ -94,7 +94,9 @@
     "updateDownloading": "Downloading update…",
     "updateDownloadError": "Automatic download failed: {{error}}",
     "speechSynthesis": "Opplesing",
-    "speechSynthesisDesc": "Viser en høyttalerknapp på assistentens meldinger for frakoblet opplesing med systemstemmen."
+    "speechSynthesisDesc": "Viser en høyttalerknapp på assistentens meldinger for frakoblet opplesing med systemstemmen.",
+    "modelStats": "Modellstatistikk",
+    "modelStatsDesc": "Viser genereringshastighet (tok/s), kontekstfylling og modellmetadata (parametere/kvantisering) når de er kjent."
   },
   "webSearch": {
     "title": "Web search",
@@ -776,7 +778,9 @@
     "openInFileManager": "Åpne i filbehandler",
     "contextUsage": "Kontekstbruk",
     "contextUsageLabel": "{{used}} / {{total}}",
-    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining"
+    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
+    "modelMeta": "{{meta}}",
+    "contextFillHint": "Kontekstfylling"
   },
   "messageCard": {
     "request": "Forespørsel",
@@ -805,7 +809,8 @@
     "copyBlock": "Kopier blokk",
     "copyThinking": "Kopier tenking",
     "speakMessage": "Les opp",
-    "stopSpeaking": "Stopp opplesing"
+    "stopSpeaking": "Stopp opplesing",
+    "tokensPerSecond": "{{rate}} tok/s"
   },
   "schedule": {
     "createTitle": "Opprett tidsplan",
