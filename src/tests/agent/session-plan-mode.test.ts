@@ -85,7 +85,6 @@ describe('session plan/act mode', () => {
   it('exposes a constant plan-mode system prompt section', () => {
     expect(PLAN_MODE_SYSTEM_PROMPT).toContain('Planning mode');
     expect(PLAN_MODE_SYSTEM_PROMPT).toContain('numbered action plan');
-    expect(PLAN_MODE_SYSTEM_PROMPT).toBe(PLAN_MODE_SYSTEM_PROMPT);
   });
 
   it('keeps act-mode runtime signature identical when sessionMode is omitted or act', () => {
