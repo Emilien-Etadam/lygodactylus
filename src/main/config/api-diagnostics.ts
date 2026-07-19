@@ -672,23 +672,27 @@ async function runDiagnosticsImpl(input: DiagnosticInput): Promise<DiagnosticRes
   if (overallOk) {
     log('[Diagnostics] All checks passed', { totalLatencyMs });
     // Best-effort constrained-output capability probe — never affects diagnostic result.
-    void refreshConstrainedOutputCapability(
-      {
-        provider: input.provider,
-        customProtocol: input.customProtocol,
-        apiKey: input.apiKey,
-        baseUrl: input.baseUrl,
-        model: input.model || '',
-      },
-      {
-        getConfig: () => configStore.getAll(),
-        saveCapability: (cache) => {
-          configStore.update({ constrainedOutputCapability: cache });
-        },
+    void (async () => {
+      try {
+        await refreshConstrainedOutputCapability(
+          {
+            provider: input.provider,
+            customProtocol: input.customProtocol,
+            apiKey: input.apiKey,
+            baseUrl: input.baseUrl,
+            model: input.model || '',
+          },
+          {
+            getConfig: () => configStore.getAll(),
+            saveCapability: (cache) => {
+              configStore.update({ constrainedOutputCapability: cache });
+            },
+          }
+        );
+      } catch (error) {
+        logWarn('[Diagnostics] Constrained-output capability probe failed silently:', error);
       }
-    ).catch((error) => {
-      logWarn('[Diagnostics] Constrained-output capability probe failed silently:', error);
-    });
+    })();
   } else {
     logWarn('[Diagnostics] Failed', {
       failedAt: result.failedAt,

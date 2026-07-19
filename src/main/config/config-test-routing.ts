@@ -12,23 +12,27 @@ export async function runConfigApiTest(
   const result = await probeWithPiAi(payload, config);
   if (result.ok) {
     // Best-effort capability probe — never fail the connection test.
-    void refreshConstrainedOutputCapability(
-      {
-        provider: payload.provider,
-        customProtocol: payload.customProtocol,
-        apiKey: payload.apiKey ?? config.apiKey,
-        baseUrl: payload.baseUrl ?? config.baseUrl,
-        model: (typeof payload.model === 'string' ? payload.model : config.model) || '',
-      },
-      {
-        getConfig: () => configStore.getAll(),
-        saveCapability: (cache) => {
-          configStore.update({ constrainedOutputCapability: cache });
-        },
+    void (async () => {
+      try {
+        await refreshConstrainedOutputCapability(
+          {
+            provider: payload.provider,
+            customProtocol: payload.customProtocol,
+            apiKey: payload.apiKey ?? config.apiKey,
+            baseUrl: payload.baseUrl ?? config.baseUrl,
+            model: (typeof payload.model === 'string' ? payload.model : config.model) || '',
+          },
+          {
+            getConfig: () => configStore.getAll(),
+            saveCapability: (cache) => {
+              configStore.update({ constrainedOutputCapability: cache });
+            },
+          }
+        );
+      } catch (error) {
+        logWarn('[ConfigTest] Constrained-output capability probe failed silently:', error);
       }
-    ).catch((error) => {
-      logWarn('[ConfigTest] Constrained-output capability probe failed silently:', error);
-    });
+    })();
   }
   return result;
 }
