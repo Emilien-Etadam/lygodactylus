@@ -204,7 +204,19 @@
     "injectionPolicyStrip": "Strip suspicious patterns",
     "injectionPolicyBlock": "Block suspicious content",
     "showInjectedMemoryInChat": "Show injected memory in chat",
-    "relevanceScore": "Relevance {{score}}"
+    "relevanceScore": "Relevance {{score}}",
+    "rerankerTitle": "Lokale herordening",
+    "rerankerDescription": "Optioneel. Herordent opgehaalde herinneringen via een lokaal POST /v1/rerank-eindpunt (bijv. llama.cpp --reranking). Standaard uit; bij fout blijft de huidige rangschikking behouden.",
+    "rerankerEnabled": "Lokale herordening inschakelen",
+    "rerankerBaseUrl": "Basis-URL van de herordenaar",
+    "rerankerModel": "Herordeningsmodel",
+    "rerankerTopN": "Kandidaten top-N",
+    "rerankerKeep": "Te behouden resultaten",
+    "rerankerTimeoutMs": "Time-out (ms)",
+    "rerankerTest": "Testen",
+    "rerankerTesting": "Bezig met testen…",
+    "rerankerTestSuccess": "Herordening OK ({{ms}} ms).",
+    "rerankerTestFailed": "Herordeningstest mislukt."
   },
   "language": {
     "english": "Engels",

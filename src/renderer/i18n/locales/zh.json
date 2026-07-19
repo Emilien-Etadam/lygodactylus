@@ -204,7 +204,19 @@
     "injectionPolicyStrip": "Strip suspicious patterns",
     "injectionPolicyBlock": "Block suspicious content",
     "showInjectedMemoryInChat": "Show injected memory in chat",
-    "relevanceScore": "Relevance {{score}}"
+    "relevanceScore": "Relevance {{score}}",
+    "rerankerTitle": "本地重排序",
+    "rerankerDescription": "可选。通过本地 POST /v1/rerank 端点（如 llama.cpp --reranking）重新排序检索到的记忆。默认关闭；失败时保留当前排序。",
+    "rerankerEnabled": "启用本地重排序",
+    "rerankerBaseUrl": "重排序服务 Base URL",
+    "rerankerModel": "重排序模型",
+    "rerankerTopN": "候选 Top-N",
+    "rerankerKeep": "保留结果数",
+    "rerankerTimeoutMs": "超时（毫秒）",
+    "rerankerTest": "测试",
+    "rerankerTesting": "测试中…",
+    "rerankerTestSuccess": "重排序正常（{{ms}} 毫秒）。",
+    "rerankerTestFailed": "重排序测试失败。"
   },
   "language": {
     "english": "English",

@@ -198,6 +198,24 @@ export function registerScheduleMemoryIpc(): void {
     });
     return result;
   });
+
+  ipcMain.handle(
+    'memory.testReranker',
+    async (
+      _event,
+      payload: { baseUrl: string; model: string; timeoutMs?: number }
+    ): Promise<{ ok: boolean; latencyMs?: number; error?: string }> => {
+      const { probeMemoryReranker } = await import('../memory/memory-reranker-client');
+      return probeMemoryReranker({
+        baseUrl: typeof payload?.baseUrl === 'string' ? payload.baseUrl : '',
+        model: typeof payload?.model === 'string' ? payload.model : '',
+        timeoutMs:
+          typeof payload?.timeoutMs === 'number' && Number.isFinite(payload.timeoutMs)
+            ? payload.timeoutMs
+            : undefined,
+      });
+    }
+  );
 }
 
 export function createScheduledTaskManager(

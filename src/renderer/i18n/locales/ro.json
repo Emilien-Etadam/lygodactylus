@@ -204,7 +204,19 @@
     "injectionPolicyStrip": "Strip suspicious patterns",
     "injectionPolicyBlock": "Block suspicious content",
     "showInjectedMemoryInChat": "Show injected memory in chat",
-    "relevanceScore": "Relevance {{score}}"
+    "relevanceScore": "Relevance {{score}}",
+    "rerankerTitle": "Rerank local",
+    "rerankerDescription": "Opțional. Reordonează amintirile recuperate printr-un endpoint local POST /v1/rerank (ex. llama.cpp --reranking). Dezactivat implicit; la eșec se păstrează clasamentul curent.",
+    "rerankerEnabled": "Activează rerank local",
+    "rerankerBaseUrl": "URL de bază al reranker-ului",
+    "rerankerModel": "Model de rerank",
+    "rerankerTopN": "Top-N candidați",
+    "rerankerKeep": "Rezultate de păstrat",
+    "rerankerTimeoutMs": "Timeout (ms)",
+    "rerankerTest": "Testează",
+    "rerankerTesting": "Se testează…",
+    "rerankerTestSuccess": "Rerank OK ({{ms}} ms).",
+    "rerankerTestFailed": "Testul de rerank a eșuat."
   },
   "language": {
     "english": "Engleză",

@@ -204,7 +204,19 @@
     "injectionPolicyStrip": "Strip suspicious patterns",
     "injectionPolicyBlock": "Block suspicious content",
     "showInjectedMemoryInChat": "Show injected memory in chat",
-    "relevanceScore": "Relevance {{score}}"
+    "relevanceScore": "Relevance {{score}}",
+    "rerankerTitle": "Локальний rerank",
+    "rerankerDescription": "Необов’язково. Перевпорядковує знайдені спогади через локальний POST /v1/rerank (напр. llama.cpp --reranking). Вимкнено за замовчуванням; при помилці зберігається поточний порядок.",
+    "rerankerEnabled": "Увімкнути локальний rerank",
+    "rerankerBaseUrl": "Базова URL reranker",
+    "rerankerModel": "Модель rerank",
+    "rerankerTopN": "Кандидати Top-N",
+    "rerankerKeep": "Скільки залишити",
+    "rerankerTimeoutMs": "Таймаут (мс)",
+    "rerankerTest": "Перевірити",
+    "rerankerTesting": "Перевірка…",
+    "rerankerTestSuccess": "Rerank OK ({{ms}} мс).",
+    "rerankerTestFailed": "Помилка перевірки rerank."
   },
   "language": {
     "english": "Англійська",

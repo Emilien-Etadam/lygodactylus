@@ -204,7 +204,19 @@
     "injectionPolicyStrip": "Strip suspicious patterns",
     "injectionPolicyBlock": "Block suspicious content",
     "showInjectedMemoryInChat": "Show injected memory in chat",
-    "relevanceScore": "Relevance {{score}}"
+    "relevanceScore": "Relevance {{score}}",
+    "rerankerTitle": "Lokal omrankning",
+    "rerankerDescription": "Valfritt. Ordnar om hämtade minnen via en lokal POST /v1/rerank-endpoint (t.ex. llama.cpp --reranking). Av som standard; vid fel behålls den nuvarande rangordningen.",
+    "rerankerEnabled": "Aktivera lokal omrankning",
+    "rerankerBaseUrl": "Bas-URL för omrankare",
+    "rerankerModel": "Omrankningsmodell",
+    "rerankerTopN": "Kandidater top-N",
+    "rerankerKeep": "Resultat att behålla",
+    "rerankerTimeoutMs": "Tidsgräns (ms)",
+    "rerankerTest": "Testa",
+    "rerankerTesting": "Testar…",
+    "rerankerTestSuccess": "Omrankning OK ({{ms}} ms).",
+    "rerankerTestFailed": "Omrankningstestet misslyckades."
   },
   "language": {
     "english": "Engelska",

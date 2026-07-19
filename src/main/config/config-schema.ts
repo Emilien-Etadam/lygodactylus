@@ -134,6 +134,18 @@ export interface MemoryModelRuntimeConfig {
 
 export type MemoryInjectionPolicy = 'escape' | 'strip-suspicious' | 'block';
 
+/** Rerank local opt-in (POST /v1/rerank). Désactivé par défaut. */
+export interface MemoryRerankerConfig {
+  enabled: boolean;
+  baseUrl: string;
+  model: string;
+  /** Taille du pool candidaté avant rerank. */
+  topN: number;
+  /** Nombre de résultats conservés après rerank. */
+  keep: number;
+  timeoutMs: number;
+}
+
 export interface MemoryRuntimeConfig {
   llm: MemoryModelRuntimeConfig;
   embedding: MemoryModelRuntimeConfig;
@@ -144,6 +156,8 @@ export interface MemoryRuntimeConfig {
   sessionTopK: number;
   injectionPolicy: MemoryInjectionPolicy;
   showInjectedMemoryInChat: boolean;
+  /** Rerank local optionnel ; OFF par défaut, fallback silencieux. */
+  memoryReranker: MemoryRerankerConfig;
   storageRoot?: string;
   evalEnabled?: boolean;
   evalWorkspaces?: string[];
@@ -280,6 +294,14 @@ export const defaultConfig: AppConfig = {
     sessionTopK: 5,
     injectionPolicy: 'escape',
     showInjectedMemoryInChat: true,
+    memoryReranker: {
+      enabled: false,
+      baseUrl: '',
+      model: '',
+      topN: 20,
+      keep: 8,
+      timeoutMs: 800,
+    },
     storageRoot: '',
     evalEnabled: false,
     evalWorkspaces: [],
@@ -344,6 +366,30 @@ function normalizeMemoryModelRuntimeConfig(
   };
 }
 
+function normalizeMemoryRerankerConfig(raw: unknown): MemoryRerankerConfig {
+  const fallback = defaultConfig.memoryRuntime.memoryReranker;
+  const value = typeof raw === 'object' && raw !== null ? (raw as Partial<MemoryRerankerConfig>) : {};
+  const topN =
+    typeof value.topN === 'number' && Number.isFinite(value.topN)
+      ? Math.max(1, Math.min(50, Math.round(value.topN)))
+      : fallback.topN;
+  const keep =
+    typeof value.keep === 'number' && Number.isFinite(value.keep)
+      ? Math.max(1, Math.min(topN, Math.round(value.keep)))
+      : Math.min(fallback.keep, topN);
+  return {
+    enabled: toBoolean(value.enabled, fallback.enabled),
+    baseUrl: typeof value.baseUrl === 'string' ? value.baseUrl.trim() : fallback.baseUrl,
+    model: typeof value.model === 'string' ? value.model.trim() : fallback.model,
+    topN,
+    keep,
+    timeoutMs:
+      typeof value.timeoutMs === 'number' && Number.isFinite(value.timeoutMs)
+        ? Math.max(100, Math.min(30_000, Math.round(value.timeoutMs)))
+        : fallback.timeoutMs,
+  };
+}
+
 export function normalizeMemoryRuntimeConfig(raw: unknown): MemoryRuntimeConfig {
   const value =
     typeof raw === 'object' && raw !== null ? (raw as Partial<MemoryRuntimeConfig>) : {};
@@ -378,6 +424,7 @@ export function normalizeMemoryRuntimeConfig(raw: unknown): MemoryRuntimeConfig 
       value.showInjectedMemoryInChat,
       defaultConfig.memoryRuntime.showInjectedMemoryInChat
     ),
+    memoryReranker: normalizeMemoryRerankerConfig(value.memoryReranker),
     storageRoot:
       typeof value.storageRoot === 'string'
         ? value.storageRoot

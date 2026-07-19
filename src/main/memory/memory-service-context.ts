@@ -5,6 +5,11 @@ import type { ExperienceMemoryStore } from './experience-memory-store';
 import type { MemoryLLMClientLike } from './memory-llm-client';
 import type { MemoryNavigator } from './memory-navigator';
 import {
+  memoryConfidenceFactor,
+  memoryFreshnessFactor,
+} from './memory-ranker';
+import { maybeRerankMemoryItems } from './memory-reranker-client';
+import {
   escapeMemoryContextText,
   getMemoryInjectionPolicy,
   sanitizeMemoryContent,
@@ -172,6 +177,45 @@ export async function buildExperienceContext(
   });
   if (!retrieval.broadSummaries.length) {
     return { text: '', items: [] };
+  }
+
+  // Rerank opt-in avant affichage / injection : ordre final = ordre reranké (keep).
+  // Fraîcheur/confiance restent multiplicatifs sur le score reranké.
+  const reranker = runtime.memoryReranker;
+  if (reranker?.enabled) {
+    type SummaryItem = ProgressiveRetrievalResult['broadSummaries'][number];
+    type RerankCandidate = {
+      payload: SummaryItem;
+      documentText: string;
+      score: number;
+      freshnessFactor: number;
+      confidenceFactor: number;
+    };
+    const candidates: RerankCandidate[] = retrieval.broadSummaries.map((item) => {
+      const record =
+        item.type === 'chunk' ? store.getChunk(item.id) : store.getSession(item.sessionId);
+      const freshnessTimestamp = record?.createdAt || record?.ingestedAt;
+      return {
+        payload: item,
+        documentText: item.summary,
+        score: typeof item.score === 'number' ? item.score : 0,
+        freshnessFactor: memoryFreshnessFactor(freshnessTimestamp),
+        confidenceFactor: memoryConfidenceFactor(record?.confidence),
+      };
+    });
+    const reranked = await maybeRerankMemoryItems({
+      enabled: true,
+      config: reranker,
+      query: prompt,
+      items: candidates,
+      logLabel: 'inject',
+    });
+    retrieval.broadSummaries = reranked.map(
+      (item): SummaryItem => ({
+        ...item.payload,
+        score: item.score,
+      })
+    );
   }
 
   const items = retrieval.broadSummaries.map(

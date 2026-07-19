@@ -204,7 +204,19 @@
     "injectionPolicyStrip": "Strip suspicious patterns",
     "injectionPolicyBlock": "Block suspicious content",
     "showInjectedMemoryInChat": "Show injected memory in chat",
-    "relevanceScore": "Relevance {{score}}"
+    "relevanceScore": "Relevance {{score}}",
+    "rerankerTitle": "Rerank local",
+    "rerankerDescription": "Opcional. Reordena los recuerdos recuperados mediante un endpoint local POST /v1/rerank (p. ej. llama.cpp --reranking). Desactivado por defecto; si falla, se conserva el ranking actual.",
+    "rerankerEnabled": "Activar rerank local",
+    "rerankerBaseUrl": "URL base del reranker",
+    "rerankerModel": "Modelo de rerank",
+    "rerankerTopN": "Top-N candidatos",
+    "rerankerKeep": "Resultados a conservar",
+    "rerankerTimeoutMs": "Tiempo máximo (ms)",
+    "rerankerTest": "Probar",
+    "rerankerTesting": "Probando…",
+    "rerankerTestSuccess": "Rerank OK ({{ms}} ms).",
+    "rerankerTestFailed": "Falló la prueba de rerank."
   },
   "language": {
     "english": "Inglés",

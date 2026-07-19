@@ -241,7 +241,19 @@
     "noFiles": "No memory files yet",
     "fileContent": "File content",
     "emptyFile": "File is empty",
-    "selectFileHint": "Select a file on the left to view its raw JSON."
+    "selectFileHint": "Select a file on the left to view its raw JSON.",
+    "rerankerTitle": "Local rerank",
+    "rerankerDescription": "Optional. Reorders retrieved memories via a local POST /v1/rerank endpoint (e.g. llama.cpp --reranking). Off by default; on failure the current ranking is kept.",
+    "rerankerEnabled": "Enable local rerank",
+    "rerankerBaseUrl": "Reranker base URL",
+    "rerankerModel": "Rerank model",
+    "rerankerTopN": "Candidate top-N",
+    "rerankerKeep": "Results to keep",
+    "rerankerTimeoutMs": "Timeout (ms)",
+    "rerankerTest": "Test",
+    "rerankerTesting": "Testing…",
+    "rerankerTestSuccess": "Rerank OK ({{ms}} ms).",
+    "rerankerTestFailed": "Rerank test failed."
   },
   "language": {
     "english": "English",

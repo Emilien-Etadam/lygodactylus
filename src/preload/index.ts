@@ -29,6 +29,8 @@ import type {
   MemoryDebugFileInfo,
   MemoryDebugFileContent,
   MemoryInspectSessionResult,
+  MemoryRerankerTestInput,
+  MemoryRerankerTestResult,
 } from '../renderer/types';
 import type { DiagnosticInput, DiagnosticResult } from '../renderer/types';
 import type { McpServerConfig, McpTool, McpServerStatus, McpPresetsMap } from '../shared/ipc-types';
@@ -400,6 +402,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('memory.inspectSession', sessionId, workspaceKey),
     setEnabled: (enabled: boolean): Promise<{ success: boolean; enabled: boolean }> =>
       ipcRenderer.invoke('memory.setEnabled', enabled),
+    testReranker: (payload: MemoryRerankerTestInput): Promise<MemoryRerankerTestResult> =>
+      ipcRenderer.invoke('memory.testReranker', payload),
   },
 });
 
@@ -656,6 +660,7 @@ declare global {
           workspaceKey?: string
         ) => Promise<MemoryInspectSessionResult | null>;
         setEnabled: (enabled: boolean) => Promise<{ success: boolean; enabled: boolean }>;
+        testReranker: (payload: MemoryRerankerTestInput) => Promise<MemoryRerankerTestResult>;
       };
     };
   }

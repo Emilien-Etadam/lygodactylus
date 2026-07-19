@@ -204,7 +204,19 @@
     "injectionPolicyStrip": "Strip suspicious patterns",
     "injectionPolicyBlock": "Block suspicious content",
     "showInjectedMemoryInChat": "Show injected memory in chat",
-    "relevanceScore": "Relevance {{score}}"
+    "relevanceScore": "Relevance {{score}}",
+    "rerankerTitle": "Lokal omrangering",
+    "rerankerDescription": "Valgfritt. Omordner hentede minner via en lokal POST /v1/rerank-endepunkt (f.eks. llama.cpp --reranking). Av som standard; ved feil beholdes gjeldende rangering.",
+    "rerankerEnabled": "Aktiver lokal omrangering",
+    "rerankerBaseUrl": "Basis-URL for omrangerer",
+    "rerankerModel": "Omrangeringsmodell",
+    "rerankerTopN": "Kandidater topp-N",
+    "rerankerKeep": "Resultater å beholde",
+    "rerankerTimeoutMs": "Tidsavbrudd (ms)",
+    "rerankerTest": "Test",
+    "rerankerTesting": "Tester…",
+    "rerankerTestSuccess": "Omrangering OK ({{ms}} ms).",
+    "rerankerTestFailed": "Omrangeringstest mislyktes."
   },
   "language": {
     "english": "Engelsk",

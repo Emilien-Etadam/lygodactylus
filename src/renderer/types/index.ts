@@ -724,6 +724,15 @@ export interface MemoryModelRuntimeConfig {
   timeoutMs: number;
 }
 
+export interface MemoryRerankerConfig {
+  enabled: boolean;
+  baseUrl: string;
+  model: string;
+  topN: number;
+  keep: number;
+  timeoutMs: number;
+}
+
 export interface MemoryRuntimeConfig {
   llm: MemoryModelRuntimeConfig;
   embedding: MemoryModelRuntimeConfig;
@@ -734,12 +743,25 @@ export interface MemoryRuntimeConfig {
   sessionTopK: number;
   injectionPolicy: 'escape' | 'strip-suspicious' | 'block';
   showInjectedMemoryInChat: boolean;
+  memoryReranker: MemoryRerankerConfig;
   storageRoot?: string;
   evalEnabled?: boolean;
   evalWorkspaces?: string[];
   evalMaxRounds?: number;
   evalArtifactsRoot?: string;
   promptIterationRounds?: number;
+}
+
+export interface MemoryRerankerTestInput {
+  baseUrl: string;
+  model: string;
+  timeoutMs?: number;
+}
+
+export interface MemoryRerankerTestResult {
+  ok: boolean;
+  latencyMs?: number;
+  error?: string;
 }
 
 export interface MemoryInjectedItem {

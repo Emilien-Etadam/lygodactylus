@@ -104,6 +104,10 @@ export interface MemoryRankInput {
 export function computeMemoryRankScore(input: MemoryRankInput): {
   score: number;
   evidenceScore: number;
+  /** Score avant fraîcheur/confiance — base pour le pool de rerank. */
+  baseScore: number;
+  freshnessFactor: number;
+  confidenceFactor: number;
 } {
   const lexical = lexicalScore(input.query, input.text);
   const embedding =
@@ -118,9 +122,8 @@ export function computeMemoryRankScore(input: MemoryRankInput): {
     memoryWorkspaceBoost(currentWorkspace, input.sourceWorkspace) +
     (input.ingestedAt ? memoryRecencyBoost(input.ingestedAt, now) : 0);
   const freshnessTimestamp = input.createdAt || input.ingestedAt;
-  const score =
-    baseScore *
-    memoryFreshnessFactor(freshnessTimestamp, now) *
-    memoryConfidenceFactor(input.confidence);
-  return { score, evidenceScore };
+  const freshnessFactor = memoryFreshnessFactor(freshnessTimestamp, now);
+  const confidenceFactor = memoryConfidenceFactor(input.confidence);
+  const score = baseScore * freshnessFactor * confidenceFactor;
+  return { score, evidenceScore, baseScore, freshnessFactor, confidenceFactor };
 }

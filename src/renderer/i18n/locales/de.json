@@ -204,7 +204,19 @@
     "injectionPolicyStrip": "Strip suspicious patterns",
     "injectionPolicyBlock": "Block suspicious content",
     "showInjectedMemoryInChat": "Show injected memory in chat",
-    "relevanceScore": "Relevance {{score}}"
+    "relevanceScore": "Relevance {{score}}",
+    "rerankerTitle": "Lokales Reranking",
+    "rerankerDescription": "Optional. Ordnet abgerufene Erinnerungen über einen lokalen POST /v1/rerank-Endpunkt neu (z. B. llama.cpp --reranking). Standardmäßig aus; bei Fehler bleibt die aktuelle Rangfolge erhalten.",
+    "rerankerEnabled": "Lokales Reranking aktivieren",
+    "rerankerBaseUrl": "Reranker-Basis-URL",
+    "rerankerModel": "Rerank-Modell",
+    "rerankerTopN": "Kandidaten Top-N",
+    "rerankerKeep": "Behaltene Ergebnisse",
+    "rerankerTimeoutMs": "Timeout (ms)",
+    "rerankerTest": "Testen",
+    "rerankerTesting": "Test läuft…",
+    "rerankerTestSuccess": "Rerank OK ({{ms}} ms).",
+    "rerankerTestFailed": "Rerank-Test fehlgeschlagen."
   },
   "language": {
     "english": "Englisch",
