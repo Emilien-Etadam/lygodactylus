@@ -133,6 +133,17 @@ Current stable fork baseline: **`6.0.2`** — [CHANGELOG](CHANGELOG.md)
 - **Skill Lockfile & Pinning**: enregistrer à l'install le commit sha résolu + un hash d'intégrité dans `marketplace-installed-store` (aujourd'hui : install à un `ref` de catalogue, sans lockfile). Reproductibilité, détection/rollback de dérive, et sécurité supply-chain (un skill exécute du code dans le sandbox). Inspiré du `skills.lock` de trivium ; extension du store existant, pas un sous-système. — _planned_
 - **Chat Organization**: groupes/dossiers de chats par projet + **sous-chats** (brancher une discussion annexe sans polluer le contexte principal) — UX locale self-contained, prolonge le fork/édition de messages existant. Inspiré d'Atlantis (roia.io). — _candidate_
 
+### Prochain lot — veille concurrentielle 2026-07 (prioritaire)
+
+_Issu d'une veille (moltagent, LM Studio Bionic, trivium, Atlantis, Jan/Cline/Aider/Khoj/llama.cpp…). Items validés, petits et self-contained, dans l'ADN local-first + fiabilité des modèles locaux._
+
+- **Constrained Output (grammar / JSON-schema)**: passer le JSON Schema de l'outil (ou une grammaire GBNF) en champ de requête — Ollama `format`, llama.cpp `grammar`/`json_schema`, vLLM guided — pour forcer un JSON/tool-call valide côté serveur. Évolution *préventive* du tool-call guard ; pur changement client. — _planned_
+- **Global Quick-Ask Launcher**: hotkey système ouvrant une fenêtre frameless « quick ask » sans focaliser l'app, + actions sur le texte sélectionné (résumer/traduire/reformuler). Electron `globalShortcut` + BrowserWindow non-activante (paste-back = seule part M). Absent de tous les peers runner-de-modèles. — _planned_
+- **Read-Aloud (TTS)**: lecture vocale des réponses via `speechSynthesis` de Chromium (offline, zéro-dep), Piper/Kokoro en upgrade. Miroir du STT planifié, complète la boucle voix. — _planned_
+- **Plan/Act Mode**: phase plan en lecture seule (explore + propose) gâtée avant toute exécution, puis bascule exécution. Toggle + gating d'outils ; améliore nettement les petits modèles locaux. — _planned_
+- **Local Inference Latency**: préfixe système stable + réutilisation cache KV/prompt (`cache_prompt`) + contrôle keep-alive/warm-model (`keep_alive`, préchargement au focus, unload idle) pour tuer le cold-start. Gains quasi gratuits. — _planned_
+- **Local Reranker (mémoire / RAG)**: cross-encoder local — llama.cpp `/v1/rerank` ou ONNX transformers.js in-process — qui re-score le top-N récupéré avant injection. Plus gros lift qualité-retrieval ; booste la task #1 mémoire. — _planned_
+
 ### Mid-term (v3.5.0+)
 
 - **Plugin System**: Extensible architecture for community-built integrations
@@ -149,4 +160,4 @@ Current stable fork baseline: **`6.0.2`** — [CHANGELOG](CHANGELOG.md)
 
 ---
 
-_Last updated: 2026-07-19 (planned: memory freshness/confidence, skill lockfile/pinning ; candidates: local voice STT, model-location picker, Tailscale remote, chat organization)_
+_Last updated: 2026-07-19 (veille : batch prioritaire ajouté — constrained output, quick-ask launcher, read-aloud TTS, plan/act, inference latency, local reranker)_
