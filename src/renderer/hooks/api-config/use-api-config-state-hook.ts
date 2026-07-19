@@ -51,6 +51,7 @@ export function useApiConfigState(options: UseApiConfigStateOptions = {}) {
     pendingConfigSetAction,
     isMutatingConfigSet,
     enableThinking,
+    ollamaKeepAlive,
     discoveredModels,
     isLoadingConfig,
     savedDraftSignature,
@@ -113,6 +114,7 @@ export function useApiConfigState(options: UseApiConfigStateOptions = {}) {
     configSets,
     discoveredModels,
     enableThinking,
+    ollamaKeepAlive,
     error,
     pendingConfigSetAction,
     presets,
@@ -176,6 +178,9 @@ export function useApiConfigState(options: UseApiConfigStateOptions = {}) {
   }, [updateActiveProfile]);
   const setEnableThinking = useCallback((value: boolean) => {
     dispatch({ type: 'SET_ENABLE_THINKING', payload: value });
+  }, []);
+  const setOllamaKeepAlive = useCallback((value: string) => {
+    dispatch({ type: 'SET_OLLAMA_KEEP_ALIVE', payload: value });
   }, []);
   const applyCommonProviderSetup = useCallback(
     (setupId: string) => {
@@ -241,6 +246,7 @@ export function useApiConfigState(options: UseApiConfigStateOptions = {}) {
     customProtocol,
     dispatch,
     enableThinking,
+    ollamaKeepAlive,
     hasUnsavedChanges,
     model,
     onSave,
@@ -279,6 +285,7 @@ export function useApiConfigState(options: UseApiConfigStateOptions = {}) {
     discoverLocalOllama,
     discardAndContinuePendingConfigSetAction,
     enableThinking,
+    ollamaKeepAlive,
     error,
     friendlyTestDetails,
     handleDeepDiagnose,
@@ -316,6 +323,7 @@ export function useApiConfigState(options: UseApiConfigStateOptions = {}) {
     setContextWindow,
     setCustomModel,
     setEnableThinking,
+    setOllamaKeepAlive,
     setError: showErrorText,
     setMaxTokens,
     setModel,

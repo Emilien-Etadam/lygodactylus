@@ -12,6 +12,12 @@ import {
   type AgentSession as PiAgentSession,
   type ToolDefinition,
 } from '@earendil-works/pi-coding-agent';
+import { detectCommonProviderSetup } from '../../shared/api-provider-guidance';
+import { configStore } from '../config/config-store';
+import {
+  normalizeOllamaKeepAlive,
+  toOllamaKeepAlivePayload,
+} from '../config/ollama-api';
 import { decidePermission, rememberAlwaysAllow } from '../config/permission-rules-store';
 import type { MCPManager } from '../mcp/mcp-manager';
 import { logCtx } from '../utils/logger';
@@ -20,6 +26,7 @@ import { withAsyncTimeout } from '../utils/async-timeout';
 import { buildCompactionSettings, estimateTokensFromText } from './context-budget';
 import type { AgentRunnerRunContext } from './agent-runner-run-context';
 import { ModelRegistry } from './shared-auth';
+import { sortSkillsForStablePrefix } from './stable-system-prefix';
 
 export interface CachedPiSession {
   session: PiAgentSession;
@@ -433,6 +440,14 @@ export async function createPiSession({
     additionalSkillPaths: skillPaths,
     additionalPromptTemplatePaths: promptTemplatePaths,
     appendSystemPrompt: coworkAppendPrompt,
+    // Deterministic skill / project-context order → stable KV-cacheable system prefix.
+    skillsOverride: (base) => ({
+      ...base,
+      skills: sortSkillsForStablePrefix(base.skills),
+    }),
+    agentsFilesOverride: (base) => ({
+      agentsFiles: [...base.agentsFiles].sort((left, right) => left.path.localeCompare(right.path)),
+    }),
   });
   const reloadSucceeded = await reloadResourceLoaderWithTimeout(resourceLoader, promptTemplatePaths);
   if (!reloadSucceeded) {
@@ -486,12 +501,19 @@ export async function createPiSession({
     compactionEnabled: compactionSettings.enabled,
   });
 
-  if (provider === 'ollama') {
+  // Ollama was migrated to provider "openai"; detect by endpoint URL instead.
+  const modelBaseUrl =
+    typeof piModel === 'object' && piModel && 'baseUrl' in piModel
+      ? String((piModel as { baseUrl?: string }).baseUrl || '')
+      : '';
+  const isOllamaEndpoint =
+    provider === 'ollama' || detectCommonProviderSetup(modelBaseUrl)?.id === 'ollama';
+  if (isOllamaEndpoint) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const agent = piSession.agent as any;
     if (!('_onPayload' in agent)) {
       logWarn(
-        '[AgentRunner] SDK agent does not expose _onPayload — skipping Ollama num_ctx patch'
+        '[AgentRunner] SDK agent does not expose _onPayload — skipping Ollama keep_alive/num_ctx patch'
       );
     } else {
       const originalOnPayload = agent._onPayload as
@@ -508,10 +530,20 @@ export async function createPiSession({
         if (result === undefined) {
           result = payload;
         }
-        return { ...result, num_ctx: ollamaNumCtx.value };
+        const keepAlive = normalizeOllamaKeepAlive(configStore.get('ollamaKeepAlive'));
+        return {
+          ...result,
+          num_ctx: ollamaNumCtx.value,
+          keep_alive: toOllamaKeepAlivePayload(keepAlive),
+        };
       };
       ctx.piSessions.get(sessionId)!.ollamaNumCtx = ollamaNumCtx;
-      log('[AgentRunner] Ollama _onPayload wrapper installed, num_ctx:', ollamaNumCtx.value);
+      log(
+        '[AgentRunner] Ollama _onPayload wrapper installed, num_ctx:',
+        ollamaNumCtx.value,
+        'keep_alive:',
+        normalizeOllamaKeepAlive(configStore.get('ollamaKeepAlive'))
+      );
     }
   }
 

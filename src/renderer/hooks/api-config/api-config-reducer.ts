@@ -20,6 +20,7 @@ export function apiConfigReducer(state: ApiConfigState, action: ApiConfigAction)
         profiles: action.payload.profiles,
         activeProfileKey: action.payload.activeProfileKey,
         enableThinking: action.payload.enableThinking,
+        ollamaKeepAlive: action.payload.ollamaKeepAlive,
         configSets: action.payload.configSets,
         activeConfigSetId: action.payload.activeConfigSetId,
         pendingConfigSetAction: null,
@@ -31,6 +32,9 @@ export function apiConfigReducer(state: ApiConfigState, action: ApiConfigAction)
 
     case 'SET_ENABLE_THINKING':
       return { ...state, enableThinking: action.payload };
+
+    case 'SET_OLLAMA_KEEP_ALIVE':
+      return { ...state, ollamaKeepAlive: action.payload };
 
     case 'PATCH_PROFILE':
       return {

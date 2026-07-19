@@ -46,6 +46,7 @@ export function SettingsAPI() {
     isRefreshingModels,
     isDiscoveringLocalOllama,
     enableThinking,
+    ollamaKeepAlive,
     isLocalOpenAiMode,
     supportsModelDiscovery,
     requiresApiKey,
@@ -67,6 +68,7 @@ export function SettingsAPI() {
     setMaxTokens,
     toggleCustomModel,
     setEnableThinking,
+    setOllamaKeepAlive,
     applyCommonProviderSetup,
     changeProvider,
     requestConfigSetSwitch,
@@ -330,6 +332,26 @@ export function SettingsAPI() {
               />
             </div>
             <p className="col-span-2 text-xs text-text-muted">{t('api.contextWindowHint')}</p>
+          </div>
+        )}
+
+        {isLocalOpenAiMode && (
+          <div className="pt-2">
+            <label
+              htmlFor="api-ollama-keep-alive-input"
+              className="block text-xs font-medium text-text-secondary mb-1"
+            >
+              {t('api.ollamaKeepAlive')}
+            </label>
+            <input
+              id="api-ollama-keep-alive-input"
+              type="text"
+              value={ollamaKeepAlive}
+              onChange={(e) => setOllamaKeepAlive(e.target.value)}
+              placeholder={t('api.ollamaKeepAlivePlaceholder')}
+              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-text-primary text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
+            />
+            <p className="text-xs text-text-muted mt-1">{t('api.ollamaKeepAliveHint')}</p>
           </div>
         )}
       </div>

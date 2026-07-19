@@ -31,6 +31,7 @@ interface UseApiConfigSaveActionParams {
   customProtocol: CustomProtocolType;
   dispatch: Dispatch<ApiConfigAction>;
   enableThinking: boolean;
+  ollamaKeepAlive: string;
   model: string;
   onSave?: (config: Partial<AppConfig>) => Promise<void>;
   presets: ProviderPresets;
@@ -58,6 +59,7 @@ export function useApiConfigSaveAction({
   customProtocol,
   dispatch,
   enableThinking,
+  ollamaKeepAlive,
   model,
   onSave,
   presets,
@@ -100,6 +102,7 @@ export function useApiConfigSaveAction({
           profiles: toPersistedProfiles(profiles),
           activeConfigSetId,
           enableThinking,
+          ollamaKeepAlive,
         };
 
         if (onSave) {
@@ -141,6 +144,7 @@ export function useApiConfigSaveAction({
       customProtocol,
       dispatch,
       enableThinking,
+      ollamaKeepAlive,
       model,
       onSave,
       presets,

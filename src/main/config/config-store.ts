@@ -51,6 +51,7 @@ import {
   MAX_CONFIG_SET_COUNT,
   normalizeCustomProtocol,
   normalizeMemoryRuntimeConfig,
+  normalizeOllamaKeepAlive,
   normalizeWebSearchConfig,
   nowISO,
   PROFILE_KEYS,
@@ -432,9 +433,28 @@ export class ConfigStore {
         updates.speechSynthesisEnabled !== undefined
           ? updates.speechSynthesisEnabled
           : current.speechSynthesisEnabled,
+      ollamaKeepAlive:
+        updates.ollamaKeepAlive !== undefined
+          ? normalizeOllamaKeepAlive(updates.ollamaKeepAlive)
+          : current.ollamaKeepAlive,
       isConfigured:
         updates.isConfigured !== undefined ? updates.isConfigured : current.isConfigured,
     });
+
+    // Background Ollama warm-up when the active model/endpoint changes.
+    const next = this.getAll();
+    const modelChanged = next.model !== current.model;
+    const baseUrlChanged = (next.baseUrl || '') !== (current.baseUrl || '');
+    const keepAliveChanged = next.ollamaKeepAlive !== current.ollamaKeepAlive;
+    if (modelChanged || baseUrlChanged || keepAliveChanged) {
+      void import('./ollama-warmup-scheduler')
+        .then(({ scheduleWarmUpFromAppConfig }) => {
+          scheduleWarmUpFromAppConfig(next);
+        })
+        .catch(() => {
+          // ignore dynamic-import failures in constrained test envs
+        });
+    }
   }
 
   isConfigured(): boolean {

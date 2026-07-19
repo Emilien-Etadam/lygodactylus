@@ -412,7 +412,10 @@
         "models_list_not_supported": "Denna leverantör stöder inte models list-slutpunkten. Fortsätter med modellverifiering."
       },
       "skipped": "Diagnostik hoppades över: en annan körning pågår redan."
-    }
+    },
+    "ollamaKeepAlive": "Ollama keep-alive",
+    "ollamaKeepAlivePlaceholder": "30m",
+    "ollamaKeepAliveHint": "Hur länge modellen ska hållas laddad i minnet (t.ex. 30m, 1h, -1 obegränsat). Minskar kallstartsfördröjning mellan förfrågningar."
   },
   "window": {
     "minimize": "Minimera",

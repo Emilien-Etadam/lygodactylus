@@ -10,7 +10,10 @@ import { normalizeMcpToolResultForModel } from './tool-result-utils';
  * Each MCP tool becomes a customTool whose execute() delegates to mcpManager.callTool().
  */
 export function buildMcpCustomTools(mcpManager: MCPManager): ToolDefinition[] {
-  const mcpTools = mcpManager.getTools();
+  // Deterministic order so tool registration (and any prompt snippets) stay stable.
+  const mcpTools = [...mcpManager.getTools()].sort((left, right) =>
+    left.name.localeCompare(right.name)
+  );
   return mcpTools.map((mcpTool) => {
     // Wrap the raw JSON Schema inputSchema as a TypeBox TSchema
     const parameters = Type.Unsafe<Record<string, unknown>>(

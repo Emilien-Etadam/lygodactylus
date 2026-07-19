@@ -412,7 +412,10 @@
         "models_list_not_supported": "Deze provider ondersteunt het models list-eindpunt niet. Doorgaan met modelverificatie."
       },
       "skipped": "Diagnose overgeslagen: er is al een andere run bezig."
-    }
+    },
+    "ollamaKeepAlive": "Ollama keep-alive",
+    "ollamaKeepAlivePlaceholder": "30m",
+    "ollamaKeepAliveHint": "Hoe lang het model in het geheugen geladen blijft (bijv. 30m, 1h, -1 onbeperkt). Vermindert koude-startlatentie tussen verzoeken."
   },
   "window": {
     "minimize": "Minimaliseren",

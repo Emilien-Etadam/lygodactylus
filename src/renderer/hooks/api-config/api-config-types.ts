@@ -28,6 +28,7 @@ export interface ConfigStateSnapshot {
   activeProfileKey: ProviderProfileKey;
   profiles: Record<ProviderProfileKey, UIProviderProfile>;
   enableThinking: boolean;
+  ollamaKeepAlive: string;
 }
 
 export interface ApiConfigBootstrap {
@@ -50,6 +51,7 @@ export interface ApiConfigState {
   activeConfigSetId: string;
   pendingConfigSetAction: PendingConfigSetAction | null;
   enableThinking: boolean;
+  ollamaKeepAlive: string;
   savedDraftSignature: string;
   discoveredModels: Partial<Record<ProviderProfileKey, ProviderModelInfo[]>>;
   isLoadingConfig: boolean;
@@ -78,6 +80,7 @@ export type ApiConfigAction =
         profiles: Record<ProviderProfileKey, UIProviderProfile>;
         activeProfileKey: ProviderProfileKey;
         enableThinking: boolean;
+        ollamaKeepAlive: string;
         configSets: ApiConfigSet[];
         activeConfigSetId: string;
         savedDraftSignature: string;
@@ -85,6 +88,7 @@ export type ApiConfigAction =
     }
   | { type: 'SET_ACTIVE_PROFILE_KEY'; payload: ProviderProfileKey }
   | { type: 'SET_ENABLE_THINKING'; payload: boolean }
+  | { type: 'SET_OLLAMA_KEEP_ALIVE'; payload: string }
   | { type: 'PATCH_PROFILE'; profileKey: ProviderProfileKey; patch: Partial<UIProviderProfile> }
   | {
       type: 'UPDATE_PROFILE_FN';

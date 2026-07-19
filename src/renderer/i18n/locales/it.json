@@ -412,7 +412,10 @@
         "models_list_not_supported": "Questo provider non supporta l'endpoint dell'elenco modelli. Si continua con la verifica del modello."
       },
       "skipped": "Diagnostica saltata: un'altra esecuzione è già in corso."
-    }
+    },
+    "ollamaKeepAlive": "Keep-alive Ollama",
+    "ollamaKeepAlivePlaceholder": "30m",
+    "ollamaKeepAliveHint": "Durata di mantenimento del modello in memoria (es. 30m, 1h, -1 illimitato). Riduce la latenza a freddo tra le richieste."
   },
   "window": {
     "minimize": "Riduci a icona",

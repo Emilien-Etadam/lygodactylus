@@ -412,7 +412,10 @@
         "models_list_not_supported": "Este proveedor no admite el endpoint de lista de modelos. Se continúa con la verificación del modelo."
       },
       "skipped": "Diagnóstico omitido: ya hay otra ejecución en curso."
-    }
+    },
+    "ollamaKeepAlive": "Keep-alive de Ollama",
+    "ollamaKeepAlivePlaceholder": "30m",
+    "ollamaKeepAliveHint": "Tiempo que el modelo permanece cargado en memoria (p. ej. 30m, 1h, -1 ilimitado). Reduce la latencia en frío entre solicitudes."
   },
   "window": {
     "minimize": "Minimizar",

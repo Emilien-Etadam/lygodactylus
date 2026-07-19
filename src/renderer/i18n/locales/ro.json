@@ -412,7 +412,10 @@
         "models_list_not_supported": "Acest furnizor nu suportă endpoint-ul de listă a modelelor. Se continuă cu verificarea modelului."
       },
       "skipped": "Diagnostic omis: o altă rulare este deja în curs."
-    }
+    },
+    "ollamaKeepAlive": "Ollama keep-alive",
+    "ollamaKeepAlivePlaceholder": "30m",
+    "ollamaKeepAliveHint": "Cât timp rămâne modelul încărcat în memorie (ex. 30m, 1h, -1 nelimitat). Reduce latența la rece între cereri."
   },
   "window": {
     "minimize": "Minimizează",

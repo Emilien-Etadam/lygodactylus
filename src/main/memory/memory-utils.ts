@@ -354,7 +354,7 @@ export function applyCoreMemoryActions(
 }
 
 export function coreMemoryToPromptBlock(memory: Record<string, string>): string {
-  const entries = Object.entries(memory);
+  const entries = Object.entries(memory).sort(([left], [right]) => left.localeCompare(right));
   if (!entries.length) {
     return 'None';
   }

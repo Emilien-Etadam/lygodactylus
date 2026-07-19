@@ -70,6 +70,7 @@ function makeConfig(): AppConfig {
     enableThinking: false,
     thinkingLevel: 'medium',
     speechSynthesisEnabled: false,
+    ollamaKeepAlive: '30m',
     isConfigured: true,
   };
 }

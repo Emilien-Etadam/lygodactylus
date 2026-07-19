@@ -19,6 +19,7 @@ import {
   isAppTheme,
   isThinkingLevel,
   normalizeMemoryRuntimeConfig,
+  normalizeOllamaKeepAlive,
   normalizeWebSearchConfig,
   nowISO,
   profileKeyFromProvider,
@@ -376,6 +377,11 @@ export function normalizeConfig(rawConfig: Partial<AppConfig> | undefined): AppC
     speechSynthesisEnabled: toBoolean(
       raw.speechSynthesisEnabled,
       defaultConfig.speechSynthesisEnabled
+    ),
+    ollamaKeepAlive: normalizeOllamaKeepAlive(
+      typeof raw.ollamaKeepAlive === 'string' || typeof raw.ollamaKeepAlive === 'number'
+        ? raw.ollamaKeepAlive
+        : defaultConfig.ollamaKeepAlive
     ),
     isConfigured: toBoolean(raw.isConfigured, defaultConfig.isConfigured),
   };

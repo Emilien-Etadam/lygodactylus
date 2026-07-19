@@ -412,7 +412,10 @@
         "models_list_not_supported": "Ten dostawca nie obsługuje punktu końcowego listy modeli. Kontynuacja weryfikacji modelu."
       },
       "skipped": "Pominięto diagnostykę: trwa już inne uruchomienie."
-    }
+    },
+    "ollamaKeepAlive": "Ollama keep-alive",
+    "ollamaKeepAlivePlaceholder": "30m",
+    "ollamaKeepAliveHint": "Jak długo trzymać model w pamięci (np. 30m, 1h, -1 bez limitu). Zmniejsza opóźnienie zimnego startu między żądaniami."
   },
   "window": {
     "minimize": "Minimalizuj",
