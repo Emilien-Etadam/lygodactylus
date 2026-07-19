@@ -130,12 +130,13 @@ Current stable fork baseline: **`6.0.2`** — [CHANGELOG](CHANGELOG.md)
 - **Installation Experience**: Smoother first-run — auto-detect dependencies, clearer errors, one-click setup
 - **Linux Support**: First-class Linux builds — **done v5.6** (AppImage CI release; deb/rpm later)
 - **Model Location Picker (UX)**: sélecteur clair de *où* tourne chaque modèle (local vs machine distante via Chat LAN) — version allégée du « compute location as control plane » de LM Studio Bionic, sans cloud. UX polish, pas un sous-système. — _candidate_
+- **Skill Lockfile & Pinning**: enregistrer à l'install le commit sha résolu + un hash d'intégrité dans `marketplace-installed-store` (aujourd'hui : install à un `ref` de catalogue, sans lockfile). Reproductibilité, détection/rollback de dérive, et sécurité supply-chain (un skill exécute du code dans le sandbox). Inspiré du `skills.lock` de trivium ; extension du store existant, pas un sous-système. — _planned_
 
 ### Mid-term (v3.5.0+)
 
 - **Plugin System**: Extensible architecture for community-built integrations
 - **Multi-Agent**: Orchestrate multiple agents for complex workflows
-- **Workspace Templates**: Pre-configured environments for common use cases (coding, writing, research)
+- **Workspace Templates**: Pre-configured environments for common use cases (coding, writing, research) — peut inclure des **environnements de skills nommés** (bascule entre jeux de skills) ; réf. design : trivium (install épinglée + switch d'environnements)
 
 ### Long-term
 
@@ -147,4 +148,4 @@ Current stable fork baseline: **`6.0.2`** — [CHANGELOG](CHANGELOG.md)
 
 ---
 
-_Last updated: 2026-07-19 (planned: memory freshness/confidence ; candidates: local voice STT, model-location picker, Tailscale remote)_
+_Last updated: 2026-07-19 (planned: memory freshness/confidence, skill lockfile/pinning ; candidates: local voice STT, model-location picker, Tailscale remote)_
