@@ -131,6 +131,7 @@ Current stable fork baseline: **`6.0.2`** — [CHANGELOG](CHANGELOG.md)
 - **Linux Support**: First-class Linux builds — **done v5.6** (AppImage CI release; deb/rpm later)
 - **Model Location Picker (UX)**: sélecteur clair de *où* tourne chaque modèle (local vs machine distante via Chat LAN) — version allégée du « compute location as control plane » de LM Studio Bionic, sans cloud. UX polish, pas un sous-système. — _candidate_
 - **Skill Lockfile & Pinning**: enregistrer à l'install le commit sha résolu + un hash d'intégrité dans `marketplace-installed-store` (aujourd'hui : install à un `ref` de catalogue, sans lockfile). Reproductibilité, détection/rollback de dérive, et sécurité supply-chain (un skill exécute du code dans le sandbox). Inspiré du `skills.lock` de trivium ; extension du store existant, pas un sous-système. — _planned_
+- **Chat Organization**: groupes/dossiers de chats par projet + **sous-chats** (brancher une discussion annexe sans polluer le contexte principal) — UX locale self-contained, prolonge le fork/édition de messages existant. Inspiré d'Atlantis (roia.io). — _candidate_
 
 ### Mid-term (v3.5.0+)
 
@@ -144,8 +145,8 @@ Current stable fork baseline: **`6.0.2`** — [CHANGELOG](CHANGELOG.md)
 - **Collaborative Mode**: Multiple users sharing a workspace
 - **Mobile Companion**: Lightweight mobile app for monitoring and quick interactions — **first step done**: the Chat LAN web UI is now an installable PWA (QR pairing, Android home-screen install, SSE auto-reconnect, reverse-proxy/HTTPS support); a richer client may follow
 - **Local Voice Input (STT)**: clavier vocal 100% local — voice-to-text on-device via un modèle embarqué (ex. whisper.cpp / faster-whisper), push-to-talk vers la zone de saisie du chat. Surfacé par la transcription locale de LM Studio Bionic ; seule capacité purement locale qui manque aujourd'hui. Ajout de feature (capture audio + modèle local) : évaluer le périmètre avant de s'engager. — _candidate_
-- **Remote Access — option Tailscale**: chemin d'accès distant type LM Link (Tailscale, chiffré E2E) en complément de Chat LAN + WireGuard, pour réduire la friction d'appairage. À surveiller/documenter, pas à reconstruire. — _candidate_
+- **Remote Access — option Tailscale**: chemin d'accès distant type LM Link (Tailscale, chiffré E2E) en complément de Chat LAN + WireGuard, pour réduire la friction d'appairage. Variante à étudier : relais **zero-knowledge** app-level (Curve25519 + ChaCha20Poly1305, façon Atlantis) pour un accès via Internet **sans VPN**, le relais ne voyant que du chiffré. À surveiller/documenter, pas à reconstruire. — _candidate_
 
 ---
 
-_Last updated: 2026-07-19 (planned: memory freshness/confidence, skill lockfile/pinning ; candidates: local voice STT, model-location picker, Tailscale remote)_
+_Last updated: 2026-07-19 (planned: memory freshness/confidence, skill lockfile/pinning ; candidates: local voice STT, model-location picker, Tailscale remote, chat organization)_
