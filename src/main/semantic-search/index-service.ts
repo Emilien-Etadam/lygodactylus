@@ -16,7 +16,7 @@ import {
 import { isAllowedTextFile, isWithinFileSizeLimit } from './file-filters';
 import { isIgnoredByGitignore, listIndexableWorkspaceFiles } from './gitignore';
 import { ensureSemanticIndexDir, SemanticIndexStore, semanticIndexDbPath } from './index-store';
-import { resolveContainedWorkspacePath, toWorkspaceRelativePath } from './path-safety';
+import { resolveContainedWorkspacePath, toWorkspaceRelativePath } from '../tools/path-safety';
 
 export interface SemanticSearchHit {
   file: string;

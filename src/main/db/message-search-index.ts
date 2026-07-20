@@ -164,7 +164,6 @@ export function buildHighlightedExcerpt(
   const suffix = end < normalizedText.length ? '…' : '';
   const excerptCore = normalizedText.slice(start, end);
   const excerpt = `${prefix}${excerptCore}${suffix}`;
-  const offset = prefix.length - start;
 
   const highlights: Array<[number, number]> = [];
   const lowerExcerpt = excerpt.toLowerCase();
@@ -181,8 +180,6 @@ export function buildHighlightedExcerpt(
   }
 
   highlights.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-  // Silence unused offset (kept for readability of the mapping intent).
-  void offset;
   return { excerpt, highlights: mergeRanges(highlights) };
 }
 

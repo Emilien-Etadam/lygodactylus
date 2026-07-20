@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { SemanticIndexService } from '../../main/semantic-search/index-service';
-import { resolveContainedWorkspacePath } from '../../main/semantic-search/path-safety';
+import { resolveContainedWorkspacePath } from '../../main/tools/path-safety';
 import { listIndexableWorkspaceFiles } from '../../main/semantic-search/gitignore';
 import { SEMANTIC_MAX_FILE_BYTES } from '../../main/semantic-search/constants';
 import type { MemoryRerankerConfig } from '../../main/config/config-schema';

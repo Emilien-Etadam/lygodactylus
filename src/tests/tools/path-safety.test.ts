@@ -41,4 +41,13 @@ describe('resolveContainedWorkspacePath', () => {
 
     expect(toWorkspaceRelativePath(root, absolute)).toBe('src/a.ts');
   });
+
+  it('returns null for toWorkspaceRelativePath when the path escapes the workspace', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'path-safety-rel-out-'));
+    const outside = await mkdtemp(path.join(tmpdir(), 'path-safety-rel-escape-'));
+    const absolute = path.join(outside, 'secret.txt');
+    await writeFile(absolute, 'secret\n', 'utf8');
+
+    expect(toWorkspaceRelativePath(root, absolute)).toBeNull();
+  });
 });

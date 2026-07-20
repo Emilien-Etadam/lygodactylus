@@ -182,17 +182,59 @@ export function extractCitedIndices(text: string): number[] {
 }
 
 /**
- * Turn `[n]` into markdown links when `n` maps to a known source URL.
- * Does nothing when the map is empty (avoids false positives like "tableau [1]").
+ * Split markdown-ish text into plain vs code segments.
+ * Fenced ``` blocks and inline `…` are code; an unclosed fence consumes the rest
+ * (conservative). Unclosed inline backticks stay plain text.
  */
-export function linkifyCitationMarkers(
+function splitPlainAndCodeSegments(text: string): Array<{ value: string; linkify: boolean }> {
+  const segments: Array<{ value: string; linkify: boolean }> = [];
+  let i = 0;
+  let plainStart = 0;
+
+  const flushPlain = (end: number): void => {
+    if (end > plainStart) {
+      segments.push({ value: text.slice(plainStart, end), linkify: true });
+    }
+  };
+
+  while (i < text.length) {
+    if (text.startsWith('```', i)) {
+      flushPlain(i);
+      const close = text.indexOf('```', i + 3);
+      if (close === -1) {
+        segments.push({ value: text.slice(i), linkify: false });
+        return segments;
+      }
+      segments.push({ value: text.slice(i, close + 3), linkify: false });
+      i = close + 3;
+      plainStart = i;
+      continue;
+    }
+
+    if (text[i] === '`') {
+      const close = text.indexOf('`', i + 1);
+      if (close === -1) {
+        i += 1;
+        continue;
+      }
+      flushPlain(i);
+      segments.push({ value: text.slice(i, close + 1), linkify: false });
+      i = close + 1;
+      plainStart = i;
+      continue;
+    }
+
+    i += 1;
+  }
+
+  flushPlain(text.length);
+  return segments;
+}
+
+function linkifyCitationMarkersInPlainText(
   text: string,
   sourcesByIndex: ReadonlyMap<number, string>
 ): string {
-  if (!text || sourcesByIndex.size === 0) {
-    return text;
-  }
-
   return text.replace(INLINE_CITATION_RE, (full, rawIndex: string, offset: number) => {
     // Skip markdown links already of the form [label](url) — if `[n]` is followed by `(`.
     const after = text.slice(offset + full.length, offset + full.length + 1);
@@ -207,6 +249,28 @@ export function linkifyCitationMarkers(
     }
     return `[[${index}]](${url})`;
   });
+}
+
+/**
+ * Turn `[n]` into markdown links when `n` maps to a known source URL.
+ * Does nothing when the map is empty (avoids false positives like "tableau [1]").
+ * Skips fenced ``` blocks and inline `code` so code samples stay intact.
+ */
+export function linkifyCitationMarkers(
+  text: string,
+  sourcesByIndex: ReadonlyMap<number, string>
+): string {
+  if (!text || sourcesByIndex.size === 0) {
+    return text;
+  }
+
+  return splitPlainAndCodeSegments(text)
+    .map((segment) =>
+      segment.linkify
+        ? linkifyCitationMarkersInPlainText(segment.value, sourcesByIndex)
+        : segment.value
+    )
+    .join('');
 }
 
 export function sourcesByIndexMap(sources: WebCitationSource[]): Map<number, string> {
