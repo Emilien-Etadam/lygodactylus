@@ -10,6 +10,7 @@ import {
   ChevronRight,
   BrainCircuit,
   BookMarked,
+  Eye,
 } from 'lucide-react';
 import { formatEeDisplayVersion } from '../../shared/app-version';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +24,7 @@ import { SettingsGeneral } from './settings/SettingsGeneral';
 import { SettingsLogs } from './settings/SettingsLogs';
 import { SettingsMemory } from './settings/SettingsMemory';
 import { SettingsPresets } from './settings/SettingsPresets';
+import { SettingsWatch } from './settings/SettingsWatch';
 
 interface SettingsPanelProps {
   onClose: () => void;
@@ -34,6 +36,7 @@ interface SettingsPanelProps {
     | 'skills'
     | 'memory'
     | 'schedule'
+    | 'watch'
     | 'presets'
     | 'logs'
     | 'general';
@@ -45,6 +48,7 @@ type TabId =
   | 'extensions'
   | 'memory'
   | 'schedule'
+  | 'watch'
   | 'presets'
   | 'logs'
   | 'general';
@@ -55,6 +59,7 @@ const VALID_TABS = new Set<TabId>([
   'extensions',
   'memory',
   'schedule',
+  'watch',
   'presets',
   'logs',
   'general',
@@ -144,6 +149,12 @@ export function SettingsPanel({ onClose, initialTab = 'api' }: SettingsPanelProp
       label: t('settings.schedule'),
       icon: Clock3,
       description: t('settings.scheduleDesc'),
+    },
+    {
+      id: 'watch' as TabId,
+      label: t('settings.watch'),
+      icon: Eye,
+      description: t('settings.watchDesc'),
     },
     {
       id: 'presets' as TabId,
@@ -274,6 +285,9 @@ export function SettingsPanel({ onClose, initialTab = 'api' }: SettingsPanelProp
                 {viewedTabs.has('schedule') && (
                   <SettingsSchedule isActive={activeTab === 'schedule'} />
                 )}
+              </div>
+              <div className={activeTab === 'watch' ? '' : 'hidden'}>
+                {viewedTabs.has('watch') && <SettingsWatch isActive={activeTab === 'watch'} />}
               </div>
               <div className={activeTab === 'presets' ? '' : 'hidden'}>
                 {viewedTabs.has('presets') && (

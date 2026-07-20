@@ -73,7 +73,9 @@
     "general": "General",
     "generalDesc": "Appearance, language & preferences",
     "presets": "Presets",
-    "presetsDesc": "Reusable prompt templates with variables"
+    "presetsDesc": "Reusable prompt templates with variables",
+    "watch": "Watch",
+    "watchDesc": "Folders, RSS feeds and URLs — digest of new content only"
   },
   "general": {
     "appearance": "Appearance",
@@ -1315,5 +1317,67 @@
   "endpointLocation": {
     "local": "Local",
     "remote": "Remote"
+  },
+  "watch": {
+    "manageTitle": "Watch sources",
+    "manageDesc": "Monitor a local folder, RSS/Atom feed, or web page. Digests appear in the dedicated Veille session (read-only) only when something is new.",
+    "createTitle": "Add watcher",
+    "editTitle": "Edit watcher",
+    "cancelEdit": "Cancel editing",
+    "fieldType": "Source type",
+    "fieldTarget": "Target",
+    "fieldLabel": "Label (optional)",
+    "fieldMode": "Schedule",
+    "fieldTimes": "Times (HH:mm, comma-separated)",
+    "fieldWeekdays": "Weekdays",
+    "weekdaysHint": "0=Sunday … 6=Saturday",
+    "fieldEvery": "Every",
+    "fieldUnit": "Unit",
+    "enabled": "Enabled",
+    "saveChanges": "Save changes",
+    "createWatcher": "Add watcher",
+    "listTitle": "Configured watchers",
+    "listDesc": "Disabling stops future ticks. Digests never write files (plan mode).",
+    "empty": "No watchers yet",
+    "loadFailed": "Failed to load watchers",
+    "targetRequired": "Enter a folder path or URL",
+    "timesRequired": "Enter at least one valid HH:mm time",
+    "weekdaysRequired": "Select at least one weekday",
+    "saveFailed": "Failed to save watcher",
+    "updated": "Watcher updated",
+    "created": "Watcher created",
+    "toggleFailed": "Failed to toggle watcher",
+    "watcherEnabled": "Watcher enabled",
+    "watcherDisabled": "Watcher disabled",
+    "deleteConfirm": "Delete watcher “{{target}}”?",
+    "deleteFailed": "Failed to delete watcher",
+    "deleted": "Watcher deleted",
+    "delete": "Delete",
+    "statusEnabled": "On",
+    "statusDisabled": "Off",
+    "lastRun": "Last run: {{time}}",
+    "neverRun": "Not run yet",
+    "modeDaily": "Daily",
+    "modeWeekly": "Weekly",
+    "modeInterval": "Interval (≥ 1 hour)",
+    "labelPlaceholder": "Short name",
+    "ruleDaily": "Daily at {{times}}",
+    "ruleWeekly": "Weekly on {{days}} at {{times}}",
+    "ruleInterval": "Every {{every}} {{unit}}",
+    "ruleUnknown": "Custom schedule",
+    "type": {
+      "folder": "Folder",
+      "rss": "RSS / Atom",
+      "url": "URL"
+    },
+    "unit": {
+      "hour": "hour(s)",
+      "day": "day(s)"
+    },
+    "targetPlaceholder": {
+      "folder": "/absolute/path/to/folder",
+      "rss": "https://example.com/feed.xml",
+      "url": "https://example.com/page"
+    }
   }
 }

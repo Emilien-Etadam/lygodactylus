@@ -73,7 +73,9 @@
     "extensions": "Extensions",
     "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
     "presets": "Preset",
-    "presetsDesc": "Modelli di prompt riutilizzabili con variabili"
+    "presetsDesc": "Modelli di prompt riutilizzabili con variabili",
+    "watch": "Veglia",
+    "watchDesc": "Cartelle, feed RSS e URL — digest solo delle novità"
   },
   "general": {
     "appearance": "Aspetto",
@@ -1315,5 +1317,67 @@
   "endpointLocation": {
     "local": "Locale",
     "remote": "Remoto"
+  },
+  "watch": {
+    "manageTitle": "Fonti monitorate",
+    "manageDesc": "Monitora una cartella locale, un feed RSS/Atom o una pagina web. I digest compaiono nella sessione Veille (sola lettura) solo se c’è qualcosa di nuovo.",
+    "createTitle": "Aggiungi fonte",
+    "editTitle": "Modifica fonte",
+    "cancelEdit": "Annulla modifica",
+    "fieldType": "Tipo di fonte",
+    "fieldTarget": "Destinazione",
+    "fieldLabel": "Etichetta (opzionale)",
+    "fieldMode": "Pianificazione",
+    "fieldTimes": "Orari (HH:mm, separati da virgole)",
+    "fieldWeekdays": "Giorni della settimana",
+    "weekdaysHint": "0=domenica … 6=sabato",
+    "fieldEvery": "Ogni",
+    "fieldUnit": "Unità",
+    "enabled": "Attivo",
+    "saveChanges": "Salva modifiche",
+    "createWatcher": "Aggiungi fonte",
+    "listTitle": "Fonti configurate",
+    "listDesc": "Disattivare blocca le prossime esecuzioni. Un digest non scrive mai file (modalità plan).",
+    "empty": "Nessuna fonte ancora",
+    "loadFailed": "Impossibile caricare le fonti",
+    "targetRequired": "Indicare un percorso cartella o un URL",
+    "timesRequired": "Indicare almeno un orario HH:mm valido",
+    "weekdaysRequired": "Selezionare almeno un giorno",
+    "saveFailed": "Salvataggio non riuscito",
+    "updated": "Fonte aggiornata",
+    "created": "Fonte creata",
+    "toggleFailed": "Impossibile cambiare stato",
+    "watcherEnabled": "Fonte attivata",
+    "watcherDisabled": "Fonte disattivata",
+    "deleteConfirm": "Eliminare la fonte «{{target}}»?",
+    "deleteFailed": "Eliminazione non riuscita",
+    "deleted": "Fonte eliminata",
+    "delete": "Elimina",
+    "statusEnabled": "On",
+    "statusDisabled": "Off",
+    "lastRun": "Ultima esecuzione: {{time}}",
+    "neverRun": "Mai eseguito",
+    "modeDaily": "Giornaliero",
+    "modeWeekly": "Settimanale",
+    "modeInterval": "Intervallo (≥ 1 h)",
+    "labelPlaceholder": "Nome breve",
+    "ruleDaily": "Ogni giorno alle {{times}}",
+    "ruleWeekly": "Nei giorni {{days}} alle {{times}}",
+    "ruleInterval": "Ogni {{every}} {{unit}}",
+    "ruleUnknown": "Pianificazione personalizzata",
+    "type": {
+      "folder": "Cartella",
+      "rss": "RSS / Atom",
+      "url": "URL"
+    },
+    "unit": {
+      "hour": "ora/e",
+      "day": "giorno/i"
+    },
+    "targetPlaceholder": {
+      "folder": "/percorso/assoluto/cartella",
+      "rss": "https://esempio.com/feed.xml",
+      "url": "https://esempio.com/pagina"
+    }
   }
 }

@@ -73,7 +73,9 @@
     "extensions": "Extensions",
     "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
     "presets": "Пресети",
-    "presetsDesc": "Повторно використовувані шаблони промптів зі змінними"
+    "presetsDesc": "Повторно використовувані шаблони промптів зі змінними",
+    "watch": "Моніторинг",
+    "watchDesc": "Теки, RSS і URL — дайджест лише новинок"
   },
   "general": {
     "appearance": "Вигляд",
@@ -1315,5 +1317,67 @@
   "endpointLocation": {
     "local": "Локально",
     "remote": "Віддалено"
+  },
+  "watch": {
+    "manageTitle": "Джерела моніторингу",
+    "manageDesc": "Стежте за локальною текою, RSS/Atom або вебсторінкою. Дайджести з’являються в сесії Veille (лише читання) лише за наявності новинок.",
+    "createTitle": "Додати джерело",
+    "editTitle": "Редагувати джерело",
+    "cancelEdit": "Скасувати редагування",
+    "fieldType": "Тип джерела",
+    "fieldTarget": "Ціль",
+    "fieldLabel": "Мітка (необов’язково)",
+    "fieldMode": "Розклад",
+    "fieldTimes": "Час (HH:mm через кому)",
+    "fieldWeekdays": "Дні тижня",
+    "weekdaysHint": "0=неділя … 6=субота",
+    "fieldEvery": "Кожні",
+    "fieldUnit": "Одиниця",
+    "enabled": "Увімкнено",
+    "saveChanges": "Зберегти зміни",
+    "createWatcher": "Додати джерело",
+    "listTitle": "Налаштовані джерела",
+    "listDesc": "Вимкнення блокує наступні запуски. Дайджест ніколи не записує файли (режим plan).",
+    "empty": "Ще немає джерел",
+    "loadFailed": "Не вдалося завантажити джерела",
+    "targetRequired": "Вкажіть шлях до теки або URL",
+    "timesRequired": "Вкажіть принаймні один дійсний час HH:mm",
+    "weekdaysRequired": "Оберіть принаймні один день",
+    "saveFailed": "Не вдалося зберегти",
+    "updated": "Джерело оновлено",
+    "created": "Джерело створено",
+    "toggleFailed": "Не вдалося змінити стан",
+    "watcherEnabled": "Джерело увімкнено",
+    "watcherDisabled": "Джерело вимкнено",
+    "deleteConfirm": "Видалити джерело «{{target}}»?",
+    "deleteFailed": "Не вдалося видалити",
+    "deleted": "Джерело видалено",
+    "delete": "Видалити",
+    "statusEnabled": "Увімк.",
+    "statusDisabled": "Вимк.",
+    "lastRun": "Останній запуск: {{time}}",
+    "neverRun": "Ще не запускалось",
+    "modeDaily": "Щодня",
+    "modeWeekly": "Щотижня",
+    "modeInterval": "Інтервал (≥ 1 год)",
+    "labelPlaceholder": "Коротка назва",
+    "ruleDaily": "Щодня о {{times}}",
+    "ruleWeekly": "У дні {{days}} о {{times}}",
+    "ruleInterval": "Кожні {{every}} {{unit}}",
+    "ruleUnknown": "Власний розклад",
+    "type": {
+      "folder": "Тека",
+      "rss": "RSS / Atom",
+      "url": "URL"
+    },
+    "unit": {
+      "hour": "год",
+      "day": "день/дні"
+    },
+    "targetPlaceholder": {
+      "folder": "/абсолютний/шлях/до/теки",
+      "rss": "https://приклад.ua/feed.xml",
+      "url": "https://приклад.ua/сторінка"
+    }
   }
 }

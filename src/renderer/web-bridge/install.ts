@@ -187,6 +187,7 @@ function makeWebElectronApi(): Record<string, unknown> {
     sandbox: namespaceProxy('sandbox'),
     schedule: namespaceProxy('schedule'),
     presets: namespaceProxy('presets'),
+    watch: namespaceProxy('watch'),
     chatLan: namespaceProxy('chatLan'),
     // `logs` is intentionally absent: its presence would activate the
     // renderer diagnostics forwarder, which would spam rejected RPC calls.

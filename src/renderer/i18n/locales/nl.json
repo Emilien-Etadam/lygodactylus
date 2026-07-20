@@ -73,7 +73,9 @@
     "extensions": "Extensions",
     "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
     "presets": "Presets",
-    "presetsDesc": "Herbruikbare promptsjablonen met variabelen"
+    "presetsDesc": "Herbruikbare promptsjablonen met variabelen",
+    "watch": "Bewaking",
+    "watchDesc": "Mappen, RSS-feeds en URL’s — digest alleen bij nieuws"
   },
   "general": {
     "appearance": "Weergave",
@@ -1315,5 +1317,67 @@
   "endpointLocation": {
     "local": "Lokaal",
     "remote": "Extern"
+  },
+  "watch": {
+    "manageTitle": "Bewaakte bronnen",
+    "manageDesc": "Bewaak een lokale map, RSS/Atom-feed of webpagina. Digests verschijnen in de Veille-sessie (alleen-lezen) alleen bij nieuws.",
+    "createTitle": "Bron toevoegen",
+    "editTitle": "Bron bewerken",
+    "cancelEdit": "Bewerken annuleren",
+    "fieldType": "Brontype",
+    "fieldTarget": "Doel",
+    "fieldLabel": "Label (optioneel)",
+    "fieldMode": "Planning",
+    "fieldTimes": "Tijden (HH:mm, kommagescheiden)",
+    "fieldWeekdays": "Weekdagen",
+    "weekdaysHint": "0=zondag … 6=zaterdag",
+    "fieldEvery": "Elke",
+    "fieldUnit": "Eenheid",
+    "enabled": "Ingeschakeld",
+    "saveChanges": "Wijzigingen opslaan",
+    "createWatcher": "Bron toevoegen",
+    "listTitle": "Geconfigureerde bronnen",
+    "listDesc": "Uitschakelen blokkeert toekomstige runs. Digests schrijven geen bestanden (planmodus).",
+    "empty": "Nog geen bronnen",
+    "loadFailed": "Bronnen laden mislukt",
+    "targetRequired": "Map pad of URL invoeren",
+    "timesRequired": "Minstens één geldige HH:mm-tijd",
+    "weekdaysRequired": "Selecteer minstens één weekdag",
+    "saveFailed": "Opslaan mislukt",
+    "updated": "Bron bijgewerkt",
+    "created": "Bron aangemaakt",
+    "toggleFailed": "Omschakelen mislukt",
+    "watcherEnabled": "Bron ingeschakeld",
+    "watcherDisabled": "Bron uitgeschakeld",
+    "deleteConfirm": "Bron “{{target}}” verwijderen?",
+    "deleteFailed": "Verwijderen mislukt",
+    "deleted": "Bron verwijderd",
+    "delete": "Verwijderen",
+    "statusEnabled": "Aan",
+    "statusDisabled": "Uit",
+    "lastRun": "Laatste run: {{time}}",
+    "neverRun": "Nog niet uitgevoerd",
+    "modeDaily": "Dagelijks",
+    "modeWeekly": "Wekelijks",
+    "modeInterval": "Interval (≥ 1 uur)",
+    "labelPlaceholder": "Korte naam",
+    "ruleDaily": "Dagelijks om {{times}}",
+    "ruleWeekly": "Wekelijks op {{days}} om {{times}}",
+    "ruleInterval": "Elke {{every}} {{unit}}",
+    "ruleUnknown": "Aangepaste planning",
+    "type": {
+      "folder": "Map",
+      "rss": "RSS / Atom",
+      "url": "URL"
+    },
+    "unit": {
+      "hour": "uur",
+      "day": "dag(en)"
+    },
+    "targetPlaceholder": {
+      "folder": "/absoluut/pad/naar/map",
+      "rss": "https://voorbeeld.nl/feed.xml",
+      "url": "https://voorbeeld.nl/pagina"
+    }
   }
 }

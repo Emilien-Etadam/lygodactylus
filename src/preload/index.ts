@@ -35,6 +35,9 @@ import type {
   PromptPreset,
   PromptPresetCreateInput,
   PromptPresetUpdateInput,
+  Watcher,
+  WatcherCreateInput,
+  WatcherUpdateInput,
 } from '../renderer/types';
 import type { DiagnosticInput, DiagnosticResult } from '../renderer/types';
 import type { McpServerConfig, McpTool, McpServerStatus, McpPresetsMap } from '../shared/ipc-types';
@@ -407,6 +410,19 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('presets.delete', id),
   },
 
+  watch: {
+    list: (): Promise<Watcher[]> => ipcRenderer.invoke('watch.list'),
+    create: (payload: WatcherCreateInput): Promise<Watcher> =>
+      ipcRenderer.invoke('watch.create', payload),
+    update: (id: string, updates: WatcherUpdateInput): Promise<Watcher | null> =>
+      ipcRenderer.invoke('watch.update', id, updates),
+    delete: (id: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke('watch.delete', id),
+    toggle: (id: string, enabled: boolean): Promise<Watcher | null> =>
+      ipcRenderer.invoke('watch.toggle', id, enabled),
+    runNow: (id: string): Promise<Watcher | null> => ipcRenderer.invoke('watch.runNow', id),
+  },
+
   folders: {
     list: (): Promise<ChatFolder[]> => ipcRenderer.invoke('folder.list'),
     create: (payload: ChatFolderCreateInput): Promise<ChatFolder> =>
@@ -750,6 +766,14 @@ declare global {
         create: (payload: PromptPresetCreateInput) => Promise<PromptPreset>;
         update: (id: string, updates: PromptPresetUpdateInput) => Promise<PromptPreset | null>;
         delete: (id: string) => Promise<{ success: boolean }>;
+      };
+      watch: {
+        list: () => Promise<Watcher[]>;
+        create: (payload: WatcherCreateInput) => Promise<Watcher>;
+        update: (id: string, updates: WatcherUpdateInput) => Promise<Watcher | null>;
+        delete: (id: string) => Promise<{ success: boolean }>;
+        toggle: (id: string, enabled: boolean) => Promise<Watcher | null>;
+        runNow: (id: string) => Promise<Watcher | null>;
       };
       folders: {
         list: () => Promise<ChatFolder[]>;

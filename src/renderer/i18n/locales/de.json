@@ -73,7 +73,9 @@
     "extensions": "Extensions",
     "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
     "presets": "Presets",
-    "presetsDesc": "Wiederverwendbare Prompt-Vorlagen mit Variablen"
+    "presetsDesc": "Wiederverwendbare Prompt-Vorlagen mit Variablen",
+    "watch": "Beobachtung",
+    "watchDesc": "Ordner, RSS-Feeds und URLs — Digest nur bei Neuigkeiten"
   },
   "general": {
     "appearance": "Darstellung",
@@ -1315,5 +1317,67 @@
   "endpointLocation": {
     "local": "Lokal",
     "remote": "Entfernt"
+  },
+  "watch": {
+    "manageTitle": "Quellen beobachten",
+    "manageDesc": "Überwachen Sie einen lokalen Ordner, RSS/Atom-Feed oder eine Webseite. Digests erscheinen in der Veille-Sitzung (nur Lesen) nur bei Neuigkeiten.",
+    "createTitle": "Quelle hinzufügen",
+    "editTitle": "Quelle bearbeiten",
+    "cancelEdit": "Bearbeitung abbrechen",
+    "fieldType": "Quelltyp",
+    "fieldTarget": "Ziel",
+    "fieldLabel": "Bezeichnung (optional)",
+    "fieldMode": "Zeitplan",
+    "fieldTimes": "Zeiten (HH:mm, kommagetrennt)",
+    "fieldWeekdays": "Wochentage",
+    "weekdaysHint": "0=Sonntag … 6=Samstag",
+    "fieldEvery": "Alle",
+    "fieldUnit": "Einheit",
+    "enabled": "Aktiviert",
+    "saveChanges": "Änderungen speichern",
+    "createWatcher": "Quelle hinzufügen",
+    "listTitle": "Konfigurierte Quellen",
+    "listDesc": "Deaktivieren stoppt künftige Läufe. Digests schreiben keine Dateien (Plan-Modus).",
+    "empty": "Noch keine Quellen",
+    "loadFailed": "Quellen konnten nicht geladen werden",
+    "targetRequired": "Ordnerpfad oder URL eingeben",
+    "timesRequired": "Mindestens eine gültige HH:mm-Zeit angeben",
+    "weekdaysRequired": "Mindestens einen Wochentag wählen",
+    "saveFailed": "Speichern fehlgeschlagen",
+    "updated": "Quelle aktualisiert",
+    "created": "Quelle hinzugefügt",
+    "toggleFailed": "Umschalten fehlgeschlagen",
+    "watcherEnabled": "Quelle aktiviert",
+    "watcherDisabled": "Quelle deaktiviert",
+    "deleteConfirm": "Quelle „{{target}}“ löschen?",
+    "deleteFailed": "Löschen fehlgeschlagen",
+    "deleted": "Quelle gelöscht",
+    "delete": "Löschen",
+    "statusEnabled": "An",
+    "statusDisabled": "Aus",
+    "lastRun": "Letzter Lauf: {{time}}",
+    "neverRun": "Noch nicht ausgeführt",
+    "modeDaily": "Täglich",
+    "modeWeekly": "Wöchentlich",
+    "modeInterval": "Intervall (≥ 1 Stunde)",
+    "labelPlaceholder": "Kurzname",
+    "ruleDaily": "Täglich um {{times}}",
+    "ruleWeekly": "Wöchentlich an {{days}} um {{times}}",
+    "ruleInterval": "Alle {{every}} {{unit}}",
+    "ruleUnknown": "Benutzerdefinierter Zeitplan",
+    "type": {
+      "folder": "Ordner",
+      "rss": "RSS / Atom",
+      "url": "URL"
+    },
+    "unit": {
+      "hour": "Stunde(n)",
+      "day": "Tag(e)"
+    },
+    "targetPlaceholder": {
+      "folder": "/absoluter/pfad/zum/ordner",
+      "rss": "https://beispiel.de/feed.xml",
+      "url": "https://beispiel.de/seite"
+    }
   }
 }

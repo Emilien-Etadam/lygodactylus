@@ -41,6 +41,7 @@ async function cleanupSandboxResources(): Promise<void> {
   shutdownQuickAsk();
   mainAppState.skillsManager?.stopStorageMonitoring();
   mainAppState.scheduledTaskManager?.stop();
+  mainAppState.watchManager?.stop();
   mainAppState.tray?.destroy();
   mainAppState.tray = null;
 

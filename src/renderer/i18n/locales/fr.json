@@ -73,7 +73,9 @@
     "general": "Général",
     "generalDesc": "Apparence, langue et préférences",
     "presets": "Presets",
-    "presetsDesc": "Modèles de prompts réutilisables avec variables"
+    "presetsDesc": "Modèles de prompts réutilisables avec variables",
+    "watch": "Veille",
+    "watchDesc": "Dossiers, flux RSS et URL — digest des nouveautés uniquement"
   },
   "general": {
     "appearance": "Apparence",
@@ -1315,5 +1317,67 @@
   "endpointLocation": {
     "local": "Local",
     "remote": "Distant"
+  },
+  "watch": {
+    "manageTitle": "Sources surveillées",
+    "manageDesc": "Surveillez un dossier local, un flux RSS/Atom ou une page web. Les digests n’apparaissent dans la session Veille (lecture seule) que s’il y a du nouveau.",
+    "createTitle": "Ajouter une source",
+    "editTitle": "Modifier la source",
+    "cancelEdit": "Annuler la modification",
+    "fieldType": "Type de source",
+    "fieldTarget": "Cible",
+    "fieldLabel": "Libellé (optionnel)",
+    "fieldMode": "Planification",
+    "fieldTimes": "Horaires (HH:mm, séparés par des virgules)",
+    "fieldWeekdays": "Jours de la semaine",
+    "weekdaysHint": "0=dimanche … 6=samedi",
+    "fieldEvery": "Tous les",
+    "fieldUnit": "Unité",
+    "enabled": "Activé",
+    "saveChanges": "Enregistrer",
+    "createWatcher": "Ajouter la source",
+    "listTitle": "Sources configurées",
+    "listDesc": "Désactiver bloque les prochains passages. Un digest n’écrit jamais de fichiers (mode plan).",
+    "empty": "Aucune source pour l’instant",
+    "loadFailed": "Impossible de charger les sources",
+    "targetRequired": "Indiquez un chemin de dossier ou une URL",
+    "timesRequired": "Indiquez au moins un horaire HH:mm valide",
+    "weekdaysRequired": "Sélectionnez au moins un jour",
+    "saveFailed": "Échec de l’enregistrement",
+    "updated": "Source mise à jour",
+    "created": "Source ajoutée",
+    "toggleFailed": "Impossible de changer l’état",
+    "watcherEnabled": "Source activée",
+    "watcherDisabled": "Source désactivée",
+    "deleteConfirm": "Supprimer la source « {{target}} » ?",
+    "deleteFailed": "Échec de la suppression",
+    "deleted": "Source supprimée",
+    "delete": "Supprimer",
+    "statusEnabled": "On",
+    "statusDisabled": "Off",
+    "lastRun": "Dernier passage : {{time}}",
+    "neverRun": "Jamais exécuté",
+    "modeDaily": "Quotidien",
+    "modeWeekly": "Hebdomadaire",
+    "modeInterval": "Intervalle (≥ 1 h)",
+    "labelPlaceholder": "Nom court",
+    "ruleDaily": "Tous les jours à {{times}}",
+    "ruleWeekly": "Les jours {{days}} à {{times}}",
+    "ruleInterval": "Tous les {{every}} {{unit}}",
+    "ruleUnknown": "Planification personnalisée",
+    "type": {
+      "folder": "Dossier",
+      "rss": "RSS / Atom",
+      "url": "URL"
+    },
+    "unit": {
+      "hour": "heure(s)",
+      "day": "jour(s)"
+    },
+    "targetPlaceholder": {
+      "folder": "/chemin/absolu/du/dossier",
+      "rss": "https://exemple.com/flux.xml",
+      "url": "https://exemple.com/page"
+    }
   }
 }

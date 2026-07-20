@@ -73,7 +73,9 @@
     "extensions": "Extensions",
     "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
     "presets": "Forhåndsinnstillinger",
-    "presetsDesc": "Gjenbrukbare promptmaler med variabler"
+    "presetsDesc": "Gjenbrukbare promptmaler med variabler",
+    "watch": "Overvåking",
+    "watchDesc": "Mapper, RSS-strømmer og URL-er — digest kun ved nyheter"
   },
   "general": {
     "appearance": "Utseende",
@@ -1315,5 +1317,67 @@
   "endpointLocation": {
     "local": "Lokal",
     "remote": "Ekstern"
+  },
+  "watch": {
+    "manageTitle": "Overvåkede kilder",
+    "manageDesc": "Overvåk en lokal mappe, RSS/Atom-strøm eller nettside. Digester vises i Veille-økten (skrivebeskyttet) bare ved nyheter.",
+    "createTitle": "Legg til kilde",
+    "editTitle": "Rediger kilde",
+    "cancelEdit": "Avbryt redigering",
+    "fieldType": "Kildetype",
+    "fieldTarget": "Mål",
+    "fieldLabel": "Etikett (valgfritt)",
+    "fieldMode": "Tidsplan",
+    "fieldTimes": "Tider (HH:mm, kommaseparert)",
+    "fieldWeekdays": "Ukedager",
+    "weekdaysHint": "0=søndag … 6=lørdag",
+    "fieldEvery": "Hver",
+    "fieldUnit": "Enhet",
+    "enabled": "Aktivert",
+    "saveChanges": "Lagre endringer",
+    "createWatcher": "Legg til kilde",
+    "listTitle": "Konfigurerte kilder",
+    "listDesc": "Deaktivering stopper fremtidige kjøringer. Digester skriver aldri filer (planmodus).",
+    "empty": "Ingen kilder ennå",
+    "loadFailed": "Kunne ikke laste kilder",
+    "targetRequired": "Oppgi en mappesti eller URL",
+    "timesRequired": "Oppgi minst ett gyldig HH:mm-tidspunkt",
+    "weekdaysRequired": "Velg minst én ukedag",
+    "saveFailed": "Lagring mislyktes",
+    "updated": "Kilde oppdatert",
+    "created": "Kilde opprettet",
+    "toggleFailed": "Kunne ikke bytte tilstand",
+    "watcherEnabled": "Kilde aktivert",
+    "watcherDisabled": "Kilde deaktivert",
+    "deleteConfirm": "Slette kilden «{{target}}»?",
+    "deleteFailed": "Sletting mislyktes",
+    "deleted": "Kilde slettet",
+    "delete": "Slett",
+    "statusEnabled": "På",
+    "statusDisabled": "Av",
+    "lastRun": "Siste kjøring: {{time}}",
+    "neverRun": "Ikke kjørt ennå",
+    "modeDaily": "Daglig",
+    "modeWeekly": "Ukentlig",
+    "modeInterval": "Intervall (≥ 1 time)",
+    "labelPlaceholder": "Kort navn",
+    "ruleDaily": "Daglig kl. {{times}}",
+    "ruleWeekly": "Ukentlig på {{days}} kl. {{times}}",
+    "ruleInterval": "Hver {{every}} {{unit}}",
+    "ruleUnknown": "Tilpasset tidsplan",
+    "type": {
+      "folder": "Mappe",
+      "rss": "RSS / Atom",
+      "url": "URL"
+    },
+    "unit": {
+      "hour": "time(r)",
+      "day": "dag(er)"
+    },
+    "targetPlaceholder": {
+      "folder": "/absolutt/sti/til/mappe",
+      "rss": "https://eksempel.no/feed.xml",
+      "url": "https://eksempel.no/side"
+    }
   }
 }
