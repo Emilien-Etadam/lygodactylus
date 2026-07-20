@@ -365,3 +365,46 @@ Prudent : refus → erreur outil transmise au modèle (mock du point d'accroche)
 Comme au lot 1 : « vérifie la branche cursor/xxx » → revue Claude (typecheck/lint/
 vitest sur l'arbre mergé, périmètre, i18n ×12, sécurité IPC/LAN, stabilité du
 préfixe, rétro-compat DB/config). Verdict mergeable ou corrections précises.
+
+---
+
+## Ménage post-lot 2  `cursor/cleanup-lot2`
+
+_Trois dettes d'hygiène relevées pendant les revues des PRs #142/#145/#146/#147.
+AUCUN changement de comportement attendu._
+
+```text
+[coller les Règles communes du lot 1]
+
+TÂCHE : Trois nettoyages sans changement de comportement, branche cursor/cleanup-lot2
+depuis main.
+
+1. DÉDUP PATH-SAFETY (#146/#147) — deux modules quasi identiques coexistent :
+   src/main/semantic-search/path-safety.ts et src/main/tools/path-safety.ts.
+   Faire de src/main/tools/path-safety.ts LA seule source :
+   - y déplacer toWorkspaceRelativePath (aujourd'hui uniquement dans la version
+     semantic-search) s'il n'y est pas déjà ;
+   - mettre à jour tous les imports de semantic-search (index-service, manager,
+     etc.) vers tools/path-safety ;
+   - supprimer src/main/semantic-search/path-safety.ts ;
+   - fusionner/adapter les tests (src/tests/tools/path-safety.test.ts devient le
+     seul fichier de tests ; reprendre les cas de la version semantic-search qui
+     manquent, notamment toWorkspaceRelativePath).
+
+2. LINKIFICATION HORS CODE (#145) — dans src/shared/web-citation.ts,
+   linkifyCitationMarkers réécrit aussi les [n] situés dans les blocs de code.
+   Segmenter le texte : fences ``` (multilignes) et backticks inline `…` sont
+   des zones interdites — la substitution [n] → [[n]](url) ne s'applique QUE
+   hors de ces zones. Implémentation simple par scan des segments (pas de
+   parseur markdown complet). Tests dans src/tests/shared/web-citation.test.ts :
+   [1] dans un fence → intact ; [1] dans `code inline` → intact ; [1] en texte
+   normal de la même chaîne → linkifié ; fence non fermé → tout ce qui suit
+   l'ouverture est traité comme code (choix conservateur).
+
+3. MICRO (#142) — src/main/db/message-search-index.ts : supprimer la variable
+   offset inutilisée et son `void offset` dans buildHighlightedExcerpt (et le
+   commentaire associé).
+
+Vérifications : npm run typecheck && npm run lint && npx vitest run → tout vert.
+Le diff doit être net négatif ou quasi neutre en lignes.
+```
