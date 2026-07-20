@@ -73,7 +73,9 @@
     "extensions": "Extensions",
     "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
     "presets": "预设",
-    "presetsDesc": "可复用的带变量提示词模板"
+    "presetsDesc": "可复用的带变量提示词模板",
+    "watch": "监控",
+    "watchDesc": "文件夹、RSS 与 URL — 仅汇总新内容"
   },
   "general": {
     "appearance": "外观",
@@ -1315,5 +1317,67 @@
   "endpointLocation": {
     "local": "本地",
     "remote": "远程"
+  },
+  "watch": {
+    "manageTitle": "监控来源",
+    "manageDesc": "监控本地文件夹、RSS/Atom 源或网页。仅在有新内容时，摘要会出现在只读的「Veille」会话中。",
+    "createTitle": "添加监控",
+    "editTitle": "编辑监控",
+    "cancelEdit": "取消编辑",
+    "fieldType": "来源类型",
+    "fieldTarget": "目标",
+    "fieldLabel": "标签（可选）",
+    "fieldMode": "计划",
+    "fieldTimes": "时间（HH:mm，逗号分隔）",
+    "fieldWeekdays": "星期",
+    "weekdaysHint": "0=周日 … 6=周六",
+    "fieldEvery": "每",
+    "fieldUnit": "单位",
+    "enabled": "已启用",
+    "saveChanges": "保存更改",
+    "createWatcher": "添加监控",
+    "listTitle": "已配置的监控",
+    "listDesc": "禁用会阻止后续运行。摘要不会写入文件（计划模式）。",
+    "empty": "暂无监控",
+    "loadFailed": "加载监控失败",
+    "targetRequired": "请输入文件夹路径或 URL",
+    "timesRequired": "请输入至少一个有效的 HH:mm 时间",
+    "weekdaysRequired": "请至少选择一天",
+    "saveFailed": "保存失败",
+    "updated": "监控已更新",
+    "created": "监控已创建",
+    "toggleFailed": "切换状态失败",
+    "watcherEnabled": "监控已启用",
+    "watcherDisabled": "监控已禁用",
+    "deleteConfirm": "删除监控“{{target}}”？",
+    "deleteFailed": "删除失败",
+    "deleted": "监控已删除",
+    "delete": "删除",
+    "statusEnabled": "开",
+    "statusDisabled": "关",
+    "lastRun": "上次运行：{{time}}",
+    "neverRun": "尚未运行",
+    "modeDaily": "每天",
+    "modeWeekly": "每周",
+    "modeInterval": "间隔（≥ 1 小时）",
+    "labelPlaceholder": "简称",
+    "ruleDaily": "每天 {{times}}",
+    "ruleWeekly": "每周 {{days}} 的 {{times}}",
+    "ruleInterval": "每 {{every}} {{unit}}",
+    "ruleUnknown": "自定义计划",
+    "type": {
+      "folder": "文件夹",
+      "rss": "RSS / Atom",
+      "url": "URL"
+    },
+    "unit": {
+      "hour": "小时",
+      "day": "天"
+    },
+    "targetPlaceholder": {
+      "folder": "/绝对/路径/文件夹",
+      "rss": "https://example.com/feed.xml",
+      "url": "https://example.com/page"
+    }
   }
 }

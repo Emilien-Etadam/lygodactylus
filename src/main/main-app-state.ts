@@ -10,6 +10,7 @@ import type { PluginRuntimeService } from './skills/plugin-runtime-service';
 import type { MarketplaceService } from './catalog/marketplace-service';
 import type { MemoryService } from './memory/memory-service';
 import type { ScheduledTaskManager } from './schedule/scheduled-task-manager';
+import type { WatchManager } from './watch/watch-manager';
 
 export const mainAppState = {
   mainWindow: null as BrowserWindow | null,
@@ -24,6 +25,7 @@ export const mainAppState = {
   marketplaceService: null as MarketplaceService | null,
   memoryService: null as MemoryService | null,
   scheduledTaskManager: null as ScheduledTaskManager | null,
+  watchManager: null as WatchManager | null,
   tray: null as Tray | null,
   currentWorkingDir: null as string | null,
   isCleaningUp: false,

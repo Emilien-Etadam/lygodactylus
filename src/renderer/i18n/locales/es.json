@@ -73,7 +73,9 @@
     "extensions": "Extensions",
     "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
     "presets": "Presets",
-    "presetsDesc": "Plantillas de prompts reutilizables con variables"
+    "presetsDesc": "Plantillas de prompts reutilizables con variables",
+    "watch": "Vigilancia",
+    "watchDesc": "Carpetas, feeds RSS y URL — digest solo de novedades"
   },
   "general": {
     "appearance": "Apariencia",
@@ -1315,5 +1317,67 @@
   "endpointLocation": {
     "local": "Local",
     "remote": "Remoto"
+  },
+  "watch": {
+    "manageTitle": "Fuentes vigiladas",
+    "manageDesc": "Supervise una carpeta local, un feed RSS/Atom o una página web. Los digests aparecen en la sesión Veille (solo lectura) solo si hay novedades.",
+    "createTitle": "Añadir fuente",
+    "editTitle": "Editar fuente",
+    "cancelEdit": "Cancelar edición",
+    "fieldType": "Tipo de fuente",
+    "fieldTarget": "Destino",
+    "fieldLabel": "Etiqueta (opcional)",
+    "fieldMode": "Programación",
+    "fieldTimes": "Horas (HH:mm, separadas por comas)",
+    "fieldWeekdays": "Días de la semana",
+    "weekdaysHint": "0=domingo … 6=sábado",
+    "fieldEvery": "Cada",
+    "fieldUnit": "Unidad",
+    "enabled": "Activado",
+    "saveChanges": "Guardar cambios",
+    "createWatcher": "Añadir fuente",
+    "listTitle": "Fuentes configuradas",
+    "listDesc": "Desactivar bloquea futuras ejecuciones. Un digest nunca escribe archivos (modo plan).",
+    "empty": "Aún no hay fuentes",
+    "loadFailed": "No se pudieron cargar las fuentes",
+    "targetRequired": "Indique una ruta de carpeta o una URL",
+    "timesRequired": "Indique al menos una hora HH:mm válida",
+    "weekdaysRequired": "Seleccione al menos un día",
+    "saveFailed": "Error al guardar",
+    "updated": "Fuente actualizada",
+    "created": "Fuente creada",
+    "toggleFailed": "Error al cambiar el estado",
+    "watcherEnabled": "Fuente activada",
+    "watcherDisabled": "Fuente desactivada",
+    "deleteConfirm": "¿Eliminar la fuente «{{target}}»?",
+    "deleteFailed": "Error al eliminar",
+    "deleted": "Fuente eliminada",
+    "delete": "Eliminar",
+    "statusEnabled": "On",
+    "statusDisabled": "Off",
+    "lastRun": "Última ejecución: {{time}}",
+    "neverRun": "Aún no ejecutado",
+    "modeDaily": "Diario",
+    "modeWeekly": "Semanal",
+    "modeInterval": "Intervalo (≥ 1 h)",
+    "labelPlaceholder": "Nombre corto",
+    "ruleDaily": "Cada día a las {{times}}",
+    "ruleWeekly": "Los días {{days}} a las {{times}}",
+    "ruleInterval": "Cada {{every}} {{unit}}",
+    "ruleUnknown": "Programación personalizada",
+    "type": {
+      "folder": "Carpeta",
+      "rss": "RSS / Atom",
+      "url": "URL"
+    },
+    "unit": {
+      "hour": "hora(s)",
+      "day": "día(s)"
+    },
+    "targetPlaceholder": {
+      "folder": "/ruta/absoluta/de/carpeta",
+      "rss": "https://ejemplo.com/feed.xml",
+      "url": "https://ejemplo.com/pagina"
+    }
   }
 }

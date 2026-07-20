@@ -73,7 +73,9 @@
     "extensions": "Extensions",
     "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
     "presets": "Presety",
-    "presetsDesc": "Ponownie używane szablony promptów ze zmiennymi"
+    "presetsDesc": "Ponownie używane szablony promptów ze zmiennymi",
+    "watch": "Monitoring",
+    "watchDesc": "Foldery, kanały RSS i URL — digest tylko nowości"
   },
   "general": {
     "appearance": "Wygląd",
@@ -1315,5 +1317,67 @@
   "endpointLocation": {
     "local": "Lokalny",
     "remote": "Zdalny"
+  },
+  "watch": {
+    "manageTitle": "Monitorowane źródła",
+    "manageDesc": "Monitoruj lokalny folder, kanał RSS/Atom lub stronę. Digesty pojawiają się w sesji Veille (tylko odczyt) tylko przy nowościach.",
+    "createTitle": "Dodaj źródło",
+    "editTitle": "Edytuj źródło",
+    "cancelEdit": "Anuluj edycję",
+    "fieldType": "Typ źródła",
+    "fieldTarget": "Cel",
+    "fieldLabel": "Etykieta (opcjonalnie)",
+    "fieldMode": "Harmonogram",
+    "fieldTimes": "Godziny (HH:mm, oddzielone przecinkami)",
+    "fieldWeekdays": "Dni tygodnia",
+    "weekdaysHint": "0=niedziela … 6=sobota",
+    "fieldEvery": "Co",
+    "fieldUnit": "Jednostka",
+    "enabled": "Włączone",
+    "saveChanges": "Zapisz zmiany",
+    "createWatcher": "Dodaj źródło",
+    "listTitle": "Skonfigurowane źródła",
+    "listDesc": "Wyłączenie blokuje kolejne uruchomienia. Digest nigdy nie zapisuje plików (tryb plan).",
+    "empty": "Brak źródeł",
+    "loadFailed": "Nie udało się wczytać źródeł",
+    "targetRequired": "Podaj ścieżkę folderu lub URL",
+    "timesRequired": "Podaj co najmniej jedną poprawną godzinę HH:mm",
+    "weekdaysRequired": "Wybierz co najmniej jeden dzień",
+    "saveFailed": "Zapis nie powiódł się",
+    "updated": "Źródło zaktualizowane",
+    "created": "Źródło utworzone",
+    "toggleFailed": "Nie udało się zmienić stanu",
+    "watcherEnabled": "Źródło włączone",
+    "watcherDisabled": "Źródło wyłączone",
+    "deleteConfirm": "Usunąć źródło „{{target}}”?",
+    "deleteFailed": "Usuwanie nie powiodło się",
+    "deleted": "Źródło usunięte",
+    "delete": "Usuń",
+    "statusEnabled": "Wł.",
+    "statusDisabled": "Wył.",
+    "lastRun": "Ostatnie uruchomienie: {{time}}",
+    "neverRun": "Jeszcze nie uruchomiono",
+    "modeDaily": "Codziennie",
+    "modeWeekly": "Co tydzień",
+    "modeInterval": "Interwał (≥ 1 h)",
+    "labelPlaceholder": "Krótka nazwa",
+    "ruleDaily": "Codziennie o {{times}}",
+    "ruleWeekly": "W dni {{days}} o {{times}}",
+    "ruleInterval": "Co {{every}} {{unit}}",
+    "ruleUnknown": "Niestandardowy harmonogram",
+    "type": {
+      "folder": "Folder",
+      "rss": "RSS / Atom",
+      "url": "URL"
+    },
+    "unit": {
+      "hour": "godz.",
+      "day": "dzień/dni"
+    },
+    "targetPlaceholder": {
+      "folder": "/bezwzględna/ścieżka/folderu",
+      "rss": "https://przyklad.pl/feed.xml",
+      "url": "https://przyklad.pl/strona"
+    }
   }
 }

@@ -73,7 +73,9 @@
     "extensions": "Extensions",
     "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
     "presets": "Presetări",
-    "presetsDesc": "Șabloane de prompt reutilizabile cu variabile"
+    "presetsDesc": "Șabloane de prompt reutilizabile cu variabile",
+    "watch": "Veghe",
+    "watchDesc": "Dosare, fluxuri RSS și URL — digest doar pentru noutăți"
   },
   "general": {
     "appearance": "Aspect",
@@ -1315,5 +1317,67 @@
   "endpointLocation": {
     "local": "Local",
     "remote": "La distanță"
+  },
+  "watch": {
+    "manageTitle": "Surse monitorizate",
+    "manageDesc": "Monitorizați un dosar local, un flux RSS/Atom sau o pagină web. Digestele apar în sesiunea Veille (doar citire) doar când există noutăți.",
+    "createTitle": "Adaugă sursă",
+    "editTitle": "Editează sursa",
+    "cancelEdit": "Anulează editarea",
+    "fieldType": "Tip sursă",
+    "fieldTarget": "Țintă",
+    "fieldLabel": "Etichetă (opțional)",
+    "fieldMode": "Programare",
+    "fieldTimes": "Ore (HH:mm, separate prin virgulă)",
+    "fieldWeekdays": "Zilele săptămânii",
+    "weekdaysHint": "0=duminică … 6=sâmbătă",
+    "fieldEvery": "La fiecare",
+    "fieldUnit": "Unitate",
+    "enabled": "Activat",
+    "saveChanges": "Salvează modificările",
+    "createWatcher": "Adaugă sursa",
+    "listTitle": "Surse configurate",
+    "listDesc": "Dezactivarea blochează rulările viitoare. Un digest nu scrie niciodată fișiere (mod plan).",
+    "empty": "Nicio sursă încă",
+    "loadFailed": "Nu s-au putut încărca sursele",
+    "targetRequired": "Introduceți o cale de dosar sau un URL",
+    "timesRequired": "Introduceți cel puțin o oră HH:mm validă",
+    "weekdaysRequired": "Selectați cel puțin o zi",
+    "saveFailed": "Salvare eșuată",
+    "updated": "Sursă actualizată",
+    "created": "Sursă creată",
+    "toggleFailed": "Comutare eșuată",
+    "watcherEnabled": "Sursă activată",
+    "watcherDisabled": "Sursă dezactivată",
+    "deleteConfirm": "Ștergeți sursa „{{target}}”?",
+    "deleteFailed": "Ștergere eșuată",
+    "deleted": "Sursă ștearsă",
+    "delete": "Șterge",
+    "statusEnabled": "On",
+    "statusDisabled": "Off",
+    "lastRun": "Ultima rulare: {{time}}",
+    "neverRun": "Nerulat încă",
+    "modeDaily": "Zilnic",
+    "modeWeekly": "Săptămânal",
+    "modeInterval": "Interval (≥ 1 oră)",
+    "labelPlaceholder": "Nume scurt",
+    "ruleDaily": "Zilnic la {{times}}",
+    "ruleWeekly": "Săptămânal pe {{days}} la {{times}}",
+    "ruleInterval": "La fiecare {{every}} {{unit}}",
+    "ruleUnknown": "Program personalizat",
+    "type": {
+      "folder": "Dosar",
+      "rss": "RSS / Atom",
+      "url": "URL"
+    },
+    "unit": {
+      "hour": "oră/ore",
+      "day": "zi/zile"
+    },
+    "targetPlaceholder": {
+      "folder": "/cale/absolută/dosar",
+      "rss": "https://exemplu.ro/feed.xml",
+      "url": "https://exemplu.ro/pagina"
+    }
   }
 }

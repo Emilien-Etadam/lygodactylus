@@ -43,6 +43,8 @@ import { registerAppLifecycle } from './main-app-lifecycle';
 import { registerMainIpc } from './ipc/register-main-ipc';
 import { createScheduledTaskManager } from './ipc/ipc-schedule-memory';
 import { syncQuickAskFromConfig } from './quick-ask/quick-ask-controller';
+import { WatchManager } from './watch/watch-manager';
+import { watchStore } from './watch/watch-store';
 
 const envPath = resolve(__dirname, '../../.env');
 log('[dotenv] Loading from:', envPath);
@@ -198,6 +200,27 @@ app
     const scheduledTaskStore = createScheduledTaskStore(db);
     mainAppState.scheduledTaskManager = createScheduledTaskManager(scheduledTaskStore);
     mainAppState.scheduledTaskManager.start();
+
+    mainAppState.watchManager = new WatchManager({
+      store: watchStore,
+      getSessionManager: () => mainAppState.sessionManager,
+      sendSessionUpdate: (sessionId, session) => {
+        sendToRenderer({
+          type: 'session.update',
+          payload: {
+            sessionId,
+            updates: session as import('../renderer/types').Session,
+          },
+        });
+      },
+      onWatcherError: (watcherId, error) => {
+        sendToRenderer({
+          type: 'watch.error',
+          payload: { watcherId, error },
+        });
+      },
+    });
+    mainAppState.watchManager.start();
 
     app.on('activate', () => {
       const hasMainWindow =

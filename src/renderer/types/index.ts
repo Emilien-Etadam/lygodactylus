@@ -703,6 +703,7 @@ export type ServerEvent =
   | { type: 'new-session' }
   | { type: 'navigate'; payload: string }
   | { type: 'scheduled-task.error'; payload: { taskId: string; error: string } }
+  | { type: 'watch.error'; payload: { watcherId: string; error: string } }
   | {
       type: 'error';
       payload: {
@@ -1057,3 +1058,12 @@ export type {
   PromptPresetCreateInput,
   PromptPresetUpdateInput,
 } from '../../shared/prompt-presets';
+
+export type {
+  Watcher,
+  WatcherCreateInput,
+  WatcherUpdateInput,
+  WatcherType,
+  WatcherRepeatUnit,
+  WatcherScheduleConfig,
+} from '../../shared/watch';

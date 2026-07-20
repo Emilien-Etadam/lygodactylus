@@ -73,7 +73,9 @@
     "extensions": "Extensions",
     "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
     "presets": "Förinställningar",
-    "presetsDesc": "Återanvändbara promptmallar med variabler"
+    "presetsDesc": "Återanvändbara promptmallar med variabler",
+    "watch": "Bevakning",
+    "watchDesc": "Mappar, RSS-flöden och URL:er — digest endast vid nyheter"
   },
   "general": {
     "appearance": "Utseende",
@@ -1315,5 +1317,67 @@
   "endpointLocation": {
     "local": "Lokal",
     "remote": "Fjärr"
+  },
+  "watch": {
+    "manageTitle": "Bevakade källor",
+    "manageDesc": "Bevaka en lokal mapp, ett RSS/Atom-flöde eller en webbsida. Digests visas i Veille-sessionen (skrivskyddad) endast vid nyheter.",
+    "createTitle": "Lägg till källa",
+    "editTitle": "Redigera källa",
+    "cancelEdit": "Avbryt redigering",
+    "fieldType": "Källtyp",
+    "fieldTarget": "Mål",
+    "fieldLabel": "Etikett (valfritt)",
+    "fieldMode": "Schema",
+    "fieldTimes": "Tider (HH:mm, kommaseparerade)",
+    "fieldWeekdays": "Veckodagar",
+    "weekdaysHint": "0=söndag … 6=lördag",
+    "fieldEvery": "Varje",
+    "fieldUnit": "Enhet",
+    "enabled": "Aktiverad",
+    "saveChanges": "Spara ändringar",
+    "createWatcher": "Lägg till källa",
+    "listTitle": "Konfigurerade källor",
+    "listDesc": "Inaktivering stoppar framtida körningar. Digests skriver aldrig filer (planläge).",
+    "empty": "Inga källor ännu",
+    "loadFailed": "Kunde inte läsa källor",
+    "targetRequired": "Ange en mappsökväg eller URL",
+    "timesRequired": "Ange minst en giltig HH:mm-tid",
+    "weekdaysRequired": "Välj minst en veckodag",
+    "saveFailed": "Kunde inte spara",
+    "updated": "Källa uppdaterad",
+    "created": "Källa skapad",
+    "toggleFailed": "Kunde inte växla läge",
+    "watcherEnabled": "Källa aktiverad",
+    "watcherDisabled": "Källa inaktiverad",
+    "deleteConfirm": "Ta bort källan ”{{target}}”?",
+    "deleteFailed": "Kunde inte ta bort",
+    "deleted": "Källa borttagen",
+    "delete": "Ta bort",
+    "statusEnabled": "På",
+    "statusDisabled": "Av",
+    "lastRun": "Senaste körning: {{time}}",
+    "neverRun": "Inte körts ännu",
+    "modeDaily": "Dagligen",
+    "modeWeekly": "Veckovis",
+    "modeInterval": "Intervall (≥ 1 timme)",
+    "labelPlaceholder": "Kort namn",
+    "ruleDaily": "Dagligen kl. {{times}}",
+    "ruleWeekly": "Veckovis på {{days}} kl. {{times}}",
+    "ruleInterval": "Varje {{every}} {{unit}}",
+    "ruleUnknown": "Anpassat schema",
+    "type": {
+      "folder": "Mapp",
+      "rss": "RSS / Atom",
+      "url": "URL"
+    },
+    "unit": {
+      "hour": "timme/timmar",
+      "day": "dag(ar)"
+    },
+    "targetPlaceholder": {
+      "folder": "/absolut/sökväg/till/mapp",
+      "rss": "https://exempel.se/feed.xml",
+      "url": "https://exempel.se/sida"
+    }
   }
 }
