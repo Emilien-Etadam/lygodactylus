@@ -43,6 +43,7 @@ import {
   VIRTUAL_WORKSPACE_PATH,
 } from './agent-runner-run-context';
 import { getLastInputTokenCount } from './context-budget';
+import { resolveProjectRulesFile } from './project-rules-file';
 import {
   applyPiModelRuntimeOverrides,
   buildSyntheticPiModel,
@@ -239,16 +240,6 @@ export async function preparePiSessionRun({
 
   const modelContextWindow = piModel.contextWindow || 128000;
   const modelMaxTokens = piModel.maxTokens || 16384;
-  ctx.renderer.dispatch({
-    type: 'session.contextInfo',
-    payload: {
-      sessionId: session.id,
-      contextWindow: modelContextWindow,
-      maxTokens: modelMaxTokens,
-      ...(modelParameterSize ? { parameterSize: modelParameterSize } : {}),
-      ...(modelQuantization ? { quantization: modelQuantization } : {}),
-    },
-  });
 
   const authStorage = getSharedAuthStorage();
   const apiKey = runtimeConfig.apiKey?.trim();
@@ -281,12 +272,28 @@ export async function preparePiSessionRun({
 
   const imageCapable = true;
   const wslDistro = sandbox.isWSL ? sandbox.wslStatus?.distro : undefined;
+  // Same cwd passed to DefaultResourceLoader / createAgentSession — ensures
+  // SDK AGENTS.md discovery targets the chosen workspace (or its sandbox mount).
   const effectiveCwd =
     useSandboxIsolation && sandboxPath && wslDistro
       ? wslUnixPathToWindowsUnc(wslDistro, sandboxPath)
       : useSandboxIsolation && sandboxPath
         ? sandboxPath
         : workingDir || process.cwd();
+  // Prefer the user-chosen workspace folder so AGENTS.md / .rules / CLAUDE.md
+  // are found even when the effective tool cwd is a sandbox mount.
+  const projectRules = resolveProjectRulesFile(workingDir || effectiveCwd);
+  ctx.renderer.dispatch({
+    type: 'session.contextInfo',
+    payload: {
+      sessionId: session.id,
+      contextWindow: modelContextWindow,
+      maxTokens: modelMaxTokens,
+      ...(modelParameterSize ? { parameterSize: modelParameterSize } : {}),
+      ...(modelQuantization ? { quantization: modelQuantization } : {}),
+      projectRulesFile: projectRules?.fileName ?? null,
+    },
+  });
 
   await ensureSkillsSetup(ctx);
   log('[AgentRunner] Runtime skills dir:', ctx.skillsPaths.getRuntimeSkillsDir());
@@ -559,6 +566,7 @@ export async function preparePiSessionRun({
     promptPrefix: extensionResult.promptPrefix,
     modelContextWindow,
     modelMaxTokens,
+    projectRules,
   });
 
   logTiming('agent session created', runStartTime);

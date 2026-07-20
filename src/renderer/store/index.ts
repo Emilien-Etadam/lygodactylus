@@ -49,6 +49,8 @@ export interface SessionState {
   modelParameterSize?: string;
   /** Ollama quantization_level when reported via session.contextInfo. */
   modelQuantization?: string;
+  /** Workspace-root project rules file basename when loaded into the session. */
+  projectRulesFile?: string;
   /** First stream delta wall time for the active generation (client-side tok/s). */
   streamStartedAt: number | null;
   /** Frozen tok/s keyed by assistant message id (ephemeral, not persisted). */
@@ -68,6 +70,7 @@ const DEFAULT_SESSION_STATE: SessionState = {
   maxTokens: 0,
   modelParameterSize: undefined,
   modelQuantization: undefined,
+  projectRulesFile: undefined,
   streamStartedAt: null,
   tokensPerSecondByMessageId: {},
   memoryContextItems: [],
@@ -222,15 +225,14 @@ interface AppState {
       maxTokens: number;
       parameterSize?: string;
       quantization?: string;
+      projectRulesFile?: string | null;
     }
   ) => void;
   setSessionMemoryContext: (sessionId: string, items: MemoryInjectedItem[]) => void;
   bumpPluginCommandsRevision: () => void;
 
   setSpeakingMessageId: (messageId: string | null) => void;
-  setScrollToMessageRequest: (
-    request: { sessionId: string; messageId: string } | null
-  ) => void;
+  setScrollToMessageRequest: (request: { sessionId: string; messageId: string } | null) => void;
 
   // System theme actions
   setSystemDarkMode: (dark: boolean) => void;
@@ -687,6 +689,10 @@ export const useAppStore = create<AppState>((set) => ({
         maxTokens: contextInfo.maxTokens,
         modelParameterSize: contextInfo.parameterSize,
         modelQuantization: contextInfo.quantization,
+        projectRulesFile:
+          contextInfo.projectRulesFile === null
+            ? undefined
+            : (contextInfo.projectRulesFile ?? state.sessionStates[sessionId]?.projectRulesFile),
       }),
     })),
 

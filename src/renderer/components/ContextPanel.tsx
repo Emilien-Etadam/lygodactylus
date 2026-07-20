@@ -544,6 +544,11 @@ export function ContextPanel() {
               )}
             </button>
           </div>
+          {ss?.projectRulesFile && (
+            <p className="mt-2 text-xs text-text-muted truncate" title={ss.projectRulesFile}>
+              {t('context.projectRulesLoaded', { file: ss.projectRulesFile })}
+            </p>
+          )}
         </div>
       </div>
 

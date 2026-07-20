@@ -400,9 +400,18 @@ describe('SessionState unified store', () => {
       useAppStore.getState().setSessionContextInfo('s1', {
         contextWindow: 200000,
         maxTokens: 16384,
+        projectRulesFile: 'AGENTS.md',
       });
       expect(useAppStore.getState().sessionStates['s1'].contextWindow).toBe(200000);
       expect(useAppStore.getState().sessionStates['s1'].maxTokens).toBe(16384);
+      expect(useAppStore.getState().sessionStates['s1'].projectRulesFile).toBe('AGENTS.md');
+
+      useAppStore.getState().setSessionContextInfo('s1', {
+        contextWindow: 200000,
+        maxTokens: 16384,
+        projectRulesFile: null,
+      });
+      expect(useAppStore.getState().sessionStates['s1'].projectRulesFile).toBeUndefined();
     });
   });
 

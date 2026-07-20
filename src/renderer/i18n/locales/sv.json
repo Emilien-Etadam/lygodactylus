@@ -787,7 +787,8 @@
     "contextUsageLabel": "{{used}} / {{total}}",
     "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
     "modelMeta": "{{meta}}",
-    "contextFillHint": "Kontextfyllnad"
+    "contextFillHint": "Kontextfyllnad",
+    "projectRulesLoaded": "Projektregler inlästa: {{file}}"
   },
   "messageCard": {
     "request": "Begäran",
