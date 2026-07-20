@@ -1,24 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AppConfig } from '../../main/config/config-schema';
+import { defaultConfig } from '../../main/config/config-schema';
 
 const mockState = vi.hoisted(() => ({
-  config: null as AppConfig | null,
+  config: structuredClone(defaultConfig) as AppConfig,
 }));
 
 vi.mock('../../main/config/config-store', () => ({
   configStore: {
-    getAll: () => {
-      if (!mockState.config) {
-        throw new Error('config not initialized');
-      }
-      return mockState.config;
-    },
-    get: (key: keyof AppConfig) => {
-      if (!mockState.config) {
-        throw new Error('config not initialized');
-      }
-      return mockState.config[key];
-    },
+    getAll: () => mockState.config,
+    get: (key: keyof AppConfig) => mockState.config[key],
   },
 }));
 
@@ -28,22 +19,25 @@ vi.mock('../../main/semantic-search/index-manager', () => ({
   }),
 }));
 
-import { defaultConfig } from '../../main/config/config-schema';
 import { buildSemanticSearchCustomTools } from '../../main/agent/agent-runner-semantic-search-tool';
+
+function enabledConfig(): AppConfig {
+  return {
+    ...defaultConfig,
+    provider: 'openai',
+    apiKey: 'sk-test',
+    baseUrl: 'https://api.openai.com/v1',
+    memoryRuntime: {
+      ...defaultConfig.memoryRuntime,
+      useEmbedding: true,
+      semanticSearchEnabled: true,
+    },
+  };
+}
 
 describe('buildSemanticSearchCustomTools', () => {
   beforeEach(() => {
-    mockState.config = {
-      ...defaultConfig,
-      provider: 'openai',
-      apiKey: 'sk-test',
-      baseUrl: 'https://api.openai.com/v1',
-      memoryRuntime: {
-        ...defaultConfig.memoryRuntime,
-        useEmbedding: true,
-        semanticSearchEnabled: true,
-      },
-    };
+    mockState.config = enabledConfig();
   });
 
   it('exposes semantic_search when opt-in + embeddings are ready', () => {
@@ -53,9 +47,9 @@ describe('buildSemanticSearchCustomTools', () => {
 
   it('hides the tool when semantic search is OFF', () => {
     mockState.config = {
-      ...mockState.config,
+      ...enabledConfig(),
       memoryRuntime: {
-        ...mockState.config.memoryRuntime,
+        ...enabledConfig().memoryRuntime,
         semanticSearchEnabled: false,
       },
     };
@@ -64,14 +58,14 @@ describe('buildSemanticSearchCustomTools', () => {
 
   it('hides the tool when embeddings are not usable', () => {
     mockState.config = {
-      ...mockState.config,
+      ...enabledConfig(),
       baseUrl: 'http://127.0.0.1:8000/v1',
       memoryRuntime: {
-        ...mockState.config.memoryRuntime,
+        ...enabledConfig().memoryRuntime,
         useEmbedding: true,
         semanticSearchEnabled: true,
         embedding: {
-          ...mockState.config.memoryRuntime.embedding,
+          ...enabledConfig().memoryRuntime.embedding,
           inheritFromActive: true,
           baseUrl: '',
         },
