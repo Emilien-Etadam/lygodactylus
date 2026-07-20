@@ -174,8 +174,8 @@ _Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates
 - **Chat Organization** — dossiers repliables + sous-chats via le fork existant (Atlantis). — **done** (PR #155)
 - **Quick-Ask phase 2** — actions sur le presse-papier (résumer/traduire/reformuler), 2e hotkey. — **done** (PR #157)
 - **Content Watch + Digest** — watchers dossier/RSS/URL sur le cron existant, diff #149, session Veille en mode plan. — **done** (PR #158)
-- **PII Scrub sortant** — jetons réversibles par règles (email/tél/IBAN/Luhn + termes custom), fail-closed, opt-in. — _planned_
-- **Artifacts / Canvas** — aperçu iframe sandboxée (html/svg, CSP no-network), versions. Mermaid exclu (dépendance). — _planned_
+- **PII Scrub sortant** — jetons réversibles par règles (email/tél/IBAN/Luhn + termes custom), fail-closed, opt-in. — **done** (PR #159)
+- **Artifacts / Canvas** — aperçu iframe sandboxée (html/svg, CSP no-network), versions. Mermaid exclu (dépendance). — **done** (PR #161)
 - **Local STT (dictée)** — whisper.cpp on-demand (pattern runtimes v5.3), push-to-talk, transcription au release. — _planned_
 
 ### Mid-term (v3.5.0+)
@@ -194,4 +194,4 @@ _Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates
 
 ---
 
-_Last updated: 2026-07-20 (lot 3 en cours : 5/8 mergés — #153, #154, #155 dossiers/sous-chats, #157 Quick-Ask sélection, #158 veille ; prompts dans docs/cursor-prompts-lot3-2026-07.md)_
+_Last updated: 2026-07-20 (lot 3 : 7/8 mergés — #153, #154, #155, #157, #158, #159 PII, #161 canvas ; reste local-stt ; prompts dans docs/cursor-prompts-lot3-2026-07.md)_
