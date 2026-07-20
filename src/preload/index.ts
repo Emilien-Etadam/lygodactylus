@@ -216,6 +216,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     openSessionInMain: (sessionId: string) =>
       ipcRenderer.send('window.openSessionInMain', sessionId),
     hideQuickAsk: () => ipcRenderer.send('window.hideQuickAsk'),
+    openHtmlPreview: (srcdoc: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke('window.openHtmlPreview', srcdoc),
   },
 
   // MCP methods
@@ -617,6 +619,7 @@ declare global {
         close: () => void;
         openSessionInMain: (sessionId: string) => void;
         hideQuickAsk: () => void;
+        openHtmlPreview: (srcdoc: string) => Promise<{ success: boolean }>;
       };
       mcp: {
         getServers: () => Promise<McpServerConfig[]>;

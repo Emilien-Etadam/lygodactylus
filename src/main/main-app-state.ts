@@ -15,6 +15,7 @@ import type { WatchManager } from './watch/watch-manager';
 export const mainAppState = {
   mainWindow: null as BrowserWindow | null,
   quickAskWindow: null as BrowserWindow | null,
+  htmlPreviewWindow: null as BrowserWindow | null,
   quickAskShortcutRegistered: false,
   quickAskShortcutError: null as string | null,
   quickAskSelectionShortcutRegistered: false,

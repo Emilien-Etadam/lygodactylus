@@ -1391,5 +1391,16 @@
   },
   "tools": {
     "piiMasked": "{{count}} elementy zamaskowane"
+  },
+  "htmlPreview": {
+    "preview": "Podgląd",
+    "titleHtml": "Podgląd HTML",
+    "titleSvg": "Podgląd SVG",
+    "version": "v{{n}}",
+    "refresh": "Odśwież",
+    "openLarge": "Otwórz w dużym oknie",
+    "copySource": "Kopiuj źródło",
+    "close": "Zamknij",
+    "empty": "Brak podglądu"
   }
 }

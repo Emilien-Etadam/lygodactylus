@@ -1391,5 +1391,16 @@
   },
   "tools": {
     "piiMasked": "{{count}} element maskerade"
+  },
+  "htmlPreview": {
+    "preview": "Förhandsgranska",
+    "titleHtml": "HTML-förhandsvisning",
+    "titleSvg": "SVG-förhandsvisning",
+    "version": "v{{n}}",
+    "refresh": "Uppdatera",
+    "openLarge": "Öppna stort",
+    "copySource": "Kopiera källa",
+    "close": "Stäng",
+    "empty": "Ingen förhandsvisning tillgänglig"
   }
 }

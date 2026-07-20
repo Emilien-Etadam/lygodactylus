@@ -8,6 +8,7 @@ import { mainAppState } from '../main-app-state';
 import { sendToRenderer } from '../main-renderer-bridge';
 import { openQuickAskSessionInMain } from '../quick-ask/quick-ask-controller';
 import { hideQuickAskWindow } from '../quick-ask/quick-ask-window';
+import { openHtmlPreviewWindow } from '../html-preview-window';
 import { notifyPluginCommandsChanged } from './plugin-commands-notify';
 
 export function registerSkillsPluginsWindowIpc(): void {
@@ -250,6 +251,18 @@ export function registerSkillsPluginsWindowIpc(): void {
       hideQuickAskWindow();
     } catch (error) {
       logError('[Window] Error hiding Quick Ask:', error);
+    }
+  });
+
+  ipcMain.handle('window.openHtmlPreview', (_event, srcdoc: unknown) => {
+    try {
+      if (typeof srcdoc !== 'string') {
+        return { success: false as const };
+      }
+      return { success: openHtmlPreviewWindow(srcdoc) };
+    } catch (error) {
+      logError('[Window] Error opening HTML preview:', error);
+      return { success: false as const };
     }
   });
 }

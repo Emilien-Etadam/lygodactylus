@@ -1391,5 +1391,16 @@
   },
   "tools": {
     "piiMasked": "{{count}} elemente mascate"
+  },
+  "htmlPreview": {
+    "preview": "Previzualizare",
+    "titleHtml": "Previzualizare HTML",
+    "titleSvg": "Previzualizare SVG",
+    "version": "v{{n}}",
+    "refresh": "Reîmprospătează",
+    "openLarge": "Deschide mărit",
+    "copySource": "Copiază sursa",
+    "close": "Închide",
+    "empty": "Nicio previzualizare disponibilă"
   }
 }

@@ -1391,5 +1391,16 @@
   },
   "tools": {
     "piiMasked": "已脱敏 {{count}} 项"
+  },
+  "htmlPreview": {
+    "preview": "预览",
+    "titleHtml": "HTML 预览",
+    "titleSvg": "SVG 预览",
+    "version": "v{{n}}",
+    "refresh": "刷新",
+    "openLarge": "放大查看",
+    "copySource": "复制源码",
+    "close": "关闭",
+    "empty": "暂无预览"
   }
 }

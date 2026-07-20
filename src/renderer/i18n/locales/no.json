@@ -1391,5 +1391,16 @@
   },
   "tools": {
     "piiMasked": "{{count}} elementer maskert"
+  },
+  "htmlPreview": {
+    "preview": "Forhåndsvisning",
+    "titleHtml": "HTML-forhåndsvisning",
+    "titleSvg": "SVG-forhåndsvisning",
+    "version": "v{{n}}",
+    "refresh": "Oppdater",
+    "openLarge": "Åpne i stort vindu",
+    "copySource": "Kopier kilde",
+    "close": "Lukk",
+    "empty": "Ingen forhåndsvisning tilgjengelig"
   }
 }

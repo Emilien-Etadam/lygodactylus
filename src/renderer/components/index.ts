@@ -3,4 +3,5 @@ export { WelcomeView } from './WelcomeView';
 export { ChatView } from './ChatView';
 export { MessageCard } from './MessageCard';
 export { ContextPanel } from './ContextPanel';
+export { HtmlPreviewPanel } from './HtmlPreviewPanel';
 export { PermissionDialog } from './PermissionDialog';
