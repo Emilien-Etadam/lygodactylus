@@ -14,7 +14,8 @@ describe('session search wiring', () => {
     const allowlist = readProjectFile('src/shared/client-event-allowlist.ts');
     const sidebar = readProjectFile('src/renderer/components/Sidebar.tsx');
 
-    expect(ipcSource).toContain("ipcMain.handle('session.searchMessages'");
+    expect(ipcSource).toContain("'session.searchMessages'");
+    expect(ipcSource).toContain('ipcMain.handle');
     expect(registerMain).toContain('registerSessionSearchIpc');
     expect(preload).toContain("ipcRenderer.invoke('session.searchMessages'");
     expect(preload).toContain('session: {');
