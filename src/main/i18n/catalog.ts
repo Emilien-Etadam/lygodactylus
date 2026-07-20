@@ -31,6 +31,7 @@ export type BackendMessageKey =
   | 'noticeHandoffStart'
   | 'noticeHandoffFailed'
   | 'errUnknownSlashCommand'
+  | 'errPresetSlashClientOnly'
   | 'startupFailedTitle'
   | 'startupFailedBody'
   | 'configDefaultSetName'
@@ -93,6 +94,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     noticeHandoffStart: '正在总结当前对话，以便在新会话中继续…',
     noticeHandoffFailed: '会话交接失败：{{error}}',
     errUnknownSlashCommand: '未知斜杠命令：{{command}}',
+    errPresetSlashClientOnly: '提示词预设只能在聊天输入框中使用（/preset），不能作为服务端提示运行：{{command}}',
     startupFailedTitle: 'Lygodactylus 启动失败',
     startupFailedBody: '{{message}}\n\n请查看日志获取更多信息。',
     configDefaultSetName: '默认方案',
@@ -144,6 +146,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     noticeHandoffStart: 'Summarizing this conversation for a new session…',
     noticeHandoffFailed: 'Session handoff failed: {{error}}',
     errUnknownSlashCommand: 'Unknown slash command: {{command}}',
+    errPresetSlashClientOnly: 'Prompt presets can only be used from the chat input (/preset), not as a server-side prompt: {{command}}',
     startupFailedTitle: 'Lygodactylus failed to start',
     startupFailedBody: '{{message}}\n\nPlease check the logs for more information.',
     configDefaultSetName: 'Default',
@@ -195,6 +198,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     noticeHandoffStart: 'Resumiendo esta conversación para una nueva sesión…',
     noticeHandoffFailed: 'Error al transferir la sesión: {{error}}',
     errUnknownSlashCommand: 'Comando desconocido: {{command}}',
+    errPresetSlashClientOnly: 'Los presets de prompts solo se pueden usar desde la entrada del chat (/preset), no como prompt del servidor: {{command}}',
     startupFailedTitle: 'No se pudo iniciar Lygodactylus',
     startupFailedBody: '{{message}}\n\nConsulta los registros para obtener más información.',
     configDefaultSetName: 'Predeterminada',
@@ -246,6 +250,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     noticeHandoffStart: 'Résumé de la conversation en cours pour une nouvelle session…',
     noticeHandoffFailed: 'Échec de la reprise de session : {{error}}',
     errUnknownSlashCommand: 'Commande slash inconnue : {{command}}',
+    errPresetSlashClientOnly: 'Les presets de prompts ne sont utilisables que depuis la zone de saisie (/preset), pas comme prompt côté serveur : {{command}}',
     startupFailedTitle: "Échec du démarrage d'Lygodactylus",
     startupFailedBody: '{{message}}\n\nVeuillez consulter les journaux pour plus d’informations.',
     configDefaultSetName: 'Par défaut',
@@ -297,6 +302,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     noticeHandoffStart: 'Diese Unterhaltung wird für eine neue Sitzung zusammengefasst…',
     noticeHandoffFailed: 'Sitzungsübergabe fehlgeschlagen: {{error}}',
     errUnknownSlashCommand: 'Unbekannter Slash-Befehl: {{command}}',
+    errPresetSlashClientOnly: 'Prompt-Presets können nur über die Chat-Eingabe (/preset) verwendet werden, nicht als serverseitiger Prompt: {{command}}',
     startupFailedTitle: 'Lygodactylus konnte nicht gestartet werden',
     startupFailedBody: '{{message}}\n\nWeitere Informationen finden Sie in den Protokollen.',
     configDefaultSetName: 'Standard',
@@ -349,6 +355,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     noticeHandoffStart: 'Riassunto della conversazione per una nuova sessione in corso…',
     noticeHandoffFailed: 'Passaggio di sessione non riuscito: {{error}}',
     errUnknownSlashCommand: 'Comando slash sconosciuto: {{command}}',
+    errPresetSlashClientOnly: 'I preset di prompt possono essere usati solo dall’input della chat (/preset), non come prompt lato server: {{command}}',
     startupFailedTitle: 'Avvio di Lygodactylus non riuscito',
     startupFailedBody: '{{message}}\n\nControlla i log per maggiori informazioni.',
     configDefaultSetName: 'Predefinito',
@@ -400,6 +407,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     noticeHandoffStart: 'Підсумовуємо цю розмову для нової сесії…',
     noticeHandoffFailed: 'Не вдалося передати сесію: {{error}}',
     errUnknownSlashCommand: 'Невідома slash-команда: {{command}}',
+    errPresetSlashClientOnly: 'Пресети промптів можна використовувати лише з поля чату (/preset), а не як серверний промпт: {{command}}',
     startupFailedTitle: 'Не вдалося запустити Lygodactylus',
     startupFailedBody: '{{message}}\n\nПерегляньте журнали для отримання додаткової інформації.',
     configDefaultSetName: 'За замовчуванням',
@@ -451,6 +459,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     noticeHandoffStart: 'Podsumowywanie rozmowy dla nowej sesji…',
     noticeHandoffFailed: 'Przekazanie sesji nie powiodło się: {{error}}',
     errUnknownSlashCommand: 'Nieznane polecenie slash: {{command}}',
+    errPresetSlashClientOnly: 'Presety promptów można używać tylko z pola czatu (/preset), nie jako prompt po stronie serwera: {{command}}',
     startupFailedTitle: 'Nie udało się uruchomić Lygodactylus',
     startupFailedBody: '{{message}}\n\nSprawdź dzienniki, aby uzyskać więcej informacji.',
     configDefaultSetName: 'Domyślny',
@@ -502,6 +511,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     noticeHandoffStart: 'Sammanfattar den här konversationen för en ny session…',
     noticeHandoffFailed: 'Sessionsöverlämning misslyckades: {{error}}',
     errUnknownSlashCommand: 'Okänt snedstreckskommando: {{command}}',
+    errPresetSlashClientOnly: 'Promptförinställningar kan bara användas från chatinmatningen (/preset), inte som serverprompt: {{command}}',
     startupFailedTitle: 'Lygodactylus kunde inte starta',
     startupFailedBody: '{{message}}\n\nKontrollera loggarna för mer information.',
     configDefaultSetName: 'Standard',
@@ -553,6 +563,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     noticeHandoffStart: 'Oppsummerer denne samtalen for en ny økt…',
     noticeHandoffFailed: 'Øktoverlevering mislyktes: {{error}}',
     errUnknownSlashCommand: 'Ukjent skråstrek-kommando: {{command}}',
+    errPresetSlashClientOnly: 'Prompt-forhåndsinnstillinger kan bare brukes fra chat-inndata (/preset), ikke som server-prompt: {{command}}',
     startupFailedTitle: 'Lygodactylus kunne ikke starte',
     startupFailedBody: '{{message}}\n\nSjekk loggene for mer informasjon.',
     configDefaultSetName: 'Standard',
@@ -604,6 +615,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     noticeHandoffStart: 'Dit gesprek wordt samengevat voor een nieuwe sessie…',
     noticeHandoffFailed: 'Sessieoverdracht mislukt: {{error}}',
     errUnknownSlashCommand: 'Onbekend slash-commando: {{command}}',
+    errPresetSlashClientOnly: 'Prompt-presets kunnen alleen vanuit de chatinvoer (/preset) worden gebruikt, niet als serverprompt: {{command}}',
     startupFailedTitle: 'Lygodactylus kon niet worden gestart',
     startupFailedBody: '{{message}}\n\nRaadpleeg de logbestanden voor meer informatie.',
     configDefaultSetName: 'Standaard',
@@ -655,6 +667,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     noticeHandoffStart: 'Se rezumă această conversație pentru o sesiune nouă…',
     noticeHandoffFailed: 'Transferul sesiunii a eșuat: {{error}}',
     errUnknownSlashCommand: 'Comandă slash necunoscută: {{command}}',
+    errPresetSlashClientOnly: 'Presetările de prompt pot fi folosite doar din câmpul de chat (/preset), nu ca prompt pe server: {{command}}',
     startupFailedTitle: 'Lygodactylus nu a putut porni',
     startupFailedBody: '{{message}}\n\nVerifică jurnalele pentru mai multe informații.',
     configDefaultSetName: 'Implicit',

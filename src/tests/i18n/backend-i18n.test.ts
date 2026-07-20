@@ -29,6 +29,12 @@ describe('backend i18n catalog', () => {
     for (const lang of SUPPORTED_BACKEND_LANGUAGES) {
       const table = backendCatalog[lang];
       expect(table.errBadRequest, `${lang} errBadRequest`).toContain('{{error}}');
+      expect(table.errUnknownSlashCommand, `${lang} errUnknownSlashCommand`).toContain(
+        '{{command}}'
+      );
+      expect(table.errPresetSlashClientOnly, `${lang} errPresetSlashClientOnly`).toContain(
+        '{{command}}'
+      );
       expect(table.startupFailedBody, `${lang} startupFailedBody`).toContain('{{message}}');
       expect(table.configFallbackSetName, `${lang} configFallbackSetName`).toContain('{{index}}');
       expect(table.errChromeNotReady, `${lang} errChromeNotReady`).toContain('{{detail}}');

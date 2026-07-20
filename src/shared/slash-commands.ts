@@ -1,10 +1,11 @@
 import type { PluginSlashCommandInfo } from './plugin-slash-commands';
 
-export type BuiltinSlashCommandId = 'compact' | 'handoff';
+export type BuiltinSlashCommandId = 'compact' | 'handoff' | 'preset';
 
 export type ParsedSlashCommand =
   | { kind: 'compact'; instructions?: string }
   | { kind: 'handoff'; instructions?: string }
+  | { kind: 'preset'; name?: string }
   | { kind: 'plugin'; command: string; name: string; instructions?: string }
   | { kind: 'unknown'; token: string }
   | { kind: 'message' };
@@ -43,11 +44,18 @@ export const BUILTIN_SLASH_COMMAND_DEFINITIONS: readonly BuiltinSlashCommandDefi
     aliases: ['handsoff'],
     descriptionKey: 'chat.slashCommands.handoff.description',
   },
+  {
+    kind: 'builtin',
+    id: 'preset',
+    command: '/preset',
+    descriptionKey: 'chat.slashCommands.preset.description',
+  },
 ] as const;
 
 const COMPACT_COMMAND_RE = /^\/compact(?:\s+([\s\S]*))?$/i;
 const HANDOFF_COMMAND_RE = /^\/handoff(?:\s+([\s\S]*))?$/i;
 const HANDSOFF_COMMAND_RE = /^\/handsoff(?:\s+([\s\S]*))?$/i;
+const PRESET_COMMAND_RE = /^\/preset(?:\s+([\s\S]*))?$/i;
 
 function getBuiltinCommandNames(definition: BuiltinSlashCommandDefinition): string[] {
   return [definition.command.slice(1), ...(definition.aliases ?? [])];
@@ -184,6 +192,12 @@ export function parseSlashCommand(
     return { kind: 'handoff', instructions: instructions || undefined };
   }
 
+  const presetMatch = trimmed.match(PRESET_COMMAND_RE);
+  if (presetMatch) {
+    const name = presetMatch[1]?.trim();
+    return { kind: 'preset', name: name || undefined };
+  }
+
   const pluginMatch = matchPluginSlashCommand(trimmed, pluginCommands);
   if (pluginMatch) {
     return pluginMatch;
@@ -243,6 +257,13 @@ export function isHandoffSlashCommand(
   pluginCommands: readonly PluginSlashCommandInfo[] = []
 ): boolean {
   return parseSlashCommand(input, pluginCommands).kind === 'handoff';
+}
+
+export function isPresetSlashCommand(
+  input: string,
+  pluginCommands: readonly PluginSlashCommandInfo[] = []
+): boolean {
+  return parseSlashCommand(input, pluginCommands).kind === 'preset';
 }
 
 export function isPluginSlashCommand(

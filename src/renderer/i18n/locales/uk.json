@@ -71,7 +71,9 @@
     "general": "Загальні",
     "generalDesc": "Вигляд, мова та налаштування",
     "extensions": "Extensions",
-    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins"
+    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
+    "presets": "Пресети",
+    "presetsDesc": "Повторно використовувані шаблони промптів зі змінними"
   },
   "general": {
     "appearance": "Вигляд",
@@ -717,6 +719,9 @@
       },
       "handoff": {
         "description": "Розпочати нову сесію з підсумком для продовження"
+      },
+      "preset": {
+        "description": "Вставити повторно використовуваний пресет промпту"
       }
     },
     "scrollToBottom": "Прокрутити вниз",
@@ -1167,5 +1172,47 @@
     "shortcutTaken": "Цю комбінацію вже зайнято системою або іншою програмою.",
     "shortcutRegisterFailed": "Не вдалося зареєструвати глобальну комбінацію.",
     "sessionTitle": "Quick Ask"
+  },
+  "presets": {
+    "pickerTitle": "Оберіть пресет",
+    "pickerDesc": "Виберіть шаблон промпту для вставки в поле введення.",
+    "searchPlaceholder": "Пошук пресетів…",
+    "empty": "Пресетів ще немає. Створіть їх у Налаштуваннях.",
+    "noMatch": "Жоден пресет не відповідає пошуку.",
+    "variablesTitle": "Заповніть змінні",
+    "variablesDesc": "Заповніть плейсхолдери для «{{name}}».",
+    "variablePlaceholder": "Значення для {{name}}",
+    "insert": "Вставити у поле введення",
+    "unavailable": "Пресети промптів недоступні в цьому середовищі.",
+    "notFound": "Пресет «{{name}}» не знайдено.",
+    "loadFailed": "Не вдалося завантажити пресети.",
+    "manageTitle": "Пресети промптів",
+    "manageDesc": "Створюйте повторно використовувані промпти зі змінними для заповнення і токенами {date}/{os}. Вставлений текст не надсилається автоматично.",
+    "createTitle": "Новий пресет",
+    "editTitle": "Редагувати пресет",
+    "cancelEdit": "Скасувати редагування",
+    "fieldName": "Назва",
+    "fieldNamePlaceholder": "напр. Перегляд коду",
+    "fieldDescription": "Опис",
+    "fieldDescriptionPlaceholder": "Короткий опис у селекторі",
+    "fieldText": "Текст промпту",
+    "fieldTextPlaceholder": "Приклад: Напиши резюме теми обраною мовою. Сьогодні {date}.",
+    "fieldSystemPrompt": "Префікс користувацького промпту (необов’язково)",
+    "fieldSystemPromptPlaceholder": "Необов’язкові інструкції перед повідомленням користувача",
+    "systemPromptHint": "Додається як префікс до користувацького промпту (зберігає KV-кеш стабільного системного префікса).",
+    "detectedVariables": "Виявлені змінні: {{variables}}",
+    "noVariables": "Змінних шаблону не виявлено.",
+    "create": "Створити пресет",
+    "save": "Зберегти зміни",
+    "listTitle": "Ваші пресети",
+    "listDesc": "Використовуйте /preset у чаті для вставки.",
+    "nameRequired": "Назва обов’язкова.",
+    "textRequired": "Текст промпту обов’язковий.",
+    "saveFailed": "Не вдалося зберегти пресет.",
+    "deleteFailed": "Не вдалося видалити пресет.",
+    "deleteConfirm": "Видалити пресет «{{name}}»?",
+    "created": "Пресет створено.",
+    "updated": "Пресет оновлено.",
+    "deleted": "Пресет видалено."
   }
 }

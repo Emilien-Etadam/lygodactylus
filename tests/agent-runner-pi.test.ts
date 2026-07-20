@@ -112,6 +112,13 @@ describe('AgentRunner Lygodactylus SDK integration', () => {
     );
   });
 
+  it('rejects client-only /preset slash commands before model dispatch', () => {
+    expect(agentRunnerPiSetupContent).toContain('assertMainProcessAcceptsSlashPrompt');
+    expect(agentRunnerPiSetupContent).toContain(
+      "import { assertMainProcessAcceptsSlashPrompt } from './assert-main-slash-command'"
+    );
+  });
+
   it('keeps MCP server logging compact unless full debug logging is enabled', () => {
     expect(agentRunnerMcpServersContent).toContain("log('[AgentRunner] Final mcpServers summary:'");
     expect(agentRunnerMcpServersContent).toContain(

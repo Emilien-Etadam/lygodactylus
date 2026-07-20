@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  BUILTIN_SLASH_COMMAND_DEFINITIONS,
   filterSlashCommands,
   getSlashCommandQuery,
   hasExactSlashCommandQuery,
@@ -47,10 +46,15 @@ describe('slash command suggestions', () => {
   });
 
   it('filters command definitions by prefix', () => {
-    expect(filterSlashCommands('')).toEqual([...BUILTIN_SLASH_COMMAND_DEFINITIONS]);
+    expect(filterSlashCommands('').map((item) => item.id)).toEqual([
+      'compact',
+      'handoff',
+      'preset',
+    ]);
     expect(filterSlashCommands('com').map((item) => item.id)).toEqual(['compact']);
     expect(filterSlashCommands('hand').map((item) => item.id)).toEqual(['handoff']);
     expect(filterSlashCommands('handsof').map((item) => item.id)).toEqual(['handoff']);
+    expect(filterSlashCommands('pre').map((item) => item.id)).toEqual(['preset']);
     expect(filterSlashCommands('xyz')).toEqual([]);
   });
 
@@ -97,6 +101,15 @@ describe('parseSlashCommand', () => {
     expect(parseSlashCommand('/handoff focus on tests')).toEqual({
       kind: 'handoff',
       instructions: 'focus on tests',
+    });
+  });
+
+  it('detects /preset with optional name', () => {
+    expect(parseSlashCommand('/preset')).toEqual({ kind: 'preset', name: undefined });
+    expect(parseSlashCommand('/preset Revue')).toEqual({ kind: 'preset', name: 'Revue' });
+    expect(parseSlashCommand('/PRESET code review')).toEqual({
+      kind: 'preset',
+      name: 'code review',
     });
   });
 

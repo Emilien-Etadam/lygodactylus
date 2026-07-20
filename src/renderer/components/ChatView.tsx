@@ -25,7 +25,13 @@ import {
   normalizePluginSlashPromptForExpansion,
   type SlashCommandDefinition,
 } from '../../shared/slash-commands';
+import {
+  buildPresetInsertionText,
+  type PromptPreset,
+} from '../../shared/prompt-presets';
 import { SlashCommandMenu } from './SlashCommandMenu';
+import { PresetPickerDialog } from './PresetPickerDialog';
+import { PresetVariableDialog } from './PresetVariableDialog';
 import { ThinkingLevelToggle } from './ThinkingLevelToggle';
 import { PlanActToggle } from './PlanActToggle';
 import { Send, Square, Plus, Loader2, Plug, X, Clock, ChevronDown, StickyNote, FileText, Zap } from 'lucide-react';
@@ -113,6 +119,9 @@ export function ChatView() {
   const [slashMenuDismissed, setSlashMenuDismissed] = useState(false);
   const [slashHighlightIndex, setSlashHighlightIndex] = useState(0);
   const [pluginSlashCommands, setPluginSlashCommands] = useState<PluginSlashCommandInfo[]>([]);
+  const [presetPickerOpen, setPresetPickerOpen] = useState(false);
+  const [presetPickerItems, setPresetPickerItems] = useState<PromptPreset[]>([]);
+  const [pendingPreset, setPendingPreset] = useState<PromptPreset | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -157,12 +166,101 @@ export function ChatView() {
 
   const showSlashMenu = !slashMenuDismissed && slashQuery !== null && slashSuggestions.length > 0;
 
-  const applySlashCommand = useCallback((definition: SlashCommandDefinition) => {
-    setPrompt(`${definition.command} `);
+  const insertPromptDraft = useCallback((nextPrompt: string) => {
+    setPrompt(nextPrompt);
+    if (textareaRef.current) {
+      textareaRef.current.value = nextPrompt;
+      textareaRef.current.focus();
+      const end = nextPrompt.length;
+      textareaRef.current.setSelectionRange(end, end);
+    }
     setSlashMenuDismissed(false);
     setSlashHighlightIndex(0);
-    requestAnimationFrame(() => textareaRef.current?.focus());
   }, []);
+
+  const applySelectedPreset = useCallback(
+    (preset: PromptPreset) => {
+      setPresetPickerOpen(false);
+      setPresetPickerItems([]);
+      if (preset.variables.length === 0) {
+        const platform =
+          typeof window !== 'undefined' && window.electronAPI?.platform
+            ? window.electronAPI.platform
+            : undefined;
+        insertPromptDraft(
+          buildPresetInsertionText(preset, {}, platform ? { os: platform } : undefined)
+        );
+        setPendingPreset(null);
+        return;
+      }
+      setPendingPreset(preset);
+    },
+    [insertPromptDraft]
+  );
+
+  const openPresetFlow = useCallback(
+    async (name?: string) => {
+      if (!isElectron || !window.electronAPI?.presets) {
+        setGlobalNotice({
+          id: `notice-presets-unavailable-${Date.now()}`,
+          type: 'warning',
+          message: t('presets.unavailable'),
+          messageKey: 'presets.unavailable',
+        });
+        return;
+      }
+
+      try {
+        if (name?.trim()) {
+          const preset = await window.electronAPI.presets.getByName(name.trim());
+          if (!preset) {
+            setGlobalNotice({
+              id: `notice-preset-missing-${Date.now()}`,
+              type: 'warning',
+              message: t('presets.notFound', { name: name.trim() }),
+              messageKey: 'presets.notFound',
+              messageValues: { name: name.trim() },
+            });
+            return;
+          }
+          applySelectedPreset(preset);
+          return;
+        }
+
+        const presets = await window.electronAPI.presets.list();
+        setPresetPickerItems(presets);
+        setPresetPickerOpen(true);
+      } catch {
+        setGlobalNotice({
+          id: `notice-presets-load-${Date.now()}`,
+          type: 'warning',
+          message: t('presets.loadFailed'),
+          messageKey: 'presets.loadFailed',
+        });
+      }
+    },
+    [applySelectedPreset, isElectron, setGlobalNotice, t]
+  );
+
+  const applySlashCommand = useCallback(
+    (definition: SlashCommandDefinition) => {
+      if (definition.kind === 'builtin' && definition.id === 'preset') {
+        setPrompt('');
+        if (textareaRef.current) {
+          textareaRef.current.value = '';
+        }
+        setSlashMenuDismissed(false);
+        setSlashHighlightIndex(0);
+        void openPresetFlow();
+        return;
+      }
+      setPrompt(`${definition.command} `);
+      setSlashMenuDismissed(false);
+      setSlashHighlightIndex(0);
+      requestAnimationFrame(() => textareaRef.current?.focus());
+    },
+    [openPresetFlow]
+  );
 
   useEffect(() => {
     if (!prompt.trimStart().startsWith('/')) {
@@ -568,6 +666,14 @@ export function ChatView() {
           if (textareaRef.current) {
             textareaRef.current.value = '';
           }
+          return;
+        }
+        if (command.kind === 'preset') {
+          setPrompt('');
+          if (textareaRef.current) {
+            textareaRef.current.value = '';
+          }
+          await openPresetFlow(command.name);
           return;
         }
         if (command.kind === 'unknown') {
@@ -1009,6 +1115,42 @@ export function ChatView() {
           </form>
         </div>
       </div>
+
+      {presetPickerOpen && (
+        <PresetPickerDialog
+          presets={presetPickerItems}
+          onSelect={(preset) => applySelectedPreset(preset)}
+          onClose={() => {
+            setPresetPickerOpen(false);
+            setPresetPickerItems([]);
+            requestAnimationFrame(() => textareaRef.current?.focus());
+          }}
+        />
+      )}
+
+      {pendingPreset && (
+        <PresetVariableDialog
+          preset={pendingPreset}
+          onConfirm={(values) => {
+            const platform =
+              typeof window !== 'undefined' && window.electronAPI?.platform
+                ? window.electronAPI.platform
+                : undefined;
+            insertPromptDraft(
+              buildPresetInsertionText(
+                pendingPreset,
+                values,
+                platform ? { os: platform } : undefined
+              )
+            );
+            setPendingPreset(null);
+          }}
+          onClose={() => {
+            setPendingPreset(null);
+            requestAnimationFrame(() => textareaRef.current?.focus());
+          }}
+        />
+      )}
     </div>
   );
 }

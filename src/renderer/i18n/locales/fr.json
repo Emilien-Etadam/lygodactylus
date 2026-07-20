@@ -71,7 +71,9 @@
     "logsDesc": "Afficher et exporter les journaux de l'application",
     "panelDesc": "Configurez votre espace de travail, vos outils et le comportement de votre compte.",
     "general": "Général",
-    "generalDesc": "Apparence, langue et préférences"
+    "generalDesc": "Apparence, langue et préférences",
+    "presets": "Presets",
+    "presetsDesc": "Modèles de prompts réutilisables avec variables"
   },
   "general": {
     "appearance": "Apparence",
@@ -823,6 +825,9 @@
       },
       "handoff": {
         "description": "Créer une nouvelle session avec un résumé de reprise"
+      },
+      "preset": {
+        "description": "Insérer un preset de prompt réutilisable"
       }
     },
     "scrollToBottom": "Descendre en bas",
@@ -1167,5 +1172,47 @@
     "shortcutTaken": "Ce raccourci est déjà utilisé par le système ou une autre application.",
     "shortcutRegisterFailed": "Impossible d'enregistrer le raccourci global.",
     "sessionTitle": "Quick Ask"
+  },
+  "presets": {
+    "pickerTitle": "Choisir un preset",
+    "pickerDesc": "Sélectionnez un modèle de prompt à insérer dans la zone de saisie.",
+    "searchPlaceholder": "Rechercher des presets…",
+    "empty": "Aucun preset pour l’instant. Créez-en dans Réglages.",
+    "noMatch": "Aucun preset ne correspond à votre recherche.",
+    "variablesTitle": "Remplir les variables",
+    "variablesDesc": "Complétez les espaces réservés pour « {{name}} ».",
+    "variablePlaceholder": "Valeur pour {{name}}",
+    "insert": "Insérer dans la saisie",
+    "unavailable": "Les presets de prompts sont indisponibles dans cet environnement.",
+    "notFound": "Le preset « {{name}} » est introuvable.",
+    "loadFailed": "Échec du chargement des presets.",
+    "manageTitle": "Presets de prompts",
+    "manageDesc": "Créez des prompts réutilisables avec des variables à remplir et les jetons {date}/{os}. Le texte inséré n’est pas envoyé automatiquement.",
+    "createTitle": "Nouveau preset",
+    "editTitle": "Modifier le preset",
+    "cancelEdit": "Annuler la modification",
+    "fieldName": "Nom",
+    "fieldNamePlaceholder": "ex. Revue de code",
+    "fieldDescription": "Description",
+    "fieldDescriptionPlaceholder": "Résumé court affiché dans le sélecteur",
+    "fieldText": "Texte du prompt",
+    "fieldTextPlaceholder": "Exemple : Rédige un résumé du sujet dans la langue choisie. Aujourd’hui : {date}.",
+    "fieldSystemPrompt": "Préfixe du prompt utilisateur (optionnel)",
+    "fieldSystemPromptPlaceholder": "Instructions optionnelles préfixées au message utilisateur",
+    "systemPromptHint": "Ajouté en préfixe du prompt utilisateur (préserve le cache KV du préfixe système stable).",
+    "detectedVariables": "Variables détectées : {{variables}}",
+    "noVariables": "Aucune variable de modèle détectée.",
+    "create": "Créer le preset",
+    "save": "Enregistrer",
+    "listTitle": "Vos presets",
+    "listDesc": "Utilisez /preset dans le chat pour en insérer un.",
+    "nameRequired": "Un nom est requis.",
+    "textRequired": "Le texte du prompt est requis.",
+    "saveFailed": "Échec de l’enregistrement du preset.",
+    "deleteFailed": "Échec de la suppression du preset.",
+    "deleteConfirm": "Supprimer le preset « {{name}} » ?",
+    "created": "Preset créé.",
+    "updated": "Preset mis à jour.",
+    "deleted": "Preset supprimé."
   }
 }

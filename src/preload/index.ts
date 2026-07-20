@@ -31,6 +31,9 @@ import type {
   MemoryInspectSessionResult,
   MemoryRerankerTestInput,
   MemoryRerankerTestResult,
+  PromptPreset,
+  PromptPresetCreateInput,
+  PromptPresetUpdateInput,
 } from '../renderer/types';
 import type { DiagnosticInput, DiagnosticResult } from '../renderer/types';
 import type { McpServerConfig, McpTool, McpServerStatus, McpPresetsMap } from '../shared/ipc-types';
@@ -331,6 +334,19 @@ contextBridge.exposeInMainWorld('electronAPI', {
     runNow: (id: string): Promise<ScheduleTask | null> => ipcRenderer.invoke('schedule.runNow', id),
   },
 
+  presets: {
+    list: (): Promise<PromptPreset[]> => ipcRenderer.invoke('presets.list'),
+    get: (id: string): Promise<PromptPreset | null> => ipcRenderer.invoke('presets.get', id),
+    getByName: (name: string): Promise<PromptPreset | null> =>
+      ipcRenderer.invoke('presets.getByName', name),
+    create: (payload: PromptPresetCreateInput): Promise<PromptPreset> =>
+      ipcRenderer.invoke('presets.create', payload),
+    update: (id: string, updates: PromptPresetUpdateInput): Promise<PromptPreset | null> =>
+      ipcRenderer.invoke('presets.update', id, updates),
+    delete: (id: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke('presets.delete', id),
+  },
+
   chatLan: {
     getConfig: (): Promise<{
       enabled: boolean;
@@ -607,6 +623,14 @@ declare global {
         delete: (id: string) => Promise<{ success: boolean }>;
         toggle: (id: string, enabled: boolean) => Promise<ScheduleTask | null>;
         runNow: (id: string) => Promise<ScheduleTask | null>;
+      };
+      presets: {
+        list: () => Promise<PromptPreset[]>;
+        get: (id: string) => Promise<PromptPreset | null>;
+        getByName: (name: string) => Promise<PromptPreset | null>;
+        create: (payload: PromptPresetCreateInput) => Promise<PromptPreset>;
+        update: (id: string, updates: PromptPresetUpdateInput) => Promise<PromptPreset | null>;
+        delete: (id: string) => Promise<{ success: boolean }>;
       };
       chatLan: {
         getConfig: () => Promise<{

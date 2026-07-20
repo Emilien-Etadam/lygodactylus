@@ -71,7 +71,9 @@
     "general": "General",
     "generalDesc": "Aspect, limbă și preferințe",
     "extensions": "Extensions",
-    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins"
+    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
+    "presets": "Presetări",
+    "presetsDesc": "Șabloane de prompt reutilizabile cu variabile"
   },
   "general": {
     "appearance": "Aspect",
@@ -717,6 +719,9 @@
       },
       "handoff": {
         "description": "Pornește o sesiune nouă cu un rezumat de continuare"
+      },
+      "preset": {
+        "description": "Inserează o presetare de prompt reutilizabilă"
       }
     },
     "scrollToBottom": "Derulează la final",
@@ -1167,5 +1172,47 @@
     "shortcutTaken": "Această scurtătură este deja folosită de sistem sau altă aplicație.",
     "shortcutRegisterFailed": "Nu s-a putut înregistra scurtătura globală.",
     "sessionTitle": "Quick Ask"
+  },
+  "presets": {
+    "pickerTitle": "Alege o presetare",
+    "pickerDesc": "Selectează un șablon de prompt de inserat în câmpul de introducere.",
+    "searchPlaceholder": "Caută presetări…",
+    "empty": "Nicio presetare încă. Creează-le în Setări.",
+    "noMatch": "Nicio presetare nu corespunde căutării.",
+    "variablesTitle": "Completează variabilele",
+    "variablesDesc": "Completează placeholder-ele pentru „{{name}}”.",
+    "variablePlaceholder": "Valoare pentru {{name}}",
+    "insert": "Inserează în câmp",
+    "unavailable": "Presetările de prompt nu sunt disponibile în acest mediu.",
+    "notFound": "Presetarea „{{name}}” nu a fost găsită.",
+    "loadFailed": "Încărcarea presetărilor a eșuat.",
+    "manageTitle": "Presetări de prompt",
+    "manageDesc": "Creează prompturi reutilizabile cu variabile de completat și tokeni {date}/{os}. Textul inserat nu este trimis automat.",
+    "createTitle": "Presetare nouă",
+    "editTitle": "Editează presetarea",
+    "cancelEdit": "Anulează editarea",
+    "fieldName": "Nume",
+    "fieldNamePlaceholder": "ex. Revizuire cod",
+    "fieldDescription": "Descriere",
+    "fieldDescriptionPlaceholder": "Rezumat scurt afișat în selector",
+    "fieldText": "Textul promptului",
+    "fieldTextPlaceholder": "Exemplu: Scrie un rezumat al subiectului în limba aleasă. Astăzi este {date}.",
+    "fieldSystemPrompt": "Prefix prompt utilizator (opțional)",
+    "fieldSystemPromptPlaceholder": "Instrucțiuni opționale înaintea mesajului utilizator",
+    "systemPromptHint": "Adăugat ca prefix la promptul utilizator (păstrează cache-ul KV al prefixului de sistem stabil).",
+    "detectedVariables": "Variabile detectate: {{variables}}",
+    "noVariables": "Nicio variabilă de șablon detectată.",
+    "create": "Creează presetarea",
+    "save": "Salvează modificările",
+    "listTitle": "Presetările tale",
+    "listDesc": "Folosește /preset în chat pentru a insera.",
+    "nameRequired": "Numele este obligatoriu.",
+    "textRequired": "Textul promptului este obligatoriu.",
+    "saveFailed": "Salvarea presetării a eșuat.",
+    "deleteFailed": "Ștergerea presetării a eșuat.",
+    "deleteConfirm": "Ștergi presetarea „{{name}}”?",
+    "created": "Presetare creată.",
+    "updated": "Presetare actualizată.",
+    "deleted": "Presetare ștearsă."
   }
 }

@@ -10,6 +10,7 @@ import { registerSessionSearchIpc } from './ipc-session-search';
 import { registerChatLanIpc } from './ipc-chat-lan';
 import { registerMarketplaceIpc } from './ipc-marketplace';
 import { registerAutoUpdateIpc } from './ipc-auto-update';
+import { registerPromptPresetsIpc } from './ipc-prompt-presets';
 
 export function registerMainIpc(): void {
   registerClientShellIpc();
@@ -21,4 +22,5 @@ export function registerMainIpc(): void {
   registerScheduleMemoryIpc();
   registerSessionSearchIpc();
   registerChatLanIpc();
+  registerPromptPresetsIpc();
 }

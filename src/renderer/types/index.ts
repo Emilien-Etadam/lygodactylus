@@ -976,3 +976,9 @@ export interface MCPToolInfo {
   serverId: string;
   serverName: string;
 }
+
+export type {
+  PromptPreset,
+  PromptPresetCreateInput,
+  PromptPresetUpdateInput,
+} from '../../shared/prompt-presets';

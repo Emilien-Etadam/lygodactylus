@@ -71,7 +71,9 @@
     "general": "通用",
     "generalDesc": "外观、语言等通用偏好",
     "extensions": "Extensions",
-    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins"
+    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
+    "presets": "预设",
+    "presetsDesc": "可复用的带变量提示词模板"
   },
   "general": {
     "appearance": "外观",
@@ -717,6 +719,9 @@
       },
       "handoff": {
         "description": "创建包含续接摘要的新会话"
+      },
+      "preset": {
+        "description": "插入可复用的提示词预设"
       }
     },
     "scrollToBottom": "滚动到底部",
@@ -1167,5 +1172,47 @@
     "shortcutTaken": "该快捷键已被系统或其他应用占用。",
     "shortcutRegisterFailed": "无法注册全局快捷键。",
     "sessionTitle": "Quick Ask"
+  },
+  "presets": {
+    "pickerTitle": "选择预设",
+    "pickerDesc": "选择要插入到输入框的提示词模板。",
+    "searchPlaceholder": "搜索预设…",
+    "empty": "暂无预设。请在设置中创建。",
+    "noMatch": "没有匹配的预设。",
+    "variablesTitle": "填写变量",
+    "variablesDesc": "为“{{name}}”填写占位符。",
+    "variablePlaceholder": "{{name}} 的值",
+    "insert": "插入到输入框",
+    "unavailable": "当前环境无法使用提示词预设。",
+    "notFound": "未找到预设“{{name}}”。",
+    "loadFailed": "加载预设失败。",
+    "manageTitle": "提示词预设",
+    "manageDesc": "创建带可填写变量与 {date}/{os} 标记的可复用提示词。插入的文本不会自动发送。",
+    "createTitle": "新建预设",
+    "editTitle": "编辑预设",
+    "cancelEdit": "取消编辑",
+    "fieldName": "名称",
+    "fieldNamePlaceholder": "例如：代码审查",
+    "fieldDescription": "描述",
+    "fieldDescriptionPlaceholder": "选择器中显示的简短说明",
+    "fieldText": "提示词正文",
+    "fieldTextPlaceholder": "示例：用所选语言写一份主题摘要。今天是 {date}。",
+    "fieldSystemPrompt": "用户提示前缀（可选）",
+    "fieldSystemPromptPlaceholder": "可选，会前置到用户消息",
+    "systemPromptHint": "作为用户提示的前缀添加（保留稳定系统前缀的 KV 缓存）。",
+    "detectedVariables": "检测到的变量：{{variables}}",
+    "noVariables": "未检测到模板变量。",
+    "create": "创建预设",
+    "save": "保存更改",
+    "listTitle": "你的预设",
+    "listDesc": "在聊天中使用 /preset 插入。",
+    "nameRequired": "名称必填。",
+    "textRequired": "提示词正文必填。",
+    "saveFailed": "保存预设失败。",
+    "deleteFailed": "删除预设失败。",
+    "deleteConfirm": "删除预设“{{name}}”？",
+    "created": "预设已创建。",
+    "updated": "预设已更新。",
+    "deleted": "预设已删除。"
   }
 }

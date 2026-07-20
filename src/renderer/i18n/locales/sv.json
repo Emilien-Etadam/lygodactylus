@@ -71,7 +71,9 @@
     "general": "Allmänt",
     "generalDesc": "Utseende, språk och inställningar",
     "extensions": "Extensions",
-    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins"
+    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
+    "presets": "Förinställningar",
+    "presetsDesc": "Återanvändbara promptmallar med variabler"
   },
   "general": {
     "appearance": "Utseende",
@@ -717,6 +719,9 @@
       },
       "handoff": {
         "description": "Starta en ny session med en fortsättningssammanfattning"
+      },
+      "preset": {
+        "description": "Infoga en återanvändbar promptförinställning"
       }
     },
     "scrollToBottom": "Scrolla till botten",
@@ -1167,5 +1172,47 @@
     "shortcutTaken": "Denna genväg används redan av systemet eller en annan app.",
     "shortcutRegisterFailed": "Kunde inte registrera den globala genvägen.",
     "sessionTitle": "Quick Ask"
+  },
+  "presets": {
+    "pickerTitle": "Välj en förinställning",
+    "pickerDesc": "Välj en promptmall att infoga i inmatningsfältet.",
+    "searchPlaceholder": "Sök förinställningar…",
+    "empty": "Inga förinställningar ännu. Skapa dem i Inställningar.",
+    "noMatch": "Ingen förinställning matchar sökningen.",
+    "variablesTitle": "Fyll i variabler",
+    "variablesDesc": "Fyll i platshållarna för ”{{name}}”.",
+    "variablePlaceholder": "Värde för {{name}}",
+    "insert": "Infoga i inmatningen",
+    "unavailable": "Promptförinställningar är inte tillgängliga i denna miljö.",
+    "notFound": "Förinställningen ”{{name}}” hittades inte.",
+    "loadFailed": "Kunde inte läsa in förinställningar.",
+    "manageTitle": "Promptförinställningar",
+    "manageDesc": "Skapa återanvändbara prompter med ifyllnadsvariabler och {date}/{os}-token. Infogad text skickas inte automatiskt.",
+    "createTitle": "Ny förinställning",
+    "editTitle": "Redigera förinställning",
+    "cancelEdit": "Avbryt redigering",
+    "fieldName": "Namn",
+    "fieldNamePlaceholder": "t.ex. Kodgranskning",
+    "fieldDescription": "Beskrivning",
+    "fieldDescriptionPlaceholder": "Kort sammanfattning i väljaren",
+    "fieldText": "Prompttext",
+    "fieldTextPlaceholder": "Exempel: Skriv en sammanfattning av ämnet på valt språk. Idag är {date}.",
+    "fieldSystemPrompt": "Användarpromptprefix (valfritt)",
+    "fieldSystemPromptPlaceholder": "Valfria instruktioner före användarmeddelandet",
+    "systemPromptHint": "Läggs till som prefix på användarprompten (bevarar KV-cachen för stabilt systemprefix).",
+    "detectedVariables": "Upptäckta variabler: {{variables}}",
+    "noVariables": "Inga mallvariabler upptäcktes.",
+    "create": "Skapa förinställning",
+    "save": "Spara ändringar",
+    "listTitle": "Dina förinställningar",
+    "listDesc": "Använd /preset i chatten för att infoga.",
+    "nameRequired": "Namn krävs.",
+    "textRequired": "Prompttext krävs.",
+    "saveFailed": "Kunde inte spara förinställningen.",
+    "deleteFailed": "Kunde inte ta bort förinställningen.",
+    "deleteConfirm": "Ta bort förinställningen ”{{name}}”?",
+    "created": "Förinställning skapad.",
+    "updated": "Förinställning uppdaterad.",
+    "deleted": "Förinställning borttagen."
   }
 }
