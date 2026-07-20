@@ -71,7 +71,9 @@
     "general": "General",
     "generalDesc": "Apariencia, idioma y preferencias",
     "extensions": "Extensions",
-    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins"
+    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
+    "presets": "Presets",
+    "presetsDesc": "Plantillas de prompts reutilizables con variables"
   },
   "general": {
     "appearance": "Apariencia",
@@ -717,6 +719,9 @@
       },
       "handoff": {
         "description": "Iniciar una nueva sesión con un resumen de continuación"
+      },
+      "preset": {
+        "description": "Insertar un preset de prompt reutilizable"
       }
     },
     "scrollToBottom": "Ir al final",
@@ -1167,5 +1172,47 @@
     "shortcutTaken": "Este atajo ya está en uso por el sistema u otra aplicación.",
     "shortcutRegisterFailed": "No se pudo registrar el atajo global.",
     "sessionTitle": "Quick Ask"
+  },
+  "presets": {
+    "pickerTitle": "Elegir un preset",
+    "pickerDesc": "Selecciona una plantilla de prompt para insertar en la entrada.",
+    "searchPlaceholder": "Buscar presets…",
+    "empty": "Aún no hay presets. Créalos en Ajustes.",
+    "noMatch": "Ningún preset coincide con tu búsqueda.",
+    "variablesTitle": "Completar variables",
+    "variablesDesc": "Completa los marcadores de “{{name}}”.",
+    "variablePlaceholder": "Valor para {{name}}",
+    "insert": "Insertar en la entrada",
+    "unavailable": "Los presets de prompts no están disponibles en este entorno.",
+    "notFound": "No se encontró el preset “{{name}}”.",
+    "loadFailed": "Error al cargar los presets.",
+    "manageTitle": "Presets de prompts",
+    "manageDesc": "Crea prompts reutilizables con {{variables}} y tokens {date}/{os}. El texto insertado no se envía automáticamente.",
+    "createTitle": "Nuevo preset",
+    "editTitle": "Editar preset",
+    "cancelEdit": "Cancelar edición",
+    "fieldName": "Nombre",
+    "fieldNamePlaceholder": "p. ej. Revisión de código",
+    "fieldDescription": "Descripción",
+    "fieldDescriptionPlaceholder": "Resumen corto mostrado en el selector",
+    "fieldText": "Texto del prompt",
+    "fieldTextPlaceholder": "Escribe un resumen de {{sujet}} en {{langue}}. Hoy es {date}.",
+    "fieldSystemPrompt": "Prefijo del prompt de usuario (opcional)",
+    "fieldSystemPromptPlaceholder": "Instrucciones opcionales antepuestas al mensaje de usuario",
+    "systemPromptHint": "Se añade como prefijo del prompt de usuario (conserva la caché KV del prefijo de sistema estable).",
+    "detectedVariables": "Variables detectadas: {{variables}}",
+    "noVariables": "No se detectaron variables de plantilla.",
+    "create": "Crear preset",
+    "save": "Guardar cambios",
+    "listTitle": "Tus presets",
+    "listDesc": "Usa /preset en el chat para insertar uno.",
+    "nameRequired": "El nombre es obligatorio.",
+    "textRequired": "El texto del prompt es obligatorio.",
+    "saveFailed": "Error al guardar el preset.",
+    "deleteFailed": "Error al eliminar el preset.",
+    "deleteConfirm": "¿Eliminar el preset “{{name}}”?",
+    "created": "Preset creado.",
+    "updated": "Preset actualizado.",
+    "deleted": "Preset eliminado."
   }
 }

@@ -9,6 +9,7 @@ import {
   Globe,
   ChevronRight,
   BrainCircuit,
+  BookMarked,
 } from 'lucide-react';
 import { formatEeDisplayVersion } from '../../shared/app-version';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +22,7 @@ import { SettingsSchedule } from './settings/SettingsSchedule';
 import { SettingsGeneral } from './settings/SettingsGeneral';
 import { SettingsLogs } from './settings/SettingsLogs';
 import { SettingsMemory } from './settings/SettingsMemory';
+import { SettingsPresets } from './settings/SettingsPresets';
 
 interface SettingsPanelProps {
   onClose: () => void;
@@ -32,11 +34,20 @@ interface SettingsPanelProps {
     | 'skills'
     | 'memory'
     | 'schedule'
+    | 'presets'
     | 'logs'
     | 'general';
 }
 
-type TabId = 'api' | 'sandbox' | 'extensions' | 'memory' | 'schedule' | 'logs' | 'general';
+type TabId =
+  | 'api'
+  | 'sandbox'
+  | 'extensions'
+  | 'memory'
+  | 'schedule'
+  | 'presets'
+  | 'logs'
+  | 'general';
 
 const VALID_TABS = new Set<TabId>([
   'api',
@@ -44,6 +55,7 @@ const VALID_TABS = new Set<TabId>([
   'extensions',
   'memory',
   'schedule',
+  'presets',
   'logs',
   'general',
 ]);
@@ -132,6 +144,12 @@ export function SettingsPanel({ onClose, initialTab = 'api' }: SettingsPanelProp
       label: t('settings.schedule'),
       icon: Clock3,
       description: t('settings.scheduleDesc'),
+    },
+    {
+      id: 'presets' as TabId,
+      label: t('settings.presets'),
+      icon: BookMarked,
+      description: t('settings.presetsDesc'),
     },
     {
       id: 'logs' as TabId,
@@ -255,6 +273,11 @@ export function SettingsPanel({ onClose, initialTab = 'api' }: SettingsPanelProp
               <div className={activeTab === 'schedule' ? '' : 'hidden'}>
                 {viewedTabs.has('schedule') && (
                   <SettingsSchedule isActive={activeTab === 'schedule'} />
+                )}
+              </div>
+              <div className={activeTab === 'presets' ? '' : 'hidden'}>
+                {viewedTabs.has('presets') && (
+                  <SettingsPresets isActive={activeTab === 'presets'} />
                 )}
               </div>
               <div className={activeTab === 'logs' ? '' : 'hidden'}>

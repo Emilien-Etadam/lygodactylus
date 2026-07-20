@@ -71,7 +71,9 @@
     "general": "Generelt",
     "generalDesc": "Utseende, språk og preferanser",
     "extensions": "Extensions",
-    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins"
+    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
+    "presets": "Forhåndsinnstillinger",
+    "presetsDesc": "Gjenbrukbare promptmaler med variabler"
   },
   "general": {
     "appearance": "Utseende",
@@ -717,6 +719,9 @@
       },
       "handoff": {
         "description": "Start en ny økt med et fortsettelsessammendrag"
+      },
+      "preset": {
+        "description": "Sett inn en gjenbrukbar prompt-forhåndsinnstilling"
       }
     },
     "scrollToBottom": "Rull til bunnen",
@@ -1167,5 +1172,47 @@
     "shortcutTaken": "Denne snarveien er allerede i bruk av systemet eller en annen app.",
     "shortcutRegisterFailed": "Kunne ikke registrere den globale snarveien.",
     "sessionTitle": "Quick Ask"
+  },
+  "presets": {
+    "pickerTitle": "Velg en forhåndsinnstilling",
+    "pickerDesc": "Velg en promptmal som skal settes inn i inndatafeltet.",
+    "searchPlaceholder": "Søk i forhåndsinnstillinger…",
+    "empty": "Ingen forhåndsinnstillinger ennå. Opprett dem i Innstillinger.",
+    "noMatch": "Ingen forhåndsinnstilling matcher søket.",
+    "variablesTitle": "Fyll inn variabler",
+    "variablesDesc": "Fullfør plassholderne for «{{name}}».",
+    "variablePlaceholder": "Verdi for {{name}}",
+    "insert": "Sett inn i inndata",
+    "unavailable": "Prompt-forhåndsinnstillinger er utilgjengelige i dette miljøet.",
+    "notFound": "Fant ikke forhåndsinnstillingen «{{name}}».",
+    "loadFailed": "Kunne ikke laste forhåndsinnstillinger.",
+    "manageTitle": "Prompt-forhåndsinnstillinger",
+    "manageDesc": "Opprett gjenbrukbare prompt med {{variables}} og {date}/{os}-token. Innsatt tekst sendes ikke automatisk.",
+    "createTitle": "Ny forhåndsinnstilling",
+    "editTitle": "Rediger forhåndsinnstilling",
+    "cancelEdit": "Avbryt redigering",
+    "fieldName": "Navn",
+    "fieldNamePlaceholder": "f.eks. Kodegjennomgang",
+    "fieldDescription": "Beskrivelse",
+    "fieldDescriptionPlaceholder": "Kort sammendrag vist i velgeren",
+    "fieldText": "Prompttekst",
+    "fieldTextPlaceholder": "Skriv et sammendrag av {{sujet}} på {{langue}}. I dag er {date}.",
+    "fieldSystemPrompt": "Brukerprompt-prefiks (valgfritt)",
+    "fieldSystemPromptPlaceholder": "Valgfrie instruksjoner foran brukermeldingen",
+    "systemPromptHint": "Legges til som prefiks på brukerprompten (bevarer KV-cachen for stabilt systemprefiks).",
+    "detectedVariables": "Oppdagede variabler: {{variables}}",
+    "noVariables": "Ingen malvariabler oppdaget.",
+    "create": "Opprett forhåndsinnstilling",
+    "save": "Lagre endringer",
+    "listTitle": "Dine forhåndsinnstillinger",
+    "listDesc": "Bruk /preset i chatten for å sette inn.",
+    "nameRequired": "Navn er påkrevd.",
+    "textRequired": "Prompttekst er påkrevd.",
+    "saveFailed": "Kunne ikke lagre forhåndsinnstillingen.",
+    "deleteFailed": "Kunne ikke slette forhåndsinnstillingen.",
+    "deleteConfirm": "Slette forhåndsinnstillingen «{{name}}»?",
+    "created": "Forhåndsinnstilling opprettet.",
+    "updated": "Forhåndsinnstilling oppdatert.",
+    "deleted": "Forhåndsinnstilling slettet."
   }
 }

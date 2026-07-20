@@ -71,7 +71,9 @@
     "logsDesc": "View and export application logs",
     "panelDesc": "Configure your workspace, tools, and account behavior.",
     "general": "General",
-    "generalDesc": "Appearance, language & preferences"
+    "generalDesc": "Appearance, language & preferences",
+    "presets": "Presets",
+    "presetsDesc": "Reusable prompt templates with variables"
   },
   "general": {
     "appearance": "Appearance",
@@ -823,6 +825,9 @@
       },
       "handoff": {
         "description": "Start a new session with a continuation summary"
+      },
+      "preset": {
+        "description": "Insert a reusable prompt preset"
       }
     },
     "scrollToBottom": "Scroll to bottom",
@@ -1167,5 +1172,47 @@
     "shortcutTaken": "This shortcut is already taken by the OS or another app.",
     "shortcutRegisterFailed": "Could not register the global shortcut.",
     "sessionTitle": "Quick Ask"
+  },
+  "presets": {
+    "pickerTitle": "Choose a preset",
+    "pickerDesc": "Select a prompt template to insert into the input.",
+    "searchPlaceholder": "Search presets…",
+    "empty": "No presets yet. Create some in Settings.",
+    "noMatch": "No preset matches your search.",
+    "variablesTitle": "Fill in variables",
+    "variablesDesc": "Complete the placeholders for “{{name}}”.",
+    "variablePlaceholder": "Value for {{name}}",
+    "insert": "Insert into input",
+    "unavailable": "Prompt presets are unavailable in this environment.",
+    "notFound": "Preset “{{name}}” was not found.",
+    "loadFailed": "Failed to load presets.",
+    "manageTitle": "Prompt presets",
+    "manageDesc": "Create reusable prompts with {{variables}} and {date}/{os} tokens. Inserted text is not sent automatically.",
+    "createTitle": "New preset",
+    "editTitle": "Edit preset",
+    "cancelEdit": "Cancel editing",
+    "fieldName": "Name",
+    "fieldNamePlaceholder": "e.g. Code review",
+    "fieldDescription": "Description",
+    "fieldDescriptionPlaceholder": "Short summary shown in the picker",
+    "fieldText": "Prompt text",
+    "fieldTextPlaceholder": "Write a summary of {{sujet}} in {{langue}}. Today is {date}.",
+    "fieldSystemPrompt": "User-prompt prefix (optional)",
+    "fieldSystemPromptPlaceholder": "Optional instructions prepended to the user message",
+    "systemPromptHint": "Added as a prefix on the user prompt (preserves the stable system KV cache).",
+    "detectedVariables": "Detected variables: {{variables}}",
+    "noVariables": "No template variables detected.",
+    "create": "Create preset",
+    "save": "Save changes",
+    "listTitle": "Your presets",
+    "listDesc": "Use /preset in chat to insert one.",
+    "nameRequired": "A name is required.",
+    "textRequired": "Prompt text is required.",
+    "saveFailed": "Failed to save the preset.",
+    "deleteFailed": "Failed to delete the preset.",
+    "deleteConfirm": "Delete preset “{{name}}”?",
+    "created": "Preset created.",
+    "updated": "Preset updated.",
+    "deleted": "Preset deleted."
   }
 }

@@ -71,7 +71,9 @@
     "general": "Algemeen",
     "generalDesc": "Weergave, taal en voorkeuren",
     "extensions": "Extensions",
-    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins"
+    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
+    "presets": "Presets",
+    "presetsDesc": "Herbruikbare promptsjablonen met variabelen"
   },
   "general": {
     "appearance": "Weergave",
@@ -717,6 +719,9 @@
       },
       "handoff": {
         "description": "Start een nieuwe sessie met een voortzettingssamenvatting"
+      },
+      "preset": {
+        "description": "Voeg een herbruikbare prompt-preset in"
       }
     },
     "scrollToBottom": "Naar beneden scrollen",
@@ -1167,5 +1172,47 @@
     "shortcutTaken": "Deze sneltoets is al in gebruik door het systeem of een andere app.",
     "shortcutRegisterFailed": "Kon de globale sneltoets niet registreren.",
     "sessionTitle": "Quick Ask"
+  },
+  "presets": {
+    "pickerTitle": "Kies een preset",
+    "pickerDesc": "Selecteer een promptsjabloon om in het invoerveld te plaatsen.",
+    "searchPlaceholder": "Zoek presets…",
+    "empty": "Nog geen presets. Maak ze aan in Instellingen.",
+    "noMatch": "Geen preset komt overeen met je zoekopdracht.",
+    "variablesTitle": "Variabelen invullen",
+    "variablesDesc": "Vul de placeholders voor “{{name}}” in.",
+    "variablePlaceholder": "Waarde voor {{name}}",
+    "insert": "Invoegen in invoerveld",
+    "unavailable": "Prompt-presets zijn niet beschikbaar in deze omgeving.",
+    "notFound": "Preset “{{name}}” niet gevonden.",
+    "loadFailed": "Presets laden mislukt.",
+    "manageTitle": "Prompt-presets",
+    "manageDesc": "Maak herbruikbare prompts met {{variables}} en {date}/{os}-tokens. Ingevoegde tekst wordt niet automatisch verzonden.",
+    "createTitle": "Nieuwe preset",
+    "editTitle": "Preset bewerken",
+    "cancelEdit": "Bewerken annuleren",
+    "fieldName": "Naam",
+    "fieldNamePlaceholder": "bijv. Code review",
+    "fieldDescription": "Beschrijving",
+    "fieldDescriptionPlaceholder": "Korte samenvatting in de kiezer",
+    "fieldText": "Prompttekst",
+    "fieldTextPlaceholder": "Schrijf een samenvatting van {{sujet}} in {{langue}}. Vandaag is {date}.",
+    "fieldSystemPrompt": "Gebruikersprompt-voorvoegsel (optioneel)",
+    "fieldSystemPromptPlaceholder": "Optionele instructies vóór het gebruikersbericht",
+    "systemPromptHint": "Toegevoegd als voorvoegsel op de gebruikersprompt (behoudt de KV-cache van het stabiele systeemvoorvoegsel).",
+    "detectedVariables": "Gedetecteerde variabelen: {{variables}}",
+    "noVariables": "Geen sjabloonvariabelen gedetecteerd.",
+    "create": "Preset maken",
+    "save": "Wijzigingen opslaan",
+    "listTitle": "Jouw presets",
+    "listDesc": "Gebruik /preset in de chat om er een in te voegen.",
+    "nameRequired": "Naam is verplicht.",
+    "textRequired": "Prompttekst is verplicht.",
+    "saveFailed": "Preset opslaan mislukt.",
+    "deleteFailed": "Preset verwijderen mislukt.",
+    "deleteConfirm": "Preset “{{name}}” verwijderen?",
+    "created": "Preset aangemaakt.",
+    "updated": "Preset bijgewerkt.",
+    "deleted": "Preset verwijderd."
   }
 }

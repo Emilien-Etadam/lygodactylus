@@ -71,7 +71,9 @@
     "general": "Allgemein",
     "generalDesc": "Darstellung, Sprache & Voreinstellungen",
     "extensions": "Extensions",
-    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins"
+    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
+    "presets": "Presets",
+    "presetsDesc": "Wiederverwendbare Prompt-Vorlagen mit Variablen"
   },
   "general": {
     "appearance": "Darstellung",
@@ -717,6 +719,9 @@
       },
       "handoff": {
         "description": "Neue Sitzung mit Fortsetzungszusammenfassung starten"
+      },
+      "preset": {
+        "description": "Wiederverwendbares Prompt-Preset einfügen"
       }
     },
     "scrollToBottom": "Nach unten scrollen",
@@ -1167,5 +1172,47 @@
     "shortcutTaken": "Dieses Tastenkürzel ist bereits vom System oder einer anderen App belegt.",
     "shortcutRegisterFailed": "Globaler Shortcut konnte nicht registriert werden.",
     "sessionTitle": "Quick Ask"
+  },
+  "presets": {
+    "pickerTitle": "Preset wählen",
+    "pickerDesc": "Wähle eine Prompt-Vorlage zum Einfügen in das Eingabefeld.",
+    "searchPlaceholder": "Presets suchen…",
+    "empty": "Noch keine Presets. Erstelle welche in den Einstellungen.",
+    "noMatch": "Kein Preset entspricht der Suche.",
+    "variablesTitle": "Variablen ausfüllen",
+    "variablesDesc": "Platzhalter für „{{name}}“ ausfüllen.",
+    "variablePlaceholder": "Wert für {{name}}",
+    "insert": "In Eingabe einfügen",
+    "unavailable": "Prompt-Presets sind in dieser Umgebung nicht verfügbar.",
+    "notFound": "Preset „{{name}}“ wurde nicht gefunden.",
+    "loadFailed": "Presets konnten nicht geladen werden.",
+    "manageTitle": "Prompt-Presets",
+    "manageDesc": "Erstelle wiederverwendbare Prompts mit {{variables}} und {date}/{os}-Tokens. Eingefügter Text wird nicht automatisch gesendet.",
+    "createTitle": "Neues Preset",
+    "editTitle": "Preset bearbeiten",
+    "cancelEdit": "Bearbeitung abbrechen",
+    "fieldName": "Name",
+    "fieldNamePlaceholder": "z. B. Code-Review",
+    "fieldDescription": "Beschreibung",
+    "fieldDescriptionPlaceholder": "Kurze Zusammenfassung im Auswahlmenü",
+    "fieldText": "Prompt-Text",
+    "fieldTextPlaceholder": "Schreibe eine Zusammenfassung von {{sujet}} auf {{langue}}. Heute ist {date}.",
+    "fieldSystemPrompt": "Benutzer-Prompt-Präfix (optional)",
+    "fieldSystemPromptPlaceholder": "Optionale Anweisungen vor der Benutzernachricht",
+    "systemPromptHint": "Wird dem Benutzer-Prompt vorangestellt (erhält den stabilen System-KV-Cache).",
+    "detectedVariables": "Erkannte Variablen: {{variables}}",
+    "noVariables": "Keine Vorlagenvariablen erkannt.",
+    "create": "Preset erstellen",
+    "save": "Änderungen speichern",
+    "listTitle": "Deine Presets",
+    "listDesc": "Verwende /preset im Chat zum Einfügen.",
+    "nameRequired": "Ein Name ist erforderlich.",
+    "textRequired": "Prompt-Text ist erforderlich.",
+    "saveFailed": "Preset konnte nicht gespeichert werden.",
+    "deleteFailed": "Preset konnte nicht gelöscht werden.",
+    "deleteConfirm": "Preset „{{name}}“ löschen?",
+    "created": "Preset erstellt.",
+    "updated": "Preset aktualisiert.",
+    "deleted": "Preset gelöscht."
   }
 }

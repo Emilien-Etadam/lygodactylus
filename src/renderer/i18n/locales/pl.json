@@ -71,7 +71,9 @@
     "general": "Ogólne",
     "generalDesc": "Wygląd, język i preferencje",
     "extensions": "Extensions",
-    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins"
+    "extensionsDesc": "Curated marketplace for skills, MCP connectors, and plugins",
+    "presets": "Presety",
+    "presetsDesc": "Ponownie używane szablony promptów ze zmiennymi"
   },
   "general": {
     "appearance": "Wygląd",
@@ -717,6 +719,9 @@
       },
       "handoff": {
         "description": "Rozpocznij nową sesję z podsumowaniem kontynuacji"
+      },
+      "preset": {
+        "description": "Wstaw ponownie używany preset promptu"
       }
     },
     "scrollToBottom": "Przewiń na dół",
@@ -1167,5 +1172,47 @@
     "shortcutTaken": "Ten skrót jest już zajęty przez system lub inną aplikację.",
     "shortcutRegisterFailed": "Nie udało się zarejestrować globalnego skrótu.",
     "sessionTitle": "Quick Ask"
+  },
+  "presets": {
+    "pickerTitle": "Wybierz preset",
+    "pickerDesc": "Wybierz szablon promptu do wstawienia w pole wejściowe.",
+    "searchPlaceholder": "Szukaj presetów…",
+    "empty": "Brak presetów. Utwórz je w Ustawieniach.",
+    "noMatch": "Żaden preset nie pasuje do wyszukiwania.",
+    "variablesTitle": "Uzupełnij zmienne",
+    "variablesDesc": "Uzupełnij placeholdery dla „{{name}}”.",
+    "variablePlaceholder": "Wartość dla {{name}}",
+    "insert": "Wstaw do pola",
+    "unavailable": "Presety promptów są niedostępne w tym środowisku.",
+    "notFound": "Nie znaleziono presetu „{{name}}”.",
+    "loadFailed": "Nie udało się wczytać presetów.",
+    "manageTitle": "Presety promptów",
+    "manageDesc": "Twórz ponownie używane prompty z {{variables}} i tokenami {date}/{os}. Wstawiony tekst nie jest wysyłany automatycznie.",
+    "createTitle": "Nowy preset",
+    "editTitle": "Edytuj preset",
+    "cancelEdit": "Anuluj edycję",
+    "fieldName": "Nazwa",
+    "fieldNamePlaceholder": "np. Przegląd kodu",
+    "fieldDescription": "Opis",
+    "fieldDescriptionPlaceholder": "Krótki opis w selektorze",
+    "fieldText": "Tekst promptu",
+    "fieldTextPlaceholder": "Napisz podsumowanie {{sujet}} w {{langue}}. Dziś jest {date}.",
+    "fieldSystemPrompt": "Prefiks promptu użytkownika (opcjonalnie)",
+    "fieldSystemPromptPlaceholder": "Opcjonalne instrukcje przed wiadomością użytkownika",
+    "systemPromptHint": "Dodawany jako prefiks promptu użytkownika (zachowuje cache KV stabilnego prefiksu systemowego).",
+    "detectedVariables": "Wykryte zmienne: {{variables}}",
+    "noVariables": "Nie wykryto zmiennych szablonu.",
+    "create": "Utwórz preset",
+    "save": "Zapisz zmiany",
+    "listTitle": "Twoje presety",
+    "listDesc": "Użyj /preset na czacie, aby wstawić.",
+    "nameRequired": "Nazwa jest wymagana.",
+    "textRequired": "Tekst promptu jest wymagany.",
+    "saveFailed": "Nie udało się zapisać presetu.",
+    "deleteFailed": "Nie udało się usunąć presetu.",
+    "deleteConfirm": "Usunąć preset „{{name}}”?",
+    "created": "Preset utworzony.",
+    "updated": "Preset zaktualizowany.",
+    "deleted": "Preset usunięty."
   }
 }
