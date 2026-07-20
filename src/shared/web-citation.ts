@@ -60,7 +60,10 @@ export function buildWebCitationIndexBlock(
     return { block: '', sources, nextIndex: Math.max(1, Math.trunc(startIndex)) };
   }
 
-  const lines = [WEB_CITATION_INDEX_PREFIX, ...sources.map((s) => `[${s.index}] ${s.title} — ${s.url}`)];
+  const lines = [
+    WEB_CITATION_INDEX_PREFIX,
+    ...sources.map((s) => `[${s.index}] ${s.title} — ${s.url}`),
+  ];
   return { block: lines.join('\n'), sources, nextIndex: index };
 }
 
@@ -153,9 +156,7 @@ export function extractWebCitationSourcesFromTraceStep(step: {
 }
 
 /** Merge sources by index; first occurrence wins (stable turn order). */
-export function mergeWebCitationSources(
-  batches: WebCitationSource[][]
-): WebCitationSource[] {
+export function mergeWebCitationSources(batches: WebCitationSource[][]): WebCitationSource[] {
   const byIndex = new Map<number, WebCitationSource>();
   for (const batch of batches) {
     for (const source of batch) {
@@ -208,9 +209,7 @@ export function linkifyCitationMarkers(
   });
 }
 
-export function sourcesByIndexMap(
-  sources: WebCitationSource[]
-): Map<number, string> {
+export function sourcesByIndexMap(sources: WebCitationSource[]): Map<number, string> {
   const map = new Map<number, string>();
   for (const source of sources) {
     if (!map.has(source.index)) {

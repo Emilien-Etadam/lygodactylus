@@ -28,9 +28,7 @@ export const MessageSourcesCard = memo(function MessageSourcesCard({
           <ChevronRight className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
         )}
         <Globe className="w-3.5 h-3.5 text-text-muted flex-shrink-0" aria-hidden />
-        <span className="text-xs font-medium text-text-secondary">
-          {t('messageCard.sources')}
-        </span>
+        <span className="text-xs font-medium text-text-secondary">{t('messageCard.sources')}</span>
         {sources.length > 0 && (
           <span className="text-[11px] text-text-muted tabular-nums">{sources.length}</span>
         )}
