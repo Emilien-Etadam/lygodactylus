@@ -238,6 +238,8 @@ export type {
   MarketplaceInstallResult,
   MarketplaceInstallState,
   MarketplaceInstalledRecord,
+  MarketplaceIntegrityResult,
+  SkillIntegrityStatus,
 } from '../../shared/catalog-types';
 
 export interface InstalledPlugin {

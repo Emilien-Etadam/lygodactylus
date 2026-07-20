@@ -130,6 +130,11 @@ app
       mainAppState.skillsManager,
       mainAppState.pluginRuntimeService
     );
+    // Silent supply-chain integrity check for pinned marketplace skills.
+    // Failures only set a warning badge — never block startup.
+    void mainAppState.marketplaceService.verifyAllPinnedSkills().catch((error) => {
+      logError('[Marketplace] Startup integrity sweep failed:', error);
+    });
     mainAppState.skillsManager.onStorageChanged((event) => {
       sendToRenderer({
         type: 'skills.storageChanged',

@@ -83,11 +83,18 @@ export interface CatalogManifestMeta {
 
 export type MarketplaceInstallState = 'not_installed' | 'installed' | 'builtin';
 
+/** Integrity of an installed marketplace skill relative to its pinned content hash. */
+export type SkillIntegrityStatus = 'ok' | 'modified' | 'unverified';
+
 export interface MarketplaceEntry extends CatalogEntry {
   installState: MarketplaceInstallState;
   enabled: boolean;
   installedRef?: string;
   deprecated: boolean;
+  /** Full commit SHA pinned at install/update time (github skills only). */
+  pinnedSha?: string;
+  /** Local integrity vs pinned contentHash; absent when the entry has no pin. */
+  integrityStatus?: SkillIntegrityStatus;
 }
 
 export interface MarketplaceInstallResult {
@@ -96,6 +103,14 @@ export interface MarketplaceInstallResult {
   name: string;
   installedRef?: string;
   warnings?: string[];
+  pinnedSha?: string;
+}
+
+export interface MarketplaceIntegrityResult {
+  catalogId: string;
+  status: SkillIntegrityStatus;
+  pinnedSha?: string;
+  contentHash?: string;
 }
 
 export interface MarketplaceInstalledRecord {
@@ -104,4 +119,10 @@ export interface MarketplaceInstalledRecord {
   installedRef: string;
   installedAt: number;
   env?: Record<string, string>;
+  /** Exact commit SHA resolved at install/update (additive; absent on legacy entries). */
+  pinnedSha?: string;
+  /** Deterministic sha256 of installed skill files (additive; absent on legacy entries). */
+  contentHash?: string;
+  /** Epoch ms when pinnedSha/contentHash were last written. */
+  pinnedAt?: number;
 }

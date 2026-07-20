@@ -2,10 +2,12 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import type { CatalogEntry } from '../src/shared/catalog-types';
 
 const downloadGithubSubdir = vi.fn();
+const resolveGithubCommitSha = vi.fn();
 const marketplaceSave = vi.fn();
 
 vi.mock('../src/main/catalog/github-downloader', () => ({
   downloadGithubSubdir: (...args: unknown[]) => downloadGithubSubdir(...args),
+  resolveGithubCommitSha: (...args: unknown[]) => resolveGithubCommitSha(...args),
 }));
 
 vi.mock('../src/main/catalog/marketplace-installed-store', () => ({
@@ -49,6 +51,8 @@ const githubPluginEntry: CatalogEntry = {
 describe('InstallResolver github routing', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: SHA resolution unavailable → legacy install without pin fields.
+    resolveGithubCommitSha.mockResolvedValue(null);
   });
 
   it('installs github skill entries via skillsManager.installSkill', async () => {

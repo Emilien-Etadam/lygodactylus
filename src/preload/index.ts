@@ -15,6 +15,7 @@ import type {
   PluginComponentKind,
   MarketplaceEntry,
   MarketplaceInstallResult,
+  MarketplaceIntegrityResult,
   CatalogManifestMeta,
   CatalogSourceStatus,
   ScheduleTask,
@@ -272,6 +273,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     uninstall: (catalogId: string) => ipcRenderer.invoke('marketplace.uninstall', catalogId),
     setEnabled: (catalogId: string, enabled: boolean) =>
       ipcRenderer.invoke('marketplace.setEnabled', catalogId, enabled),
+    verifyIntegrity: (catalogId: string) =>
+      ipcRenderer.invoke('marketplace.verifyIntegrity', catalogId),
+    update: (catalogId: string) => ipcRenderer.invoke('marketplace.update', catalogId),
+    rollback: (catalogId: string) => ipcRenderer.invoke('marketplace.rollback', catalogId),
     listSources: (forceRefresh = false) =>
       ipcRenderer.invoke('marketplace.sources.list', forceRefresh),
     addSource: (url: string, name?: string) =>
@@ -629,6 +634,9 @@ declare global {
         ) => Promise<MarketplaceInstallResult>;
         uninstall: (catalogId: string) => Promise<{ success: boolean }>;
         setEnabled: (catalogId: string, enabled: boolean) => Promise<{ success: boolean }>;
+        verifyIntegrity: (catalogId: string) => Promise<MarketplaceIntegrityResult>;
+        update: (catalogId: string) => Promise<MarketplaceInstallResult>;
+        rollback: (catalogId: string) => Promise<MarketplaceInstallResult>;
         listSources: (forceRefresh?: boolean) => Promise<CatalogSourceStatus[]>;
         addSource: (url: string, name?: string) => Promise<CatalogSourceStatus>;
         removeSource: (sourceId: string) => Promise<{ success: boolean }>;

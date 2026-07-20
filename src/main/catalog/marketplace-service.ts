@@ -1,3 +1,5 @@
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import type {
   CatalogEntry,
   CatalogEntryType,
@@ -5,14 +7,18 @@ import type {
   CatalogSourceStatus,
   MarketplaceEntry,
   MarketplaceInstallResult,
+  MarketplaceIntegrityResult,
+  SkillIntegrityStatus,
 } from '../../shared/catalog-types';
 import type { SkillsManager } from '../skills/skills-manager';
 import type { PluginRuntimeService } from '../skills/plugin-runtime-service';
 import { mcpConfigStore } from '../mcp/mcp-config-store';
+import { logWarn } from '../utils/logger';
 import { catalogAggregator } from './catalog-aggregator';
 import { catalogSourceIdForUrl, catalogSourcesStore } from './catalog-sources-store';
 import { InstallResolver } from './install-resolver';
 import { marketplaceInstalledStore } from './marketplace-installed-store';
+import { hashDirectoryContents } from './skill-content-hash';
 
 export interface MarketplaceUninstallResult {
   success: boolean;
@@ -22,6 +28,8 @@ export interface MarketplaceUninstallResult {
 
 export class MarketplaceService {
   private readonly installResolver: InstallResolver;
+  /** In-memory integrity results from startup / explicit verify (never blocks install). */
+  private readonly integrityCache = new Map<string, SkillIntegrityStatus>();
 
   constructor(
     private readonly skillsManager: SkillsManager,
@@ -52,7 +60,117 @@ export class MarketplaceService {
     if (!entry.sourceId && !entry.verified) {
       throw new Error(`Catalog entry not found or not verified: ${catalogId}`);
     }
-    return this.installResolver.install(entry, envValues);
+    const result = await this.installResolver.install(entry, envValues);
+    if (result.pinnedSha) {
+      this.integrityCache.set(catalogId, 'ok');
+    }
+    return result;
+  }
+
+  /**
+   * Reinstall from the catalog ref and re-pin to the newly resolved commit SHA.
+   * Skills without a github resolve simply re-run install (no pin side-effects).
+   */
+  async update(catalogId: string): Promise<MarketplaceInstallResult> {
+    return this.install(catalogId);
+  }
+
+  /**
+   * Reinstall the skill at its previously pinned commit SHA (integrity restore).
+   */
+  async rollback(catalogId: string): Promise<MarketplaceInstallResult> {
+    const entry = await catalogAggregator.getEntry(catalogId);
+    if (!entry) {
+      throw new Error(`Catalog entry not found: ${catalogId}`);
+    }
+    if (entry.type !== 'skill' || entry.resolve.via !== 'github') {
+      throw new Error('Rollback is only supported for GitHub marketplace skills');
+    }
+    const record = marketplaceInstalledStore.get(catalogId);
+    if (!record?.pinnedSha) {
+      throw new Error('No pinned commit SHA available for rollback');
+    }
+    const result = await this.installResolver.installGithubSkillAtRef(entry, record.pinnedSha);
+    if (result.pinnedSha) {
+      this.integrityCache.set(catalogId, 'ok');
+    }
+    return result;
+  }
+
+  async verifyIntegrity(catalogId: string): Promise<MarketplaceIntegrityResult> {
+    const record = marketplaceInstalledStore.get(catalogId);
+    if (!record || record.type !== 'skill') {
+      const result: MarketplaceIntegrityResult = { catalogId, status: 'unverified' };
+      this.integrityCache.set(catalogId, 'unverified');
+      return result;
+    }
+
+    if (!record.contentHash || !record.pinnedSha) {
+      const result: MarketplaceIntegrityResult = {
+        catalogId,
+        status: 'unverified',
+        pinnedSha: record.pinnedSha,
+        contentHash: record.contentHash,
+      };
+      this.integrityCache.set(catalogId, 'unverified');
+      return result;
+    }
+
+    const skillPath = await this.resolveInstalledSkillPath(record.installedRef);
+    if (!skillPath) {
+      const result: MarketplaceIntegrityResult = {
+        catalogId,
+        status: 'modified',
+        pinnedSha: record.pinnedSha,
+        contentHash: record.contentHash,
+      };
+      this.integrityCache.set(catalogId, 'modified');
+      return result;
+    }
+
+    let currentHash: string;
+    try {
+      currentHash = hashDirectoryContents(skillPath);
+    } catch (error) {
+      logWarn(`[Marketplace] Integrity hash failed for ${catalogId}:`, error);
+      const result: MarketplaceIntegrityResult = {
+        catalogId,
+        status: 'unverified',
+        pinnedSha: record.pinnedSha,
+        contentHash: record.contentHash,
+      };
+      this.integrityCache.set(catalogId, 'unverified');
+      return result;
+    }
+
+    const status: SkillIntegrityStatus =
+      currentHash === record.contentHash ? 'ok' : 'modified';
+    this.integrityCache.set(catalogId, status);
+    return {
+      catalogId,
+      status,
+      pinnedSha: record.pinnedSha,
+      contentHash: record.contentHash,
+    };
+  }
+
+  /**
+   * Silent startup check: verify every pinned skill and cache warning badges.
+   * Never throws; never blocks app startup.
+   */
+  async verifyAllPinnedSkills(): Promise<void> {
+    const records = marketplaceInstalledStore
+      .list()
+      .filter((record) => record.type === 'skill' && record.contentHash && record.pinnedSha);
+
+    for (const record of records) {
+      try {
+        await this.verifyIntegrity(record.catalogId);
+      } catch (error) {
+        logWarn(`[Marketplace] Startup integrity check failed for ${record.catalogId}:`, error);
+        this.integrityCache.set(record.catalogId, 'unverified');
+      }
+    }
   }
 
   async uninstall(catalogId: string): Promise<MarketplaceUninstallResult> {
@@ -66,6 +184,7 @@ export class MarketplaceService {
     }
     const installedRef = record?.installedRef;
     await this.installResolver.uninstall(target);
+    this.integrityCache.delete(catalogId);
     return { success: true, type: target.type, installedRef };
   }
 
@@ -131,6 +250,29 @@ export class MarketplaceService {
     return { success: removed };
   }
 
+  private async resolveInstalledSkillPath(installedRef: string): Promise<string | null> {
+    const skills = await this.skillsManager.listSkills();
+    const skill = skills.find((item) => item.id === installedRef);
+    if (!skill) {
+      return null;
+    }
+
+    const byName = path.join(this.skillsManager.getGlobalSkillsPath(), skill.name);
+    if (fs.existsSync(byName) && fs.statSync(byName).isDirectory()) {
+      return byName;
+    }
+
+    const folderFromId = installedRef.replace(/^(global|custom)-/, '');
+    if (folderFromId && folderFromId !== skill.name) {
+      const byId = path.join(this.skillsManager.getGlobalSkillsPath(), folderFromId);
+      if (fs.existsSync(byId) && fs.statSync(byId).isDirectory()) {
+        return byId;
+      }
+    }
+
+    return null;
+  }
+
   private toMarketplaceEntry(
     entry: CatalogEntry,
     skills: Awaited<ReturnType<SkillsManager['listSkills']>>,
@@ -172,12 +314,20 @@ export class MarketplaceService {
       }
     }
 
+    const pinnedSha = record?.pinnedSha;
+    let integrityStatus: SkillIntegrityStatus | undefined;
+    if (record?.type === 'skill' && (record.contentHash || record.pinnedSha)) {
+      integrityStatus = this.integrityCache.get(entry.id) ?? 'unverified';
+    }
+
     return {
       ...entry,
       installState,
       enabled,
       installedRef,
       deprecated: entry.deprecated === true,
+      ...(pinnedSha ? { pinnedSha } : {}),
+      ...(integrityStatus ? { integrityStatus } : {}),
     };
   }
 }

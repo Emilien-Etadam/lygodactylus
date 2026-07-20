@@ -4,11 +4,13 @@ import { mcpConfigStore } from '../mcp/mcp-config-store';
 import type { MCPServerConfig } from '../mcp/mcp-types';
 import type { SkillsManager } from '../skills/skills-manager';
 import type { PluginRuntimeService } from '../skills/plugin-runtime-service';
-import { downloadGithubSubdir } from './github-downloader';
+import { downloadGithubSubdir, resolveGithubCommitSha } from './github-downloader';
+import { hashDirectoryContents } from './skill-content-hash';
 import { McpRegistryResolver } from './mcp-registry-resolver';
 import { marketplaceInstalledStore } from './marketplace-installed-store';
 import { ensureHeavySkill } from '../runtime/skills-bundle-runtime';
 import { isBuiltinHeavySkill, resolveBuiltinSkillPath } from '../skills/builtin-skills-paths';
+import { logWarn } from '../utils/logger';
 
 export class InstallResolver {
   constructor(
@@ -255,25 +257,61 @@ export class InstallResolver {
     };
   }
 
+  /**
+   * Reinstall a github skill at an explicit ref (typically the pinned commit SHA).
+   * Used for integrity rollback; falls back to the catalog ref if pin is missing.
+   */
+  async installGithubSkillAtRef(
+    entry: CatalogEntry,
+    ref: string
+  ): Promise<MarketplaceInstallResult> {
+    if (entry.type !== 'skill' || entry.resolve.via !== 'github') {
+      throw new Error('Rollback is only supported for GitHub marketplace skills');
+    }
+    return this.installGithubSkill(entry, [], ref);
+  }
+
   private async installGithubSkill(
     entry: CatalogEntry,
-    warnings: string[]
+    warnings: string[],
+    overrideRef?: string
   ): Promise<MarketplaceInstallResult> {
     if (entry.resolve.via !== 'github') {
       throw new Error('Invalid GitHub resolve spec');
     }
 
+    const catalogRef = overrideRef ?? entry.resolve.ref;
+    // Best-effort pin: if the API is unavailable, install from the catalog ref
+    // without writing pin metadata (legacy behaviour).
+    const resolvedSha = await resolveGithubCommitSha(entry.resolve.repo, catalogRef);
+    const downloadRef = resolvedSha ?? catalogRef;
+
     const dir = await downloadGithubSubdir(
       entry.resolve.repo,
       entry.resolve.subdir,
-      entry.resolve.ref
+      downloadRef
     );
+
+    let contentHash: string | undefined;
+    if (resolvedSha) {
+      try {
+        contentHash = hashDirectoryContents(dir);
+      } catch (error) {
+        logWarn(`[InstallResolver] Content hash failed for ${entry.id}; installing without pin:`, error);
+        contentHash = undefined;
+      }
+    }
+
     const installed = await this.skillsManager.installSkill(dir);
+    const installedAt = Date.now();
     marketplaceInstalledStore.save({
       catalogId: entry.id,
       type: entry.type,
       installedRef: installed.id,
-      installedAt: Date.now(),
+      installedAt,
+      ...(resolvedSha && contentHash
+        ? { pinnedSha: resolvedSha, contentHash, pinnedAt: installedAt }
+        : {}),
     });
 
     return {
@@ -282,6 +320,7 @@ export class InstallResolver {
       name: installed.name,
       installedRef: installed.id,
       warnings,
+      ...(resolvedSha ? { pinnedSha: resolvedSha } : {}),
     };
   }
 
