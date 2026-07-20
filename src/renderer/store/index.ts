@@ -144,6 +144,9 @@ interface AppState {
   // Offline speechSynthesis: id of the assistant message currently being read aloud
   speakingMessageId: string | null;
 
+  /** Request ChatView to scroll to a message after session hydration. */
+  scrollToMessageRequest: { sessionId: string; messageId: string } | null;
+
   // Actions
   setSessions: (sessions: Session[]) => void;
   addSession: (session: Session) => void;
@@ -225,6 +228,9 @@ interface AppState {
   bumpPluginCommandsRevision: () => void;
 
   setSpeakingMessageId: (messageId: string | null) => void;
+  setScrollToMessageRequest: (
+    request: { sessionId: string; messageId: string } | null
+  ) => void;
 
   // System theme actions
   setSystemDarkMode: (dark: boolean) => void;
@@ -286,6 +292,7 @@ export const useAppStore = create<AppState>((set) => ({
   systemDarkMode: false,
   pluginCommandsRevision: 0,
   speakingMessageId: null,
+  scrollToMessageRequest: null,
 
   // Session actions
   setSessions: (sessions) => set({ sessions }),
@@ -694,6 +701,7 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({ pluginCommandsRevision: state.pluginCommandsRevision + 1 })),
 
   setSpeakingMessageId: (messageId) => set({ speakingMessageId: messageId }),
+  setScrollToMessageRequest: (request) => set({ scrollToMessageRequest: request }),
 
   // System theme actions
   setSystemDarkMode: (dark) => set({ systemDarkMode: dark }),

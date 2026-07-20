@@ -766,7 +766,14 @@
     "nSelected": "{{count}} sélectionné(s)",
     "batchDeleteConfirm": "Supprimer {{count}} conversations ? Cette action est irréversible.",
     "cancel": "Annuler",
-    "confirmDelete": "Supprimer"
+    "confirmDelete": "Supprimer",
+    "searchClear": "Effacer la recherche",
+    "searchSearching": "Recherche…",
+    "searchNoResults": "Aucune conversation correspondante",
+    "searchUntitled": "Conversation sans titre",
+    "searchTitleMatch": "Correspondance dans le titre",
+    "searchRoleUser": "Vous",
+    "searchRoleAssistant": "Assistant"
   },
   "chat": {
     "sendMessage": "Envoyer le message",

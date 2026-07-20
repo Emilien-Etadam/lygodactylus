@@ -324,6 +324,47 @@ export function ChatView() {
     scrollToBottom('smooth', true, true);
   };
 
+  const scrollToMessageRequest = useAppStore((s) => s.scrollToMessageRequest);
+  const setScrollToMessageRequest = useAppStore((s) => s.setScrollToMessageRequest);
+
+  useEffect(() => {
+    if (!scrollToMessageRequest || !activeSessionId) return;
+    if (scrollToMessageRequest.sessionId !== activeSessionId) return;
+
+    const messageId = scrollToMessageRequest.messageId;
+    const tryScroll = (): boolean => {
+      const el = document.getElementById(`message-${messageId}`);
+      if (!el) return false;
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('ring-2', 'ring-accent/50');
+      window.setTimeout(() => {
+        el.classList.remove('ring-2', 'ring-accent/50');
+      }, 1600);
+      setScrollToMessageRequest(null);
+      return true;
+    };
+
+    if (tryScroll()) return;
+
+    // Messages may still be hydrating — retry briefly.
+    let attempts = 0;
+    const timer = window.setInterval(() => {
+      attempts += 1;
+      if (tryScroll() || attempts >= 20) {
+        window.clearInterval(timer);
+        if (attempts >= 20) {
+          setScrollToMessageRequest(null);
+        }
+      }
+    }, 50);
+    return () => window.clearInterval(timer);
+  }, [
+    activeSessionId,
+    messages.length,
+    scrollToMessageRequest,
+    setScrollToMessageRequest,
+  ]);
+
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;

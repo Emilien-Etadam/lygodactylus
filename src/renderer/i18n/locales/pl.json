@@ -677,7 +677,14 @@
     "nSelected": "Zaznaczono {{count}}",
     "batchDeleteConfirm": "Usunąć {{count}} rozmów? Tej operacji nie można cofnąć.",
     "cancel": "Anuluj",
-    "confirmDelete": "Usuń"
+    "confirmDelete": "Usuń",
+    "searchClear": "Wyczyść wyszukiwanie",
+    "searchSearching": "Wyszukiwanie…",
+    "searchNoResults": "Brak pasujących rozmów",
+    "searchUntitled": "Rozmowa bez tytułu",
+    "searchTitleMatch": "Dopasowanie w tytule",
+    "searchRoleUser": "Ty",
+    "searchRoleAssistant": "Asystent"
   },
   "chat": {
     "sendMessage": "Wyślij wiadomość",

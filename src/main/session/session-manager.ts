@@ -63,7 +63,7 @@ export class SessionManager {
   private readonly titleGenerationTokens = new Map<string, symbol>();
 
   constructor(
-    db: DatabaseInstance,
+    private readonly db: DatabaseInstance,
     sendToRenderer: (event: ServerEvent) => void,
     private readonly pluginRuntimeService?: PluginRuntimeService,
     private readonly extensionManager?: AgentRuntimeExtensionManager
@@ -334,6 +334,10 @@ export class SessionManager {
 
   getMessages(sessionId: string): Message[] {
     return this.store.getMessages(sessionId);
+  }
+
+  searchMessages(query: string, limit?: number) {
+    return this.db.messageSearch?.search(query, limit) ?? [];
   }
 
   getTraceSteps(sessionId: string): TraceStep[] {

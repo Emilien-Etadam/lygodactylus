@@ -271,6 +271,11 @@ function createDatabaseInstance(db: Database.Database): DatabaseInstance {
       getAll: vi.fn(() => []),
       delete: vi.fn(),
     },
+    messageSearch: {
+      search: vi.fn(() => []),
+      scheduleBackfill: vi.fn(),
+      isFtsAvailable: vi.fn(() => false),
+    },
     prepare: (sql: string) => db.prepare(sql),
     exec: (sql: string) => db.exec(sql),
     pragma: (pragma: string) => db.pragma(pragma),

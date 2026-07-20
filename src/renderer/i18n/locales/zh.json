@@ -677,7 +677,14 @@
     "nSelected": "已选 {{count}} 个",
     "batchDeleteConfirm": "删除 {{count}} 个对话？此操作无法撤销。",
     "cancel": "取消",
-    "confirmDelete": "删除"
+    "confirmDelete": "删除",
+    "searchClear": "清除搜索",
+    "searchSearching": "正在搜索…",
+    "searchNoResults": "没有匹配的对话",
+    "searchUntitled": "未命名对话",
+    "searchTitleMatch": "标题匹配",
+    "searchRoleUser": "你",
+    "searchRoleAssistant": "助手"
   },
   "chat": {
     "sendMessage": "发送消息",

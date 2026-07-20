@@ -677,7 +677,14 @@
     "nSelected": "{{count}} selectate",
     "batchDeleteConfirm": "Ștergi {{count}} conversații? Această acțiune nu poate fi anulată.",
     "cancel": "Anulează",
-    "confirmDelete": "Șterge"
+    "confirmDelete": "Șterge",
+    "searchClear": "Șterge căutarea",
+    "searchSearching": "Se caută…",
+    "searchNoResults": "Nicio conversație potrivită",
+    "searchUntitled": "Conversație fără titlu",
+    "searchTitleMatch": "Potrivire în titlu",
+    "searchRoleUser": "Tu",
+    "searchRoleAssistant": "Asistent"
   },
   "chat": {
     "sendMessage": "Trimite mesajul",

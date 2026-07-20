@@ -766,7 +766,14 @@
     "nSelected": "{{count}} selected",
     "batchDeleteConfirm": "Delete {{count}} conversations? This cannot be undone.",
     "cancel": "Cancel",
-    "confirmDelete": "Delete"
+    "confirmDelete": "Delete",
+    "searchClear": "Clear search",
+    "searchSearching": "Searching…",
+    "searchNoResults": "No matching conversations",
+    "searchUntitled": "Untitled conversation",
+    "searchTitleMatch": "Title match",
+    "searchRoleUser": "You",
+    "searchRoleAssistant": "Assistant"
   },
   "chat": {
     "sendMessage": "Send message",

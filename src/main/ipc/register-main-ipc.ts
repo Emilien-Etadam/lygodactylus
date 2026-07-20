@@ -6,6 +6,7 @@ import { registerConfigMcpIpc } from './ipc-config-mcp';
 import { registerSkillsPluginsWindowIpc } from './ipc-skills-plugins-window';
 import { registerSandboxLogsIpc } from './ipc-sandbox-logs';
 import { registerScheduleMemoryIpc } from './ipc-schedule-memory';
+import { registerSessionSearchIpc } from './ipc-session-search';
 import { registerChatLanIpc } from './ipc-chat-lan';
 import { registerMarketplaceIpc } from './ipc-marketplace';
 import { registerAutoUpdateIpc } from './ipc-auto-update';
@@ -18,5 +19,6 @@ export function registerMainIpc(): void {
   registerAutoUpdateIpc();
   registerSandboxLogsIpc();
   registerScheduleMemoryIpc();
+  registerSessionSearchIpc();
   registerChatLanIpc();
 }

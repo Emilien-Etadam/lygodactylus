@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store';
 import { useIPC } from '../hooks/useIPC';
@@ -14,8 +14,10 @@ import {
   Plus,
   ListChecks,
   Check,
+  X,
 } from 'lucide-react';
 import type { Session } from '../types';
+import type { SessionMessageSearchHit } from '../../shared/session-message-search';
 
 import sidebarLogoSrc from '../assets/logo.png';
 
@@ -23,6 +25,12 @@ type SessionGroup = {
   key: string;
   label: string;
   sessions: Session[];
+};
+
+type SearchResultGroup = {
+  sessionId: string;
+  sessionTitle: string;
+  hits: SessionMessageSearchHit[];
 };
 
 export function Sidebar() {
@@ -33,6 +41,7 @@ export function Sidebar() {
   const setActiveSession = useAppStore((s) => s.setActiveSession);
   const setMessages = useAppStore((s) => s.setMessages);
   const setTraceSteps = useAppStore((s) => s.setTraceSteps);
+  const setScrollToMessageRequest = useAppStore((s) => s.setScrollToMessageRequest);
   const updateSettings = useAppStore((s) => s.updateSettings);
   const isConfigured = useAppStore((s) => s.isConfigured);
   const sidebarCollapsed = useAppStore((s) => s.sidebarCollapsed);
@@ -47,21 +56,96 @@ export function Sidebar() {
   } = useIPC();
   const [hoveredSession, setHoveredSession] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchHits, setSearchHits] = useState<SessionMessageSearchHit[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchRequestIdRef = useRef(0);
 
-  const normalizedQuery = useMemo(() => searchQuery.trim().toLowerCase(), [searchQuery]);
+  const normalizedQuery = useMemo(() => searchQuery.trim(), [searchQuery]);
+  const isSearchActive = normalizedQuery.length > 0;
+
   const filteredSessions = useMemo(() => {
-    return normalizedQuery
-      ? sessions.filter((session) => session.title.toLowerCase().includes(normalizedQuery))
-      : sessions;
-  }, [sessions, normalizedQuery]);
+    // While a full-text query is active, the session list is replaced by search results.
+    if (isSearchActive) return [];
+    return sessions;
+  }, [sessions, isSearchActive]);
 
   const groupedSessions = useMemo(
     () => groupSessionsByDate(filteredSessions, t),
     [filteredSessions, t]
   );
+
+  const groupedSearchResults = useMemo((): SearchResultGroup[] => {
+    const groups = new Map<string, SearchResultGroup>();
+    for (const hit of searchHits) {
+      const existing = groups.get(hit.sessionId);
+      if (existing) {
+        existing.hits.push(hit);
+      } else {
+        groups.set(hit.sessionId, {
+          sessionId: hit.sessionId,
+          sessionTitle: hit.sessionTitle || t('sidebar.searchUntitled'),
+          hits: [hit],
+        });
+      }
+    }
+    return Array.from(groups.values());
+  }, [searchHits, t]);
+
+  // Debounced full-text search across all conversations.
+  useEffect(() => {
+    if (!isSearchActive) {
+      setSearchHits([]);
+      setIsSearching(false);
+      return;
+    }
+
+    if (!isElectron || !window.electronAPI?.session?.searchMessages) {
+      // Fallback: local title filter when IPC is unavailable.
+      const q = normalizedQuery.toLowerCase();
+      setSearchHits(
+        sessions
+          .filter((session) => session.title.toLowerCase().includes(q))
+          .map((session) => ({
+            sessionId: session.id,
+            sessionTitle: session.title,
+            messageId: null,
+            role: null,
+            timestamp: session.updatedAt || session.createdAt,
+            excerpt: session.title,
+            highlights: [],
+          }))
+      );
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const requestId = ++searchRequestIdRef.current;
+    const timer = window.setTimeout(() => {
+      void window.electronAPI.session
+        .searchMessages({ query: normalizedQuery, limit: 40 })
+        .then((hits) => {
+          if (requestId !== searchRequestIdRef.current) return;
+          setSearchHits(Array.isArray(hits) ? hits : []);
+        })
+        .catch((error: unknown) => {
+          console.error('[Sidebar] Conversation search failed:', error);
+          if (requestId !== searchRequestIdRef.current) return;
+          setSearchHits([]);
+        })
+        .finally(() => {
+          if (requestId === searchRequestIdRef.current) {
+            setIsSearching(false);
+          }
+        });
+    }, 180);
+
+    return () => window.clearTimeout(timer);
+  }, [isElectron, isSearchActive, normalizedQuery, sessions]);
 
   // Exit select mode when sidebar collapses
   useEffect(() => {
@@ -72,19 +156,41 @@ export function Sidebar() {
     }
   }, [sidebarCollapsed, isSelectMode]);
 
-  // Escape key exits select mode
+  const clearSearch = useCallback(() => {
+    setSearchQuery('');
+    setSearchHits([]);
+    setIsSearching(false);
+  }, []);
+
+  // Escape clears search first, otherwise exits select mode.
+  // Ctrl/Cmd+Shift+F focuses the conversation search field.
   useEffect(() => {
-    if (!isSelectMode) return;
     const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        if (sidebarCollapsed) {
+          toggleSidebar();
+        }
+        window.setTimeout(() => searchInputRef.current?.focus(), 0);
+        return;
+      }
+
       if (e.key === 'Escape') {
-        setIsSelectMode(false);
-        setSelectedIds(new Set());
-        setShowDeleteConfirm(false);
+        if (isSearchActive) {
+          clearSearch();
+          searchInputRef.current?.blur();
+          return;
+        }
+        if (isSelectMode) {
+          setIsSelectMode(false);
+          setSelectedIds(new Set());
+          setShowDeleteConfirm(false);
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSelectMode]);
+  }, [clearSearch, isSearchActive, isSelectMode, sidebarCollapsed, toggleSidebar]);
 
   // Reset selection when search query changes to avoid deleting hidden sessions
   useEffect(() => {
@@ -147,12 +253,13 @@ export function Sidebar() {
   }, [selectedIds, visibleSessionIds, batchDeleteSessions, exitSelectMode]);
 
   const handleSessionClick = useCallback(
-    async (sessionId: string) => {
+    async (sessionId: string, messageId?: string | null) => {
       setShowSettings(false);
 
-      if (activeSessionId === sessionId) return;
-
-      setActiveSession(sessionId);
+      const switching = activeSessionId !== sessionId;
+      if (switching) {
+        setActiveSession(sessionId);
+      }
 
       // Read sessionStates at call-time from the store rather than closing over
       // the selector value. The selector returns a new object reference every
@@ -183,6 +290,10 @@ export function Sidebar() {
           console.error('[Sidebar] Failed to load trace steps:', error);
         }
       }
+
+      if (messageId) {
+        setScrollToMessageRequest({ sessionId, messageId });
+      }
     },
     [
       activeSessionId,
@@ -191,6 +302,7 @@ export function Sidebar() {
       isElectron,
       setActiveSession,
       setMessages,
+      setScrollToMessageRequest,
       setShowSettings,
       setTraceSteps,
     ]
@@ -312,12 +424,25 @@ export function Sidebar() {
             <div className="relative flex-1 min-w-0">
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted" />
               <input
+                ref={searchInputRef}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('sidebar.search')}
-                className="w-full rounded-xl border border-transparent bg-background/50 pl-9 pr-3 py-2 text-[13px] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border focus:bg-background transition-colors"
+                aria-label={t('sidebar.search')}
+                className="w-full rounded-xl border border-transparent bg-background/50 pl-9 pr-8 py-2 text-[13px] text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border focus:bg-background transition-colors"
               />
+              {isSearchActive && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 rounded-md flex items-center justify-center text-text-muted hover:text-text-primary"
+                  title={t('sidebar.searchClear')}
+                  aria-label={t('sidebar.searchClear')}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
             </div>
             <button
               onClick={() => {
@@ -341,7 +466,56 @@ export function Sidebar() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-4">
-        {groupedSessions.length === 0 ? (
+        {isSearchActive ? (
+          isSearching ? (
+            <div className="px-3 py-6">
+              <p className="text-sm text-text-secondary">{t('sidebar.searchSearching')}</p>
+            </div>
+          ) : groupedSearchResults.length === 0 ? (
+            <div className="px-3 py-6">
+              <p className="text-sm text-text-secondary">{t('sidebar.searchNoResults')}</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {groupedSearchResults.map((group) => (
+                <section key={group.sessionId}>
+                  <div className="px-3 pb-2 text-[11px] font-medium tracking-[0.04em] text-text-muted truncate">
+                    {group.sessionTitle}
+                  </div>
+                  <div className="space-y-0.5">
+                    {group.hits.map((hit, index) => {
+                      const isActive = activeSessionId === hit.sessionId;
+                      return (
+                        <button
+                          type="button"
+                          key={`${hit.sessionId}:${hit.messageId ?? 'title'}:${index}`}
+                          onClick={() => {
+                            void handleSessionClick(hit.sessionId, hit.messageId);
+                          }}
+                          className={`w-full text-left rounded-lg px-2.5 py-2 transition-colors ${
+                            isActive ? 'bg-surface-hover/80' : 'hover:bg-surface-hover/60'
+                          }`}
+                        >
+                          <div className="text-[11px] text-text-muted mb-0.5">
+                            {hit.messageId
+                              ? hit.role === 'assistant'
+                                ? t('sidebar.searchRoleAssistant')
+                                : t('sidebar.searchRoleUser')
+                              : t('sidebar.searchTitleMatch')}
+                          </div>
+                          <HighlightedExcerpt
+                            excerpt={hit.excerpt}
+                            highlights={hit.highlights}
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+              ))}
+            </div>
+          )
+        ) : groupedSessions.length === 0 ? (
           <div className="px-3 py-6">
             <p className="text-sm text-text-secondary">{t('sidebar.noTasks')}</p>
             <p className="mt-1 text-xs leading-5 text-text-muted">{t('sidebar.noTasksHint')}</p>
@@ -364,7 +538,7 @@ export function Sidebar() {
                           if (isSelectMode) {
                             toggleSelectSession(session.id);
                           } else {
-                            handleSessionClick(session.id);
+                            void handleSessionClick(session.id);
                           }
                         }}
                         onMouseEnter={() => setHoveredSession(session.id)}
@@ -498,6 +672,60 @@ export function Sidebar() {
         </div>
       )}
     </aside>
+  );
+}
+
+function HighlightedExcerpt({
+  excerpt,
+  highlights,
+}: {
+  excerpt: string;
+  highlights: Array<[number, number]>;
+}) {
+  if (!excerpt) {
+    return <div className="text-[12px] leading-4 text-text-muted">…</div>;
+  }
+
+  if (!highlights.length) {
+    return (
+      <div className="text-[12px] leading-4 text-text-secondary line-clamp-3 whitespace-pre-wrap">
+        {excerpt}
+      </div>
+    );
+  }
+
+  const parts: Array<{ text: string; hit: boolean }> = [];
+  let cursor = 0;
+  for (const [start, end] of highlights) {
+    const safeStart = Math.max(0, Math.min(excerpt.length, start));
+    const safeEnd = Math.max(safeStart, Math.min(excerpt.length, end));
+    if (safeStart > cursor) {
+      parts.push({ text: excerpt.slice(cursor, safeStart), hit: false });
+    }
+    if (safeEnd > safeStart) {
+      parts.push({ text: excerpt.slice(safeStart, safeEnd), hit: true });
+    }
+    cursor = Math.max(cursor, safeEnd);
+  }
+  if (cursor < excerpt.length) {
+    parts.push({ text: excerpt.slice(cursor), hit: false });
+  }
+
+  return (
+    <div className="text-[12px] leading-4 text-text-secondary line-clamp-3 whitespace-pre-wrap">
+      {parts.map((part, index) =>
+        part.hit ? (
+          <mark
+            key={`${index}-${part.text}`}
+            className="bg-accent/20 text-text-primary rounded-sm px-0.5"
+          >
+            {part.text}
+          </mark>
+        ) : (
+          <span key={`${index}-${part.text}`}>{part.text}</span>
+        )
+      )}
+    </div>
   );
 }
 

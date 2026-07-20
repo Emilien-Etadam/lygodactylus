@@ -35,6 +35,7 @@ import type {
 import type { DiagnosticInput, DiagnosticResult } from '../renderer/types';
 import type { McpServerConfig, McpTool, McpServerStatus, McpPresetsMap } from '../shared/ipc-types';
 import type { FirefoxExtensionInstallResult } from '../shared/firefox-extension';
+import type { SessionMessageSearchHit } from '../shared/session-message-search';
 import { subscribeServerEvents } from './server-event-bus';
 import { isAllowedClientEventType } from '../shared/client-event-allowlist';
 
@@ -373,6 +374,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('chatLan.installThunderbirdExtension', browserId),
   },
 
+  session: {
+    searchMessages: (payload: {
+      query: string;
+      limit?: number;
+    }): Promise<SessionMessageSearchHit[]> =>
+      ipcRenderer.invoke('session.searchMessages', payload),
+  },
+
   memory: {
     getOverview: (cwd?: string): Promise<MemoryOverview> =>
       ipcRenderer.invoke('memory.getOverview', cwd),
@@ -634,6 +643,12 @@ declare global {
         }>;
         installFirefoxExtension: (browserId?: string) => Promise<FirefoxExtensionInstallResult>;
         installThunderbirdExtension: (browserId?: string) => Promise<FirefoxExtensionInstallResult>;
+      };
+      session: {
+        searchMessages: (payload: {
+          query: string;
+          limit?: number;
+        }) => Promise<SessionMessageSearchHit[]>;
       };
       memory: {
         getOverview: (cwd?: string) => Promise<MemoryOverview>;
