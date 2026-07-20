@@ -1379,5 +1379,17 @@
       "rss": "https://example.com/feed.xml",
       "url": "https://example.com/page"
     }
+  },
+  "piiScrub": {
+    "title": "Personal data masking",
+    "description": "Before outbound calls (web search, HTTP fetch, MCP tools), replace emails, phone numbers, IBANs, cards, and custom terms with reversible tokens. Off by default.",
+    "customTerms": "Custom terms",
+    "customTermsPlaceholder": "One term per line (names, addresses…)",
+    "customTermsHint": "Literal, case-insensitive match. Regex characters are treated as plain text.",
+    "save": "Save",
+    "saved": "Masking settings saved."
+  },
+  "tools": {
+    "piiMasked": "{{count}} items masked"
   }
 }

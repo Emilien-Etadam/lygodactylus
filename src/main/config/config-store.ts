@@ -55,6 +55,7 @@ import {
   normalizeQuickAskShortcut,
   DEFAULT_QUICK_ASK_SELECTION_SHORTCUT,
   DEFAULT_QUICK_ASK_SHORTCUT,
+  normalizePiiScrubConfig,
   normalizeWebSearchConfig,
   normalizeWorkspaceTooling,
   nowISO,
@@ -455,6 +456,10 @@ export class ConfigStore {
         updates.webSearch !== undefined
           ? normalizeWebSearchConfig(updates.webSearch)
           : current.webSearch,
+      piiScrub:
+        updates.piiScrub !== undefined
+          ? normalizePiiScrubConfig(updates.piiScrub)
+          : current.piiScrub,
       thinkingLevel: isThinkingLevel(updates.thinkingLevel)
         ? updates.thinkingLevel
         : current.thinkingLevel,

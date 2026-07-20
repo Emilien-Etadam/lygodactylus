@@ -1,3 +1,9 @@
+import {
+  beginPiiScrubSession,
+  rememberPiiMaskedCount,
+  scrubToolArgsForEgress,
+  unscrubUnknownForModel,
+} from '../agent/pii-scrub-egress.js';
 import { log, logCtx, logCtxError, logError, logTiming, logWarn } from '../utils/logger.js';
 import { refreshTools, raceWithTimeout, type MCPToolRegistryContext } from './mcp-tool-registry.js';
 import type { MCPTool } from './mcp-types.js';
@@ -31,6 +37,10 @@ export async function callTool(
     `[MCPManager] Calling tool ${resolveActualToolName(toolName, tool)} on server ${tool.serverName}`
   );
 
+  // Unique MCP egress choke point: scrub model-supplied args before they leave.
+  const piiSession = beginPiiScrubSession();
+  const outboundArgs = scrubToolArgsForEgress(args, piiSession);
+
   const callStartTime = Date.now();
   const maxRetries = 2;
   const deadline = Date.now() + MCP_TOOL_CALL_TIMEOUT_MS;
@@ -53,7 +63,7 @@ export async function callTool(
       }
 
       const result = await raceWithTimeout(
-        client.callTool({ name: actualToolName, arguments: args }),
+        client.callTool({ name: actualToolName, arguments: outboundArgs }),
         remainingMs,
         `Tool call timeout after ${MCP_TOOL_CALL_TIMEOUT_MS}ms`
       );
@@ -76,7 +86,8 @@ export async function callTool(
       }
 
       logTiming(`MCP tool ${actualToolName}`, callStartTime);
-      return result;
+      const restored = unscrubUnknownForModel(result, piiSession);
+      return rememberPiiMaskedCount(restored, piiSession?.maskedCount ?? 0);
     } catch (error: unknown) {
       lastError = error;
       const errorMsg = error instanceof Error ? error.message : String(error);

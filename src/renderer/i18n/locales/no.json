@@ -1379,5 +1379,17 @@
       "rss": "https://eksempel.no/feed.xml",
       "url": "https://eksempel.no/side"
     }
+  },
+  "piiScrub": {
+    "title": "Maskering av personopplysninger",
+    "description": "Før utgående kall (websøk, HTTP-fetch, MCP-verktøy) erstattes e-post, telefon, IBAN, kort og egne termer med reversible tokens. Av som standard.",
+    "customTerms": "Egne termer",
+    "customTermsPlaceholder": "Én term per linje (navn, adresser…)",
+    "customTermsHint": "Bokstavelig treff uten å skille mellom store/små bokstaver. Regex-tegn behandles som tekst.",
+    "save": "Lagre",
+    "saved": "Maskeringsinnstillinger lagret."
+  },
+  "tools": {
+    "piiMasked": "{{count}} elementer maskert"
   }
 }

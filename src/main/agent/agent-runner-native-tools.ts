@@ -15,6 +15,12 @@ import {
   formatHttpRequestResult,
   parseHttpRequestOptions,
 } from './http-request';
+import {
+  beginPiiScrubSession,
+  piiMaskedDetails,
+  scrubHttpOptionsForEgress,
+  unscrubTextForModel,
+} from './pii-scrub-egress';
 
 const webFetchParameters = Type.Object({
   url: Type.String({ description: 'HTTP or HTTPS URL to fetch' }),
@@ -104,13 +110,18 @@ function createWebFetchTool(
       const record =
         typeof params === 'object' && params !== null ? (params as Record<string, unknown>) : {};
       const options = parseHttpRequestOptions(record);
-      const result = await executeHttpRequest({ ...options, signal, timeoutMs: 15_000 });
+      const piiSession = beginPiiScrubSession();
+      const scrubbed = scrubHttpOptionsForEgress(
+        { ...options, signal, timeoutMs: 15_000 },
+        piiSession
+      );
+      const result = await executeHttpRequest(scrubbed);
       const body = formatHttpRequestResult(result);
       const title = hostnameFromUrl(result.url);
       const text = allocateWebCitationIndex(citationCounter, [{ title, url: result.url }], body);
       return {
-        content: [{ type: 'text' as const, text }],
-        details: undefined,
+        content: [{ type: 'text' as const, text: unscrubTextForModel(text, piiSession) }],
+        details: piiMaskedDetails(piiSession),
       };
     },
   };
@@ -127,10 +138,17 @@ function createHttpRequestTool(name: string, label: string): ToolDefinition<TSch
       const record =
         typeof params === 'object' && params !== null ? (params as Record<string, unknown>) : {};
       const options = parseHttpRequestOptions(record);
-      const result = await executeHttpRequest({ ...options, signal });
+      const piiSession = beginPiiScrubSession();
+      const scrubbed = scrubHttpOptionsForEgress({ ...options, signal }, piiSession);
+      const result = await executeHttpRequest(scrubbed);
       return {
-        content: [{ type: 'text' as const, text: formatHttpRequestResult(result) }],
-        details: undefined,
+        content: [
+          {
+            type: 'text' as const,
+            text: unscrubTextForModel(formatHttpRequestResult(result), piiSession),
+          },
+        ],
+        details: piiMaskedDetails(piiSession),
       };
     },
   };

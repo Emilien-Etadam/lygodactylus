@@ -131,6 +131,8 @@ export interface TraceStep {
   toolName?: string;
   toolInput?: Record<string, unknown>;
   toolOutput?: string;
+  /** Discrete count of PII tokens substituted on outbound egress (opt-in feature). */
+  piiMaskedCount?: number;
   isError?: boolean;
   timestamp: number;
   duration?: number;
@@ -874,6 +876,8 @@ export interface AppConfig {
   memoryEnabled?: boolean;
   memoryRuntime?: MemoryRuntimeConfig;
   webSearch?: WebSearchConfig;
+  /** Opt-in PII scrubbing on outbound tool egress. Off by default. */
+  piiScrub?: PiiScrubConfig;
   enableThinking?: boolean;
   thinkingLevel?: ThinkingLevel;
   speechSynthesisEnabled?: boolean;
@@ -919,6 +923,11 @@ export interface WebSearchConfig {
   safeSearch?: 0 | 1 | 2;
   maxResults?: number;
   timeoutMs?: number;
+}
+
+export interface PiiScrubConfig {
+  enabled: boolean;
+  customTerms: string[];
 }
 
 export interface WebSearchTestInput {

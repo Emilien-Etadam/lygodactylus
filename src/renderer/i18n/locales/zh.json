@@ -1379,5 +1379,17 @@
       "rss": "https://example.com/feed.xml",
       "url": "https://example.com/page"
     }
+  },
+  "piiScrub": {
+    "title": "个人数据脱敏",
+    "description": "在出站调用（网页搜索、HTTP 请求、MCP 工具）之前，将邮箱、电话、IBAN、银行卡和自定义词替换为可逆令牌。默认关闭。",
+    "customTerms": "自定义词条",
+    "customTermsPlaceholder": "每行一个词条（姓名、地址…）",
+    "customTermsHint": "字面匹配，不区分大小写。正则特殊字符按普通文本处理。",
+    "save": "保存",
+    "saved": "脱敏设置已保存。"
+  },
+  "tools": {
+    "piiMasked": "已脱敏 {{count}} 项"
   }
 }

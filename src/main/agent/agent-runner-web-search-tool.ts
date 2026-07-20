@@ -3,6 +3,12 @@ import type { ToolDefinition } from '@earendil-works/pi-coding-agent';
 import { configStore } from '../config/config-store';
 import { runWebSearch } from '../../shared/web-search';
 import type { WebCitationCounter } from '../../shared/web-citation';
+import {
+  beginPiiScrubSession,
+  piiMaskedDetails,
+  scrubQueryForEgress,
+  unscrubTextForModel,
+} from './pii-scrub-egress';
 
 const webSearchParameters = Type.Object({
   query: Type.String({ description: 'Search query' }),
@@ -24,10 +30,12 @@ function createWebSearchTool(
         typeof params === 'object' && params !== null ? (params as Record<string, unknown>) : {};
       const query = typeof record.query === 'string' ? record.query : '';
       const config = configStore.get('webSearch');
-      const text = await runWebSearch(query, config, { citationCounter });
+      const piiSession = beginPiiScrubSession();
+      const scrubbedQuery = scrubQueryForEgress(query, piiSession);
+      const text = await runWebSearch(scrubbedQuery, config, { citationCounter });
       return {
-        content: [{ type: 'text' as const, text }],
-        details: undefined,
+        content: [{ type: 'text' as const, text: unscrubTextForModel(text, piiSession) }],
+        details: piiMaskedDetails(piiSession),
       };
     },
   };

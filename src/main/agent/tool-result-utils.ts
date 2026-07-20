@@ -13,6 +13,7 @@ type NormalizedToolTextResult = {
 type NormalizedToolExecutionResult = {
   content: string;
   images: ToolResultImage[];
+  piiMaskedCount?: number;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -100,6 +101,17 @@ function extractImagesFromDetails(details: unknown): ToolResultImage[] {
   );
 }
 
+function extractPiiMaskedCountFromDetails(details: unknown): number | undefined {
+  if (!isRecord(details)) {
+    return undefined;
+  }
+  const raw = details.piiMaskedCount;
+  if (typeof raw !== 'number' || !Number.isFinite(raw) || raw <= 0) {
+    return undefined;
+  }
+  return Math.trunc(raw);
+}
+
 function extractTextAndImagesFromContent(content: unknown): {
   textParts: string[];
   images: ToolResultImage[];
@@ -171,6 +183,7 @@ export function normalizeMcpToolResultForModel(result: unknown): NormalizedToolT
 export function normalizeToolExecutionResultForUi(result: unknown): NormalizedToolExecutionResult {
   const resultObj = isRecord(result) ? result : null;
   const detailImages = extractImagesFromDetails(resultObj?.details);
+  const piiMaskedCount = extractPiiMaskedCountFromDetails(resultObj?.details);
 
   if (resultObj?.content) {
     const { textParts, images: inlineImages } = extractTextAndImagesFromContent(resultObj.content);
@@ -178,11 +191,13 @@ export function normalizeToolExecutionResultForUi(result: unknown): NormalizedTo
     return {
       content: finalizeText(textParts, images.length),
       images,
+      ...(piiMaskedCount !== undefined ? { piiMaskedCount } : {}),
     };
   }
 
   return {
     content: typeof result === 'string' ? result : safeStringifyToolResult(result),
     images: dedupeImages(detailImages),
+    ...(piiMaskedCount !== undefined ? { piiMaskedCount } : {}),
   };
 }

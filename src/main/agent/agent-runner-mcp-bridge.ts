@@ -3,6 +3,7 @@ import type { ToolDefinition } from '@earendil-works/pi-coding-agent';
 import type { Message } from '../../renderer/types';
 import type { MCPManager } from '../mcp/mcp-manager';
 import { logError } from '../utils/logger';
+import { mergePiiMaskedDetails, takePiiMaskedCount } from './pii-scrub-egress';
 import { normalizeMcpToolResultForModel } from './tool-result-utils';
 
 /**
@@ -28,13 +29,16 @@ export function buildMcpCustomTools(mcpManager: MCPManager): ToolDefinition[] {
       async execute(_toolCallId, params, _signal, _onUpdate, _ctx) {
         try {
           const result = await mcpManager.callTool(mcpTool.name, params as Record<string, unknown>);
+          const piiMaskedCount = takePiiMaskedCount(result);
           const normalizedResult = normalizeMcpToolResultForModel(result);
           return {
             content: [{ type: 'text' as const, text: normalizedResult.text }],
-            details:
+            details: mergePiiMaskedDetails(
+              piiMaskedCount,
               normalizedResult.images.length > 0
                 ? { openCoworkImages: normalizedResult.images }
-                : undefined,
+                : undefined
+            ),
           };
         } catch (err: unknown) {
           logError(`[AgentRunner] MCP tool ${mcpTool.name} failed:`, err);

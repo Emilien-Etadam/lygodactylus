@@ -38,6 +38,10 @@ export function handleToolExecutionEndEvent(
     title: toolDisplayName,
     toolName: event.toolName,
     toolOutput: deps.sanitizeOutputPaths(outputText).slice(0, 800),
+    ...(typeof normalizedToolResult.piiMaskedCount === 'number' &&
+    normalizedToolResult.piiMaskedCount > 0
+      ? { piiMaskedCount: normalizedToolResult.piiMaskedCount }
+      : {}),
   });
 
   deps.ctx.renderer.sendMessage(deps.session.id, {

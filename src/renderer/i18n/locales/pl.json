@@ -1379,5 +1379,17 @@
       "rss": "https://przyklad.pl/feed.xml",
       "url": "https://przyklad.pl/strona"
     }
+  },
+  "piiScrub": {
+    "title": "Maskowanie danych osobowych",
+    "description": "Przed wywołaniami wychodzącymi (wyszukiwanie www, fetch HTTP, narzędzia MCP) zamienia e-maile, telefony, IBAN, karty i własne terminy na odwracalne tokeny. Domyślnie wyłączone.",
+    "customTerms": "Własne terminy",
+    "customTermsPlaceholder": "Jeden termin na linię (nazwiska, adresy…)",
+    "customTermsHint": "Dosłowne dopasowanie bez rozróżniania wielkości liter. Znaki regex traktowane jako tekst.",
+    "save": "Zapisz",
+    "saved": "Zapisano ustawienia maskowania."
+  },
+  "tools": {
+    "piiMasked": "{{count}} elementy zamaskowane"
   }
 }

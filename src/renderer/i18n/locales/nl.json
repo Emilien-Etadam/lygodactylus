@@ -1379,5 +1379,17 @@
       "rss": "https://voorbeeld.nl/feed.xml",
       "url": "https://voorbeeld.nl/pagina"
     }
+  },
+  "piiScrub": {
+    "title": "Persoonsgegevens maskeren",
+    "description": "Vóór uitgaande aanroepen (webzoekopdracht, HTTP-fetch, MCP-tools) worden e-mails, telefoonnummers, IBAN’s, kaarten en eigen termen vervangen door omkeerbare tokens. Standaard uit.",
+    "customTerms": "Eigen termen",
+    "customTermsPlaceholder": "Eén term per regel (namen, adressen…)",
+    "customTermsHint": "Letterlijke, niet-hoofdlettergevoelige match. Regex-tekens gelden als tekst.",
+    "save": "Opslaan",
+    "saved": "Maskeringsinstellingen opgeslagen."
+  },
+  "tools": {
+    "piiMasked": "{{count}} items gemaskeerd"
   }
 }
