@@ -1258,5 +1258,9 @@
     "created": "Preset utworzony.",
     "updated": "Preset zaktualizowany.",
     "deleted": "Preset usunięty."
+  },
+  "endpointLocation": {
+    "local": "Lokalny",
+    "remote": "Zdalny"
   }
 }

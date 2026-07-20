@@ -44,6 +44,7 @@ import {
 } from 'lucide-react';
 import type { TraceStep, MCPServerInfo, ContentBlock, ToolUseContent } from '../types';
 import { getMcpToolDisplayName } from './message/toolHelpers';
+import { EndpointLocationBadge } from './EndpointLocationBadge';
 
 const EMPTY_STEPS: TraceStep[] = [];
 
@@ -317,7 +318,7 @@ export function ContextPanel() {
       {/* Session Stats */}
       {activeSession && (
         <div className="px-4 py-3 border-b border-border-muted space-y-1.5">
-          <div className="flex items-center gap-1.5 text-text-primary font-medium">
+          <div className="flex items-center gap-1.5 text-text-primary font-medium min-w-0">
             <Cpu className="w-3.5 h-3.5 text-text-muted shrink-0" />
             <span className="truncate">{modelName}</span>
           </div>
@@ -326,17 +327,18 @@ export function ContextPanel() {
               {t('context.modelMeta', { meta: modelMetaLabel })}
             </p>
           )}
-          <div className="flex items-center gap-3 text-xs text-text-muted pl-5">
-            <span className="flex items-center gap-1">
+          <div className="flex items-center gap-3 text-xs text-text-muted pl-5 min-w-0">
+            <span className="flex items-center gap-1 shrink-0">
               <MessageSquare className="w-3 h-3" />
               {messageCount}
             </span>
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 shrink-0">
               <Wrench className="w-3 h-3" />
               {toolCallCount}
             </span>
+            <EndpointLocationBadge baseUrl={appConfig?.baseUrl} className="min-w-0" />
             {tokenUsage.total > 0 && (
-              <span className="ml-auto text-text-muted/70">
+              <span className="ml-auto text-text-muted/70 shrink-0">
                 {t('context.inputTokens')} {formatTokenCount(tokenUsage.input)} ·{' '}
                 {t('context.outputTokens')} {formatTokenCount(tokenUsage.output)}
               </span>

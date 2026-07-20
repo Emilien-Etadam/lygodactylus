@@ -1258,5 +1258,9 @@
     "created": "Presetare creată.",
     "updated": "Presetare actualizată.",
     "deleted": "Presetare ștearsă."
+  },
+  "endpointLocation": {
+    "local": "Local",
+    "remote": "La distanță"
   }
 }

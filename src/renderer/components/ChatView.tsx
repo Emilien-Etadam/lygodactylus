@@ -33,6 +33,7 @@ import { PresetPickerDialog } from './PresetPickerDialog';
 import { PresetVariableDialog } from './PresetVariableDialog';
 import { ThinkingLevelToggle } from './ThinkingLevelToggle';
 import { PlanActToggle } from './PlanActToggle';
+import { EndpointLocationBadge } from './EndpointLocationBadge';
 import {
   Send,
   Square,
@@ -1239,9 +1240,12 @@ export function ChatView() {
                 {/* Reasoning level toggle */}
                 <ThinkingLevelToggle />
 
-                {/* Model display */}
-                <span className="hidden sm:inline-flex px-2.5 py-1 rounded-full border border-border-subtle bg-background/60 text-xs text-text-muted">
-                  {appConfig?.model || t('chat.noModel')}
+                {/* Model display + endpoint location */}
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border-subtle bg-background/60 text-xs text-text-muted">
+                  <span className="truncate max-w-[10rem]">
+                    {appConfig?.model || t('chat.noModel')}
+                  </span>
+                  <EndpointLocationBadge baseUrl={appConfig?.baseUrl} />
                 </span>
 
                 {canStop && (

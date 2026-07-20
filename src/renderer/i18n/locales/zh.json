@@ -1258,5 +1258,9 @@
     "created": "预设已创建。",
     "updated": "预设已更新。",
     "deleted": "预设已删除。"
+  },
+  "endpointLocation": {
+    "local": "本地",
+    "remote": "远程"
   }
 }
