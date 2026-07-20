@@ -232,9 +232,7 @@ interface AppState {
   bumpPluginCommandsRevision: () => void;
 
   setSpeakingMessageId: (messageId: string | null) => void;
-  setScrollToMessageRequest: (
-    request: { sessionId: string; messageId: string } | null
-  ) => void;
+  setScrollToMessageRequest: (request: { sessionId: string; messageId: string } | null) => void;
 
   // System theme actions
   setSystemDarkMode: (dark: boolean) => void;
@@ -694,8 +692,7 @@ export const useAppStore = create<AppState>((set) => ({
         projectRulesFile:
           contextInfo.projectRulesFile === null
             ? undefined
-            : (contextInfo.projectRulesFile ??
-              state.sessionStates[sessionId]?.projectRulesFile),
+            : (contextInfo.projectRulesFile ?? state.sessionStates[sessionId]?.projectRulesFile),
       }),
     })),
 
