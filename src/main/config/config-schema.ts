@@ -10,7 +10,11 @@ import {
   DEFAULT_OLLAMA_KEEP_ALIVE,
   normalizeOllamaKeepAlive,
 } from '../../shared/ollama-keep-alive';
-import { DEFAULT_QUICK_ASK_SHORTCUT, normalizeQuickAskShortcut } from '../../shared/quick-ask';
+import {
+  DEFAULT_QUICK_ASK_SELECTION_SHORTCUT,
+  DEFAULT_QUICK_ASK_SHORTCUT,
+  normalizeQuickAskShortcut,
+} from '../../shared/quick-ask';
 import {
   DEFAULT_WEB_SEARCH_CONFIG,
   normalizeWebSearchConfig,
@@ -18,7 +22,11 @@ import {
 } from '../../shared/web-search';
 
 export { DEFAULT_OLLAMA_KEEP_ALIVE, normalizeOllamaKeepAlive };
-export { DEFAULT_QUICK_ASK_SHORTCUT, normalizeQuickAskShortcut };
+export {
+  DEFAULT_QUICK_ASK_SELECTION_SHORTCUT,
+  DEFAULT_QUICK_ASK_SHORTCUT,
+  normalizeQuickAskShortcut,
+};
 
 export type ConstrainedOutputMode = 'auto' | 'off';
 
@@ -116,6 +124,8 @@ export interface AppConfig {
   quickAskEnabled: boolean;
   /** Electron Accelerator for the Quick Ask global shortcut. */
   quickAskShortcut: string;
+  /** Electron Accelerator for Quick Ask Sélection (clipboard text). */
+  quickAskSelectionShortcut: string;
   /**
    * Ollama keep_alive duration (e.g. "30m", "1h", "-1").
    * Only sent when the active endpoint is detected as Ollama.
@@ -211,6 +221,7 @@ export const DIRECT_READ_KEYS = new Set<keyof AppConfig>([
   'checkpointsEnabled',
   'quickAskEnabled',
   'quickAskShortcut',
+  'quickAskSelectionShortcut',
   'ollamaKeepAlive',
   'constrainedOutput',
   'constrainedOutputCapability',
@@ -338,6 +349,7 @@ export const defaultConfig: AppConfig = {
   workspaceTooling: {},
   quickAskEnabled: false,
   quickAskShortcut: DEFAULT_QUICK_ASK_SHORTCUT,
+  quickAskSelectionShortcut: DEFAULT_QUICK_ASK_SELECTION_SHORTCUT,
   ollamaKeepAlive: DEFAULT_OLLAMA_KEEP_ALIVE,
   constrainedOutput: 'auto',
   constrainedOutputCapability: null,

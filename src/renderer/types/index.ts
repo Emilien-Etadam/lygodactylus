@@ -685,9 +685,20 @@ export type ServerEvent =
         shortcut: string;
         registered: boolean;
         error: string | null;
+        selectionShortcut: string;
+        selectionRegistered: boolean;
+        selectionError: string | null;
       };
     }
-  | { type: 'quickAsk.opened' }
+  | {
+      type: 'quickAsk.opened';
+      payload: {
+        mode: 'ask' | 'selection';
+        sourceText: string;
+        truncated: boolean;
+        empty: boolean;
+      };
+    }
   | { type: 'native-theme.changed'; payload: { shouldUseDarkColors: boolean } }
   | { type: 'new-session' }
   | { type: 'navigate'; payload: string }
@@ -878,6 +889,8 @@ export interface AppConfig {
   quickAskEnabled?: boolean;
   /** Electron Accelerator for the Quick Ask global shortcut. */
   quickAskShortcut?: string;
+  /** Electron Accelerator for Quick Ask Sélection (clipboard text). */
+  quickAskSelectionShortcut?: string;
   /** Ollama keep_alive duration (e.g. "30m"). Soft-defaulted in main when missing. */
   ollamaKeepAlive?: string;
   /** 'auto' enables server-side JSON schema constraints when probed; 'off' disables. */

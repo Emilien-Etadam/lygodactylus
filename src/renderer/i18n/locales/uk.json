@@ -1246,7 +1246,29 @@
     "shortcutInvalid": "Недійсний формат комбінації.",
     "shortcutTaken": "Цю комбінацію вже зайнято системою або іншою програмою.",
     "shortcutRegisterFailed": "Не вдалося зареєструвати глобальну комбінацію.",
-    "sessionTitle": "Quick Ask"
+    "sessionTitle": "Quick Ask",
+    "selectionTitle": "Quick Ask — Виділення",
+    "selectionSubtitle": "Дія з скопійованим текстом, готово до вставки",
+    "selectionEmptyHint": "Спочатку скопіюйте текст (Ctrl/Cmd+C), потім знову натисніть цей ярлик.",
+    "selectionPlaceholder": "Спочатку скопіюйте текст або введіть запитання…",
+    "selectionTruncated": "Текст буфера обміну обрізано до 32 КБ.",
+    "selectionShortcutLabel": "Ярлик виділення",
+    "selectionShortcutHint": "Скопіюйте текст в іншій програмі, потім натисніть цей ярлик. Формат Electron, напр. CommandOrControl+Shift+Y",
+    "copyResult": "Копіювати результат",
+    "copied": "Скопійовано",
+    "uiLanguageName": "українська",
+    "actions": {
+      "summarize": "Стисло",
+      "translate": "Перекласти",
+      "rephrase": "Перефразувати",
+      "correct": "Виправити"
+    },
+    "templates": {
+      "summarize": "Стисло підсумуй наступний текст:\n\n{{text}}",
+      "translate": "Переклади наступний текст мовою {{language}}:\n\n{{text}}",
+      "rephrase": "Чітко перефразуй наступний текст, зберігаючи зміст:\n\n{{text}}",
+      "correct": "Виправ орфографію, граматику та ясність наступного тексту. Поверни лише виправлений текст:\n\n{{text}}"
+    }
   },
   "presets": {
     "pickerTitle": "Оберіть пресет",

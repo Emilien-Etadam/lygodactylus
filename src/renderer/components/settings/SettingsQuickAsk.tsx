@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../store';
 import { useAppConfig } from '../../store/selectors';
 import {
+  DEFAULT_QUICK_ASK_SELECTION_SHORTCUT,
   DEFAULT_QUICK_ASK_SHORTCUT,
   isValidQuickAskShortcut,
   normalizeQuickAskShortcut,
@@ -10,22 +11,34 @@ import {
 
 const isElectron = typeof window !== 'undefined' && window.electronAPI !== undefined;
 
+type ShortcutField = 'ask' | 'selection';
+
 export function SettingsQuickAsk() {
   const { t } = useTranslation();
   const setAppConfig = useAppStore((s) => s.setAppConfig);
   const appConfig = useAppConfig();
   const enabled = appConfig?.quickAskEnabled === true;
-  const savedShortcut =
+  const savedAskShortcut =
     normalizeQuickAskShortcut(appConfig?.quickAskShortcut) || DEFAULT_QUICK_ASK_SHORTCUT;
+  const savedSelectionShortcut =
+    normalizeQuickAskShortcut(appConfig?.quickAskSelectionShortcut) ||
+    DEFAULT_QUICK_ASK_SELECTION_SHORTCUT;
 
-  const [shortcutDraft, setShortcutDraft] = useState(savedShortcut);
+  const [askDraft, setAskDraft] = useState(savedAskShortcut);
+  const [selectionDraft, setSelectionDraft] = useState(savedSelectionShortcut);
   const [isSaving, setIsSaving] = useState(false);
-  const [shortcutError, setShortcutError] = useState<string | null>(null);
-  const [formatError, setFormatError] = useState(false);
+  const [askError, setAskError] = useState<string | null>(null);
+  const [selectionError, setSelectionError] = useState<string | null>(null);
+  const [askFormatError, setAskFormatError] = useState(false);
+  const [selectionFormatError, setSelectionFormatError] = useState(false);
 
   useEffect(() => {
-    setShortcutDraft(savedShortcut);
-  }, [savedShortcut]);
+    setAskDraft(savedAskShortcut);
+  }, [savedAskShortcut]);
+
+  useEffect(() => {
+    setSelectionDraft(savedSelectionShortcut);
+  }, [savedSelectionShortcut]);
 
   useEffect(() => {
     if (!window.electronAPI?.on) {
@@ -33,28 +46,41 @@ export function SettingsQuickAsk() {
     }
     return window.electronAPI.on((event) => {
       if (event.type === 'quickAsk.status') {
-        setShortcutError(event.payload.error);
+        setAskError(event.payload.error);
+        setSelectionError(event.payload.selectionError);
       }
     });
   }, []);
 
   const persist = useCallback(
-    async (next: { quickAskEnabled?: boolean; quickAskShortcut?: string }) => {
+    async (next: {
+      quickAskEnabled?: boolean;
+      quickAskShortcut?: string;
+      quickAskSelectionShortcut?: string;
+    }) => {
       if (!isElectron || !window.electronAPI?.config?.save) {
         return;
       }
       setIsSaving(true);
-      setFormatError(false);
+      setAskFormatError(false);
+      setSelectionFormatError(false);
       try {
         const result = await window.electronAPI.config.save(next);
         if (result?.config) {
           setAppConfig(result.config);
         }
-        const regError =
+        const askRegError =
           'quickAskShortcutError' in result
-            ? ((result as { quickAskShortcutError?: string | null }).quickAskShortcutError ?? null)
+            ? ((result as { quickAskShortcutError?: string | null }).quickAskShortcutError ??
+              null)
             : null;
-        setShortcutError(regError);
+        const selectionRegError =
+          'quickAskSelectionShortcutError' in result
+            ? ((result as { quickAskSelectionShortcutError?: string | null })
+                .quickAskSelectionShortcutError ?? null)
+            : null;
+        setAskError(askRegError);
+        setSelectionError(selectionRegError);
       } catch {
         // Keep previous values; config.status may still sync later.
       } finally {
@@ -71,24 +97,49 @@ export function SettingsQuickAsk() {
     void persist({ quickAskEnabled: !enabled });
   }, [enabled, isSaving, persist]);
 
-  const handleShortcutBlur = useCallback(() => {
-    const normalized = normalizeQuickAskShortcut(shortcutDraft);
-    if (!normalized) {
-      setFormatError(true);
-      setShortcutDraft(savedShortcut);
-      return;
-    }
-    setFormatError(false);
-    if (normalized === savedShortcut) {
-      return;
-    }
-    void persist({ quickAskShortcut: normalized });
-  }, [persist, savedShortcut, shortcutDraft]);
+  const handleShortcutBlur = useCallback(
+    (field: ShortcutField) => {
+      if (field === 'ask') {
+        const normalized = normalizeQuickAskShortcut(askDraft);
+        if (!normalized) {
+          setAskFormatError(true);
+          setAskDraft(savedAskShortcut);
+          return;
+        }
+        setAskFormatError(false);
+        if (normalized === savedAskShortcut) {
+          return;
+        }
+        void persist({ quickAskShortcut: normalized });
+        return;
+      }
 
-  const shortcutErrorMessage =
-    shortcutError === 'shortcut_taken'
+      const normalized = normalizeQuickAskShortcut(selectionDraft);
+      if (!normalized) {
+        setSelectionFormatError(true);
+        setSelectionDraft(savedSelectionShortcut);
+        return;
+      }
+      setSelectionFormatError(false);
+      if (normalized === savedSelectionShortcut) {
+        return;
+      }
+      void persist({ quickAskSelectionShortcut: normalized });
+    },
+    [askDraft, persist, savedAskShortcut, savedSelectionShortcut, selectionDraft]
+  );
+
+  const askErrorMessage =
+    askError === 'shortcut_taken'
       ? t('quickAsk.shortcutTaken')
-      : shortcutError
+      : askError
+        ? t('quickAsk.shortcutRegisterFailed')
+        : null;
+
+  const selectionErrorMessage =
+    selectionError === 'shortcut_taken'
+      ? t('quickAsk.shortcutTaken')
+      : selectionError
         ? t('quickAsk.shortcutRegisterFailed')
         : null;
 
@@ -127,15 +178,15 @@ export function SettingsQuickAsk() {
         <input
           id="quick-ask-shortcut"
           type="text"
-          value={shortcutDraft}
+          value={askDraft}
           disabled={!enabled || isSaving}
           onChange={(event) => {
-            setShortcutDraft(event.target.value);
-            setFormatError(
+            setAskDraft(event.target.value);
+            setAskFormatError(
               event.target.value.trim().length > 0 && !isValidQuickAskShortcut(event.target.value)
             );
           }}
-          onBlur={handleShortcutBlur}
+          onBlur={() => handleShortcutBlur('ask')}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
               event.currentTarget.blur();
@@ -146,9 +197,48 @@ export function SettingsQuickAsk() {
           placeholder={DEFAULT_QUICK_ASK_SHORTCUT}
         />
         <p className="text-xs text-text-muted">{t('quickAsk.shortcutHint')}</p>
-        {formatError && <p className="text-xs text-amber-600 dark:text-amber-400">{t('quickAsk.shortcutInvalid')}</p>}
-        {shortcutErrorMessage && (
-          <p className="text-xs text-amber-600 dark:text-amber-400">{shortcutErrorMessage}</p>
+        {askFormatError && (
+          <p className="text-xs text-amber-600 dark:text-amber-400">{t('quickAsk.shortcutInvalid')}</p>
+        )}
+        {askErrorMessage && (
+          <p className="text-xs text-amber-600 dark:text-amber-400">{askErrorMessage}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <label
+          htmlFor="quick-ask-selection-shortcut"
+          className="block text-xs font-medium text-text-secondary"
+        >
+          {t('quickAsk.selectionShortcutLabel')}
+        </label>
+        <input
+          id="quick-ask-selection-shortcut"
+          type="text"
+          value={selectionDraft}
+          disabled={!enabled || isSaving}
+          onChange={(event) => {
+            setSelectionDraft(event.target.value);
+            setSelectionFormatError(
+              event.target.value.trim().length > 0 && !isValidQuickAskShortcut(event.target.value)
+            );
+          }}
+          onBlur={() => handleShortcutBlur('selection')}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.currentTarget.blur();
+            }
+          }}
+          spellCheck={false}
+          className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-accent"
+          placeholder={DEFAULT_QUICK_ASK_SELECTION_SHORTCUT}
+        />
+        <p className="text-xs text-text-muted">{t('quickAsk.selectionShortcutHint')}</p>
+        {selectionFormatError && (
+          <p className="text-xs text-amber-600 dark:text-amber-400">{t('quickAsk.shortcutInvalid')}</p>
+        )}
+        {selectionErrorMessage && (
+          <p className="text-xs text-amber-600 dark:text-amber-400">{selectionErrorMessage}</p>
         )}
       </div>
     </section>

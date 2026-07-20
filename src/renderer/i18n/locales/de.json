@@ -1246,7 +1246,29 @@
     "shortcutInvalid": "Ungültiges Shortcut-Format.",
     "shortcutTaken": "Dieses Tastenkürzel ist bereits vom System oder einer anderen App belegt.",
     "shortcutRegisterFailed": "Globaler Shortcut konnte nicht registriert werden.",
-    "sessionTitle": "Quick Ask"
+    "sessionTitle": "Quick Ask",
+    "selectionTitle": "Quick Ask — Auswahl",
+    "selectionSubtitle": "Mit kopiertem Text arbeiten, bereit zum Einfügen",
+    "selectionEmptyHint": "Kopieren Sie zuerst Text (Strg/Cmd+C) und nutzen Sie dann erneut dieses Kürzel.",
+    "selectionPlaceholder": "Zuerst Text kopieren oder eine Frage eingeben…",
+    "selectionTruncated": "Zwischenablagetext wurde auf 32 KB gekürzt.",
+    "selectionShortcutLabel": "Auswahl-Tastenkürzel",
+    "selectionShortcutHint": "Text in einer anderen App kopieren, dann dieses Kürzel drücken. Electron-Format, z. B. CommandOrControl+Shift+Y",
+    "copyResult": "Ergebnis kopieren",
+    "copied": "Kopiert",
+    "uiLanguageName": "Deutsch",
+    "actions": {
+      "summarize": "Zusammenfassen",
+      "translate": "Übersetzen",
+      "rephrase": "Umformulieren",
+      "correct": "Korrigieren"
+    },
+    "templates": {
+      "summarize": "Fasse den folgenden Text knapp zusammen:\n\n{{text}}",
+      "translate": "Übersetze den folgenden Text ins {{language}}:\n\n{{text}}",
+      "rephrase": "Formuliere den folgenden Text klar um und behalte die Bedeutung bei:\n\n{{text}}",
+      "correct": "Korrigiere Rechtschreibung, Grammatik und Klarheit im folgenden Text. Gib nur den korrigierten Text zurück:\n\n{{text}}"
+    }
   },
   "presets": {
     "pickerTitle": "Preset wählen",

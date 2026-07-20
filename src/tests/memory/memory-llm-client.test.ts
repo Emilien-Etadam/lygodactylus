@@ -87,6 +87,7 @@ function makeConfig(timeoutMs: number, overrides: Partial<AppConfig> = {}): AppC
     modelStatsEnabled: true,
     quickAskEnabled: false,
     quickAskShortcut: 'CommandOrControl+Shift+Space',
+    quickAskSelectionShortcut: 'CommandOrControl+Shift+Y',
     isConfigured: true,
     constrainedOutput: 'auto',
     constrainedOutputCapability: null,

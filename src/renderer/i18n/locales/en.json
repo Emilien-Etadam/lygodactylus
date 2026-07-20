@@ -1246,7 +1246,29 @@
     "shortcutInvalid": "Invalid shortcut format.",
     "shortcutTaken": "This shortcut is already taken by the OS or another app.",
     "shortcutRegisterFailed": "Could not register the global shortcut.",
-    "sessionTitle": "Quick Ask"
+    "sessionTitle": "Quick Ask",
+    "selectionTitle": "Quick Ask — Selection",
+    "selectionSubtitle": "Act on copied text, ready to paste",
+    "selectionEmptyHint": "Copy some text first (Ctrl/Cmd+C), then use this shortcut again.",
+    "selectionPlaceholder": "Copy text first, or type a question…",
+    "selectionTruncated": "Clipboard text was truncated to 32 KB.",
+    "selectionShortcutLabel": "Selection shortcut",
+    "selectionShortcutHint": "Copy text in another app, then press this shortcut. Electron format, e.g. CommandOrControl+Shift+Y",
+    "copyResult": "Copy result",
+    "copied": "Copied",
+    "uiLanguageName": "English",
+    "actions": {
+      "summarize": "Summarize",
+      "translate": "Translate",
+      "rephrase": "Rephrase",
+      "correct": "Fix"
+    },
+    "templates": {
+      "summarize": "Summarize the following text concisely:\n\n{{text}}",
+      "translate": "Translate the following text into {{language}}:\n\n{{text}}",
+      "rephrase": "Rephrase the following text clearly, preserving meaning:\n\n{{text}}",
+      "correct": "Correct spelling, grammar, and clarity in the following text. Return only the corrected text:\n\n{{text}}"
+    }
   },
   "presets": {
     "pickerTitle": "Choose a preset",

@@ -24,6 +24,7 @@ import {
   normalizeWebSearchConfig,
   normalizeWorkspaceTooling,
   nowISO,
+  DEFAULT_QUICK_ASK_SELECTION_SHORTCUT,
   DEFAULT_QUICK_ASK_SHORTCUT,
   profileKeyFromProvider,
   toBoolean,
@@ -393,6 +394,10 @@ export function normalizeConfig(rawConfig: Partial<AppConfig> | undefined): AppC
       normalizeQuickAskShortcut(raw.quickAskShortcut) ||
       defaultConfig.quickAskShortcut ||
       DEFAULT_QUICK_ASK_SHORTCUT,
+    quickAskSelectionShortcut:
+      normalizeQuickAskShortcut(raw.quickAskSelectionShortcut) ||
+      defaultConfig.quickAskSelectionShortcut ||
+      DEFAULT_QUICK_ASK_SELECTION_SHORTCUT,
     ollamaKeepAlive: normalizeOllamaKeepAlive(
       typeof raw.ollamaKeepAlive === 'string' || typeof raw.ollamaKeepAlive === 'number'
         ? raw.ollamaKeepAlive

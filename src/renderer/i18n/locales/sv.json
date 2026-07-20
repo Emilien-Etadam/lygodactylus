@@ -1246,7 +1246,29 @@
     "shortcutInvalid": "Ogiltigt genvägsformat.",
     "shortcutTaken": "Denna genväg används redan av systemet eller en annan app.",
     "shortcutRegisterFailed": "Kunde inte registrera den globala genvägen.",
-    "sessionTitle": "Quick Ask"
+    "sessionTitle": "Quick Ask",
+    "selectionTitle": "Quick Ask — Markering",
+    "selectionSubtitle": "Arbeta med kopierad text, klar att klistra in",
+    "selectionEmptyHint": "Kopiera först text (Ctrl/Cmd+C) och använd sedan genvägen igen.",
+    "selectionPlaceholder": "Kopiera text först eller skriv en fråga…",
+    "selectionTruncated": "Urklippstexten kapades till 32 KB.",
+    "selectionShortcutLabel": "Markeringsgenväg",
+    "selectionShortcutHint": "Kopiera text i en annan app och tryck sedan på den här genvägen. Electron-format, t.ex. CommandOrControl+Shift+Y",
+    "copyResult": "Kopiera resultatet",
+    "copied": "Kopierat",
+    "uiLanguageName": "svenska",
+    "actions": {
+      "summarize": "Sammanfatta",
+      "translate": "Översätt",
+      "rephrase": "Omformulera",
+      "correct": "Korrigera"
+    },
+    "templates": {
+      "summarize": "Sammanfatta följande text kortfattat:\n\n{{text}}",
+      "translate": "Översätt följande text till {{language}}:\n\n{{text}}",
+      "rephrase": "Omformulera följande text tydligt och behåll betydelsen:\n\n{{text}}",
+      "correct": "Korrigera stavning, grammatik och tydlighet i följande text. Returnera endast den korrigerade texten:\n\n{{text}}"
+    }
   },
   "presets": {
     "pickerTitle": "Välj en förinställning",

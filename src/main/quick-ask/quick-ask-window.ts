@@ -5,10 +5,18 @@
  */
 import { BrowserWindow, screen } from 'electron';
 import { join } from 'path';
+import type { QuickAskOpenedPayload } from '../../shared/quick-ask';
 import { configStore } from '../config/config-store';
 import { log, logError, logWarn } from '../utils/logger';
 import { mainAppState } from '../main-app-state';
 import { getSavedThemePreference, resolveEffectiveTheme } from '../main-app-window';
+
+const DEFAULT_OPENED_PAYLOAD: QuickAskOpenedPayload = {
+  mode: 'ask',
+  sourceText: '',
+  truncated: false,
+  empty: false,
+};
 
 const QUICK_ASK_WIDTH = 640;
 const QUICK_ASK_HEIGHT = 420;
@@ -115,7 +123,22 @@ export function hideQuickAskWindow(): void {
   }
 }
 
-export function showQuickAskWindow(): void {
+function sendOpenedEvent(win: BrowserWindow, payload: QuickAskOpenedPayload): void {
+  const event = { type: 'quickAsk.opened' as const, payload };
+  if (!win.webContents.isLoading()) {
+    win.webContents.send('server-event', event);
+  } else {
+    win.webContents.once('did-finish-load', () => {
+      if (!win.isDestroyed()) {
+        win.webContents.send('server-event', event);
+      }
+    });
+  }
+}
+
+export function showQuickAskWindow(
+  opened: QuickAskOpenedPayload = DEFAULT_OPENED_PAYLOAD
+): void {
   if (!configStore.get('quickAskEnabled')) {
     logWarn('[QuickAsk] show requested while feature disabled');
     return;
@@ -130,20 +153,10 @@ export function showQuickAskWindow(): void {
   win.setBounds(bounds);
   win.show();
   win.focus();
-
-  // Notify renderer to reset the prompt field for this opening.
-  if (!win.webContents.isLoading()) {
-    win.webContents.send('server-event', { type: 'quickAsk.opened' });
-  } else {
-    win.webContents.once('did-finish-load', () => {
-      if (!win.isDestroyed()) {
-        win.webContents.send('server-event', { type: 'quickAsk.opened' });
-      }
-    });
-  }
+  sendOpenedEvent(win, opened);
 }
 
-/** Toggle visibility — used by the global shortcut. */
+/** Toggle visibility — used by the Ask global shortcut. */
 export function toggleQuickAskWindow(): void {
   if (!configStore.get('quickAskEnabled')) {
     return;
@@ -154,7 +167,14 @@ export function toggleQuickAskWindow(): void {
     win.hide();
     return;
   }
-  showQuickAskWindow();
+  showQuickAskWindow(DEFAULT_OPENED_PAYLOAD);
+}
+
+/**
+ * Always show (never toggle-hide) in Sélection mode with the given clipboard payload.
+ */
+export function showQuickAskSelectionWindow(opened: QuickAskOpenedPayload): void {
+  showQuickAskWindow({ ...opened, mode: 'selection' });
 }
 
 export function destroyQuickAskWindow(): void {

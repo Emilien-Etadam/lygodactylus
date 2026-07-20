@@ -1,16 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import {
+  DEFAULT_QUICK_ASK_SELECTION_SHORTCUT,
   DEFAULT_QUICK_ASK_SHORTCUT,
   isValidQuickAskShortcut,
   normalizeQuickAskShortcut,
 } from '../../shared/quick-ask';
 
 describe('normalizeQuickAskShortcut / isValidQuickAskShortcut', () => {
-  it('accepts the default shortcut', () => {
+  it('accepts the default Ask and Sélection shortcuts', () => {
     expect(normalizeQuickAskShortcut(DEFAULT_QUICK_ASK_SHORTCUT)).toBe(
       DEFAULT_QUICK_ASK_SHORTCUT
     );
     expect(isValidQuickAskShortcut(DEFAULT_QUICK_ASK_SHORTCUT)).toBe(true);
+    expect(normalizeQuickAskShortcut(DEFAULT_QUICK_ASK_SELECTION_SHORTCUT)).toBe(
+      DEFAULT_QUICK_ASK_SELECTION_SHORTCUT
+    );
+    expect(isValidQuickAskShortcut(DEFAULT_QUICK_ASK_SELECTION_SHORTCUT)).toBe(true);
   });
 
   it('accepts common Electron accelerators', () => {

@@ -84,6 +84,7 @@ function makeConfig(): AppConfig {
     workspaceTooling: {},
     quickAskEnabled: false,
     quickAskShortcut: 'CommandOrControl+Shift+Space',
+    quickAskSelectionShortcut: 'CommandOrControl+Shift+Y',
     ollamaKeepAlive: '30m',
     constrainedOutput: 'auto',
     constrainedOutputCapability: null,

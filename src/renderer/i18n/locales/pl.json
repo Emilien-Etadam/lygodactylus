@@ -1246,7 +1246,29 @@
     "shortcutInvalid": "Nieprawidłowy format skrótu.",
     "shortcutTaken": "Ten skrót jest już zajęty przez system lub inną aplikację.",
     "shortcutRegisterFailed": "Nie udało się zarejestrować globalnego skrótu.",
-    "sessionTitle": "Quick Ask"
+    "sessionTitle": "Quick Ask",
+    "selectionTitle": "Quick Ask — Zaznaczenie",
+    "selectionSubtitle": "Działaj na skopiowanym tekście, gotowe do wklejenia",
+    "selectionEmptyHint": "Najpierw skopiuj tekst (Ctrl/Cmd+C), a potem użyj ponownie tego skrótu.",
+    "selectionPlaceholder": "Najpierw skopiuj tekst albo wpisz pytanie…",
+    "selectionTruncated": "Tekst schowka został obcięty do 32 KB.",
+    "selectionShortcutLabel": "Skrót zaznaczenia",
+    "selectionShortcutHint": "Skopiuj tekst w innej aplikacji, a następnie naciśnij ten skrót. Format Electron, np. CommandOrControl+Shift+Y",
+    "copyResult": "Kopiuj wynik",
+    "copied": "Skopiowano",
+    "uiLanguageName": "polski",
+    "actions": {
+      "summarize": "Podsumuj",
+      "translate": "Przetłumacz",
+      "rephrase": "Przeformułuj",
+      "correct": "Popraw"
+    },
+    "templates": {
+      "summarize": "Podsumuj zwięźle poniższy tekst:\n\n{{text}}",
+      "translate": "Przetłumacz poniższy tekst na język {{language}}:\n\n{{text}}",
+      "rephrase": "Przeformułuj jasno poniższy tekst, zachowując znaczenie:\n\n{{text}}",
+      "correct": "Popraw pisownię, gramatykę i jasność poniższego tekstu. Zwróć tylko poprawiony tekst:\n\n{{text}}"
+    }
   },
   "presets": {
     "pickerTitle": "Wybierz preset",

@@ -1,11 +1,15 @@
 import { FormEvent, Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowUpRight, Loader2, Send } from 'lucide-react';
+import { ArrowUpRight, Check, ClipboardCopy, Loader2, Send } from 'lucide-react';
 import { useIPC } from '../hooks/useIPC';
 import { useAppStore } from '../store';
 import {
+  QUICK_ASK_SELECTION_ACTIONS,
   QUICK_ASK_SESSION_TITLE,
+  applyQuickAskActionTemplate,
   resolveQuickAskSessionAction,
+  type QuickAskOpenMode,
+  type QuickAskSelectionAction,
 } from '../../shared/quick-ask';
 
 const MessageMarkdown = lazy(() =>
@@ -32,9 +36,14 @@ export function QuickAskView() {
   const setShowSettings = useAppStore((s) => s.setShowSettings);
 
   const [prompt, setPrompt] = useState('');
+  const [mode, setMode] = useState<QuickAskOpenMode>('ask');
+  const [sourceText, setSourceText] = useState('');
+  const [clipboardEmpty, setClipboardEmpty] = useState(false);
+  const [truncated, setTruncated] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [turnStartedAt, setTurnStartedAt] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (isElectron) {
@@ -42,16 +51,31 @@ export function QuickAskView() {
     }
   }, [isElectron, listSessions]);
 
-  // Reset the prompt field each time the window is (re)opened.
+  // Reset / hydrate the prompt field each time the window is (re)opened.
   useEffect(() => {
     if (!window.electronAPI?.on) {
       return;
     }
     return window.electronAPI.on((event) => {
-      if (event.type === 'quickAsk.opened') {
+      if (event.type !== 'quickAsk.opened') {
+        return;
+      }
+      const payload = event.payload;
+      const nextMode = payload?.mode === 'selection' ? 'selection' : 'ask';
+      setMode(nextMode);
+      setTurnStartedAt(null);
+      setIsSubmitting(false);
+      setCopied(false);
+      if (nextMode === 'selection') {
+        setSourceText(payload.sourceText);
+        setPrompt(payload.sourceText);
+        setClipboardEmpty(payload.empty === true);
+        setTruncated(payload.truncated === true);
+      } else {
+        setSourceText('');
         setPrompt('');
-        setTurnStartedAt(null);
-        setIsSubmitting(false);
+        setClipboardEmpty(false);
+        setTruncated(false);
       }
     });
   }, []);
@@ -101,6 +125,21 @@ export function QuickAskView() {
     : undefined;
   const isRunning = sessionStatus === 'running' || isSubmitting;
 
+  const applyActionChip = useCallback(
+    (action: QuickAskSelectionAction) => {
+      if (!sourceText) {
+        return;
+      }
+      const template = t(`quickAsk.templates.${action}`);
+      const next = applyQuickAskActionTemplate(template, {
+        text: sourceText,
+        language: t('quickAsk.uiLanguageName'),
+      });
+      setPrompt(next);
+    },
+    [sourceText, t]
+  );
+
   const handleSubmit = useCallback(
     async (event?: FormEvent) => {
       event?.preventDefault();
@@ -112,6 +151,7 @@ export function QuickAskView() {
       setIsSubmitting(true);
       setTurnStartedAt(Date.now());
       setShowSettings(false);
+      setCopied(false);
 
       try {
         const action = resolveQuickAskSessionAction(sessions);
@@ -158,12 +198,43 @@ export function QuickAskView() {
     window.electronAPI?.window?.openSessionInMain?.(sessionId);
   }, [sessionId]);
 
+  const handleCopyResult = useCallback(async () => {
+    const text = assistantReply.text.trim();
+    if (!text) {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  }, [assistantReply.text]);
+
+  useEffect(() => {
+    if (!copied) {
+      return;
+    }
+    const timer = window.setTimeout(() => setCopied(false), 2000);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
+
+  const title =
+    mode === 'selection' ? t('quickAsk.selectionTitle') : t('quickAsk.title');
+  const subtitle =
+    mode === 'selection' ? t('quickAsk.selectionSubtitle') : t('quickAsk.subtitle');
+  const emptyHint =
+    mode === 'selection' && clipboardEmpty
+      ? t('quickAsk.selectionEmptyHint')
+      : t('quickAsk.emptyHint');
+  const showCopyButton = Boolean(assistantReply.text) && !assistantReply.streaming;
+
   return (
     <div className="h-full w-full min-h-0 flex flex-col bg-background text-text-primary overflow-hidden">
       <header className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border-subtle shrink-0 titlebar-drag">
         <div className="min-w-0">
-          <h1 className="text-sm font-semibold truncate">{t('quickAsk.title')}</h1>
-          <p className="text-xs text-text-muted truncate">{t('quickAsk.subtitle')}</p>
+          <h1 className="text-sm font-semibold truncate">{title}</h1>
+          <p className="text-xs text-text-muted truncate">{subtitle}</p>
         </div>
         <button
           type="button"
@@ -178,7 +249,7 @@ export function QuickAskView() {
 
       <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 titlebar-no-drag">
         {!assistantReply.text && !isRunning ? (
-          <p className="text-sm text-text-muted">{t('quickAsk.emptyHint')}</p>
+          <p className="text-sm text-text-muted">{emptyHint}</p>
         ) : (
           <Suspense fallback={<p className="text-sm text-text-muted">…</p>}>
             {isRunning && !assistantReply.text ? (
@@ -187,10 +258,26 @@ export function QuickAskView() {
                 {t('quickAsk.thinking')}
               </div>
             ) : (
-              <MessageMarkdown
-                normalizedText={assistantReply.text}
-                isStreaming={assistantReply.streaming}
-              />
+              <div className="space-y-3">
+                <MessageMarkdown
+                  normalizedText={assistantReply.text}
+                  isStreaming={assistantReply.streaming}
+                />
+                {showCopyButton && (
+                  <button
+                    type="button"
+                    onClick={() => void handleCopyResult()}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-accent text-white text-sm font-medium hover:opacity-90"
+                  >
+                    {copied ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <ClipboardCopy className="w-4 h-4" />
+                    )}
+                    {copied ? t('quickAsk.copied') : t('quickAsk.copyResult')}
+                  </button>
+                )}
+              </div>
             )}
           </Suspense>
         )}
@@ -198,34 +285,62 @@ export function QuickAskView() {
 
       <form
         onSubmit={(event) => void handleSubmit(event)}
-        className="shrink-0 border-t border-border-subtle px-3 py-3 flex items-end gap-2 titlebar-no-drag"
+        className="shrink-0 border-t border-border-subtle px-3 py-3 space-y-2 titlebar-no-drag"
       >
-        <textarea
-          value={prompt}
-          onChange={(event) => setPrompt(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-              event.preventDefault();
-              void handleSubmit();
+        {mode === 'selection' && (
+          <div className="space-y-1.5">
+            {truncated && (
+              <p className="text-xs text-amber-600 dark:text-amber-400">
+                {t('quickAsk.selectionTruncated')}
+              </p>
+            )}
+            <div className="flex flex-wrap gap-1.5">
+              {QUICK_ASK_SELECTION_ACTIONS.map((action) => (
+                <button
+                  key={action}
+                  type="button"
+                  disabled={clipboardEmpty || !sourceText || isRunning}
+                  onClick={() => applyActionChip(action)}
+                  className="px-2.5 py-1 rounded-md border border-border bg-surface hover:bg-surface-hover text-xs font-medium disabled:opacity-40"
+                >
+                  {t(`quickAsk.actions.${action}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="flex items-end gap-2">
+          <textarea
+            value={prompt}
+            onChange={(event) => setPrompt(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                void handleSubmit();
+              }
+            }}
+            rows={2}
+            placeholder={
+              mode === 'selection' && clipboardEmpty
+                ? t('quickAsk.selectionPlaceholder')
+                : t('quickAsk.placeholder')
             }
-          }}
-          rows={2}
-          placeholder={t('quickAsk.placeholder')}
-          className="flex-1 min-h-[2.75rem] max-h-28 resize-none rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent"
-          autoFocus
-        />
-        <button
-          type="submit"
-          disabled={!prompt.trim() || isRunning}
-          className="inline-flex items-center justify-center h-10 w-10 rounded-lg bg-accent text-white disabled:opacity-40"
-          aria-label={t('quickAsk.send')}
-        >
-          {isRunning ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Send className="w-4 h-4" />
-          )}
-        </button>
+            className="flex-1 min-h-[2.75rem] max-h-28 resize-none rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent"
+            autoFocus
+          />
+          <button
+            type="submit"
+            disabled={!prompt.trim() || isRunning}
+            className="inline-flex items-center justify-center h-10 w-10 rounded-lg bg-accent text-white disabled:opacity-40"
+            aria-label={t('quickAsk.send')}
+          >
+            {isRunning ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Send className="w-4 h-4" />
+            )}
+          </button>
+        </div>
       </form>
     </div>
   );

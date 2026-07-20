@@ -1246,7 +1246,29 @@
     "shortcutInvalid": "Format de scurtătură invalid.",
     "shortcutTaken": "Această scurtătură este deja folosită de sistem sau altă aplicație.",
     "shortcutRegisterFailed": "Nu s-a putut înregistra scurtătura globală.",
-    "sessionTitle": "Quick Ask"
+    "sessionTitle": "Quick Ask",
+    "selectionTitle": "Quick Ask — Selecție",
+    "selectionSubtitle": "Acționează pe textul copiat, gata de lipit",
+    "selectionEmptyHint": "Copiază mai întâi un text (Ctrl/Cmd+C), apoi folosește din nou această comandă rapidă.",
+    "selectionPlaceholder": "Copiază mai întâi text sau scrie o întrebare…",
+    "selectionTruncated": "Textul din clipboard a fost trunchiat la 32 KB.",
+    "selectionShortcutLabel": "Comandă rapidă selecție",
+    "selectionShortcutHint": "Copiază text într-o altă aplicație, apoi apasă această comandă. Format Electron, ex. CommandOrControl+Shift+Y",
+    "copyResult": "Copiază rezultatul",
+    "copied": "Copiat",
+    "uiLanguageName": "română",
+    "actions": {
+      "summarize": "Rezumă",
+      "translate": "Traduce",
+      "rephrase": "Reformulează",
+      "correct": "Corectează"
+    },
+    "templates": {
+      "summarize": "Rezumă concis următorul text:\n\n{{text}}",
+      "translate": "Traduce următorul text în {{language}}:\n\n{{text}}",
+      "rephrase": "Reformulează clar următorul text, păstrând sensul:\n\n{{text}}",
+      "correct": "Corectează ortografia, gramatica și claritatea următorului text. Returnează doar textul corectat:\n\n{{text}}"
+    }
   },
   "presets": {
     "pickerTitle": "Alege o presetare",
