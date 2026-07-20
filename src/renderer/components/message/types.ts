@@ -5,6 +5,7 @@ import type {
   ToolUseContent,
   ToolResultContent,
 } from '../../types';
+import type { WebCitationSource } from '../../../shared/web-citation';
 
 export type { Message, ContentBlock, ToolUseContent, ToolResultContent };
 
@@ -16,6 +17,8 @@ export interface ContentBlockViewProps {
   allBlocks?: ContentBlock[];
   /** The full message, used to search across all session messages */
   message?: Message;
+  /** Numbered web sources for the current turn; enables [n] linkification */
+  citationSources?: WebCitationSource[];
 }
 
 export interface ToolBlockBaseProps {

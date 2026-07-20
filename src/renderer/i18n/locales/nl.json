@@ -823,7 +823,9 @@
     "copyThinking": "Denkproces kopiëren",
     "speakMessage": "Voorlezen",
     "stopSpeaking": "Stoppen met voorlezen",
-    "tokensPerSecond": "{{rate}} tok/s"
+    "tokensPerSecond": "{{rate}} tok/s",
+    "sources": "Bronnen",
+    "sourcesEmpty": "Geen bronnen"
   },
   "schedule": {
     "createTitle": "Planning maken",

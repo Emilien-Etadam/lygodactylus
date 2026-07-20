@@ -823,7 +823,9 @@
     "copyThinking": "Copiar reflexión",
     "speakMessage": "Leer en voz alta",
     "stopSpeaking": "Detener lectura",
-    "tokensPerSecond": "{{rate}} tok/s"
+    "tokensPerSecond": "{{rate}} tok/s",
+    "sources": "Fuentes",
+    "sourcesEmpty": "Sin fuentes"
   },
   "schedule": {
     "createTitle": "Crear programación",

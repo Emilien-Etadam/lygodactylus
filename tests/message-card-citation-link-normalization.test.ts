@@ -22,8 +22,9 @@ describe('MessageCard citation link normalization', () => {
       "return markdown.replace(/~\\[(.+?)\\]\\(([^)\\s]+)\\)~/g, '[$1]($2)');"
     );
     expect(messageCardContent).toContain(
-      'normalizeLocalFileMarkdownLinks(normalizeLatexDelimiters(text))'
+      'normalizeLocalFileMarkdownLinks(normalizeLatexDelimiters(withCitationLinks))'
     );
+    expect(messageCardContent).toContain('linkifyCitationMarkers');
   });
 
   it('disables remark-gfm single-tilde strikethrough parsing for safety', () => {

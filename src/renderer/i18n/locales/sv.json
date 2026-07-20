@@ -823,7 +823,9 @@
     "copyThinking": "Kopiera tänkande",
     "speakMessage": "Läs upp",
     "stopSpeaking": "Stoppa uppläsning",
-    "tokensPerSecond": "{{rate}} tok/s"
+    "tokensPerSecond": "{{rate}} tok/s",
+    "sources": "Källor",
+    "sourcesEmpty": "Inga källor"
   },
   "schedule": {
     "createTitle": "Skapa schema",

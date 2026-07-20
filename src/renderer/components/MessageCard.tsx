@@ -4,16 +4,28 @@ import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Clock, XCircle, GitBranch, Pencil } from 'lucide-react';
 import type { Message, ContentBlock, ToolUseContent, ToolResultContent } from '../types';
+import { useAppStore } from '../store';
 import { useAppConfig } from '../store/selectors';
 import { ContentBlockView } from './message/ContentBlockView';
 import { CopyButton } from './message/CopyButton';
 import { SpeakButton } from './message/SpeakButton';
+import { MessageSourcesCard } from './message/MessageSourcesCard';
+import {
+  collectWebSourcesForAssistantMessage,
+  getAssistantPlainText,
+  getTurnMessages,
+} from '../utils/web-citation-sources';
+import type { WebCitationSource } from '../../shared/web-citation';
 
 interface MessageCardProps {
   message: Message;
   isStreaming?: boolean;
   onFork?: () => void;
   onEditPrompt?: () => void;
+}
+
+function messageHasText(message: Message): boolean {
+  return getAssistantPlainText(message).trim().length > 0;
 }
 
 export const MessageCard = memo(function MessageCard({
@@ -29,6 +41,13 @@ export const MessageCard = memo(function MessageCard({
   const isSystem = message.role === 'system';
   const isQueued = message.localStatus === 'queued';
   const isCancelled = message.localStatus === 'cancelled';
+  const sessionMessages = useAppStore((s) =>
+    message.sessionId ? (s.sessionStates[message.sessionId]?.messages ?? []) : []
+  );
+  const traceSteps = useAppStore((s) =>
+    message.sessionId ? (s.sessionStates[message.sessionId]?.traceSteps ?? []) : []
+  );
+
   const contentBlocks = useMemo(() => {
     const rawContent = message.content as unknown;
     return Array.isArray(rawContent)
@@ -59,6 +78,25 @@ export const MessageCard = memo(function MessageCard({
         .join('\n'),
     [contentBlocks]
   );
+
+  const webSources = useMemo((): WebCitationSource[] => {
+    if (isUser || isSystem || !message.sessionId) {
+      return [];
+    }
+    return collectWebSourcesForAssistantMessage(sessionMessages, message, traceSteps);
+  }, [isUser, isSystem, message, sessionMessages, traceSteps]);
+
+  const showSourcesCard = useMemo(() => {
+    if (webSources.length === 0 || !textContent.trim()) {
+      return false;
+    }
+    const turnMessages = getTurnMessages(sessionMessages, message);
+    const textAssistants = turnMessages.filter(
+      (item) => item.role === 'assistant' && messageHasText(item)
+    );
+    const lastTextAssistant = textAssistants[textAssistants.length - 1];
+    return lastTextAssistant?.id === message.id;
+  }, [webSources.length, textContent, sessionMessages, message]);
 
   const hasCopyableText = textContent.length > 0;
 
@@ -163,9 +201,11 @@ export const MessageCard = memo(function MessageCard({
                 isStreaming={isStreaming}
                 allBlocks={contentBlocks}
                 message={message}
+                citationSources={webSources}
               />
             );
           })}
+          {showSourcesCard && <MessageSourcesCard sources={webSources} />}
         </div>
       )}
     </div>

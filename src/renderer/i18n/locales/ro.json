@@ -823,7 +823,9 @@
     "copyThinking": "Copiază gândirea",
     "speakMessage": "Citește mesajul",
     "stopSpeaking": "Oprește citirea",
-    "tokensPerSecond": "{{rate}} tok/s"
+    "tokensPerSecond": "{{rate}} tok/s",
+    "sources": "Surse",
+    "sourcesEmpty": "Nicio sursă"
   },
   "schedule": {
     "createTitle": "Creează programare",
