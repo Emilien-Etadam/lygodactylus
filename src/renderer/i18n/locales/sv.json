@@ -1258,5 +1258,9 @@
     "created": "Förinställning skapad.",
     "updated": "Förinställning uppdaterad.",
     "deleted": "Förinställning borttagen."
+  },
+  "endpointLocation": {
+    "local": "Lokal",
+    "remote": "Fjärr"
   }
 }

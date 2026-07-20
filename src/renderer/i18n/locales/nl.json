@@ -1258,5 +1258,9 @@
     "created": "Preset aangemaakt.",
     "updated": "Preset bijgewerkt.",
     "deleted": "Preset verwijderd."
+  },
+  "endpointLocation": {
+    "local": "Lokaal",
+    "remote": "Extern"
   }
 }
