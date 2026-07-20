@@ -52,16 +52,15 @@ import {
   resolveSyntheticPiModelFallback,
 } from './pi-model-resolution';
 import {
-  parseSlashCommand,
   normalizePluginSlashPromptForExpansion,
 } from '../../shared/slash-commands';
+import { assertMainProcessAcceptsSlashPrompt } from './assert-main-slash-command';
 import {
   filterToolsForSessionMode,
   getPlanModeExcludedBuiltinTools,
   normalizeSessionMode,
   PLAN_MODE_SYSTEM_PROMPT,
 } from '../../shared/session-mode';
-import { mt } from '../i18n';
 import { buildPiSessionRuntimeSignature } from './pi-session-runtime';
 import { getSharedAuthStorage } from './shared-auth';
 import { createWindowsBashOperations } from './windows-bash-operations';
@@ -317,14 +316,7 @@ export async function preparePiSessionRun({
     sessionMode,
   });
   const pluginSlashCommands = ctx.skillsPaths.listPluginSlashCommands();
-  const slashParsed = parseSlashCommand(prompt.trim(), pluginSlashCommands);
-  if (slashParsed.kind === 'unknown') {
-    const error = new Error(
-      mt('errUnknownSlashCommand', { command: `/${slashParsed.token}` })
-    ) as Error & { alreadyReportedToUser?: boolean };
-    error.alreadyReportedToUser = true;
-    throw error;
-  }
+  assertMainProcessAcceptsSlashPrompt(prompt, pluginSlashCommands);
   const normalizedPrompt = normalizePluginSlashPromptForExpansion(prompt, pluginSlashCommands);
 
   const skillPaths = await ctx.skillsPaths.resolveSkillPaths(session.id);
