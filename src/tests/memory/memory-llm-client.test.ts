@@ -20,7 +20,10 @@ vi.mock('openai', () => ({
 }));
 
 import type { AppConfig } from '../../main/config/config-store';
-import { DEFAULT_WEB_SEARCH_CONFIG } from '../../main/config/config-store';
+import {
+  DEFAULT_PII_SCRUB_CONFIG,
+  DEFAULT_WEB_SEARCH_CONFIG,
+} from '../../main/config/config-store';
 import { MemoryLLMClient } from '../../main/memory/memory-llm-client';
 
 function makeConfig(timeoutMs: number, overrides: Partial<AppConfig> = {}): AppConfig {
@@ -81,6 +84,7 @@ function makeConfig(timeoutMs: number, overrides: Partial<AppConfig> = {}): AppC
       promptIterationRounds: 2,
     },
     webSearch: { ...DEFAULT_WEB_SEARCH_CONFIG },
+    piiScrub: { ...DEFAULT_PII_SCRUB_CONFIG, customTerms: [] },
     enableThinking: false,
     thinkingLevel: 'medium',
     speechSynthesisEnabled: false,

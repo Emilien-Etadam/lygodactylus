@@ -1379,5 +1379,17 @@
       "rss": "https://beispiel.de/feed.xml",
       "url": "https://beispiel.de/seite"
     }
+  },
+  "piiScrub": {
+    "title": "Personenbezogene Daten maskieren",
+    "description": "Vor ausgehenden Aufrufen (Websuche, HTTP-Fetch, MCP-Tools) werden E-Mails, Telefonnummern, IBANs, Karten und eigene Begriffe durch reversible Token ersetzt. Standardmäßig aus.",
+    "customTerms": "Eigene Begriffe",
+    "customTermsPlaceholder": "Ein Begriff pro Zeile (Namen, Adressen…)",
+    "customTermsHint": "Wörtliche, groß-/kleinschreibungsunabhängige Übereinstimmung. Regex-Zeichen gelten als Text.",
+    "save": "Speichern",
+    "saved": "Maskierungseinstellungen gespeichert."
+  },
+  "tools": {
+    "piiMasked": "{{count}} Elemente maskiert"
   }
 }

@@ -1379,5 +1379,17 @@
       "rss": "https://ejemplo.com/feed.xml",
       "url": "https://ejemplo.com/pagina"
     }
+  },
+  "piiScrub": {
+    "title": "Enmascaramiento de datos personales",
+    "description": "Antes de las llamadas salientes (búsqueda web, fetch HTTP, herramientas MCP), sustituye correos, teléfonos, IBAN, tarjetas y términos personalizados por tokens reversibles. Desactivado por defecto.",
+    "customTerms": "Términos personalizados",
+    "customTermsPlaceholder": "Un término por línea (nombres, direcciones…)",
+    "customTermsHint": "Coincidencia literal, sin distinguir mayúsculas. Los caracteres de regex se tratan como texto.",
+    "save": "Guardar",
+    "saved": "Ajustes de enmascaramiento guardados."
+  },
+  "tools": {
+    "piiMasked": "{{count}} elementos enmascarados"
   }
 }

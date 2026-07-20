@@ -1379,5 +1379,17 @@
       "rss": "https://exemplu.ro/feed.xml",
       "url": "https://exemplu.ro/pagina"
     }
+  },
+  "piiScrub": {
+    "title": "Mascare date personale",
+    "description": "Înainte de apelurile de ieșire (căutare web, fetch HTTP, instrumente MCP), înlocuiește e-mailuri, telefoane, IBAN, carduri și termeni personalizați cu jetoane reversibile. Dezactivat implicit.",
+    "customTerms": "Termeni personalizați",
+    "customTermsPlaceholder": "Un termen pe linie (nume, adrese…)",
+    "customTermsHint": "Potrivire literală, fără diferențiere majuscule. Caracterele regex sunt text simplu.",
+    "save": "Salvează",
+    "saved": "Setările de mascare au fost salvate."
+  },
+  "tools": {
+    "piiMasked": "{{count}} elemente mascate"
   }
 }

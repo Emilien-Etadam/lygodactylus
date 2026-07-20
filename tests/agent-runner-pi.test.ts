@@ -200,8 +200,10 @@ describe('AgentRunner Lygodactylus SDK integration', () => {
       "import { normalizeMcpToolResultForModel } from './tool-result-utils'"
     );
     expect(agentRunnerMcpBridgeContent).toContain(
-      'const normalizedResult = normalizeMcpToolResultForModel(result);'
+      'const normalizedResult = normalizeMcpToolResultForModel(restored);'
     );
+    expect(agentRunnerMcpBridgeContent).toContain('beginPiiScrubSession');
+    expect(agentRunnerMcpBridgeContent).toContain('mcpManager.callTool(mcpTool.name, scrubbedArgs)');
     expect(agentRunnerStreamToolEventsContent).toContain(
       'const normalizedToolResult = normalizeToolExecutionResultForUi(event.result);'
     );

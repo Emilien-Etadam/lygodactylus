@@ -21,6 +21,7 @@ import {
   normalizeMemoryRuntimeConfig,
   normalizeOllamaKeepAlive,
   normalizeQuickAskShortcut,
+  normalizePiiScrubConfig,
   normalizeWebSearchConfig,
   normalizeWorkspaceTooling,
   nowISO,
@@ -378,6 +379,7 @@ export function normalizeConfig(rawConfig: Partial<AppConfig> | undefined): AppC
     memoryEnabled: toBoolean(raw.memoryEnabled, defaultConfig.memoryEnabled),
     memoryRuntime: normalizeMemoryRuntimeConfig(raw.memoryRuntime),
     webSearch: normalizeWebSearchConfig(raw.webSearch),
+    piiScrub: normalizePiiScrubConfig(raw.piiScrub),
     enableThinking: projected.enableThinking,
     thinkingLevel: isThinkingLevel(raw.thinkingLevel)
       ? raw.thinkingLevel

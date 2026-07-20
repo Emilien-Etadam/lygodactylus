@@ -57,7 +57,8 @@ export type BackendMessageKey =
   | 'checkpointRestoreInvalidArgs'
   | 'checkpointRestoreRunInProgress'
   | 'checkpointRestoreNotFound'
-  | 'checkpointRestoreFailed';
+  | 'checkpointRestoreFailed'
+  | 'errPiiScrubFailed';
 
 export type BackendMessages = Record<BackendMessageKey, string>;
 
@@ -138,6 +139,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     checkpointRestoreRunInProgress: '当前会话仍有正在运行的任务，无法撤销此运行。',
     checkpointRestoreNotFound: '找不到此运行的检查点。',
     checkpointRestoreFailed: '撤销此运行的更改失败。',
+    errPiiScrubFailed: '出站调用前的个人数据脱敏失败；调用已阻止（故障封闭）。',
   },
   en: {
     errModelTimeout:
@@ -203,6 +205,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     checkpointRestoreRunInProgress: 'A run is still in progress on this session; cannot undo.',
     checkpointRestoreNotFound: 'No checkpoint found for this run.',
     checkpointRestoreFailed: 'Failed to undo changes from this run.',
+    errPiiScrubFailed: 'Personal data masking failed before the outbound call; the call was blocked (fail-closed).',
   },
   es: {
     errModelTimeout:
@@ -268,6 +271,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     checkpointRestoreRunInProgress: 'Todavía hay una ejecución en curso en esta sesión; no se puede deshacer.',
     checkpointRestoreNotFound: 'No se encontró ningún punto de control para esta ejecución.',
     checkpointRestoreFailed: 'No se pudieron deshacer los cambios de esta ejecución.',
+    errPiiScrubFailed: 'Falló el enmascaramiento de datos personales antes de la llamada saliente; la llamada se bloqueó (fail-closed).',
   },
   fr: {
     errModelTimeout:
@@ -333,6 +337,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     checkpointRestoreRunInProgress: 'Une exécution est encore en cours sur cette session ; annulation impossible.',
     checkpointRestoreNotFound: 'Aucun point de contrôle trouvé pour ce run.',
     checkpointRestoreFailed: 'Échec de l\'annulation des changements de ce run.',
+    errPiiScrubFailed: 'Échec du masquage des données personnelles avant l\'appel sortant ; l\'appel a été bloqué (fail-closed).',
   },
   de: {
     errModelTimeout:
@@ -398,6 +403,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     checkpointRestoreRunInProgress: 'In dieser Sitzung läuft noch ein Run; Rückgängigmachen nicht möglich.',
     checkpointRestoreNotFound: 'Kein Checkpoint für diesen Run gefunden.',
     checkpointRestoreFailed: 'Änderungen dieses Runs konnten nicht rückgängig gemacht werden.',
+    errPiiScrubFailed: 'Maskierung personenbezogener Daten vor dem ausgehenden Aufruf fehlgeschlagen; Aufruf blockiert (fail-closed).',
   },
   it: {
     errModelTimeout:
@@ -465,6 +471,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
       "È ancora in corso un'esecuzione su questa sessione; impossibile annullare.",
     checkpointRestoreNotFound: 'Nessun checkpoint trovato per questa esecuzione.',
     checkpointRestoreFailed: 'Impossibile annullare le modifiche di questa esecuzione.',
+    errPiiScrubFailed: 'Mascheramento dei dati personali non riuscito prima della chiamata in uscita; chiamata bloccata (fail-closed).',
   },
   uk: {
     errModelTimeout:
@@ -530,6 +537,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     checkpointRestoreRunInProgress: 'У цій сесії все ще виконується запуск; скасування неможливе.',
     checkpointRestoreNotFound: 'Контрольну точку для цього запуску не знайдено.',
     checkpointRestoreFailed: 'Не вдалося скасувати зміни цього запуску.',
+    errPiiScrubFailed: 'Не вдалося замаскувати персональні дані перед вихідним викликом; виклик заблоковано (fail-closed).',
   },
   pl: {
     errModelTimeout:
@@ -595,6 +603,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     checkpointRestoreRunInProgress: 'W tej sesji nadal trwa uruchomienie; nie można cofnąć.',
     checkpointRestoreNotFound: 'Nie znaleziono punktu kontrolnego dla tego uruchomienia.',
     checkpointRestoreFailed: 'Nie udało się cofnąć zmian z tego uruchomienia.',
+    errPiiScrubFailed: 'Maskowanie danych osobowych nie powiodło się przed wywołaniem wychodzącym; wywołanie zablokowano (fail-closed).',
   },
   sv: {
     errModelTimeout:
@@ -660,6 +669,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     checkpointRestoreRunInProgress: 'En körning pågår fortfarande i den här sessionen; kan inte ångra.',
     checkpointRestoreNotFound: 'Ingen kontrollpunkt hittades för den här körningen.',
     checkpointRestoreFailed: 'Det gick inte att ångra ändringarna från den här körningen.',
+    errPiiScrubFailed: 'Maskering av personuppgifter misslyckades före det utgående anropet; anropet blockerades (fail-closed).',
   },
   no: {
     errModelTimeout:
@@ -725,6 +735,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     checkpointRestoreRunInProgress: 'En kjøring pågår fortsatt i denne økten; kan ikke angre.',
     checkpointRestoreNotFound: 'Ingen sjekkpunkt funnet for denne kjøringen.',
     checkpointRestoreFailed: 'Kunne ikke angre endringene fra denne kjøringen.',
+    errPiiScrubFailed: 'Maskering av personopplysninger mislyktes før det utgående kallet; kallet ble blokkert (fail-closed).',
   },
   nl: {
     errModelTimeout:
@@ -790,6 +801,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
     checkpointRestoreRunInProgress: 'Er loopt nog een uitvoering in deze sessie; ongedaan maken is niet mogelijk.',
     checkpointRestoreNotFound: 'Geen checkpoint gevonden voor deze uitvoering.',
     checkpointRestoreFailed: 'Wijzigingen van deze uitvoering ongedaan maken is mislukt.',
+    errPiiScrubFailed: 'Maskeren van persoonsgegevens mislukt vóór de uitgaande aanroep; aanroep geblokkeerd (fail-closed).',
   },
   ro: {
     errModelTimeout:
@@ -855,5 +867,6 @@ export const backendCatalog: Record<string, BackendMessages> = {
     checkpointRestoreRunInProgress: 'O execuție este încă în curs pe această sesiune; nu se poate anula.',
     checkpointRestoreNotFound: 'Nu a fost găsit niciun punct de control pentru această execuție.',
     checkpointRestoreFailed: 'Nu s-au putut anula modificările acestei execuții.',
+    errPiiScrubFailed: 'Mascarea datelor personale a eșuat înainte de apelul de ieșire; apelul a fost blocat (fail-closed).',
   },
 };

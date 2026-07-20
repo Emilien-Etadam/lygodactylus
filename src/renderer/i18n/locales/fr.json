@@ -1379,5 +1379,17 @@
       "rss": "https://exemple.com/flux.xml",
       "url": "https://exemple.com/page"
     }
+  },
+  "piiScrub": {
+    "title": "Masquage des données personnelles",
+    "description": "Avant tout appel sortant (recherche web, fetch HTTP, outils MCP), remplace les e-mails, téléphones, IBAN, cartes et termes personnalisés par des jetons réversibles. Désactivé par défaut.",
+    "customTerms": "Termes personnalisés",
+    "customTermsPlaceholder": "Un terme par ligne (noms, adresses…)",
+    "customTermsHint": "Correspondance littérale, sans distinction de casse. Les caractères spéciaux sont traités comme du texte.",
+    "save": "Enregistrer",
+    "saved": "Réglages de masquage enregistrés."
+  },
+  "tools": {
+    "piiMasked": "{{count}} éléments masqués"
   }
 }

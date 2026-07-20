@@ -16,6 +16,11 @@ import {
   normalizeQuickAskShortcut,
 } from '../../shared/quick-ask';
 import {
+  DEFAULT_PII_SCRUB_CONFIG,
+  normalizePiiScrubConfig,
+  type PiiScrubConfig,
+} from '../../shared/pii-scrub';
+import {
   DEFAULT_WEB_SEARCH_CONFIG,
   normalizeWebSearchConfig,
   type WebSearchConfig,
@@ -99,6 +104,11 @@ export interface AppConfig {
   memoryEnabled: boolean;
   memoryRuntime: MemoryRuntimeConfig;
   webSearch: WebSearchConfig;
+  /**
+   * Opt-in PII scrubbing on outbound tool egress (web_search / web_fetch /
+   * http_request / MCP). Off by default; fail-closed when enabled.
+   */
+  piiScrub: PiiScrubConfig;
   enableThinking: boolean;
   thinkingLevel: ThinkingLevel;
   /** Offline speechSynthesis for assistant replies (Chromium voices). Off by default. */
@@ -141,8 +151,13 @@ export interface AppConfig {
   isConfigured: boolean;
 }
 
-export type { WebSearchConfig };
-export { DEFAULT_WEB_SEARCH_CONFIG, normalizeWebSearchConfig };
+export type { WebSearchConfig, PiiScrubConfig };
+export {
+  DEFAULT_WEB_SEARCH_CONFIG,
+  normalizeWebSearchConfig,
+  DEFAULT_PII_SCRUB_CONFIG,
+  normalizePiiScrubConfig,
+};
 
 export interface MemoryModelRuntimeConfig {
   inheritFromActive: boolean;
@@ -214,6 +229,7 @@ export const DIRECT_READ_KEYS = new Set<keyof AppConfig>([
   'sandboxLanNetworkEnabled',
   'memoryEnabled',
   'webSearch',
+  'piiScrub',
   'enableThinking',
   'thinkingLevel',
   'speechSynthesisEnabled',
@@ -341,6 +357,7 @@ export const defaultConfig: AppConfig = {
     promptIterationRounds: 2,
   },
   webSearch: { ...DEFAULT_WEB_SEARCH_CONFIG },
+  piiScrub: { ...DEFAULT_PII_SCRUB_CONFIG, customTerms: [] },
   enableThinking: false,
   thinkingLevel: 'medium',
   speechSynthesisEnabled: false,

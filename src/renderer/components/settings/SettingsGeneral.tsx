@@ -7,6 +7,7 @@ import { formatEeDisplayVersion } from '../../../shared/app-version';
 import type { UpdateCheckResult } from '../../../shared/update-check';
 import { stopSpeechSynthesis } from '../../utils/speech-synthesis';
 import { SettingsChatLan } from './SettingsChatLan';
+import { SettingsPiiScrub } from './SettingsPiiScrub';
 import { SettingsQuickAsk } from './SettingsQuickAsk';
 import { SettingsWebSearch } from './SettingsWebSearch';
 
@@ -285,6 +286,7 @@ export function SettingsGeneral() {
     <div className="space-y-6">
       <SettingsChatLan />
       <SettingsWebSearch />
+      <SettingsPiiScrub />
       <div className="space-y-3">
         <h4 className="text-sm font-medium text-text-primary">{t('general.appearance')}</h4>
         <div className="flex gap-2">

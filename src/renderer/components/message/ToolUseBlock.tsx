@@ -1,5 +1,6 @@
 // Tool use card — collapsible, merges matching tool_result from same/other messages
 import { useState, memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight, Loader2, XCircle, CheckCircle2 } from 'lucide-react';
 import { useAppStore } from '../../store';
 import {
@@ -26,6 +27,7 @@ export const ToolUseBlock = memo(function ToolUseBlock({
   allBlocks,
   message,
 }: ToolUseBlockProps) {
+  const { t } = useTranslation();
   const traceSteps = useAppStore((s) =>
     message?.sessionId ? (s.sessionStates[message.sessionId]?.traceSteps ?? []) : []
   );
@@ -110,11 +112,19 @@ export const ToolUseBlock = memo(function ToolUseBlock({
       )
     : false;
 
-  // Duration from trace steps
+  // Duration / PII mask count from trace steps
   let duration: number | undefined;
+  let piiMaskedCount: number | undefined;
   if (message?.sessionId) {
     const resultStep = traceSteps.find((s) => s.id === block.id && s.type === 'tool_result');
     duration = resultStep?.duration;
+    const toolCallStep = traceSteps.find((s) => s.id === block.id && s.type === 'tool_call');
+    if (
+      typeof toolCallStep?.piiMaskedCount === 'number' &&
+      toolCallStep.piiMaskedCount > 0
+    ) {
+      piiMaskedCount = toolCallStep.piiMaskedCount;
+    }
   }
 
   return (
@@ -159,6 +169,15 @@ export const ToolUseBlock = memo(function ToolUseBlock({
         {isMCPTool && mcpServerName && (
           <span className="px-1.5 py-0.5 text-[10px] rounded-md bg-mcp/15 text-mcp flex-shrink-0 font-medium">
             {mcpServerName}
+          </span>
+        )}
+
+        {piiMaskedCount !== undefined && (
+          <span
+            className="text-[10px] text-text-muted flex-shrink-0 tabular-nums"
+            title={t('tools.piiMasked', { count: piiMaskedCount })}
+          >
+            {t('tools.piiMasked', { count: piiMaskedCount })}
           </span>
         )}
 

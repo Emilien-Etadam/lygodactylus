@@ -1379,5 +1379,17 @@
       "rss": "https://exempel.se/feed.xml",
       "url": "https://exempel.se/sida"
     }
+  },
+  "piiScrub": {
+    "title": "Maskering av personuppgifter",
+    "description": "Före utgående anrop (websök, HTTP-fetch, MCP-verktyg) ersätts e-post, telefonnummer, IBAN, kort och egna termer med reversibla token. Av som standard.",
+    "customTerms": "Egna termer",
+    "customTermsPlaceholder": "En term per rad (namn, adresser…)",
+    "customTermsHint": "Ordagrann matchning utan skiftläge. Regex-tecken behandlas som text.",
+    "save": "Spara",
+    "saved": "Maskeringsinställningar sparade."
+  },
+  "tools": {
+    "piiMasked": "{{count}} element maskerade"
   }
 }
