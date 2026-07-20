@@ -16,6 +16,7 @@ export const TEST_MEMORY_RUNTIME: MemoryRuntimeConfig = {
     timeoutMs: 180000,
   },
   useEmbedding: false,
+  semanticSearchEnabled: false,
   maxNavSteps: 2,
   ingestionConcurrency: 2,
   chunkTopK: 10,

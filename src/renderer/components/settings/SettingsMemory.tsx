@@ -31,6 +31,7 @@ const DEFAULT_MEMORY_RUNTIME: MemoryRuntimeConfig = {
     timeoutMs: 180000,
   },
   useEmbedding: false,
+  semanticSearchEnabled: false,
   maxNavSteps: 2,
   ingestionConcurrency: 4,
   chunkTopK: 10,
@@ -59,6 +60,8 @@ function cloneRuntimeConfig(runtime?: MemoryRuntimeConfig): MemoryRuntimeConfig 
     llm: { ...DEFAULT_MEMORY_RUNTIME.llm, ...source.llm },
     embedding: { ...DEFAULT_MEMORY_RUNTIME.embedding, ...source.embedding },
     useEmbedding: source.useEmbedding ?? DEFAULT_MEMORY_RUNTIME.useEmbedding,
+    semanticSearchEnabled:
+      source.semanticSearchEnabled ?? DEFAULT_MEMORY_RUNTIME.semanticSearchEnabled,
     maxNavSteps: source.maxNavSteps ?? DEFAULT_MEMORY_RUNTIME.maxNavSteps,
     ingestionConcurrency:
       source.ingestionConcurrency ?? DEFAULT_MEMORY_RUNTIME.ingestionConcurrency,
@@ -297,9 +300,7 @@ export function SettingsMemory() {
         setRerankTestStatus(result.error || t('memory.rerankerTestFailed'));
         return;
       }
-      setRerankTestStatus(
-        t('memory.rerankerTestSuccess', { ms: result.latencyMs ?? 0 })
-      );
+      setRerankTestStatus(t('memory.rerankerTestSuccess', { ms: result.latencyMs ?? 0 }));
     } catch (error) {
       setRerankTestStatus(error instanceof Error ? error.message : String(error));
     } finally {
@@ -591,6 +592,17 @@ export function SettingsMemory() {
                 }))
               }
             />
+            <ToggleField
+              label={t('memory.semanticSearchEnabled')}
+              description={t('memory.semanticSearchDescription')}
+              checked={runtimeDraft.semanticSearchEnabled}
+              onChange={(checked) =>
+                setRuntimeDraft((prev) => ({
+                  ...prev,
+                  semanticSearchEnabled: checked,
+                }))
+              }
+            />
           </div>
 
           <div className="space-y-3 rounded-lg border border-border-muted bg-background/80 p-3">
@@ -705,9 +717,7 @@ export function SettingsMemory() {
               >
                 {isTestingRerank ? t('memory.rerankerTesting') : t('memory.rerankerTest')}
               </button>
-              {rerankTestStatus && (
-                <p className="text-xs text-text-muted">{rerankTestStatus}</p>
-              )}
+              {rerankTestStatus && <p className="text-xs text-text-muted">{rerankTestStatus}</p>}
             </div>
           </div>
 
@@ -1065,9 +1075,7 @@ export function SettingsMemory() {
                     </div>
                   </div>
                 ) : (
-                  <p className="mt-3 text-sm text-text-muted">
-                    {t('memory.inspectSessionHint')}
-                  </p>
+                  <p className="mt-3 text-sm text-text-muted">{t('memory.inspectSessionHint')}</p>
                 )}
               </div>
             </div>
@@ -1128,9 +1136,7 @@ export function SettingsMemory() {
           <div className="rounded-xl border border-border-muted bg-background/80 p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold text-text-primary">
-                  {t('memory.fileContent')}
-                </p>
+                <p className="text-sm font-semibold text-text-primary">{t('memory.fileContent')}</p>
                 {fileContent?.filePath && (
                   <p className="mt-1 text-xs text-text-muted">{fileContent.filePath}</p>
                 )}
@@ -1153,9 +1159,7 @@ export function SettingsMemory() {
                   : fileContent.text || t('memory.emptyFile')}
               </pre>
             ) : (
-              <p className="mt-3 text-sm text-text-muted">
-                {t('memory.selectFileHint')}
-              </p>
+              <p className="mt-3 text-sm text-text-muted">{t('memory.selectFileHint')}</p>
             )}
           </div>
         </div>
@@ -1252,16 +1256,23 @@ function LabeledField({ label, children }: { label: string; children: React.Reac
 
 function ToggleField({
   label,
+  description,
   checked,
   onChange,
 }: {
   label: string;
+  description?: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
 }) {
   return (
     <label className="flex items-center justify-between gap-3 rounded-lg border border-border-muted bg-background/70 px-3 py-2.5">
-      <span className="text-sm text-text-primary">{label}</span>
+      <span className="min-w-0">
+        <span className="block text-sm text-text-primary">{label}</span>
+        {description ? (
+          <span className="mt-0.5 block text-xs text-text-muted">{description}</span>
+        ) : null}
+      </span>
       <input
         type="checkbox"
         checked={checked}

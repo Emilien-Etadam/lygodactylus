@@ -220,7 +220,9 @@
     "rerankerTest": "Testuj",
     "rerankerTesting": "Testowanie…",
     "rerankerTestSuccess": "Rerank OK ({{ms}} ms).",
-    "rerankerTestFailed": "Test rerank nie powiódł się."
+    "rerankerTestFailed": "Test rerank nie powiódł się.",
+    "semanticSearchEnabled": "Wyszukiwanie semantyczne",
+    "semanticSearchDescription": "Indeksuje pliki tekstowe workspace lokalnymi embeddingami i udostępnia narzędzie semantic_search (grep według znaczenia). Wymaga skonfigurowanego endpointu embeddingów. Domyślnie wyłączone."
   },
   "language": {
     "english": "Angielski",

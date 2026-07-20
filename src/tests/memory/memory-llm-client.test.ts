@@ -58,6 +58,7 @@ function makeConfig(timeoutMs: number, overrides: Partial<AppConfig> = {}): AppC
         timeoutMs: 180000,
       },
       useEmbedding: false,
+      semanticSearchEnabled: false,
       maxNavSteps: 2,
       ingestionConcurrency: 4,
       chunkTopK: 10,

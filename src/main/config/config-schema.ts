@@ -10,10 +10,7 @@ import {
   DEFAULT_OLLAMA_KEEP_ALIVE,
   normalizeOllamaKeepAlive,
 } from '../../shared/ollama-keep-alive';
-import {
-  DEFAULT_QUICK_ASK_SHORTCUT,
-  normalizeQuickAskShortcut,
-} from '../../shared/quick-ask';
+import { DEFAULT_QUICK_ASK_SHORTCUT, normalizeQuickAskShortcut } from '../../shared/quick-ask';
 import {
   DEFAULT_WEB_SEARCH_CONFIG,
   normalizeWebSearchConfig,
@@ -155,6 +152,11 @@ export interface MemoryRuntimeConfig {
   llm: MemoryModelRuntimeConfig;
   embedding: MemoryModelRuntimeConfig;
   useEmbedding: boolean;
+  /**
+   * Opt-in native `semantic_search` tool (workspace file embeddings).
+   * OFF by default; only exposed when embeddings endpoint is usable.
+   */
+  semanticSearchEnabled: boolean;
   maxNavSteps: number;
   ingestionConcurrency: number;
   chunkTopK: number;
@@ -294,6 +296,7 @@ export const defaultConfig: AppConfig = {
       timeoutMs: 180000,
     },
     useEmbedding: false,
+    semanticSearchEnabled: false,
     maxNavSteps: 2,
     ingestionConcurrency: 4,
     chunkTopK: 10,
@@ -375,7 +378,8 @@ function normalizeMemoryModelRuntimeConfig(
 
 function normalizeMemoryRerankerConfig(raw: unknown): MemoryRerankerConfig {
   const fallback = defaultConfig.memoryRuntime.memoryReranker;
-  const value = typeof raw === 'object' && raw !== null ? (raw as Partial<MemoryRerankerConfig>) : {};
+  const value =
+    typeof raw === 'object' && raw !== null ? (raw as Partial<MemoryRerankerConfig>) : {};
   const topN =
     typeof value.topN === 'number' && Number.isFinite(value.topN)
       ? Math.max(1, Math.min(50, Math.round(value.topN)))
@@ -407,6 +411,10 @@ export function normalizeMemoryRuntimeConfig(raw: unknown): MemoryRuntimeConfig 
       defaultConfig.memoryRuntime.embedding
     ),
     useEmbedding: toBoolean(value.useEmbedding, defaultConfig.memoryRuntime.useEmbedding),
+    semanticSearchEnabled: toBoolean(
+      value.semanticSearchEnabled,
+      defaultConfig.memoryRuntime.semanticSearchEnabled
+    ),
     maxNavSteps:
       typeof value.maxNavSteps === 'number' && Number.isFinite(value.maxNavSteps)
         ? Math.max(0, Math.min(4, Math.round(value.maxNavSteps)))

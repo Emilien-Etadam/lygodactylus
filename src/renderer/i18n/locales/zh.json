@@ -220,7 +220,9 @@
     "rerankerTest": "测试",
     "rerankerTesting": "测试中…",
     "rerankerTestSuccess": "重排序正常（{{ms}} 毫秒）。",
-    "rerankerTestFailed": "重排序测试失败。"
+    "rerankerTestFailed": "重排序测试失败。",
+    "semanticSearchEnabled": "语义搜索",
+    "semanticSearchDescription": "使用本地嵌入索引工作区文本文件，并向模型暴露 semantic_search 工具（按语义检索）。需要已配置的嵌入端点。默认关闭。"
   },
   "language": {
     "english": "English",

@@ -29,6 +29,7 @@ export const PLAN_MODE_ALLOWED_TOOL_NAMES: ReadonlySet<string> = new Set([
   'glob',
   'find',
   'grep',
+  'semantic_search',
   'ls',
   'list_directory',
   'web_search',

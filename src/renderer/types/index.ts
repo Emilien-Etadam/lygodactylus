@@ -747,6 +747,8 @@ export interface MemoryRuntimeConfig {
   llm: MemoryModelRuntimeConfig;
   embedding: MemoryModelRuntimeConfig;
   useEmbedding: boolean;
+  /** Opt-in workspace semantic_search tool (OFF by default). */
+  semanticSearchEnabled: boolean;
   maxNavSteps: number;
   ingestionConcurrency: number;
   chunkTopK: number;

@@ -33,6 +33,7 @@ import {
 } from './agent-runner-pi-session';
 import { buildCoworkAppendPrompt } from './agent-runner-prompts';
 import { buildNativeCustomTools } from './agent-runner-native-tools';
+import { buildSemanticSearchCustomTools } from './agent-runner-semantic-search-tool';
 import { buildWebSearchCustomTools } from './agent-runner-web-search-tool';
 import { createWebCitationCounter } from '../../shared/web-citation';
 import { createScheduleTools } from '../schedule/schedule-tools';
@@ -52,9 +53,7 @@ import {
   resolvePiRouteProtocol,
   resolveSyntheticPiModelFallback,
 } from './pi-model-resolution';
-import {
-  normalizePluginSlashPromptForExpansion,
-} from '../../shared/slash-commands';
+import { normalizePluginSlashPromptForExpansion } from '../../shared/slash-commands';
 import { assertMainProcessAcceptsSlashPrompt } from './assert-main-slash-command';
 import {
   filterToolsForSessionMode,
@@ -417,6 +416,7 @@ export async function preparePiSessionRun({
     citationCounter,
     requestUserQuestion: ctx.requestUserQuestion,
   });
+  const semanticSearchCustomTools = buildSemanticSearchCustomTools(effectiveCwd);
   const scheduleCustomTools = createScheduleTools({
     getManager: () => mainAppState.scheduledTaskManager,
     defaultCwd: workingDir || process.cwd(),
@@ -439,6 +439,12 @@ export async function preparePiSessionRun({
     log(
       `[AgentRunner] Registered ${nativeCustomTools.length} native tools as customTools:`,
       nativeCustomTools.map((tool) => tool.name).join(', ')
+    );
+  }
+  if (semanticSearchCustomTools.length > 0) {
+    log(
+      `[AgentRunner] Registered ${semanticSearchCustomTools.length} semantic search tools as customTools:`,
+      semanticSearchCustomTools.map((tool) => tool.name).join(', ')
     );
   }
   if (scheduleCustomTools.length > 0) {
@@ -486,6 +492,7 @@ export async function preparePiSessionRun({
   const assembledCustomTools = [
     ...(wrappedBash ? [wrappedBash] : []),
     ...nativeCustomTools,
+    ...semanticSearchCustomTools,
     ...scheduleCustomTools,
     ...webSearchCustomTools,
     ...mcpCustomTools,
