@@ -3,7 +3,8 @@ import type { AppConfig } from '../../main/config/config-schema';
 import { defaultConfig } from '../../main/config/config-schema';
 
 const mockState = vi.hoisted(() => ({
-  config: structuredClone(defaultConfig) as AppConfig,
+  // Assigned in beforeEach before any tool builder call.
+  config: undefined as unknown as AppConfig,
 }));
 
 vi.mock('../../main/config/config-store', () => ({
