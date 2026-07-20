@@ -15,8 +15,12 @@ describe('agent-runner native tools', () => {
   it('registers LiteLLM-friendly tool aliases for filesystem, web, and planning tools', () => {
     expect(nativeToolsContent).toContain("cloneToolWithName(findTool, 'glob', 'Glob')");
     expect(nativeToolsContent).toContain('createGrepToolDefinition(ctx.cwd)');
-    expect(nativeToolsContent).toContain("createWebFetchTool('web_fetch', 'Web Fetch')");
-    expect(nativeToolsContent).toContain("createWebFetchTool('WebFetch', 'Web Fetch')");
+    expect(nativeToolsContent).toContain(
+      "createWebFetchTool('web_fetch', 'Web Fetch', ctx.citationCounter)"
+    );
+    expect(nativeToolsContent).toContain(
+      "createWebFetchTool('WebFetch', 'Web Fetch', ctx.citationCounter)"
+    );
     expect(nativeToolsContent).toContain("createHttpRequestTool('http_request', 'HTTP Request')");
     expect(nativeToolsContent).toContain("createHttpRequestTool('HttpRequest', 'HTTP Request')");
     expect(nativeToolsContent).toContain("createTodoWriteTool('todo_write', 'Todo Write')");

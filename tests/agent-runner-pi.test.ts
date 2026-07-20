@@ -89,8 +89,10 @@ describe('AgentRunner Lygodactylus SDK integration', () => {
   });
 
   it('uses standard markdown link guidance for sources citations', () => {
+    expect(agentRunnerPromptsContent).toContain('<citation_requirements>');
+    expect(agentRunnerPromptsContent).toContain('Source index:');
     expect(agentRunnerPromptsContent).toContain(
-      'otherwise use standard Markdown links: [Title](https://claude.ai/chat/URL)'
+      'otherwise use standard Markdown links: [Title](https://example.com/URL)'
     );
   });
 
