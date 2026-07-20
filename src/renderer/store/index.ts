@@ -17,9 +17,24 @@ import type {
 } from '../types';
 import { applySessionUpdate } from '../utils/session-update';
 import { computeTokensPerSecondFromText } from '../utils/generation-stats';
+import {
+  collectPreviewArtifacts,
+  versionsOfKind,
+  type PreviewKind,
+} from '../../shared/html-preview';
 
 export type GlobalNoticeType = 'info' | 'warning' | 'error' | 'success';
 export type GlobalNoticeAction = 'open_api_settings';
+
+/** Ephemeral HTML/SVG preview panel state (not persisted). */
+export interface HtmlPreviewState {
+  sessionId: string;
+  kind: PreviewKind;
+  /** 0-based index among same-kind versions in the session. */
+  versionIndex: number;
+  /** Source used to resolve the version when artifacts are rebuilt. */
+  focusSource: string;
+}
 
 export interface GlobalNotice {
   id: string;
@@ -156,6 +171,9 @@ interface AppState {
   /** Request ChatView to scroll to a message after session hydration. */
   scrollToMessageRequest: { sessionId: string; messageId: string } | null;
 
+  /** Side-panel HTML/SVG preview (session-scoped, not persisted). */
+  htmlPreview: HtmlPreviewState | null;
+
   // Actions
   setSessions: (sessions: Session[]) => void;
   setFolders: (folders: ChatFolder[]) => void;
@@ -194,6 +212,14 @@ interface AppState {
   setContextPanelCollapsed: (collapsed: boolean) => void;
   setShowSettings: (show: boolean) => void;
   setSettingsTab: (tab: string | null) => void;
+  openHtmlPreview: (payload: {
+    sessionId: string;
+    kind: PreviewKind;
+    source: string;
+    versionIndex: number;
+  }) => void;
+  closeHtmlPreview: () => void;
+  setHtmlPreviewVersion: (versionIndex: number) => void;
 
   setPendingPermission: (permission: PermissionRequest | null) => void;
 
@@ -304,6 +330,7 @@ export const useAppStore = create<AppState>((set) => ({
   pluginCommandsRevision: 0,
   speakingMessageId: null,
   scrollToMessageRequest: null,
+  htmlPreview: null,
 
   // Session actions
   setSessions: (sessions) => set({ sessions }),
@@ -349,7 +376,14 @@ export const useAppStore = create<AppState>((set) => ({
       };
     }),
 
-  setActiveSession: (sessionId) => set({ activeSessionId: sessionId }),
+  setActiveSession: (sessionId) =>
+    set((state) => ({
+      activeSessionId: sessionId,
+      htmlPreview:
+        state.htmlPreview && sessionId && state.htmlPreview.sessionId === sessionId
+          ? state.htmlPreview
+          : null,
+    })),
 
   // Message actions
   addMessage: (sessionId, message) =>
@@ -646,6 +680,33 @@ export const useAppStore = create<AppState>((set) => ({
   setContextPanelCollapsed: (collapsed) => set({ contextPanelCollapsed: collapsed }),
   setShowSettings: (show) => set({ showSettings: show }),
   setSettingsTab: (tab) => set({ settingsTab: tab }),
+  openHtmlPreview: ({ sessionId, kind, source, versionIndex }) =>
+    set({
+      htmlPreview: {
+        sessionId,
+        kind,
+        focusSource: source,
+        versionIndex: Math.max(0, versionIndex),
+      },
+    }),
+  closeHtmlPreview: () => set({ htmlPreview: null }),
+  setHtmlPreviewVersion: (versionIndex) =>
+    set((state) => {
+      if (!state.htmlPreview) {
+        return state;
+      }
+      const safeIndex = Math.max(0, versionIndex);
+      const messages = state.sessionStates[state.htmlPreview.sessionId]?.messages ?? [];
+      const versions = versionsOfKind(collectPreviewArtifacts(messages), state.htmlPreview.kind);
+      const selected = versions[safeIndex];
+      return {
+        htmlPreview: {
+          ...state.htmlPreview,
+          versionIndex: safeIndex,
+          focusSource: selected?.source ?? state.htmlPreview.focusSource,
+        },
+      };
+    }),
 
   // Permission actions
   setPendingPermission: (permission) => set({ pendingPermission: permission }),

@@ -37,6 +37,9 @@ const ChatView = lazy(() =>
 const ContextPanel = lazy(() =>
   import('./components/ContextPanel').then((module) => ({ default: module.ContextPanel }))
 );
+const HtmlPreviewPanel = lazy(() =>
+  import('./components/HtmlPreviewPanel').then((module) => ({ default: module.HtmlPreviewPanel }))
+);
 const ConfigModal = lazy(() =>
   import('./components/ConfigModal').then((module) => ({ default: module.ConfigModal }))
 );
@@ -93,6 +96,7 @@ function MainApp() {
   const { sidebarCollapsed } = useLayoutState();
   const { showConfigModal, isConfigured, appConfig } = useConfigModalState();
   const globalNotice = useGlobalNotice();
+  const htmlPreview = useAppStore((s) => s.htmlPreview);
   const { progress: sandboxSetupProgress, isComplete: isSandboxSetupComplete } =
     useSandboxSetupState();
   const sandboxSyncStatus = useSandboxSyncStatus();
@@ -237,8 +241,21 @@ function MainApp() {
           )}
         </main>
 
+        {/* HTML/SVG preview panel takes over the right rail when open */}
+        {activeSessionId && !showSettings && htmlPreview && (
+          <PanelErrorBoundary
+            name="HtmlPreviewPanel"
+            resetKey={`${activeSessionId}-${htmlPreview.kind}`}
+            fallback={null}
+          >
+            <Suspense fallback={null}>
+              <HtmlPreviewPanel />
+            </Suspense>
+          </PanelErrorBoundary>
+        )}
+
         {/* Context Panel - only show when in session and not in settings */}
-        {activeSessionId && !showSettings && (
+        {activeSessionId && !showSettings && !htmlPreview && (
           <PanelErrorBoundary
             name="ContextPanel"
             resetKey={activeSessionId}

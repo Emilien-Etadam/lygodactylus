@@ -1391,5 +1391,16 @@
   },
   "tools": {
     "piiMasked": "{{count}} items gemaskeerd"
+  },
+  "htmlPreview": {
+    "preview": "Voorbeeld",
+    "titleHtml": "HTML-voorbeeld",
+    "titleSvg": "SVG-voorbeeld",
+    "version": "v{{n}}",
+    "refresh": "Vernieuwen",
+    "openLarge": "Groot openen",
+    "copySource": "Bron kopiëren",
+    "close": "Sluiten",
+    "empty": "Geen voorbeeld beschikbaar"
   }
 }

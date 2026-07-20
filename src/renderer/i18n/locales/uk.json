@@ -1391,5 +1391,16 @@
   },
   "tools": {
     "piiMasked": "Замасковано {{count}} елементів"
+  },
+  "htmlPreview": {
+    "preview": "Перегляд",
+    "titleHtml": "Перегляд HTML",
+    "titleSvg": "Перегляд SVG",
+    "version": "v{{n}}",
+    "refresh": "Оновити",
+    "openLarge": "Відкрити у великому вікні",
+    "copySource": "Копіювати джерело",
+    "close": "Закрити",
+    "empty": "Перегляд недоступний"
   }
 }

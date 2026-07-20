@@ -1391,5 +1391,16 @@
   },
   "tools": {
     "piiMasked": "{{count}} items masked"
+  },
+  "htmlPreview": {
+    "preview": "Preview",
+    "titleHtml": "HTML preview",
+    "titleSvg": "SVG preview",
+    "version": "v{{n}}",
+    "refresh": "Refresh",
+    "openLarge": "Open large",
+    "copySource": "Copy source",
+    "close": "Close",
+    "empty": "No preview available"
   }
 }

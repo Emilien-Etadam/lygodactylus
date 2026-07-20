@@ -174,6 +174,21 @@ function makeWebElectronApi(): Record<string, unknown> {
       close: () => undefined,
       openSessionInMain: () => undefined,
       hideQuickAsk: () => undefined,
+      openHtmlPreview: (srcdoc: string) => {
+        // Browser fallback: open a blank window and write CSP-hardened markup.
+        try {
+          const preview = window.open('about:blank', '_blank');
+          if (!preview) {
+            return Promise.resolve({ success: false });
+          }
+          preview.document.open();
+          preview.document.write(srcdoc);
+          preview.document.close();
+          return Promise.resolve({ success: true });
+        } catch {
+          return Promise.resolve({ success: false });
+        }
+      },
     },
 
     artifacts: namespaceProxy('artifacts'),
