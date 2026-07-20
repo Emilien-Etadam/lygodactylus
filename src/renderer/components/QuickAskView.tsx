@@ -29,7 +29,7 @@ function extractAssistantText(
 }
 
 export function QuickAskView() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { startSession, continueSession, listSessions, setSessionMode, isElectron } = useIPC();
   const sessions = useAppStore((s) => s.sessions);
   const sessionStates = useAppStore((s) => s.sessionStates);
@@ -137,7 +137,7 @@ export function QuickAskView() {
       });
       setPrompt(next);
     },
-    [i18n.language, sourceText, t]
+    [sourceText, t]
   );
 
   const handleSubmit = useCallback(
