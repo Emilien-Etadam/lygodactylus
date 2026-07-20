@@ -677,7 +677,14 @@
     "nSelected": "{{count}} ausgewählt",
     "batchDeleteConfirm": "{{count}} Unterhaltungen löschen? Das kann nicht rückgängig gemacht werden.",
     "cancel": "Abbrechen",
-    "confirmDelete": "Löschen"
+    "confirmDelete": "Löschen",
+    "searchClear": "Suche löschen",
+    "searchSearching": "Suche…",
+    "searchNoResults": "Keine passenden Unterhaltungen",
+    "searchUntitled": "Unbenannte Unterhaltung",
+    "searchTitleMatch": "Treffer im Titel",
+    "searchRoleUser": "Sie",
+    "searchRoleAssistant": "Assistent"
   },
   "chat": {
     "sendMessage": "Nachricht senden",

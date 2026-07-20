@@ -677,7 +677,14 @@
     "nSelected": "{{count}} geselecteerd",
     "batchDeleteConfirm": "{{count}} gesprekken verwijderen? Dit kan niet ongedaan worden gemaakt.",
     "cancel": "Annuleren",
-    "confirmDelete": "Verwijderen"
+    "confirmDelete": "Verwijderen",
+    "searchClear": "Zoekopdracht wissen",
+    "searchSearching": "Zoeken…",
+    "searchNoResults": "Geen overeenkomende gesprekken",
+    "searchUntitled": "Naamloos gesprek",
+    "searchTitleMatch": "Titelovereenkomst",
+    "searchRoleUser": "Jij",
+    "searchRoleAssistant": "Assistent"
   },
   "chat": {
     "sendMessage": "Bericht verzenden",

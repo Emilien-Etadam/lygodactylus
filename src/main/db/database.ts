@@ -8,6 +8,9 @@ import { app } from 'electron';
 import { join } from 'path';
 import { existsSync, mkdirSync, statSync, renameSync, openSync, readSync, closeSync } from 'fs';
 import { log, logError, logWarn } from '../utils/logger';
+import { MessageSearchIndex, type SessionMessageSearchHit } from './message-search-index';
+
+export type { SessionMessageSearchHit };
 
 export interface DatabaseInstance {
   // Raw database access (for advanced queries)
@@ -30,6 +33,13 @@ export interface DatabaseInstance {
     delete: (id: string) => void;
     deleteBySessionId: (sessionId: string) => void;
     deleteFromTimestamp: (sessionId: string, fromTimestamp: number) => void;
+  };
+
+  /** Full-text search over session titles + user/assistant message text. */
+  messageSearch?: {
+    search: (query: string, limit?: number) => SessionMessageSearchHit[];
+    scheduleBackfill: () => void;
+    isFtsAvailable: () => boolean;
   };
 
   traceSteps: {
@@ -445,6 +455,10 @@ export function initDatabase(): DatabaseInstance {
   // Initialize schema
   initializeSchema(rawDb);
 
+  // Conversation search index (reuses schema created in initializeSchema).
+  const messageSearchIndex = new MessageSearchIndex(rawDb);
+  messageSearchIndex.ensureSchema();
+
   // Prepare statements for better performance
   const insertSession = rawDb.prepare(`
     INSERT OR REPLACE INTO sessions
@@ -554,6 +568,7 @@ export function initDatabase(): DatabaseInstance {
           session.created_at,
           session.updated_at
         );
+        messageSearchIndex.upsertSessionTitle(session.id, session.title);
       },
 
       update: (id: string, updates: Partial<SessionRow>) => {
@@ -582,6 +597,10 @@ export function initDatabase(): DatabaseInstance {
 
         const sql = `UPDATE sessions SET ${setClauses.join(', ')} WHERE id = ?`;
         rawDb.prepare(sql).run(...values);
+
+        if (typeof updates.title === 'string') {
+          messageSearchIndex.upsertSessionTitle(id, updates.title);
+        }
       },
 
       get: (id: string): SessionRow | undefined => {
@@ -593,6 +612,8 @@ export function initDatabase(): DatabaseInstance {
       },
 
       delete: (id: string) => {
+        // Keep the FTS index in sync — CASCADE does not apply to virtual tables.
+        messageSearchIndex.removeSession(id);
         // Messages will be deleted automatically due to ON DELETE CASCADE
         deleteSessionStmt.run(id);
       },
@@ -609,6 +630,7 @@ export function initDatabase(): DatabaseInstance {
           message.token_usage,
           message.execution_time_ms ?? null
         );
+        messageSearchIndex.upsertMessage(message);
       },
 
       update: (id: string, updates: Partial<Pick<MessageRow, 'execution_time_ms'>>) => {
@@ -622,16 +644,25 @@ export function initDatabase(): DatabaseInstance {
       },
 
       delete: (id: string) => {
+        messageSearchIndex.removeMessage(id);
         deleteMessageStmt.run(id);
       },
 
       deleteBySessionId: (sessionId: string) => {
+        messageSearchIndex.removeSessionMessages(sessionId);
         deleteMessagesBySessionStmt.run(sessionId);
       },
 
       deleteFromTimestamp: (sessionId: string, fromTimestamp: number) => {
+        messageSearchIndex.removeFromTimestamp(sessionId, fromTimestamp);
         deleteMessagesFromTimestampStmt.run(sessionId, fromTimestamp);
       },
+    },
+
+    messageSearch: {
+      search: (query: string, limit?: number) => messageSearchIndex.search(query, limit),
+      scheduleBackfill: () => messageSearchIndex.scheduleBackfill(),
+      isFtsAvailable: () => messageSearchIndex.ftsAvailable,
     },
 
     traceSteps: {
@@ -749,6 +780,9 @@ export function initDatabase(): DatabaseInstance {
       db = null;
     },
   };
+
+  // Non-blocking backfill of existing messages into the search index.
+  messageSearchIndex.scheduleBackfill();
 
   log('[Database] SQLite database initialized successfully');
   return db!;

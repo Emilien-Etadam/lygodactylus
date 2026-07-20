@@ -677,7 +677,14 @@
     "nSelected": "{{count}} seleccionados",
     "batchDeleteConfirm": "¿Eliminar {{count}} conversaciones? Esto no se puede deshacer.",
     "cancel": "Cancelar",
-    "confirmDelete": "Eliminar"
+    "confirmDelete": "Eliminar",
+    "searchClear": "Borrar búsqueda",
+    "searchSearching": "Buscando…",
+    "searchNoResults": "No hay conversaciones coincidentes",
+    "searchUntitled": "Conversación sin título",
+    "searchTitleMatch": "Coincidencia en el título",
+    "searchRoleUser": "Tú",
+    "searchRoleAssistant": "Asistente"
   },
   "chat": {
     "sendMessage": "Enviar mensaje",

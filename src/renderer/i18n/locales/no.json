@@ -677,7 +677,14 @@
     "nSelected": "{{count}} valgt",
     "batchDeleteConfirm": "Slette {{count}} samtaler? Dette kan ikke angres.",
     "cancel": "Avbryt",
-    "confirmDelete": "Slett"
+    "confirmDelete": "Slett",
+    "searchClear": "Tøm søk",
+    "searchSearching": "Søker…",
+    "searchNoResults": "Ingen matchende samtaler",
+    "searchUntitled": "Samtale uten tittel",
+    "searchTitleMatch": "Titteltreff",
+    "searchRoleUser": "Deg",
+    "searchRoleAssistant": "Assistent"
   },
   "chat": {
     "sendMessage": "Send melding",

@@ -63,7 +63,7 @@ export const MessageCard = memo(function MessageCard({
   const hasCopyableText = textContent.length > 0;
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in" data-message-id={message.id} id={`message-${message.id}`}>
       {isUser ? (
         // User message - compact styling with smaller padding and radius
         <div className="flex items-start gap-2 justify-end group">

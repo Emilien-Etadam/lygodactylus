@@ -677,7 +677,14 @@
     "nSelected": "{{count}} markerade",
     "batchDeleteConfirm": "Ta bort {{count}} konversationer? Detta kan inte ångras.",
     "cancel": "Avbryt",
-    "confirmDelete": "Ta bort"
+    "confirmDelete": "Ta bort",
+    "searchClear": "Rensa sökning",
+    "searchSearching": "Söker…",
+    "searchNoResults": "Inga matchande konversationer",
+    "searchUntitled": "Namnlös konversation",
+    "searchTitleMatch": "Titelträff",
+    "searchRoleUser": "Du",
+    "searchRoleAssistant": "Assistent"
   },
   "chat": {
     "sendMessage": "Skicka meddelande",

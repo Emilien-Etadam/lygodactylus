@@ -677,7 +677,14 @@
     "nSelected": "Вибрано: {{count}}",
     "batchDeleteConfirm": "Видалити {{count}} розмов? Це неможливо скасувати.",
     "cancel": "Скасувати",
-    "confirmDelete": "Видалити"
+    "confirmDelete": "Видалити",
+    "searchClear": "Очистити пошук",
+    "searchSearching": "Пошук…",
+    "searchNoResults": "Немає відповідних розмов",
+    "searchUntitled": "Розмова без назви",
+    "searchTitleMatch": "Збіг у назві",
+    "searchRoleUser": "Ви",
+    "searchRoleAssistant": "Асистент"
   },
   "chat": {
     "sendMessage": "Надіслати повідомлення",

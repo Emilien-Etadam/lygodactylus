@@ -677,7 +677,14 @@
     "nSelected": "{{count}} selezionate",
     "batchDeleteConfirm": "Eliminare {{count}} conversazioni? Questa operazione non può essere annullata.",
     "cancel": "Annulla",
-    "confirmDelete": "Elimina"
+    "confirmDelete": "Elimina",
+    "searchClear": "Cancella ricerca",
+    "searchSearching": "Ricerca…",
+    "searchNoResults": "Nessuna conversazione corrispondente",
+    "searchUntitled": "Conversazione senza titolo",
+    "searchTitleMatch": "Corrispondenza nel titolo",
+    "searchRoleUser": "Tu",
+    "searchRoleAssistant": "Assistente"
   },
   "chat": {
     "sendMessage": "Invia messaggio",
