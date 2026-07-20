@@ -9,6 +9,8 @@ import {
   type PreviewMessageLike,
 } from '../../shared/html-preview';
 
+const EXPECTED_CSP_META = `<meta http-equiv="Content-Security-Policy" content="${PREVIEW_CSP}">`;
+
 describe('isPreviewableCodeBlock', () => {
   it('accepts a complete html document', () => {
     const source = '<!DOCTYPE html><html><body><h1>Hi</h1></body></html>';
@@ -56,6 +58,38 @@ describe('buildPreviewSrcdoc', () => {
     expect(srcdoc).toContain('Content-Security-Policy');
     expect(srcdoc).toContain(source);
     expect(srcdoc.startsWith('<!DOCTYPE html>')).toBe(true);
+  });
+
+  it('places CSP meta before a script that precedes <head>', () => {
+    const source =
+      '<html><script src="http://evil/x.js"></script><head></head><body></body></html>';
+    const srcdoc = buildPreviewSrcdoc(source, 'html');
+    const cspIndex = srcdoc.indexOf(EXPECTED_CSP_META);
+    const scriptIndex = srcdoc.indexOf('<script src="http://evil/x.js"></script>');
+    expect(cspIndex).toBeGreaterThanOrEqual(0);
+    expect(scriptIndex).toBeGreaterThanOrEqual(0);
+    expect(cspIndex).toBeLessThan(scriptIndex);
+  });
+
+  it('strips adversarial CSP metas and keeps only ours at the head', () => {
+    const source = [
+      '<html>',
+      '<script>window.x=1</script>',
+      '<meta http-equiv="Content-Security-Policy" content="default-src *">',
+      '<head>',
+      '<meta http-equiv="Content-Security-Policy" content="script-src *">',
+      '</head>',
+      '<body></body>',
+      '</html>',
+    ].join('');
+    const srcdoc = buildPreviewSrcdoc(source, 'html');
+    const cspMetaMatches = srcdoc.match(
+      /<meta\b[^>]*http-equiv\s*=\s*(["']?)Content-Security-Policy\1[^>]*>/gi
+    );
+    expect(cspMetaMatches).toEqual([EXPECTED_CSP_META]);
+    expect(srcdoc.startsWith(`${EXPECTED_CSP_META}\n`)).toBe(true);
+    expect(srcdoc).not.toContain('default-src *');
+    expect(srcdoc).not.toContain('script-src *');
   });
 });
 

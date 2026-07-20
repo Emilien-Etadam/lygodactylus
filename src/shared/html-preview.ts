@@ -84,36 +84,34 @@ export function extractFencedCodeBlocks(markdown: string): FencedCodeBlock[] {
   return blocks;
 }
 
+/** Match any <meta …> tag so we can filter CSP metas regardless of attribute order. */
+const META_TAG_RE = /<meta\b[^>]*>/gi;
+
+function isCspMetaTag(tag: string): boolean {
+  return /http-equiv\s*=\s*(["']?)Content-Security-Policy\1/i.test(tag);
+}
+
+/** Step A: remove every Content-Security-Policy meta from the source (global). */
+function stripAllCspMetas(html: string): string {
+  return html.replace(META_TAG_RE, (tag) => (isCspMetaTag(tag) ? '' : tag));
+}
+
+/**
+ * Step B: place our CSP meta at the absolute document head —
+ * immediately after `<!doctype …>` when present, otherwise as the first characters
+ * (before `<html>`). Chromium re-parents it into the implicit head, ahead of any
+ * script/img in the content.
+ */
 function injectCspIntoHtml(html: string): string {
-  if (/http-equiv\s*=\s*["']?Content-Security-Policy/i.test(html)) {
-    // Replace existing CSP with our restrictive policy.
-    return html.replace(
-      /<meta\b[^>]*http-equiv\s*=\s*["']?Content-Security-Policy["']?[^>]*>/i,
-      PREVIEW_CSP_META
-    );
+  const withoutCsp = stripAllCspMetas(html);
+  const doctypeMatch = /^(\s*)(<!doctype[^>]*>)/i.exec(withoutCsp);
+  if (doctypeMatch) {
+    const lead = doctypeMatch[1] ?? '';
+    const doctype = doctypeMatch[2] ?? '';
+    const rest = withoutCsp.slice(doctypeMatch[0].length);
+    return `${lead}${doctype}\n${PREVIEW_CSP_META}\n${rest}`;
   }
-  if (/<head\b[^>]*>/i.test(html)) {
-    return html.replace(/<head\b[^>]*>/i, (open) => `${open}\n${PREVIEW_CSP_META}`);
-  }
-  if (/<html\b[^>]*>/i.test(html)) {
-    return html.replace(
-      /<html\b[^>]*>/i,
-      (open) => `${open}\n<head>\n<meta charset="utf-8">\n${PREVIEW_CSP_META}\n</head>`
-    );
-  }
-  if (/<!doctype\b/i.test(html)) {
-    return (
-      html.replace(
-        /<!doctype[^>]*>/i,
-        (doctype) =>
-          `${doctype}\n<html>\n<head>\n<meta charset="utf-8">\n${PREVIEW_CSP_META}\n</head>\n<body>`
-      ) + '\n</body>\n</html>'
-    );
-  }
-  return (
-    `<!DOCTYPE html><html><head><meta charset="utf-8">${PREVIEW_CSP_META}</head>` +
-    `<body>${html}</body></html>`
-  );
+  return `${PREVIEW_CSP_META}\n${withoutCsp}`;
 }
 
 function wrapSvgAsHtml(svgSource: string): string {
@@ -121,6 +119,13 @@ function wrapSvgAsHtml(svgSource: string): string {
     `<!DOCTYPE html><html><head><meta charset="utf-8">${PREVIEW_CSP_META}` +
     `<style>html,body{margin:0;height:100%;display:flex;align-items:center;justify-content:center;background:#fff}</style>` +
     `</head><body>${svgSource}</body></html>`
+  );
+}
+
+function wrapHtmlFragment(fragment: string): string {
+  return (
+    `<!DOCTYPE html><html><head><meta charset="utf-8">${PREVIEW_CSP_META}</head>` +
+    `<body>${fragment}</body></html>`
   );
 }
 
@@ -139,7 +144,7 @@ export function buildPreviewSrcdoc(source: string, kind: PreviewKind): string {
   if (kind === 'svg' || /<svg\b/i.test(trimmed)) {
     return wrapSvgAsHtml(trimmed);
   }
-  return injectCspIntoHtml(trimmed);
+  return wrapHtmlFragment(trimmed);
 }
 
 /**
