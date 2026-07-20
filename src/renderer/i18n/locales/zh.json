@@ -757,7 +757,15 @@
     "planMode": "计划",
     "actMode": "执行",
     "switchToAct": "切换到执行",
-    "planModeBadge": "计划模式"
+    "planModeBadge": "计划模式",
+    "atMentions": {
+      "menuLabel": "提及",
+      "empty": "没有匹配的文件或文件夹",
+      "fileDescription": "附加文件内容",
+      "directoryDescription": "附加目录列表",
+      "urlDescription": "获取 URL 内容",
+      "placeholder": "在 @ 后输入路径或粘贴 URL"
+    }
   },
   "context": {
     "progress": "进度",
@@ -793,7 +801,9 @@
     "contextUsageDetail": "{{input}} 输入 + {{output}} 预留 · 剩余 {{remaining}}",
     "modelMeta": "{{meta}}",
     "contextFillHint": "上下文占用",
-    "projectRulesLoaded": "已加载项目规则：{{file}}"
+    "projectRulesLoaded": "已加载项目规则：{{file}}",
+    "attachedContext": "附加上下文",
+    "attachedContextFailed": "失败"
   },
   "messageCard": {
     "request": "请求",

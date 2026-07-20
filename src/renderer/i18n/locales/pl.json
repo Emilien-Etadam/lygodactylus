@@ -757,7 +757,15 @@
     "planMode": "Plan",
     "actMode": "Act",
     "switchToAct": "Przełącz na Act",
-    "planModeBadge": "Tryb planowania"
+    "planModeBadge": "Tryb planowania",
+    "atMentions": {
+      "menuLabel": "Wzmianki",
+      "empty": "Brak pasujących plików lub folderów",
+      "fileDescription": "Dołącz zawartość pliku",
+      "directoryDescription": "Dołącz listę katalogu",
+      "urlDescription": "Pobierz zawartość URL",
+      "placeholder": "Wpisz ścieżkę lub wklej URL po @"
+    }
   },
   "context": {
     "progress": "Postęp",
@@ -793,7 +801,9 @@
     "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
     "modelMeta": "{{meta}}",
     "contextFillHint": "Wypełnienie kontekstu",
-    "projectRulesLoaded": "Załadowano reguły projektu: {{file}}"
+    "projectRulesLoaded": "Załadowano reguły projektu: {{file}}",
+    "attachedContext": "Dołączony kontekst",
+    "attachedContextFailed": "Błąd"
   },
   "messageCard": {
     "request": "Żądanie",

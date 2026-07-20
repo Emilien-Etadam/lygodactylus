@@ -757,7 +757,15 @@
     "planMode": "Plan",
     "actMode": "Act",
     "switchToAct": "Bytt til Act",
-    "planModeBadge": "Planleggingsmodus"
+    "planModeBadge": "Planleggingsmodus",
+    "atMentions": {
+      "menuLabel": "Omtaler",
+      "empty": "Ingen samsvarende filer eller mapper",
+      "fileDescription": "Legg ved filinnhold",
+      "directoryDescription": "Legg ved mappeliste",
+      "urlDescription": "Hent URL-innhold",
+      "placeholder": "Skriv en bane eller lim inn en URL etter @"
+    }
   },
   "context": {
     "progress": "Fremdrift",
@@ -793,7 +801,9 @@
     "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
     "modelMeta": "{{meta}}",
     "contextFillHint": "Kontekstfylling",
-    "projectRulesLoaded": "Prosjektregler lastet: {{file}}"
+    "projectRulesLoaded": "Prosjektregler lastet: {{file}}",
+    "attachedContext": "Vedlagt kontekst",
+    "attachedContextFailed": "Feilet"
   },
   "messageCard": {
     "request": "Forespørsel",

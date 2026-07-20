@@ -757,7 +757,15 @@
     "planMode": "Plan",
     "actMode": "Act",
     "switchToAct": "Treci la Act",
-    "planModeBadge": "Mod planificare"
+    "planModeBadge": "Mod planificare",
+    "atMentions": {
+      "menuLabel": "Mențiuni",
+      "empty": "Niciun fișier sau dosar potrivit",
+      "fileDescription": "Atașează conținutul fișierului",
+      "directoryDescription": "Atașează listarea directorului",
+      "urlDescription": "Preia conținutul URL-ului",
+      "placeholder": "Tastează o cale sau lipește un URL după @"
+    }
   },
   "context": {
     "progress": "Progres",
@@ -793,7 +801,9 @@
     "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
     "modelMeta": "{{meta}}",
     "contextFillHint": "Umplerea contextului",
-    "projectRulesLoaded": "Reguli de proiect încărcate: {{file}}"
+    "projectRulesLoaded": "Reguli de proiect încărcate: {{file}}",
+    "attachedContext": "Context atașat",
+    "attachedContextFailed": "Eșuat"
   },
   "messageCard": {
     "request": "Cerere",

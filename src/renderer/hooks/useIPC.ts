@@ -254,6 +254,10 @@ export function useIPC() {
             store.setSessionMemoryContext(event.payload.sessionId, event.payload.items);
             break;
 
+          case 'session.attachedContext':
+            store.setSessionAttachedContext(event.payload.sessionId, event.payload.items);
+            break;
+
           case 'plugins.commandsChanged':
           case 'plugins.runtimeApplied':
             store.bumpPluginCommandsRevision();

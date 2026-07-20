@@ -44,7 +44,16 @@ export type BackendMessageKey =
   | 'hintMacosAccessibilityAutomation'
   | 'scheduleTitlePrefix'
   | 'scheduleEmptyTitle'
-  | 'traceRequestTimedOut';
+  | 'traceRequestTimedOut'
+  | 'atMentionNoWorkspace'
+  | 'atMentionPathEscapesWorkspace'
+  | 'atMentionPathMissing'
+  | 'atMentionPathUnsupported'
+  | 'atMentionDirectoryEmpty'
+  | 'atMentionDirectoryFailed'
+  | 'atMentionFileTruncated'
+  | 'atMentionFileFailed'
+  | 'atMentionUrlFailed';
 
 export type BackendMessages = Record<BackendMessageKey, string>;
 
@@ -112,6 +121,15 @@ export const backendCatalog: Record<string, BackendMessages> = {
     scheduleTitlePrefix: '[定时任务]',
     scheduleEmptyTitle: '未命名任务',
     traceRequestTimedOut: '请求超时',
+    atMentionNoWorkspace: '没有可用的工作区，无法解析 @ 提及。',
+    atMentionPathEscapesWorkspace: '路径超出工作区范围，已忽略：{{path}}',
+    atMentionPathMissing: '文件或目录不存在：{{path}}',
+    atMentionPathUnsupported: '不支持的路径类型：{{path}}',
+    atMentionDirectoryEmpty: '目录为空：{{path}}',
+    atMentionDirectoryFailed: '无法列出目录 {{path}}：{{error}}',
+    atMentionFileTruncated: '[已截断：仅包含前 {{limit}} 字节，原文件 {{size}} 字节]',
+    atMentionFileFailed: '无法读取文件 {{path}}：{{error}}',
+    atMentionUrlFailed: '无法获取 URL {{url}}：{{error}}',
   },
   en: {
     errModelTimeout:
@@ -164,6 +182,15 @@ export const backendCatalog: Record<string, BackendMessages> = {
     scheduleTitlePrefix: '[Scheduled Task]',
     scheduleEmptyTitle: 'Untitled task',
     traceRequestTimedOut: 'Request timed out',
+    atMentionNoWorkspace: 'No workspace is available; @ mention could not be resolved.',
+    atMentionPathEscapesWorkspace: 'Path escapes the workspace and was ignored: {{path}}',
+    atMentionPathMissing: 'File or directory not found: {{path}}',
+    atMentionPathUnsupported: 'Unsupported path type: {{path}}',
+    atMentionDirectoryEmpty: 'Directory is empty: {{path}}',
+    atMentionDirectoryFailed: 'Could not list directory {{path}}: {{error}}',
+    atMentionFileTruncated: '[Truncated: first {{limit}} bytes of {{size}}]',
+    atMentionFileFailed: 'Could not read file {{path}}: {{error}}',
+    atMentionUrlFailed: 'Could not fetch URL {{url}}: {{error}}',
   },
   es: {
     errModelTimeout:
@@ -216,6 +243,15 @@ export const backendCatalog: Record<string, BackendMessages> = {
     scheduleTitlePrefix: '[Tarea programada]',
     scheduleEmptyTitle: 'Tarea sin nombre',
     traceRequestTimedOut: 'Tiempo de espera agotado',
+    atMentionNoWorkspace: 'No hay un espacio de trabajo disponible; no se pudo resolver la mención @.',
+    atMentionPathEscapesWorkspace: 'La ruta sale del espacio de trabajo y se ignoró: {{path}}',
+    atMentionPathMissing: 'Archivo o directorio no encontrado: {{path}}',
+    atMentionPathUnsupported: 'Tipo de ruta no compatible: {{path}}',
+    atMentionDirectoryEmpty: 'El directorio está vacío: {{path}}',
+    atMentionDirectoryFailed: 'No se pudo listar el directorio {{path}}: {{error}}',
+    atMentionFileTruncated: '[Truncado: primeros {{limit}} bytes de {{size}}]',
+    atMentionFileFailed: 'No se pudo leer el archivo {{path}}: {{error}}',
+    atMentionUrlFailed: 'No se pudo obtener la URL {{url}}: {{error}}',
   },
   fr: {
     errModelTimeout:
@@ -268,6 +304,15 @@ export const backendCatalog: Record<string, BackendMessages> = {
     scheduleTitlePrefix: '[Tâche planifiée]',
     scheduleEmptyTitle: 'Tâche sans nom',
     traceRequestTimedOut: 'Délai dépassé',
+    atMentionNoWorkspace: 'Aucun espace de travail disponible ; la mention @ n’a pas pu être résolue.',
+    atMentionPathEscapesWorkspace: 'Chemin hors de l’espace de travail, ignoré : {{path}}',
+    atMentionPathMissing: 'Fichier ou dossier introuvable : {{path}}',
+    atMentionPathUnsupported: 'Type de chemin non pris en charge : {{path}}',
+    atMentionDirectoryEmpty: 'Dossier vide : {{path}}',
+    atMentionDirectoryFailed: 'Impossible de lister le dossier {{path}} : {{error}}',
+    atMentionFileTruncated: '[Tronqué : {{limit}} premiers octets sur {{size}}]',
+    atMentionFileFailed: 'Impossible de lire le fichier {{path}} : {{error}}',
+    atMentionUrlFailed: 'Impossible de récupérer l’URL {{url}} : {{error}}',
   },
   de: {
     errModelTimeout:
@@ -320,6 +365,15 @@ export const backendCatalog: Record<string, BackendMessages> = {
     scheduleTitlePrefix: '[Geplante Aufgabe]',
     scheduleEmptyTitle: 'Unbenannte Aufgabe',
     traceRequestTimedOut: 'Zeitüberschreitung',
+    atMentionNoWorkspace: 'Kein Arbeitsbereich verfügbar; @-Erwähnung konnte nicht aufgelöst werden.',
+    atMentionPathEscapesWorkspace: 'Pfad liegt außerhalb des Arbeitsbereichs und wurde ignoriert: {{path}}',
+    atMentionPathMissing: 'Datei oder Verzeichnis nicht gefunden: {{path}}',
+    atMentionPathUnsupported: 'Nicht unterstützter Pfadtyp: {{path}}',
+    atMentionDirectoryEmpty: 'Verzeichnis ist leer: {{path}}',
+    atMentionDirectoryFailed: 'Verzeichnis {{path}} konnte nicht aufgelistet werden: {{error}}',
+    atMentionFileTruncated: '[Gekürzt: erste {{limit}} Bytes von {{size}}]',
+    atMentionFileFailed: 'Datei {{path}} konnte nicht gelesen werden: {{error}}',
+    atMentionUrlFailed: 'URL {{url}} konnte nicht abgerufen werden: {{error}}',
   },
   it: {
     errModelTimeout:
@@ -373,6 +427,15 @@ export const backendCatalog: Record<string, BackendMessages> = {
     scheduleTitlePrefix: '[Scheduled Task]',
     scheduleEmptyTitle: 'Attività senza titolo',
     traceRequestTimedOut: 'Timeout della richiesta',
+    atMentionNoWorkspace: 'Nessuna area di lavoro disponibile; impossibile risolvere la menzione @.',
+    atMentionPathEscapesWorkspace: 'Percorso fuori dall’area di lavoro, ignorato: {{path}}',
+    atMentionPathMissing: 'File o cartella non trovati: {{path}}',
+    atMentionPathUnsupported: 'Tipo di percorso non supportato: {{path}}',
+    atMentionDirectoryEmpty: 'Cartella vuota: {{path}}',
+    atMentionDirectoryFailed: 'Impossibile elencare la cartella {{path}}: {{error}}',
+    atMentionFileTruncated: '[Troncato: primi {{limit}} byte di {{size}}]',
+    atMentionFileFailed: 'Impossibile leggere il file {{path}}: {{error}}',
+    atMentionUrlFailed: 'Impossibile recuperare l’URL {{url}}: {{error}}',
   },
   uk: {
     errModelTimeout:
@@ -425,6 +488,15 @@ export const backendCatalog: Record<string, BackendMessages> = {
     scheduleTitlePrefix: '[Scheduled Task]',
     scheduleEmptyTitle: 'Завдання без назви',
     traceRequestTimedOut: 'Час очікування вичерпано',
+    atMentionNoWorkspace: 'Немає доступної робочої області; згадку @ не вдалося розв’язати.',
+    atMentionPathEscapesWorkspace: 'Шлях виходить за межі робочої області й проігноровано: {{path}}',
+    atMentionPathMissing: 'Файл або каталог не знайдено: {{path}}',
+    atMentionPathUnsupported: 'Непідтримуваний тип шляху: {{path}}',
+    atMentionDirectoryEmpty: 'Каталог порожній: {{path}}',
+    atMentionDirectoryFailed: 'Не вдалося отримати список каталогу {{path}}: {{error}}',
+    atMentionFileTruncated: '[Обрізано: перші {{limit}} байтів із {{size}}]',
+    atMentionFileFailed: 'Не вдалося прочитати файл {{path}}: {{error}}',
+    atMentionUrlFailed: 'Не вдалося отримати URL {{url}}: {{error}}',
   },
   pl: {
     errModelTimeout:
@@ -477,6 +549,15 @@ export const backendCatalog: Record<string, BackendMessages> = {
     scheduleTitlePrefix: '[Zadanie zaplanowane]',
     scheduleEmptyTitle: 'Zadanie bez nazwy',
     traceRequestTimedOut: 'Przekroczono limit czasu',
+    atMentionNoWorkspace: 'Brak dostępnego obszaru roboczego; nie udało się rozwiązać wzmianki @.',
+    atMentionPathEscapesWorkspace: 'Ścieżka poza obszarem roboczym — zignorowano: {{path}}',
+    atMentionPathMissing: 'Nie znaleziono pliku ani katalogu: {{path}}',
+    atMentionPathUnsupported: 'Nieobsługiwany typ ścieżki: {{path}}',
+    atMentionDirectoryEmpty: 'Katalog jest pusty: {{path}}',
+    atMentionDirectoryFailed: 'Nie udało się wyświetlić katalogu {{path}}: {{error}}',
+    atMentionFileTruncated: '[Obcięto: pierwsze {{limit}} bajtów z {{size}}]',
+    atMentionFileFailed: 'Nie udało się odczytać pliku {{path}}: {{error}}',
+    atMentionUrlFailed: 'Nie udało się pobrać URL {{url}}: {{error}}',
   },
   sv: {
     errModelTimeout:
@@ -529,6 +610,15 @@ export const backendCatalog: Record<string, BackendMessages> = {
     scheduleTitlePrefix: '[Schemalagd uppgift]',
     scheduleEmptyTitle: 'Namnlös uppgift',
     traceRequestTimedOut: 'Tidsgräns överskriden',
+    atMentionNoWorkspace: 'Ingen arbetsyta tillgänglig; @-omnämnandet kunde inte lösas.',
+    atMentionPathEscapesWorkspace: 'Sökvägen ligger utanför arbetsytan och ignorerades: {{path}}',
+    atMentionPathMissing: 'Fil eller katalog hittades inte: {{path}}',
+    atMentionPathUnsupported: 'Sökvägstyp stöds inte: {{path}}',
+    atMentionDirectoryEmpty: 'Katalogen är tom: {{path}}',
+    atMentionDirectoryFailed: 'Kunde inte lista katalogen {{path}}: {{error}}',
+    atMentionFileTruncated: '[Avkortad: första {{limit}} byten av {{size}}]',
+    atMentionFileFailed: 'Kunde inte läsa filen {{path}}: {{error}}',
+    atMentionUrlFailed: 'Kunde inte hämta URL {{url}}: {{error}}',
   },
   no: {
     errModelTimeout:
@@ -581,6 +671,15 @@ export const backendCatalog: Record<string, BackendMessages> = {
     scheduleTitlePrefix: '[Planlagt oppgave]',
     scheduleEmptyTitle: 'Oppgave uten navn',
     traceRequestTimedOut: 'Forespørsel tidsavbrutt',
+    atMentionNoWorkspace: 'Ingen arbeidsmappe tilgjengelig; @-omtalen kunne ikke løses.',
+    atMentionPathEscapesWorkspace: 'Stien er utenfor arbeidsmappen og ble ignorert: {{path}}',
+    atMentionPathMissing: 'Fil eller mappe ble ikke funnet: {{path}}',
+    atMentionPathUnsupported: 'Stitype støttes ikke: {{path}}',
+    atMentionDirectoryEmpty: 'Mappen er tom: {{path}}',
+    atMentionDirectoryFailed: 'Kunne ikke liste mappen {{path}}: {{error}}',
+    atMentionFileTruncated: '[Avkortet: første {{limit}} byte av {{size}}]',
+    atMentionFileFailed: 'Kunne ikke lese filen {{path}}: {{error}}',
+    atMentionUrlFailed: 'Kunne ikke hente URL {{url}}: {{error}}',
   },
   nl: {
     errModelTimeout:
@@ -633,6 +732,15 @@ export const backendCatalog: Record<string, BackendMessages> = {
     scheduleTitlePrefix: '[Scheduled Task]',
     scheduleEmptyTitle: 'Naamloze taak',
     traceRequestTimedOut: 'Verzoek time-out',
+    atMentionNoWorkspace: 'Geen werkruimte beschikbaar; @-vermelding kon niet worden opgelost.',
+    atMentionPathEscapesWorkspace: 'Pad ligt buiten de werkruimte en is genegeerd: {{path}}',
+    atMentionPathMissing: 'Bestand of map niet gevonden: {{path}}',
+    atMentionPathUnsupported: 'Niet-ondersteund padtype: {{path}}',
+    atMentionDirectoryEmpty: 'Map is leeg: {{path}}',
+    atMentionDirectoryFailed: 'Kon map {{path}} niet weergeven: {{error}}',
+    atMentionFileTruncated: '[Afgekapt: eerste {{limit}} bytes van {{size}}]',
+    atMentionFileFailed: 'Kon bestand {{path}} niet lezen: {{error}}',
+    atMentionUrlFailed: 'Kon URL {{url}} niet ophalen: {{error}}',
   },
   ro: {
     errModelTimeout:
@@ -685,5 +793,14 @@ export const backendCatalog: Record<string, BackendMessages> = {
     scheduleTitlePrefix: '[Scheduled Task]',
     scheduleEmptyTitle: 'Sarcină fără nume',
     traceRequestTimedOut: 'Cererea a expirat',
+    atMentionNoWorkspace: 'Niciun spațiu de lucru disponibil; mențiunea @ nu a putut fi rezolvată.',
+    atMentionPathEscapesWorkspace: 'Calea iese din spațiul de lucru și a fost ignorată: {{path}}',
+    atMentionPathMissing: 'Fișier sau director negăsit: {{path}}',
+    atMentionPathUnsupported: 'Tip de cale neacceptat: {{path}}',
+    atMentionDirectoryEmpty: 'Directorul este gol: {{path}}',
+    atMentionDirectoryFailed: 'Nu s-a putut lista directorul {{path}}: {{error}}',
+    atMentionFileTruncated: '[Trunchiat: primii {{limit}} octeți din {{size}}]',
+    atMentionFileFailed: 'Nu s-a putut citi fișierul {{path}}: {{error}}',
+    atMentionUrlFailed: 'Nu s-a putut prelua URL-ul {{url}}: {{error}}',
   },
 };
