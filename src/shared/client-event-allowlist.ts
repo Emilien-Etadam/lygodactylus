@@ -12,6 +12,8 @@ export const ALLOWED_CLIENT_EVENT_TYPES = [
   'session.setMemoryEnabled',
   'session.setMode',
   'session.getMode',
+  'session.setAutonomy',
+  'session.getAutonomy',
   'session.list',
   'session.getMessages',
   'session.getTraceSteps',

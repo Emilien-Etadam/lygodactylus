@@ -1,4 +1,5 @@
 import type { ContentBlock, Message, Session, TextContent, TraceStep } from '../../renderer/types';
+import { normalizeSessionAutonomy } from '../../shared/session-autonomy';
 import { normalizeSessionMode } from '../../shared/session-mode';
 import type { DatabaseInstance, SessionRow, TraceStepRow } from '../db/database';
 import { log, logError } from '../utils/logger';
@@ -24,6 +25,7 @@ function mapSessionRow(row: SessionRow): Session {
     allowedTools: parseJsonArray(row.allowed_tools, 'allowed_tools'),
     memoryEnabled: row.memory_enabled === 1,
     mode: normalizeSessionMode(row.mode),
+    autonomy: normalizeSessionAutonomy(row.autonomy),
     model: row.model || undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -73,6 +75,7 @@ export class SessionManagerStore {
       allowed_tools: JSON.stringify(session.allowedTools),
       memory_enabled: session.memoryEnabled ? 1 : 0,
       mode: session.mode || 'act',
+      autonomy: session.autonomy || 'normal',
       model: session.model || null,
       created_at: session.createdAt,
       updated_at: session.updatedAt,

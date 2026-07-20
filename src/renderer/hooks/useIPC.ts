@@ -14,6 +14,7 @@ import { useWorkdirIpc } from './ipc/useWorkdirIpc';
 import { useMcpIpc } from './ipc/useMcpIpc';
 import { useMemoryIpc } from './ipc/useMemoryIpc';
 import { useSessionModeIpc } from './ipc/useSessionModeIpc';
+import { useSessionAutonomyIpc } from './ipc/useSessionAutonomyIpc';
 
 // Module-level singleton guard so only the FIRST useIPC() caller installs the
 // server-event listener. Other callers (PermissionDialog, Sidebar, ChatView,
@@ -468,6 +469,10 @@ export function useIPC() {
 
   const { setSessionMemoryEnabled } = useMemoryIpc({ invoke, updateSession });
   const { setSessionMode, getSessionMode } = useSessionModeIpc({ invoke, updateSession });
+  const { setSessionAutonomy, getSessionAutonomy } = useSessionAutonomyIpc({
+    invoke,
+    updateSession,
+  });
 
   return {
     send,
@@ -482,6 +487,8 @@ export function useIPC() {
     setSessionMemoryEnabled,
     setSessionMode,
     getSessionMode,
+    setSessionAutonomy,
+    getSessionAutonomy,
     deleteSession,
     batchDeleteSessions,
     listSessions,

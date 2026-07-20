@@ -114,6 +114,12 @@ export async function handleClientEvent(event: ClientEvent): Promise<unknown> {
     case 'session.getMode':
       return sm.getSessionMode(event.payload.sessionId);
 
+    case 'session.setAutonomy':
+      return sm.setSessionAutonomy(event.payload.sessionId, event.payload.autonomy);
+
+    case 'session.getAutonomy':
+      return sm.getSessionAutonomy(event.payload.sessionId);
+
     case 'session.list': {
       const sessions = sm.listSessions();
       sendToRenderer({ type: 'session.list', payload: { sessions } });

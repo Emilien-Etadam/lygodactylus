@@ -100,7 +100,15 @@
     "modelStats": "Model stats",
     "modelStatsDesc": "Show generation speed (tok/s), context fill, and model metadata (parameters/quantization) when known.",
     "checkpoints": "Run checkpoints",
-    "checkpointsDesc": "Before the agent modifies files, save pre-images so you can undo a run’s changes in one click (no git required)."
+    "checkpointsDesc": "Before the agent modifies files, save pre-images so you can undo a run’s changes in one click (no git required).",
+    "workspaceToolingTitle": "Quality commands (autonomous mode)",
+    "workspaceToolingHint": "Optional. Run after a mutating run when Autonomous mode is active.",
+    "lintCmd": "Lint command",
+    "testCmd": "Test command",
+    "lintCmdPlaceholder": "e.g. npm run lint",
+    "testCmdPlaceholder": "e.g. npm test",
+    "noWorkspace": "Open a working folder to configure lint/tests.",
+    "saveTooling": "Save"
   },
   "webSearch": {
     "title": "Web search",
@@ -858,7 +866,16 @@
       "directoryDescription": "Attach directory listing",
       "urlDescription": "Fetch URL contents",
       "placeholder": "Type a path or paste a URL after @"
-    }
+    },
+    "autonomyToggle": "Autonomy level",
+    "autonomyCareful": "Careful",
+    "autonomyNormal": "Normal",
+    "autonomyAutonomous": "Autonomous",
+    "autonomyCarefulTooltip": "Every write/edit must be approved with a diff",
+    "autonomyNormalTooltip": "Standard behavior (unchanged permissions)",
+    "autonomyAutonomousTooltip": "After edits, run lint/tests and auto-fix in a loop",
+    "autonomyCarefulBadge": "Careful",
+    "autonomyAutonomousBadge": "Autonomous"
   },
   "context": {
     "progress": "Progress",
@@ -1162,7 +1179,11 @@
       "execute_command": "Execute shell commands in the workspace",
       "glob": "Search files by pattern",
       "grep": "Search file contents"
-    }
+    },
+    "carefulApproveTitle": "Approve edit",
+    "carefulApproveDescription": "File {{path}} (≈ {{bytes}} bytes)",
+    "diff": "Diff",
+    "allowRun": "Approve all for this run"
   },
   "sudo": {
     "title": "Administrator Permission Required",

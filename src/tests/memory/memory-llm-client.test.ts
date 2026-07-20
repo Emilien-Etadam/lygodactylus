@@ -93,6 +93,7 @@ function makeConfig(timeoutMs: number, overrides: Partial<AppConfig> = {}): AppC
     ...overrides,
     ollamaKeepAlive: overrides.ollamaKeepAlive ?? '30m',
     checkpointsEnabled: overrides.checkpointsEnabled ?? true,
+    workspaceTooling: overrides.workspaceTooling ?? {},
   };
 }
 

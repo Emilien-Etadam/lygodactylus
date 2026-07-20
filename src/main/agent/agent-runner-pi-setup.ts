@@ -6,8 +6,10 @@ import {
   type BashToolOptions,
   type ToolDefinition,
 } from '@earendil-works/pi-coding-agent';
+import { wrapFileMutationToolsForCareful } from '../autonomy/careful-approval';
 import { wrapFileMutationToolsForCheckpoints } from '../checkpoints';
 import type { Message, Session } from '../../renderer/types';
+import { normalizeSessionAutonomy } from '../../shared/session-autonomy';
 import { configStore } from '../config/config-store';
 import {
   isLoopbackOpenAIEndpoint,
@@ -493,8 +495,12 @@ export async function preparePiSessionRun({
     effectiveCwd,
     ctx.requestSudoPassword
   ).find((tool) => tool.name === 'bash');
-  // Override built-in write/edit with wrapped copies so checkpoints can capture
-  // pre-images before the first mutation of each file in the run (no git).
+  // Override built-in write/edit: careful approval (outer) then checkpoint capture.
+  // Order matters — do not capture a pre-image for a denied careful edit.
+  // Live lookup: re-read store on every call so autonomy changes apply without
+  // recreating the cached pi session (same source as session.getAutonomy IPC).
+  const getAutonomy = () =>
+    ctx.getSessionAutonomy?.(session.id) ?? normalizeSessionAutonomy(session.autonomy);
   const checkpointFileTools = wrapFileMutationToolsForCheckpoints(
     [
       createWriteToolDefinition(effectiveCwd) as ToolDefinition,
@@ -503,10 +509,17 @@ export async function preparePiSessionRun({
     session.id,
     effectiveCwd
   );
+  const carefulFileTools = wrapFileMutationToolsForCareful(
+    checkpointFileTools,
+    session.id,
+    effectiveCwd,
+    getAutonomy,
+    ctx.requestPermission
+  );
   // Assemble the full toolset, then filter once for plan mode (single gating point).
   const assembledCustomTools = [
     ...(wrappedBash ? [wrappedBash] : []),
-    ...checkpointFileTools,
+    ...carefulFileTools,
     ...nativeCustomTools,
     ...semanticSearchCustomTools,
     ...scheduleCustomTools,
@@ -587,6 +600,7 @@ export async function preparePiSessionRun({
     modelContextWindow,
     modelMaxTokens,
     projectRules,
+    getAutonomy,
   });
 
   logTiming('agent session created', runStartTime);

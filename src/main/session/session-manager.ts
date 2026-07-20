@@ -1,10 +1,12 @@
 import type {
   ContentBlock,
   Message,
+  PermissionDiffPayload,
   PermissionResult,
   QuestionItem,
   ServerEvent,
   Session,
+  SessionAutonomy,
   SessionMode,
   TraceStep,
 } from '../../renderer/types';
@@ -124,10 +126,24 @@ export class SessionManager {
         saveMessage: (message) => this.saveMessage(message),
         requestSudoPassword: (sessionId, toolUseId, command) =>
           this.requestSudoPassword(sessionId, toolUseId, command),
-        requestPermission: (sessionId, toolUseId, toolName, input) =>
-          this.requestPermission(sessionId, toolUseId, toolName, input),
+        requestPermission: (sessionId, toolUseId, toolName, input, options) =>
+          this.requestPermission(sessionId, toolUseId, toolName, input, options),
         requestUserQuestion: (sessionId, toolUseId, questions) =>
           this.requestUserQuestion(sessionId, toolUseId, questions),
+        enqueueFollowUpPrompt: (sessionId, prompt) => {
+          const session = this.store.loadSession(sessionId);
+          if (!session) {
+            return;
+          }
+          this.enqueuePrompt(session, prompt);
+        },
+        getSessionAutonomy: (sessionId) => {
+          try {
+            return this.getSessionAutonomy(sessionId).autonomy;
+          } catch {
+            return 'normal';
+          }
+        },
       },
       this.pathResolver,
       this.mcpManager,
@@ -324,6 +340,14 @@ export class SessionManager {
     return this.facadeSupport.updateSessionMode(sessionId, mode);
   }
 
+  getSessionAutonomy(sessionId: string): { autonomy: SessionAutonomy } {
+    return this.facadeSupport.getSessionAutonomy(sessionId);
+  }
+
+  setSessionAutonomy(sessionId: string, autonomy: SessionAutonomy): Session {
+    return this.facadeSupport.updateSessionAutonomy(sessionId, autonomy);
+  }
+
   clearAllCachedAgentSessions(): void {
     this.agentRunner.clearAllSdkSessions?.();
   }
@@ -394,7 +418,8 @@ export class SessionManager {
     sessionId: string,
     toolUseId: string,
     toolName: string,
-    input: Record<string, unknown>
+    input: Record<string, unknown>,
+    options?: { diff?: PermissionDiffPayload; allowRunOption?: boolean }
   ): Promise<PermissionResult> {
     return new Promise((resolve) => {
       const timeoutId = setTimeout(() => {
@@ -409,7 +434,14 @@ export class SessionManager {
       });
       this.sendToRenderer({
         type: 'permission.request',
-        payload: { toolUseId, toolName, input, sessionId },
+        payload: {
+          toolUseId,
+          toolName,
+          input,
+          sessionId,
+          ...(options?.diff ? { diff: options.diff } : {}),
+          ...(options?.allowRunOption ? { allowRunOption: true } : {}),
+        },
       });
     });
   }

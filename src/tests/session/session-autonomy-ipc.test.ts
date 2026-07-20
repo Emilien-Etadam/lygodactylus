@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Session } from '../../renderer/types';
 import {
-  getSessionMode,
-  updateSessionMode,
+  getSessionAutonomy,
+  updateSessionAutonomy,
 } from '../../main/session/session-manager-session-lifecycle';
 import type { SessionManagerFacadeSupportDeps } from '../../main/session/session-manager-facade-support';
 
@@ -46,61 +46,65 @@ function makeDeps(session: Session) {
   return { deps, store, db, sendToRenderer, clearSdkSession, activeSessions };
 }
 
-describe('session mode IPC helpers', () => {
-  it('getSessionMode returns persisted mode (default act)', () => {
-    const session = makeSession({ mode: 'act' });
+describe('session autonomy IPC helpers', () => {
+  it('getSessionAutonomy returns persisted autonomy (default normal)', () => {
+    const session = makeSession({ autonomy: 'normal' });
     const { deps } = makeDeps(session);
-    expect(getSessionMode(deps, 'session-1')).toEqual({ mode: 'act' });
+    expect(getSessionAutonomy(deps, 'session-1')).toEqual({ autonomy: 'normal' });
   });
 
-  it('setSessionMode persists plan and clears cached pi session', () => {
-    const session = makeSession({ mode: 'act' });
+  it('setSessionAutonomy persists careful without clearing the cached pi session', () => {
+    const session = makeSession({ autonomy: 'normal' });
     const { deps, db, sendToRenderer, clearSdkSession } = makeDeps(session);
 
-    const updated = updateSessionMode(deps, 'session-1', 'plan');
+    const updated = updateSessionAutonomy(deps, 'session-1', 'careful');
 
-    expect(updated.mode).toBe('plan');
+    expect(updated.autonomy).toBe('careful');
     expect(db.sessions.update).toHaveBeenCalledWith(
       'session-1',
-      expect.objectContaining({ mode: 'plan' })
+      expect.objectContaining({ autonomy: 'careful' })
     );
-    expect(clearSdkSession).toHaveBeenCalledWith('session-1');
+    // Live getAutonomy reads the store; no need to recreate the pi session.
+    expect(clearSdkSession).not.toHaveBeenCalled();
     expect(sendToRenderer).toHaveBeenCalledWith({
       type: 'session.update',
       payload: {
         sessionId: 'session-1',
-        updates: expect.objectContaining({ mode: 'plan' }),
+        updates: expect.objectContaining({ autonomy: 'careful' }),
       },
     });
   });
 
-  it('rejects mode changes while a run is in progress', () => {
+  it('rejects autonomy changes while a run is in progress', () => {
     const session = makeSession({ status: 'running' });
     const { deps } = makeDeps(session);
-    expect(() => updateSessionMode(deps, 'session-1', 'plan')).toThrow(
+    expect(() => updateSessionAutonomy(deps, 'session-1', 'autonomous')).toThrow(
       /while a run is in progress/
     );
   });
 
-  it('rejects mode changes when session is in activeSessions', () => {
+  it('rejects autonomy changes when session is in activeSessions', () => {
     const session = makeSession({ status: 'idle' });
     const { deps, activeSessions } = makeDeps(session);
     activeSessions.set('session-1', new AbortController());
-    expect(() => updateSessionMode(deps, 'session-1', 'plan')).toThrow(
+    expect(() => updateSessionAutonomy(deps, 'session-1', 'careful')).toThrow(
       /while a run is in progress/
     );
   });
 
   it('round-trips set then get', () => {
-    let session = makeSession({ mode: 'act' });
+    let session = makeSession({ autonomy: 'normal' });
     const store = {
       loadSession: vi.fn(() => session),
     };
     const db = {
       sessions: {
-        update: vi.fn((_id: string, updates: { mode?: string }) => {
-          if (updates.mode) {
-            session = { ...session, mode: updates.mode as Session['mode'] };
+        update: vi.fn((_id: string, updates: { autonomy?: string }) => {
+          if (updates.autonomy) {
+            session = {
+              ...session,
+              autonomy: updates.autonomy as Session['autonomy'],
+            };
           }
         }),
       },
@@ -113,9 +117,11 @@ describe('session mode IPC helpers', () => {
       activeSessions: new Map(),
     } as unknown as SessionManagerFacadeSupportDeps;
 
-    updateSessionMode(deps, 'session-1', 'plan');
-    expect(getSessionMode(deps, 'session-1')).toEqual({ mode: 'plan' });
-    updateSessionMode(deps, 'session-1', 'act');
-    expect(getSessionMode(deps, 'session-1')).toEqual({ mode: 'act' });
+    updateSessionAutonomy(deps, 'session-1', 'careful');
+    expect(getSessionAutonomy(deps, 'session-1')).toEqual({ autonomy: 'careful' });
+    updateSessionAutonomy(deps, 'session-1', 'autonomous');
+    expect(getSessionAutonomy(deps, 'session-1')).toEqual({ autonomy: 'autonomous' });
+    updateSessionAutonomy(deps, 'session-1', 'normal');
+    expect(getSessionAutonomy(deps, 'session-1')).toEqual({ autonomy: 'normal' });
   });
 });

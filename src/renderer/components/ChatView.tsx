@@ -79,6 +79,7 @@ export function ChatView() {
     stopSession,
     setSessionMemoryEnabled,
     setSessionMode,
+    setSessionAutonomy,
     isElectron,
   } = useIPC();
   const setActiveSession = useAppStore((s) => s.setActiveSession);
@@ -152,6 +153,10 @@ export function ChatView() {
   const isSessionRunning = activeSession?.status === 'running';
   const canStop = isSessionRunning || hasActiveTurn || pendingCount > 0;
   const sessionMode: SessionMode = activeSession?.mode === 'plan' ? 'plan' : 'act';
+  const sessionAutonomy =
+    activeSession?.autonomy === 'careful' || activeSession?.autonomy === 'autonomous'
+      ? activeSession.autonomy
+      : 'normal';
   const showSwitchToAct =
     sessionMode === 'plan' && !canStop && messages.some((message) => message.role === 'assistant');
 
@@ -163,6 +168,16 @@ export function ChatView() {
       void setSessionMode(activeSession.id, mode);
     },
     [activeSession, canStop, sessionMode, setSessionMode]
+  );
+
+  const handleSessionAutonomyChange = useCallback(
+    (autonomy: 'careful' | 'normal' | 'autonomous') => {
+      if (!activeSession || canStop || autonomy === sessionAutonomy) {
+        return;
+      }
+      void setSessionAutonomy(activeSession.id, autonomy);
+    },
+    [activeSession, canStop, sessionAutonomy, setSessionAutonomy]
   );
 
   const slashQuery = useMemo(() => {
@@ -865,6 +880,13 @@ export function ChatView() {
               {t('chat.planModeBadge')}
             </span>
           )}
+          {sessionMode === 'act' && sessionAutonomy !== 'normal' && (
+            <span className="shrink-0 px-2 py-0.5 rounded-full border border-accent/30 bg-accent/10 text-[11px] font-medium text-accent">
+              {sessionAutonomy === 'careful'
+                ? t('chat.autonomyCarefulBadge')
+                : t('chat.autonomyAutonomousBadge')}
+            </span>
+          )}
         </div>
         {activeConnectors.length > 0 && (
           <>
@@ -1208,8 +1230,10 @@ export function ChatView() {
               <div className="flex items-center gap-2">
                 <PlanActToggle
                   mode={sessionMode}
+                  autonomy={sessionAutonomy}
                   disabled={canStop}
-                  onChange={handleSessionModeChange}
+                  onChangeMode={handleSessionModeChange}
+                  onChangeAutonomy={handleSessionAutonomyChange}
                 />
 
                 {/* Reasoning level toggle */}

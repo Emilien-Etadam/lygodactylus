@@ -100,7 +100,15 @@
     "modelStats": "Statistici model",
     "modelStatsDesc": "Afișează viteza de generare (tok/s), umplerea contextului și metadatele modelului (parametri/cuantizare) când sunt cunoscute.",
     "checkpoints": "Puncte de control ale execuțiilor",
-    "checkpointsDesc": "Înainte ca agentul să modifice fișierele, salvează pre-imagini pentru a anula modificările unei execuții dintr-un clic (fără git)."
+    "checkpointsDesc": "Înainte ca agentul să modifice fișierele, salvează pre-imagini pentru a anula modificările unei execuții dintr-un clic (fără git).",
+    "workspaceToolingTitle": "Quality commands (autonomous mode)",
+    "workspaceToolingHint": "Optional. Run after a mutating run when Autonomous mode is active.",
+    "lintCmd": "Lint command",
+    "testCmd": "Test command",
+    "lintCmdPlaceholder": "e.g. npm run lint",
+    "testCmdPlaceholder": "e.g. npm test",
+    "noWorkspace": "Open a working folder to configure lint/tests.",
+    "saveTooling": "Salvează"
   },
   "webSearch": {
     "title": "Web search",
@@ -769,7 +777,16 @@
       "directoryDescription": "Atașează listarea directorului",
       "urlDescription": "Preia conținutul URL-ului",
       "placeholder": "Tastează o cale sau lipește un URL după @"
-    }
+    },
+    "autonomyToggle": "Nivel de autonomie",
+    "autonomyCareful": "Prudent",
+    "autonomyNormal": "Normal",
+    "autonomyAutonomous": "Autonom",
+    "autonomyCarefulTooltip": "Fiecare scriere/editare trebuie aprobată cu un diff",
+    "autonomyNormalTooltip": "Comportament standard (permisiuni neschimbate)",
+    "autonomyAutonomousTooltip": "După modificări rulează lint/teste și corectează în buclă",
+    "autonomyCarefulBadge": "Prudent",
+    "autonomyAutonomousBadge": "Autonom"
   },
   "context": {
     "progress": "Progres",
@@ -1073,7 +1090,11 @@
       "execute_command": "Execută comenzi shell în spațiul de lucru",
       "glob": "Caută fișiere după model",
       "grep": "Caută în conținutul fișierelor"
-    }
+    },
+    "carefulApproveTitle": "Aprobă modificarea",
+    "carefulApproveDescription": "Fișier {{path}} (≈ {{bytes}} octeți)",
+    "diff": "Diff",
+    "allowRun": "Aprobă tot pentru această rulare"
   },
   "sudo": {
     "title": "Permisiune de administrator necesară",

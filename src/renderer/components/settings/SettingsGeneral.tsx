@@ -21,9 +21,13 @@ export function SettingsGeneral() {
   const speechEnabled = appConfig?.speechSynthesisEnabled === true;
   const modelStatsEnabled = appConfig?.modelStatsEnabled !== false;
   const checkpointsEnabled = appConfig?.checkpointsEnabled !== false;
+  const workingDir = useAppStore((s) => s.workingDir);
   const [isSavingSpeech, setIsSavingSpeech] = useState(false);
   const [isSavingModelStats, setIsSavingModelStats] = useState(false);
   const [isSavingCheckpoints, setIsSavingCheckpoints] = useState(false);
+  const [lintCmdDraft, setLintCmdDraft] = useState('');
+  const [testCmdDraft, setTestCmdDraft] = useState('');
+  const [isSavingTooling, setIsSavingTooling] = useState(false);
   const baseLang = i18n.language.split('-')[0];
   const currentLang = baseLang === 'nb' || baseLang === 'nn' ? 'no' : baseLang;
   const [appVer, setAppVer] = useState('');
@@ -201,6 +205,51 @@ export function SettingsGeneral() {
     }
   }, [checkpointsEnabled, isSavingCheckpoints, setAppConfig]);
 
+  useEffect(() => {
+    if (!workingDir) {
+      setLintCmdDraft('');
+      setTestCmdDraft('');
+      return;
+    }
+    const entry = appConfig?.workspaceTooling?.[workingDir] ?? {};
+    setLintCmdDraft(typeof entry.lintCmd === 'string' ? entry.lintCmd : '');
+    setTestCmdDraft(typeof entry.testCmd === 'string' ? entry.testCmd : '');
+  }, [workingDir, appConfig?.workspaceTooling]);
+
+  const handleSaveWorkspaceTooling = useCallback(async () => {
+    if (!isElectron || !workingDir || isSavingTooling || !window.electronAPI?.config?.save) {
+      return;
+    }
+    setIsSavingTooling(true);
+    try {
+      const nextTooling = { ...(appConfig?.workspaceTooling ?? {}) };
+      const lintCmd = lintCmdDraft.trim() || undefined;
+      const testCmd = testCmdDraft.trim() || undefined;
+      if (!lintCmd && !testCmd) {
+        delete nextTooling[workingDir];
+      } else {
+        nextTooling[workingDir] = { lintCmd, testCmd };
+      }
+      const result = await window.electronAPI.config.save({
+        workspaceTooling: nextTooling,
+      });
+      if (result?.config) {
+        setAppConfig(result.config);
+      }
+    } catch {
+      // Keep drafts; config.status may still sync later.
+    } finally {
+      setIsSavingTooling(false);
+    }
+  }, [
+    appConfig?.workspaceTooling,
+    isSavingTooling,
+    lintCmdDraft,
+    setAppConfig,
+    testCmdDraft,
+    workingDir,
+  ]);
+
   const languages = [
     { code: 'en', nativeName: 'English' },
     { code: 'zh', nativeName: '中文' },
@@ -359,6 +408,55 @@ export function SettingsGeneral() {
             />
           </button>
         </div>
+      </section>
+
+      <section className="rounded-lg border border-border-subtle bg-background px-4 py-4 space-y-3">
+        <div>
+          <h4 className="text-sm font-semibold text-text-primary">
+            {t('general.workspaceToolingTitle')}
+          </h4>
+          <p className="mt-1 text-xs leading-5 text-text-muted">
+            {t('general.workspaceToolingHint')}
+          </p>
+        </div>
+        {!workingDir ? (
+          <p className="text-xs text-text-muted">{t('general.noWorkspace')}</p>
+        ) : (
+          <>
+            <p className="text-[11px] font-mono text-text-muted truncate" title={workingDir}>
+              {workingDir}
+            </p>
+            <label className="block space-y-1">
+              <span className="text-xs font-medium text-text-secondary">{t('general.lintCmd')}</span>
+              <input
+                type="text"
+                value={lintCmdDraft}
+                onChange={(e) => setLintCmdDraft(e.target.value)}
+                placeholder={t('general.lintCmdPlaceholder')}
+                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted"
+              />
+            </label>
+            <label className="block space-y-1">
+              <span className="text-xs font-medium text-text-secondary">{t('general.testCmd')}</span>
+              <input
+                type="text"
+                value={testCmdDraft}
+                onChange={(e) => setTestCmdDraft(e.target.value)}
+                placeholder={t('general.testCmdPlaceholder')}
+                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => void handleSaveWorkspaceTooling()}
+              disabled={isSavingTooling}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-surface hover:bg-surface-hover text-sm font-medium text-text-primary disabled:opacity-60"
+            >
+              {isSavingTooling ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+              {t('general.saveTooling', { defaultValue: 'Save' })}
+            </button>
+          </>
+        )}
       </section>
 
       <SettingsQuickAsk />

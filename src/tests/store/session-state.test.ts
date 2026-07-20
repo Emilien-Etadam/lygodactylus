@@ -19,6 +19,7 @@ describe('SessionState unified store', () => {
     allowedTools: [] as string[],
     memoryEnabled: false,
     mode: 'act' as const,
+    autonomy: 'normal' as const,
   });
 
   describe('addSession', () => {

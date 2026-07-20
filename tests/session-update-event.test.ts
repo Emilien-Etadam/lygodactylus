@@ -20,6 +20,7 @@ describe('applySessionUpdate', () => {
       allowedTools: [],
       memoryEnabled: false,
       mode: 'act',
+      autonomy: 'normal',
     };
     const updated = applySessionUpdate(sessions, 's-new', updates);
     expect(updated).toHaveLength(1);

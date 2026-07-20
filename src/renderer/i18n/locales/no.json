@@ -100,7 +100,15 @@
     "modelStats": "Modellstatistikk",
     "modelStatsDesc": "Viser genereringshastighet (tok/s), kontekstfylling og modellmetadata (parametere/kvantisering) når de er kjent.",
     "checkpoints": "Sjekkpunkter for kjøringer",
-    "checkpointsDesc": "Lagrer forhåndsbilder før agenten endrer filer, slik at du kan angre endringene fra en kjøring med ett klikk (uten git)."
+    "checkpointsDesc": "Lagrer forhåndsbilder før agenten endrer filer, slik at du kan angre endringene fra en kjøring med ett klikk (uten git).",
+    "workspaceToolingTitle": "Quality commands (autonomous mode)",
+    "workspaceToolingHint": "Optional. Run after a mutating run when Autonomous mode is active.",
+    "lintCmd": "Lint command",
+    "testCmd": "Test command",
+    "lintCmdPlaceholder": "e.g. npm run lint",
+    "testCmdPlaceholder": "e.g. npm test",
+    "noWorkspace": "Open a working folder to configure lint/tests.",
+    "saveTooling": "Lagre"
   },
   "webSearch": {
     "title": "Web search",
@@ -769,7 +777,16 @@
       "directoryDescription": "Legg ved mappeliste",
       "urlDescription": "Hent URL-innhold",
       "placeholder": "Skriv en bane eller lim inn en URL etter @"
-    }
+    },
+    "autonomyToggle": "Autonominivå",
+    "autonomyCareful": "Forsiktig",
+    "autonomyNormal": "Normal",
+    "autonomyAutonomous": "Autonom",
+    "autonomyCarefulTooltip": "Hver skriving/redigering må godkjennes med en diff",
+    "autonomyNormalTooltip": "Standardoppførsel (uendrede tillatelser)",
+    "autonomyAutonomousTooltip": "Etter endringer kjører lint/tester og retter i en løkke",
+    "autonomyCarefulBadge": "Forsiktig",
+    "autonomyAutonomousBadge": "Autonom"
   },
   "context": {
     "progress": "Fremdrift",
@@ -1073,7 +1090,11 @@
       "execute_command": "Kjøre skallkommandoer i arbeidsområdet",
       "glob": "Søke i filer etter mønster",
       "grep": "Søke i filinnhold"
-    }
+    },
+    "carefulApproveTitle": "Godkjenn endring",
+    "carefulApproveDescription": "Fil {{path}} (≈ {{bytes}} byte)",
+    "diff": "Diff",
+    "allowRun": "Godkjenn alt for denne kjøringen"
   },
   "sudo": {
     "title": "Administratortillatelse påkrevd",

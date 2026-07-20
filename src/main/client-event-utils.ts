@@ -16,6 +16,8 @@ export function eventRequiresSessionManager(event: ClientEvent): boolean {
     case 'session.rewindToMessage':
     case 'session.setMode':
     case 'session.getMode':
+    case 'session.setAutonomy':
+    case 'session.getAutonomy':
     case 'permission.response':
     case 'question.response':
       return true;

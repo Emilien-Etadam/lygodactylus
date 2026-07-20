@@ -1,7 +1,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import type { Message, QuestionItem } from '../../renderer/types';
+import type {
+  Message,
+  PermissionDiffPayload,
+  PermissionResult,
+  QuestionItem,
+} from '../../renderer/types';
+import type { SessionAutonomy } from '../../shared/session-autonomy';
 import type { AgentRuntimeExtensionManager } from '../extensions/agent-runtime-extension-manager';
 import type { MCPManager } from '../mcp/mcp-manager';
 import type { PathResolver } from '../sandbox/path-resolver';
@@ -35,13 +41,21 @@ export interface AgentRunnerRunContext {
     sessionId: string,
     toolUseId: string,
     toolName: string,
-    input: Record<string, unknown>
-  ) => Promise<'allow' | 'deny' | 'allow_always'>;
+    input: Record<string, unknown>,
+    options?: { diff?: PermissionDiffPayload; allowRunOption?: boolean }
+  ) => Promise<PermissionResult>;
   requestUserQuestion?: (
     sessionId: string,
     toolUseId: string,
     questions: QuestionItem[]
   ) => Promise<string>;
+  /** Enqueue a follow-up user prompt (autonomous fix loop). */
+  enqueueFollowUpPrompt?: (sessionId: string, prompt: string) => void;
+  /**
+   * Live session autonomy lookup (same source as session.getAutonomy IPC).
+   * Must re-read store on every call — never capture a frozen value at prep.
+   */
+  getSessionAutonomy?: (sessionId: string) => SessionAutonomy;
   skillsPaths: AgentRunnerSkillsPaths;
   getToolDisplayName(toolName: string): string;
   getCurrentModelString(preferredModel?: string): string;

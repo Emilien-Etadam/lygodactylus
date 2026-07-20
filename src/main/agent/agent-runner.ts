@@ -3,7 +3,15 @@
  *
  * Agent runner entrypoint and long-lived runner state.
  */
-import type { Message, QuestionItem, ServerEvent, Session } from '../../renderer/types';
+import type {
+  Message,
+  PermissionDiffPayload,
+  PermissionResult,
+  QuestionItem,
+  ServerEvent,
+  Session,
+} from '../../renderer/types';
+import type { SessionAutonomy } from '../../shared/session-autonomy';
 import { PathResolver } from '../sandbox/path-resolver';
 import { MCPManager } from '../mcp/mcp-manager';
 import { log, logCtx } from '../utils/logger';
@@ -42,13 +50,16 @@ interface AgentRunnerOptions {
     sessionId: string,
     toolUseId: string,
     toolName: string,
-    input: Record<string, unknown>
-  ) => Promise<'allow' | 'deny' | 'allow_always'>;
+    input: Record<string, unknown>,
+    options?: { diff?: PermissionDiffPayload; allowRunOption?: boolean }
+  ) => Promise<PermissionResult>;
   requestUserQuestion?: (
     sessionId: string,
     toolUseId: string,
     questions: QuestionItem[]
   ) => Promise<string>;
+  enqueueFollowUpPrompt?: (sessionId: string, prompt: string) => void;
+  getSessionAutonomy?: (sessionId: string) => SessionAutonomy;
 }
 
 /**
@@ -73,13 +84,16 @@ export class AgentRunner {
     sessionId: string,
     toolUseId: string,
     toolName: string,
-    input: Record<string, unknown>
-  ) => Promise<'allow' | 'deny' | 'allow_always'>;
+    input: Record<string, unknown>,
+    options?: { diff?: PermissionDiffPayload; allowRunOption?: boolean }
+  ) => Promise<PermissionResult>;
   private readonly requestUserQuestion?: (
     sessionId: string,
     toolUseId: string,
     questions: QuestionItem[]
   ) => Promise<string>;
+  private readonly enqueueFollowUpPrompt?: (sessionId: string, prompt: string) => void;
+  private readonly getSessionAutonomy?: (sessionId: string) => SessionAutonomy;
   private readonly skillsPaths: AgentRunnerSkillsPaths;
   private readonly activeControllers: Map<string, AbortController> = new Map();
   private readonly piSessions: Map<string, CachedPiSession> = new Map();
@@ -133,6 +147,8 @@ export class AgentRunner {
     this.requestSudoPassword = options.requestSudoPassword;
     this.requestPermission = options.requestPermission;
     this.requestUserQuestion = options.requestUserQuestion;
+    this.enqueueFollowUpPrompt = options.enqueueFollowUpPrompt;
+    this.getSessionAutonomy = options.getSessionAutonomy;
     this.skillsPaths = new AgentRunnerSkillsPaths({
       skillsAdapter,
       pluginRuntimeService,
@@ -177,6 +193,8 @@ export class AgentRunner {
         requestSudoPassword: this.requestSudoPassword,
         requestPermission: this.requestPermission,
         requestUserQuestion: this.requestUserQuestion,
+        enqueueFollowUpPrompt: this.enqueueFollowUpPrompt,
+        getSessionAutonomy: this.getSessionAutonomy,
         skillsPaths: this.skillsPaths,
         getToolDisplayName: (toolName) => this.getToolDisplayName(toolName),
         getCurrentModelString: (preferredModel) => this.getCurrentModelString(preferredModel),

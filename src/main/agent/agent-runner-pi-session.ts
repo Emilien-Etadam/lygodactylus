@@ -110,9 +110,14 @@ export function installPermissionHook(
         toolUseId: string,
         toolName: string,
         input: Record<string, unknown>
-      ) => Promise<'allow' | 'deny' | 'allow_always'>)
+      ) => Promise<'allow' | 'deny' | 'allow_always' | 'allow_run'>)
     | undefined,
-  getToolDisplayName: (toolName: string) => string
+  getToolDisplayName: (toolName: string) => string,
+  /**
+   * When careful, write/edit approvals are handled by the execute wrap (diff UI).
+   * Skip the generic ask here to avoid a double prompt.
+   */
+  getAutonomy?: () => 'careful' | 'normal' | 'autonomous'
 ): void {
   if (!requestPermission) {
     log('[AgentRunner] No requestPermission callback — skipping permission hook');
@@ -136,8 +141,14 @@ export function installPermissionHook(
     async (ctx: any, signal?: AbortSignal): Promise<any> => {
       const toolName: string = ctx.toolCall?.name ?? '';
       const input: Record<string, unknown> = ctx.args ?? {};
+      const normalizedTool = toolName.toLowerCase();
+      const autonomy = getAutonomy?.() ?? 'normal';
+      const carefulFileMutation =
+        autonomy === 'careful' && (normalizedTool === 'write' || normalizedTool === 'edit');
 
-      const decision = decidePermission(sessionId, toolName, input);
+      const decision = carefulFileMutation
+        ? 'allow'
+        : decidePermission(sessionId, toolName, input);
       const displayName = getToolDisplayName(toolName);
 
       if (decision === 'deny') {
@@ -150,7 +161,7 @@ export function installPermissionHook(
 
       if (decision === 'ask') {
         const toolUseId = `${ctx.toolCall?.id ?? 'unknown'}-perm-${uuidv4().slice(0, 8)}`;
-        let result: 'allow' | 'deny' | 'allow_always';
+        let result: 'allow' | 'deny' | 'allow_always' | 'allow_run';
         try {
           result = await requestPermission(sessionId, toolUseId, displayName, input);
         } catch (permErr) {
@@ -423,6 +434,8 @@ interface CreatePiSessionOptions {
   modelMaxTokens: number;
   /** Pre-resolved workspace rules; resolved from effectiveCwd when omitted. */
   projectRules?: ProjectRulesFile | null;
+  /** Session autonomy (careful skips generic write/edit ask — handled by tool wrap). */
+  getAutonomy?: () => 'careful' | 'normal' | 'autonomous';
 }
 
 export async function createPiSession({
@@ -444,6 +457,7 @@ export async function createPiSession({
   modelContextWindow,
   modelMaxTokens,
   projectRules,
+  getAutonomy,
 }: CreatePiSessionOptions): Promise<{ piSession: PiAgentSession; compactionEnabled: boolean }> {
   const resolvedProjectRules =
     projectRules === undefined ? resolveProjectRulesFile(effectiveCwd) : projectRules;
@@ -514,8 +528,12 @@ export async function createPiSession({
       })
   );
 
-  installPermissionHook(piSession, sessionId, ctx.requestPermission, (toolName) =>
-    ctx.getToolDisplayName(toolName)
+  installPermissionHook(
+    piSession,
+    sessionId,
+    ctx.requestPermission,
+    (toolName) => ctx.getToolDisplayName(toolName),
+    getAutonomy
   );
   evictOldestPiSession(ctx.piSessions);
   ctx.piSessions.set(sessionId, {

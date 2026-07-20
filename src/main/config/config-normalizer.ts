@@ -22,6 +22,7 @@ import {
   normalizeOllamaKeepAlive,
   normalizeQuickAskShortcut,
   normalizeWebSearchConfig,
+  normalizeWorkspaceTooling,
   nowISO,
   DEFAULT_QUICK_ASK_SHORTCUT,
   profileKeyFromProvider,
@@ -386,6 +387,7 @@ export function normalizeConfig(rawConfig: Partial<AppConfig> | undefined): AppC
     ),
     modelStatsEnabled: toBoolean(raw.modelStatsEnabled, defaultConfig.modelStatsEnabled),
     checkpointsEnabled: toBoolean(raw.checkpointsEnabled, defaultConfig.checkpointsEnabled),
+    workspaceTooling: normalizeWorkspaceTooling(raw.workspaceTooling),
     quickAskEnabled: toBoolean(raw.quickAskEnabled, defaultConfig.quickAskEnabled),
     quickAskShortcut:
       normalizeQuickAskShortcut(raw.quickAskShortcut) ||

@@ -100,7 +100,15 @@
     "modelStats": "Statistiche del modello",
     "modelStatsDesc": "Mostra la velocità di generazione (tok/s), il riempimento del contesto e i metadati del modello (parametri/quantizzazione) quando noti.",
     "checkpoints": "Checkpoint delle esecuzioni",
-    "checkpointsDesc": "Prima che l'agente modifichi i file, salva le pre-immagini per annullare le modifiche di un'esecuzione con un clic (senza git)."
+    "checkpointsDesc": "Prima che l'agente modifichi i file, salva le pre-immagini per annullare le modifiche di un'esecuzione con un clic (senza git).",
+    "workspaceToolingTitle": "Comandi qualità (modalità autonoma)",
+    "workspaceToolingHint": "Opzionale. Eseguiti dopo un run che modifica file se la modalità Autonoma è attiva.",
+    "lintCmd": "Comando lint",
+    "testCmd": "Comando test",
+    "lintCmdPlaceholder": "es. npm run lint",
+    "testCmdPlaceholder": "es. npm test",
+    "noWorkspace": "Apri una cartella di lavoro per configurare lint/test.",
+    "saveTooling": "Salva"
   },
   "webSearch": {
     "title": "Web search",
@@ -769,7 +777,16 @@
       "directoryDescription": "Allega l’elenco della cartella",
       "urlDescription": "Recupera il contenuto dell’URL",
       "placeholder": "Digita un percorso o incolla un URL dopo @"
-    }
+    },
+    "autonomyToggle": "Livello di autonomia",
+    "autonomyCareful": "Prudente",
+    "autonomyNormal": "Normale",
+    "autonomyAutonomous": "Autonomo",
+    "autonomyCarefulTooltip": "Ogni scrittura/modifica deve essere approvata con un diff",
+    "autonomyNormalTooltip": "Comportamento standard (permessi invariati)",
+    "autonomyAutonomousTooltip": "Dopo le modifiche esegue lint/test e corregge in loop",
+    "autonomyCarefulBadge": "Prudente",
+    "autonomyAutonomousBadge": "Autonomo"
   },
   "context": {
     "progress": "Avanzamento",
@@ -1073,7 +1090,11 @@
       "execute_command": "Eseguire comandi della shell nel workspace",
       "glob": "Cercare file per pattern",
       "grep": "Cercare nel contenuto dei file"
-    }
+    },
+    "carefulApproveTitle": "Approva modifica",
+    "carefulApproveDescription": "File {{path}} (≈ {{bytes}} byte)",
+    "diff": "Diff",
+    "allowRun": "Approva tutto per questa esecuzione"
   },
   "sudo": {
     "title": "Permesso di amministratore richiesto",

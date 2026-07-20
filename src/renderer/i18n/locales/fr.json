@@ -100,7 +100,15 @@
     "modelStats": "Stats du modèle",
     "modelStatsDesc": "Affiche la vitesse de génération (tok/s), le remplissage du contexte et les méta du modèle (paramètres/quantization) quand elles sont connues.",
     "checkpoints": "Points de contrôle des runs",
-    "checkpointsDesc": "Avant chaque modification de fichier par l’agent, enregistre une pré-image pour pouvoir annuler les changements d’un run en un clic (sans git)."
+    "checkpointsDesc": "Avant chaque modification de fichier par l’agent, enregistre une pré-image pour pouvoir annuler les changements d’un run en un clic (sans git).",
+    "workspaceToolingTitle": "Commandes qualité (mode autonome)",
+    "workspaceToolingHint": "Optionnel. Exécutées après un run qui modifie des fichiers, si le mode Autonome est actif.",
+    "lintCmd": "Commande lint",
+    "testCmd": "Commande tests",
+    "lintCmdPlaceholder": "ex. npm run lint",
+    "testCmdPlaceholder": "ex. npm test",
+    "noWorkspace": "Ouvrez un dossier de travail pour configurer lint/tests.",
+    "saveTooling": "Enregistrer"
   },
   "webSearch": {
     "title": "Recherche web",
@@ -858,7 +866,16 @@
       "directoryDescription": "Joindre le listing du dossier",
       "urlDescription": "Récupérer le contenu de l’URL",
       "placeholder": "Saisissez un chemin ou collez une URL après @"
-    }
+    },
+    "autonomyToggle": "Niveau d’autonomie",
+    "autonomyCareful": "Prudent",
+    "autonomyNormal": "Normal",
+    "autonomyAutonomous": "Autonome",
+    "autonomyCarefulTooltip": "Chaque écriture/édition doit être approuvée avec un diff",
+    "autonomyNormalTooltip": "Comportement standard (permissions inchangées)",
+    "autonomyAutonomousTooltip": "Après les modifications, lance lint/tests et corrige en boucle",
+    "autonomyCarefulBadge": "Prudent",
+    "autonomyAutonomousBadge": "Autonome"
   },
   "context": {
     "progress": "Progression",
@@ -1162,7 +1179,11 @@
       "execute_command": "Exécuter des commandes shell dans l'espace de travail",
       "glob": "Rechercher des fichiers par motif",
       "grep": "Rechercher dans le contenu des fichiers"
-    }
+    },
+    "carefulApproveTitle": "Approuver la modification",
+    "carefulApproveDescription": "Fichier {{path}} (≈ {{bytes}} octets)",
+    "diff": "Diff",
+    "allowRun": "Tout approuver pour ce run"
   },
   "sudo": {
     "title": "Autorisation administrateur requise",

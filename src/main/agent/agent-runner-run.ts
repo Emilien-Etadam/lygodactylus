@@ -1,10 +1,25 @@
 import { v4 as uuidv4 } from 'uuid';
 import { setMaxListeners } from 'node:events';
+import {
+  createBashToolDefinition,
+  type ToolDefinition,
+} from '@earendil-works/pi-coding-agent';
 import type { Message, Session } from '../../renderer/types';
+import {
+  bumpAutonomousIteration,
+  decideAutonomousLoop,
+  getAutonomousIteration,
+  resetAutonomousIteration,
+  runConfiguredQualityCommands,
+} from '../autonomy/autonomous-loop';
+import { clearCarefulAllowRun } from '../autonomy/careful-run-allow';
+import { listConfiguredCommands } from '../autonomy/workspace-tooling';
+import { getWorkspaceTooling } from '../autonomy/workspace-tooling';
 import { checkpointService } from '../checkpoints';
 import { configStore } from '../config/config-store';
 import { getSandboxAdapter } from '../sandbox/sandbox-adapter';
 import { SandboxSync } from '../sandbox/sandbox-sync';
+import { normalizeSessionAutonomy } from '../../shared/session-autonomy';
 import { log, logCtx, logCtxError, logError, logTiming } from '../utils/logger';
 import {
   resolveAbortDisposition,
@@ -21,6 +36,8 @@ import {
 export { type AgentRunnerRunContext } from './agent-runner-run-context';
 import { runPromptWithStreamHandling } from './agent-runner-stream-handler';
 import { withAsyncTimeout } from '../utils/async-timeout';
+
+const AUTONOMOUS_FIX_PROMPT_PREFIX = 'Automatic quality check failed';
 
 const PI_SESSION_SETUP_TIMEOUT_MS = 180_000;
 
@@ -42,10 +59,16 @@ export async function executeAgentRun(
   }
   ctx.activeControllers.set(session.id, controller);
   checkpointService.markSessionRunning(session.id, true);
+  clearCarefulAllowRun(session.id);
+  // Fresh user turns reset the autonomous fix counter; follow-up fix prompts keep it.
+  if (!prompt.startsWith(AUTONOMOUS_FIX_PROMPT_PREFIX)) {
+    resetAutonomousIteration(session.id);
+  }
 
   let sandboxPath: string | null = null;
   let useSandboxIsolation = false;
   let sandboxPathRegex: RegExp | null = null;
+  let runCompletedOk = false;
   const sanitizeOutputPaths = (content: string): string => {
     if (!sandboxPath || !useSandboxIsolation) return content;
     if (!sandboxPathRegex) {
@@ -162,6 +185,7 @@ export async function executeAgentRun(
       status: streamResult.terminalErrorText ? 'error' : 'completed',
       title: streamResult.terminalErrorText ? 'Request failed' : 'Task completed',
     });
+    runCompletedOk = !streamResult.terminalErrorText;
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
       logCtx('[AgentRunner] Aborted by user');
@@ -199,10 +223,14 @@ export async function executeAgentRun(
   } finally {
     ctx.activeControllers.delete(session.id);
     checkpointService.markSessionRunning(session.id, false);
+    clearCarefulAllowRun(session.id);
+
+    let filesModified = false;
     if (checkpointStarted) {
       try {
         const summary = await checkpointService.endRun(session.id, checkpointRunId);
         if (summary && summary.files.length > 0) {
+          filesModified = true;
           ctx.renderer.dispatch({
             type: 'checkpoint.runReady',
             payload: {
@@ -258,5 +286,81 @@ export async function executeAgentRun(
         });
       }
     }
+
+    // Autonomous lint/test loop — after sync so host cwd reflects mutations.
+    try {
+      await maybeRunAutonomousQualityLoop({
+        ctx,
+        session,
+        runCompletedOk,
+        filesModified,
+      });
+    } catch (autonomousErr) {
+      logError('[AgentRunner] Autonomous quality loop failed:', autonomousErr);
+    }
+  }
+}
+
+async function maybeRunAutonomousQualityLoop(options: {
+  ctx: AgentRunnerRunContext;
+  session: Session;
+  runCompletedOk: boolean;
+  filesModified: boolean;
+}): Promise<void> {
+  const { ctx, session, runCompletedOk, filesModified } = options;
+  if (!runCompletedOk) {
+    return;
+  }
+  // Live autonomy (not the session snapshot from run start / prep).
+  const autonomy =
+    ctx.getSessionAutonomy?.(session.id) ?? normalizeSessionAutonomy(session.autonomy);
+  if (autonomy !== 'autonomous') {
+    return;
+  }
+
+  const tooling = getWorkspaceTooling(session.cwd);
+  const configured = listConfiguredCommands(tooling);
+  if (configured.length === 0) {
+    return;
+  }
+  if (!filesModified) {
+    resetAutonomousIteration(session.id);
+    return;
+  }
+
+  const cwd = session.cwd || process.cwd();
+  const bashTool = createBashToolDefinition(cwd) as ToolDefinition;
+  const { results } = await runConfiguredQualityCommands(bashTool, session.cwd);
+  const decision = decideAutonomousLoop({
+    sessionId: session.id,
+    filesModified: true,
+    commandsConfigured: true,
+    results,
+    currentIteration: getAutonomousIteration(session.id),
+  });
+
+  if (decision.action === 'stop') {
+    resetAutonomousIteration(session.id);
+    return;
+  }
+
+  if (decision.action === 'summary' && decision.summaryText) {
+    resetAutonomousIteration(session.id);
+    ctx.renderer.sendMessage(session.id, {
+      id: uuidv4(),
+      sessionId: session.id,
+      role: 'assistant',
+      content: [{ type: 'text', text: decision.summaryText }],
+      timestamp: Date.now(),
+    });
+    return;
+  }
+
+  if (decision.action === 'retry' && decision.fixPrompt && ctx.enqueueFollowUpPrompt) {
+    bumpAutonomousIteration(session.id);
+    ctx.enqueueFollowUpPrompt(session.id, decision.fixPrompt);
+    log(
+      `[AgentRunner] Autonomous fix queued (iteration ${decision.iteration}) for ${session.id}`
+    );
   }
 }
