@@ -14,6 +14,7 @@ import type {
   MemoryInjectedItem,
 } from '../types';
 import { applySessionUpdate } from '../utils/session-update';
+import { computeTokensPerSecondFromText } from '../utils/generation-stats';
 
 export type GlobalNoticeType = 'info' | 'warning' | 'error' | 'success';
 export type GlobalNoticeAction = 'open_api_settings';
@@ -44,6 +45,14 @@ export interface SessionState {
   traceSteps: TraceStep[];
   contextWindow: number;
   maxTokens: number;
+  /** Ollama parameter_size when reported via session.contextInfo. */
+  modelParameterSize?: string;
+  /** Ollama quantization_level when reported via session.contextInfo. */
+  modelQuantization?: string;
+  /** First stream delta wall time for the active generation (client-side tok/s). */
+  streamStartedAt: number | null;
+  /** Frozen tok/s keyed by assistant message id (ephemeral, not persisted). */
+  tokensPerSecondByMessageId: Record<string, number>;
   memoryContextItems: MemoryInjectedItem[];
 }
 
@@ -57,6 +66,10 @@ const DEFAULT_SESSION_STATE: SessionState = {
   traceSteps: [],
   contextWindow: 0,
   maxTokens: 0,
+  modelParameterSize: undefined,
+  modelQuantization: undefined,
+  streamStartedAt: null,
+  tokensPerSecondByMessageId: {},
   memoryContextItems: [],
 };
 
@@ -201,7 +214,12 @@ interface AppState {
   // Context window actions
   setSessionContextInfo: (
     sessionId: string,
-    contextInfo: { contextWindow: number; maxTokens: number }
+    contextInfo: {
+      contextWindow: number;
+      maxTokens: number;
+      parameterSize?: string;
+      quantization?: string;
+    }
   ) => void;
   setSessionMemoryContext: (sessionId: string, items: MemoryInjectedItem[]) => void;
   bumpPluginCommandsRevision: () => void;
@@ -349,10 +367,33 @@ export const useAppStore = create<AppState>((set) => ({
       }
 
       const shouldClearPartial = message.role === 'assistant';
+      let tokensPerSecondByMessageId = ss.tokensPerSecondByMessageId;
+      let streamStartedAt = ss.streamStartedAt;
+
+      if (shouldClearPartial) {
+        // Freeze tok/s onto this assistant message before clearing the stream buffer.
+        if (ss.streamStartedAt != null) {
+          const frozen = computeTokensPerSecondFromText(
+            `${ss.partialMessage}${ss.partialThinking}`,
+            ss.streamStartedAt,
+            Date.now()
+          );
+          if (frozen != null) {
+            tokensPerSecondByMessageId = {
+              ...ss.tokensPerSecondByMessageId,
+              [message.id]: frozen,
+            };
+          }
+        }
+        streamStartedAt = null;
+      }
+
       return {
         sessionStates: patchSession(state.sessionStates, sessionId, {
           messages: updatedMessages,
           pendingTurns: updatedPendingTurns,
+          tokensPerSecondByMessageId,
+          streamStartedAt,
           ...(shouldClearPartial ? { partialMessage: '', partialThinking: '' } : {}),
         }),
       };
@@ -410,6 +451,7 @@ export const useAppStore = create<AppState>((set) => ({
       return {
         sessionStates: patchSession(state.sessionStates, sessionId, {
           partialMessage: ss.partialMessage + partial,
+          streamStartedAt: ss.streamStartedAt ?? Date.now(),
         }),
       };
     }),
@@ -425,6 +467,7 @@ export const useAppStore = create<AppState>((set) => ({
       return {
         sessionStates: patchSession(state.sessionStates, sessionId, {
           partialThinking: ss.partialThinking + delta,
+          streamStartedAt: ss.streamStartedAt ?? Date.now(),
         }),
       };
     }),
@@ -635,6 +678,8 @@ export const useAppStore = create<AppState>((set) => ({
       sessionStates: patchSession(state.sessionStates, sessionId, {
         contextWindow: contextInfo.contextWindow,
         maxTokens: contextInfo.maxTokens,
+        modelParameterSize: contextInfo.parameterSize,
+        modelQuantization: contextInfo.quantization,
       }),
     })),
 

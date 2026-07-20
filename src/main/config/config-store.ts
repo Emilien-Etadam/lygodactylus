@@ -156,6 +156,7 @@ export class ConfigStore {
             key === 'memoryEnabled' ||
             key === 'enableThinking' ||
             key === 'speechSynthesisEnabled' ||
+            key === 'modelStatsEnabled' ||
             key === 'quickAskEnabled' ||
             key === 'isConfigured') &&
           typeof rawValue !== 'boolean'
@@ -458,6 +459,10 @@ export class ConfigStore {
         updates.speechSynthesisEnabled !== undefined
           ? updates.speechSynthesisEnabled
           : current.speechSynthesisEnabled,
+      modelStatsEnabled:
+        updates.modelStatsEnabled !== undefined
+          ? updates.modelStatsEnabled
+          : current.modelStatsEnabled,
       quickAskEnabled:
         updates.quickAskEnabled !== undefined
           ? updates.quickAskEnabled

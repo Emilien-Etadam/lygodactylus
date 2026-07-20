@@ -94,7 +94,9 @@
     "updateDownloading": "Téléchargement de la mise à jour en cours…",
     "updateDownloadError": "Échec du téléchargement automatique : {{error}}",
     "speechSynthesis": "Lecture vocale",
-    "speechSynthesisDesc": "Affiche un bouton haut-parleur sur les réponses de l'assistant pour les lire hors ligne avec la voix système."
+    "speechSynthesisDesc": "Affiche un bouton haut-parleur sur les réponses de l'assistant pour les lire hors ligne avec la voix système.",
+    "modelStats": "Stats du modèle",
+    "modelStatsDesc": "Affiche la vitesse de génération (tok/s), le remplissage du contexte et les méta du modèle (paramètres/quantization) quand elles sont connues."
   },
   "webSearch": {
     "title": "Recherche web",
@@ -865,7 +867,9 @@
     "openInFileManager": "Ouvrir dans le gestionnaire de fichiers",
     "contextUsage": "Utilisation du contexte",
     "contextUsageLabel": "{{used}} / {{total}}",
-    "contextUsageDetail": "{{input}} entrée + {{output}} réservés · {{remaining}} restants"
+    "contextUsageDetail": "{{input}} entrée + {{output}} réservés · {{remaining}} restants",
+    "modelMeta": "{{meta}}",
+    "contextFillHint": "Remplissage du contexte"
   },
   "messageCard": {
     "request": "Requête",
@@ -894,7 +898,8 @@
     "copyBlock": "Copier le bloc",
     "copyThinking": "Copier la réflexion",
     "speakMessage": "Lire le message",
-    "stopSpeaking": "Arrêter la lecture"
+    "stopSpeaking": "Arrêter la lecture",
+    "tokensPerSecond": "{{rate}} tok/s"
   },
   "schedule": {
     "createTitle": "Créer une planification",

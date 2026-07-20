@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { computeContextUsage } from '../src/renderer/utils/context-usage';
+import { computeContextUsage, formatContextPercentage } from '../src/renderer/utils/context-usage';
 
 describe('context usage', () => {
   it('shows usage when only the context window is known', () => {
@@ -34,6 +34,12 @@ describe('context usage', () => {
 
     expect(usage?.inputTokens).toBe(12000);
     expect(usage?.used).toBe(16096);
+  });
+
+  it('formats context percentage for the compact indicator', () => {
+    expect(formatContextPercentage(42.4)).toBe('42%');
+    expect(formatContextPercentage(99.6)).toBe('100%');
+    expect(formatContextPercentage(-1)).toBe('0%');
   });
 });
 

@@ -2,7 +2,11 @@ import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store';
 import { resolveArtifactPath } from '../utils/artifact-path';
-import { computeContextUsage, formatTokenCount } from '../utils/context-usage';
+import {
+  computeContextUsage,
+  formatContextPercentage,
+  formatTokenCount,
+} from '../utils/context-usage';
 import {
   extractFilePathFromToolInput,
   extractFilePathFromToolOutput,
@@ -90,6 +94,7 @@ export function ContextPanel() {
   const { displayArtifactSteps } = getArtifactSteps(steps);
   const canShowItemInFolder =
     typeof window !== 'undefined' && !!window.electronAPI?.showItemInFolder;
+  const modelStatsEnabled = appConfig?.modelStatsEnabled !== false;
 
   // Session info computations
   const messages = useMemo(
@@ -99,6 +104,19 @@ export function ContextPanel() {
   const messageCount = messages.length;
   const toolCallCount = steps.filter((s) => s.type === 'tool_call').length;
   const modelName = activeSession?.model || appConfig?.model || '—';
+  const modelMetaLabel = useMemo(() => {
+    if (!modelStatsEnabled) {
+      return '';
+    }
+    const parts: string[] = [];
+    if (ss?.modelParameterSize) {
+      parts.push(ss.modelParameterSize);
+    }
+    if (ss?.modelQuantization) {
+      parts.push(ss.modelQuantization);
+    }
+    return parts.join(' · ');
+  }, [modelStatsEnabled, ss?.modelParameterSize, ss?.modelQuantization]);
 
   // Token usage aggregation
   const tokenUsage = useMemo(() => {
@@ -301,6 +319,11 @@ export function ContextPanel() {
             <Cpu className="w-3.5 h-3.5 text-text-muted shrink-0" />
             <span className="truncate">{modelName}</span>
           </div>
+          {modelMetaLabel && (
+            <p className="text-[11px] text-text-muted pl-5 truncate" title={modelMetaLabel}>
+              {t('context.modelMeta', { meta: modelMetaLabel })}
+            </p>
+          )}
           <div className="flex items-center gap-3 text-xs text-text-muted pl-5">
             <span className="flex items-center gap-1">
               <MessageSquare className="w-3 h-3" />
@@ -328,15 +351,16 @@ export function ContextPanel() {
               {t('context.contextUsage')}
             </span>
             <span
-              className={`text-xs font-medium ${
+              className={`text-xs font-medium tabular-nums ${
                 contextUsage.percentage > 95
                   ? 'text-error'
                   : contextUsage.percentage > 80
                     ? 'text-warning'
                     : 'text-text-primary'
               }`}
+              title={modelStatsEnabled ? t('context.contextFillHint') : undefined}
             >
-              {Math.round(contextUsage.percentage)}%
+              {formatContextPercentage(contextUsage.percentage)}
             </span>
           </div>
           <div className="h-1.5 bg-surface-muted rounded-full overflow-hidden">
@@ -348,7 +372,7 @@ export function ContextPanel() {
                     ? 'bg-warning'
                     : 'bg-gradient-to-r from-accent to-accent-hover'
               }`}
-              style={{ width: `${contextUsage.percentage}%` }}
+              style={{ width: `${Math.min(100, Math.max(0, contextUsage.percentage))}%` }}
             />
           </div>
           <p className="text-xs text-text-muted">

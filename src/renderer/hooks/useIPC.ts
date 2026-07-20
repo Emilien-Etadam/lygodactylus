@@ -244,6 +244,8 @@ export function useIPC() {
             store.setSessionContextInfo(event.payload.sessionId, {
               contextWindow: event.payload.contextWindow,
               maxTokens: event.payload.maxTokens,
+              parameterSize: event.payload.parameterSize,
+              quantization: event.payload.quantization,
             });
             break;
 

@@ -31,6 +31,10 @@ import { PlanActToggle } from './PlanActToggle';
 import { Send, Square, Plus, Loader2, Plug, X, Clock, ChevronDown, StickyNote, FileText, Zap } from 'lucide-react';
 import { MemoryContextBar } from './MemoryContextBar';
 import { stopSpeechSynthesis } from '../utils/speech-synthesis';
+import {
+  computeTokensPerSecondFromText,
+  formatTokensPerSecond,
+} from '../utils/generation-stats';
 
 export function ChatView() {
   const { t } = useTranslation();
@@ -43,8 +47,17 @@ export function ChatView() {
   const pendingTurns = usePendingTurns();
   const executionClock = useActiveExecutionClock();
   const appConfig = useAppConfig();
+  const modelStatsEnabled = appConfig?.modelStatsEnabled !== false;
   const setGlobalNotice = useAppStore((s) => s.setGlobalNotice);
   const pluginCommandsRevision = useAppStore((s) => s.pluginCommandsRevision);
+  const streamStartedAt = useAppStore((s) =>
+    s.activeSessionId ? (s.sessionStates[s.activeSessionId]?.streamStartedAt ?? null) : null
+  );
+  const tokensPerSecondByMessageId = useAppStore((s) =>
+    s.activeSessionId
+      ? (s.sessionStates[s.activeSessionId]?.tokensPerSecondByMessageId ?? {})
+      : {}
+  );
   const {
     continueSession,
     compactSession,
@@ -225,7 +238,9 @@ export function ChatView() {
   const [clockNow, setClockNow] = useState(() => Date.now());
 
   useEffect(() => {
-    const isActive = Boolean(executionClock?.startAt && executionClock.endAt === null);
+    const isActive = Boolean(
+      (executionClock?.startAt && executionClock.endAt === null) || streamStartedAt != null
+    );
     if (!isActive) {
       return;
     }
@@ -234,13 +249,24 @@ export function ChatView() {
       setClockNow(Date.now());
     }, 100);
     return () => clearInterval(interval);
-  }, [executionClock?.startAt, executionClock?.endAt]);
+  }, [executionClock?.startAt, executionClock?.endAt, streamStartedAt]);
 
   const liveElapsed =
     executionClock?.startAt == null
       ? 0
       : Math.max(0, (executionClock.endAt ?? clockNow) - executionClock.startAt);
   const timerActive = Boolean(executionClock?.startAt && executionClock.endAt === null);
+
+  const liveTokensPerSecond = useMemo(() => {
+    if (!modelStatsEnabled || streamStartedAt == null) {
+      return null;
+    }
+    const generated = `${partialMessage}${partialThinking}`;
+    if (!generated) {
+      return null;
+    }
+    return computeTokensPerSecondFromText(generated, streamStartedAt, clockNow);
+  }, [clockNow, modelStatsEnabled, partialMessage, partialThinking, streamStartedAt]);
 
   // Debounced scroll function to prevent scroll conflicts
   const scrollToBottom = useRef(
@@ -654,6 +680,12 @@ export function ChatView() {
             displayedMessages.map((message) => {
               const isStreaming =
                 typeof message.id === 'string' && message.id.startsWith('partial-');
+              const tokensPerSecond =
+                modelStatsEnabled && message.role === 'assistant'
+                  ? isStreaming
+                    ? liveTokensPerSecond
+                    : (tokensPerSecondByMessageId[message.id] ?? null)
+                  : null;
               return (
                 <div key={message.id}>
                   <MessageCard
@@ -670,6 +702,16 @@ export function ChatView() {
                         : undefined
                     }
                   />
+                  {tokensPerSecond != null && (
+                    <div className="flex items-center gap-1.5 text-[11px] text-text-muted mt-1 ml-0.5">
+                      <Zap className="w-3 h-3" />
+                      <span>
+                        {t('messageCard.tokensPerSecond', {
+                          rate: formatTokensPerSecond(tokensPerSecond),
+                        })}
+                      </span>
+                    </div>
+                  )}
                 </div>
               );
             })

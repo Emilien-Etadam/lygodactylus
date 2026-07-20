@@ -94,7 +94,9 @@
     "updateDownloading": "Downloading update…",
     "updateDownloadError": "Automatic download failed: {{error}}",
     "speechSynthesis": "Озвучення",
-    "speechSynthesisDesc": "Показує кнопку динаміка на відповідях асистента для офлайн-озвучення системним голосом."
+    "speechSynthesisDesc": "Показує кнопку динаміка на відповідях асистента для офлайн-озвучення системним голосом.",
+    "modelStats": "Статистика моделі",
+    "modelStatsDesc": "Показує швидкість генерації (tok/s), заповнення контексту та метадані моделі (параметри/квантизація), якщо відомі."
   },
   "webSearch": {
     "title": "Web search",
@@ -776,7 +778,9 @@
     "openInFileManager": "Відкрити у файловому менеджері",
     "contextUsage": "Використання контексту",
     "contextUsageLabel": "{{used}} / {{total}}",
-    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining"
+    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
+    "modelMeta": "{{meta}}",
+    "contextFillHint": "Заповнення контексту"
   },
   "messageCard": {
     "request": "Запит",
@@ -805,7 +809,8 @@
     "copyBlock": "Копіювати блок",
     "copyThinking": "Копіювати мислення",
     "speakMessage": "Озвучити повідомлення",
-    "stopSpeaking": "Зупинити озвучення"
+    "stopSpeaking": "Зупинити озвучення",
+    "tokensPerSecond": "{{rate}} tok/s"
   },
   "schedule": {
     "createTitle": "Створити розклад",

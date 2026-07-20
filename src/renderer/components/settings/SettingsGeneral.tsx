@@ -19,7 +19,9 @@ export function SettingsGeneral() {
   const setAppConfig = useAppStore((s) => s.setAppConfig);
   const appConfig = useAppConfig();
   const speechEnabled = appConfig?.speechSynthesisEnabled === true;
+  const modelStatsEnabled = appConfig?.modelStatsEnabled !== false;
   const [isSavingSpeech, setIsSavingSpeech] = useState(false);
+  const [isSavingModelStats, setIsSavingModelStats] = useState(false);
   const baseLang = i18n.language.split('-')[0];
   const currentLang = baseLang === 'nb' || baseLang === 'nn' ? 'no' : baseLang;
   const [appVer, setAppVer] = useState('');
@@ -155,6 +157,27 @@ export function SettingsGeneral() {
     }
   }, [isSavingSpeech, setAppConfig, speechEnabled]);
 
+  const handleToggleModelStats = useCallback(async () => {
+    if (!isElectron || isSavingModelStats || !window.electronAPI?.config?.save) {
+      return;
+    }
+
+    const nextEnabled = !modelStatsEnabled;
+    setIsSavingModelStats(true);
+    try {
+      const result = await window.electronAPI.config.save({
+        modelStatsEnabled: nextEnabled,
+      });
+      if (result?.config) {
+        setAppConfig(result.config);
+      }
+    } catch {
+      // Keep previous value; config.status may still sync later.
+    } finally {
+      setIsSavingModelStats(false);
+    }
+  }, [isSavingModelStats, modelStatsEnabled, setAppConfig]);
+
   const languages = [
     { code: 'en', nativeName: 'English' },
     { code: 'zh', nativeName: '中文' },
@@ -251,6 +274,35 @@ export function SettingsGeneral() {
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-text-primary transition-transform ${
                 speechEnabled ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-border-subtle bg-background px-4 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h4 className="text-sm font-semibold text-text-primary">
+              {t('general.modelStats')}
+            </h4>
+            <p className="mt-1 text-xs leading-5 text-text-muted">
+              {t('general.modelStatsDesc')}
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={modelStatsEnabled}
+            onClick={() => void handleToggleModelStats()}
+            disabled={isSavingModelStats}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 disabled:opacity-50 flex-shrink-0 ${
+              modelStatsEnabled ? 'bg-accent' : 'bg-surface-muted'
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-text-primary transition-transform ${
+                modelStatsEnabled ? 'translate-x-6' : 'translate-x-1'
               }`}
             />
           </button>

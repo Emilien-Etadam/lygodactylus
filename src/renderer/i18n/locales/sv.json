@@ -94,7 +94,9 @@
     "updateDownloading": "Downloading update…",
     "updateDownloadError": "Automatic download failed: {{error}}",
     "speechSynthesis": "Uppläsning",
-    "speechSynthesisDesc": "Visar en högtalarknapp på assistentens meddelanden för offlineuppläsning med systemrösten."
+    "speechSynthesisDesc": "Visar en högtalarknapp på assistentens meddelanden för offlineuppläsning med systemrösten.",
+    "modelStats": "Modellstatistik",
+    "modelStatsDesc": "Visar genereringshastighet (tok/s), kontextfyllnad och modellmetadata (parametrar/kvantisering) när de är kända."
   },
   "webSearch": {
     "title": "Web search",
@@ -776,7 +778,9 @@
     "openInFileManager": "Öppna i filhanteraren",
     "contextUsage": "Kontextanvändning",
     "contextUsageLabel": "{{used}} / {{total}}",
-    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining"
+    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
+    "modelMeta": "{{meta}}",
+    "contextFillHint": "Kontextfyllnad"
   },
   "messageCard": {
     "request": "Begäran",
@@ -805,7 +809,8 @@
     "copyBlock": "Kopiera block",
     "copyThinking": "Kopiera tänkande",
     "speakMessage": "Läs upp",
-    "stopSpeaking": "Stoppa uppläsning"
+    "stopSpeaking": "Stoppa uppläsning",
+    "tokensPerSecond": "{{rate}} tok/s"
   },
   "schedule": {
     "createTitle": "Skapa schema",

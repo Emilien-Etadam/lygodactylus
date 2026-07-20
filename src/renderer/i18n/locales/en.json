@@ -94,7 +94,9 @@
     "updateDownloading": "Downloading update…",
     "updateDownloadError": "Automatic download failed: {{error}}",
     "speechSynthesis": "Read aloud",
-    "speechSynthesisDesc": "Show a speaker button on assistant messages to read them offline with the system voice."
+    "speechSynthesisDesc": "Show a speaker button on assistant messages to read them offline with the system voice.",
+    "modelStats": "Model stats",
+    "modelStatsDesc": "Show generation speed (tok/s), context fill, and model metadata (parameters/quantization) when known."
   },
   "webSearch": {
     "title": "Web search",
@@ -865,7 +867,9 @@
     "openInFileManager": "Open in file manager",
     "contextUsage": "Context Usage",
     "contextUsageLabel": "{{used}} / {{total}}",
-    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining"
+    "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
+    "modelMeta": "{{meta}}",
+    "contextFillHint": "Context fill"
   },
   "messageCard": {
     "request": "Request",
@@ -894,7 +898,8 @@
     "copyBlock": "Copy block",
     "copyThinking": "Copy thinking",
     "speakMessage": "Read aloud",
-    "stopSpeaking": "Stop reading"
+    "stopSpeaking": "Stop reading",
+    "tokensPerSecond": "{{rate}} tok/s"
   },
   "schedule": {
     "createTitle": "Create Schedule",
