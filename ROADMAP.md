@@ -169,8 +169,8 @@ _Écartés volontairement par le mainteneur : RAG « chat avec mes docs » (risq
 
 _Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates restantes des analyses projet (trivium, Atlantis, Bionic) et du cadrage lot 2, + la phase 2 du Quick-Ask._
 
-- **Model Location Picker** — badge local/LAN/distant dans le sélecteur de modèle. — _planned_
-- **Skill Lockfile & Pinning** — sha épinglé + hash d'intégrité à l'install (trivium). — _planned_
+- **Model Location Picker** — badge local/LAN/distant dans le sélecteur de modèle. — **done** (PR #153)
+- **Skill Lockfile & Pinning** — sha épinglé + hash d'intégrité à l'install (trivium). — **done** (PR #154)
 - **Chat Organization** — dossiers repliables + sous-chats via le fork existant (Atlantis). — _planned_
 - **Quick-Ask phase 2** — actions sur le presse-papier (résumer/traduire/reformuler), 2e hotkey. — _planned_
 - **Content Watch + Digest** — watchers dossier/RSS/URL sur le cron existant, diff #149, session Veille en mode plan. — _planned_
@@ -194,4 +194,4 @@ _Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates
 
 ---
 
-_Last updated: 2026-07-20 (lot 2 livré #141–#149 + cleanup #151 ; **lot 3 lancé** — 8 items, prompts dans docs/cursor-prompts-lot3-2026-07.md)_
+_Last updated: 2026-07-20 (lot 3 en cours : 2/8 mergés — badge localisation #153, verrou skills #154 ; prompts dans docs/cursor-prompts-lot3-2026-07.md)_
