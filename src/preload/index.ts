@@ -124,6 +124,46 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('workspace.searchPaths', cwd, query, Math.min(limit, 20)),
   },
 
+  checkpoints: {
+    getForMessage: (
+      sessionId: string,
+      messageId: string
+    ): Promise<{
+      sessionId: string;
+      runId: string;
+      createdAt: number;
+      endedAt?: number;
+      partialCoverage: boolean;
+      restoredAt?: number;
+      messageIds: string[];
+      files: Array<{ path: string; action: 'modified' | 'created' }>;
+    } | null> => ipcRenderer.invoke('checkpoints.getForMessage', sessionId, messageId),
+    listForSession: (
+      sessionId: string
+    ): Promise<
+      Array<{
+        sessionId: string;
+        runId: string;
+        createdAt: number;
+        endedAt?: number;
+        partialCoverage: boolean;
+        restoredAt?: number;
+        messageIds: string[];
+        files: Array<{ path: string; action: 'modified' | 'created' }>;
+      }>
+    > => ipcRenderer.invoke('checkpoints.listForSession', sessionId),
+    restore: (
+      sessionId: string,
+      runId: string
+    ): Promise<{
+      ok: boolean;
+      error?: string;
+      restored: string[];
+      deleted: string[];
+      partialCoverage: boolean;
+    }> => ipcRenderer.invoke('checkpoints.restore', sessionId, runId),
+  },
+
   // Config methods
   config: {
     get: (): Promise<AppConfig> => ipcRenderer.invoke('config.get'),
@@ -471,6 +511,43 @@ declare global {
           query: string,
           limit?: number
         ) => Promise<Array<{ relativePath: string; kind: 'file' | 'directory' }>>;
+      };
+      checkpoints: {
+        getForMessage: (
+          sessionId: string,
+          messageId: string
+        ) => Promise<{
+          sessionId: string;
+          runId: string;
+          createdAt: number;
+          endedAt?: number;
+          partialCoverage: boolean;
+          restoredAt?: number;
+          messageIds: string[];
+          files: Array<{ path: string; action: 'modified' | 'created' }>;
+        } | null>;
+        listForSession: (sessionId: string) => Promise<
+          Array<{
+            sessionId: string;
+            runId: string;
+            createdAt: number;
+            endedAt?: number;
+            partialCoverage: boolean;
+            restoredAt?: number;
+            messageIds: string[];
+            files: Array<{ path: string; action: 'modified' | 'created' }>;
+          }>
+        >;
+        restore: (
+          sessionId: string,
+          runId: string
+        ) => Promise<{
+          ok: boolean;
+          error?: string;
+          restored: string[];
+          deleted: string[];
+          partialCoverage: boolean;
+        }>;
       };
       config: {
         get: () => Promise<AppConfig>;

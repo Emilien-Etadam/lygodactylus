@@ -98,7 +98,9 @@
     "speechSynthesis": "Vorlesen",
     "speechSynthesisDesc": "Zeigt bei Assistentennachrichten einen Lautsprecher-Button, um sie offline mit der Systemstimme vorzulesen.",
     "modelStats": "Modellstatistiken",
-    "modelStatsDesc": "Zeigt die Generierungsgeschwindigkeit (tok/s), die Kontextauslastung und Modellmetadaten (Parameter/Quantisierung), sofern bekannt."
+    "modelStatsDesc": "Zeigt die Generierungsgeschwindigkeit (tok/s), die Kontextauslastung und Modellmetadaten (Parameter/Quantisierung), sofern bekannt.",
+    "checkpoints": "Run-Checkpoints",
+    "checkpointsDesc": "Speichert vor Agent-Dateänderungen Vorabbilder, damit Sie die Änderungen eines Runs mit einem Klick rückgängig machen können (ohne git)."
   },
   "webSearch": {
     "title": "Web search",
@@ -837,7 +839,14 @@
     "stopSpeaking": "Vorlesen stoppen",
     "tokensPerSecond": "{{rate}} tok/s",
     "sources": "Quellen",
-    "sourcesEmpty": "Keine Quellen"
+    "sourcesEmpty": "Keine Quellen",
+    "undoRun": "Änderungen dieses Runs rückgängig machen",
+    "undoRunConfirm": "Die folgenden Dateien auf den Stand vor diesem Run zurücksetzen?\n\n{{files}}",
+    "undoRunPartial": "Teilweise Abdeckung: Für einige Dateien gibt es kein Vorabbild (Größenlimit erreicht).",
+    "undoRunSuccess": "Run-Änderungen rückgängig gemacht ({{restored}} wiederhergestellt, {{deleted}} gelöscht).",
+    "undoRunFailed": "Rückgängigmachen fehlgeschlagen: {{error}}",
+    "undoRunInProgress": "Während ein Run läuft, kann nicht rückgängig gemacht werden.",
+    "undoRunNone": "Keine Dateien zum Wiederherstellen für diesen Run."
   },
   "schedule": {
     "createTitle": "Zeitplan erstellen",

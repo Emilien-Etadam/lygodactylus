@@ -98,7 +98,9 @@
     "speechSynthesis": "Lettura ad alta voce",
     "speechSynthesisDesc": "Mostra un pulsante altoparlante sui messaggi dell'assistente per leggerli offline con la voce di sistema.",
     "modelStats": "Statistiche del modello",
-    "modelStatsDesc": "Mostra la velocità di generazione (tok/s), il riempimento del contesto e i metadati del modello (parametri/quantizzazione) quando noti."
+    "modelStatsDesc": "Mostra la velocità di generazione (tok/s), il riempimento del contesto e i metadati del modello (parametri/quantizzazione) quando noti.",
+    "checkpoints": "Checkpoint delle esecuzioni",
+    "checkpointsDesc": "Prima che l'agente modifichi i file, salva le pre-immagini per annullare le modifiche di un'esecuzione con un clic (senza git)."
   },
   "webSearch": {
     "title": "Web search",
@@ -837,7 +839,14 @@
     "stopSpeaking": "Interrompi lettura",
     "tokensPerSecond": "{{rate}} tok/s",
     "sources": "Fonti",
-    "sourcesEmpty": "Nessuna fonte"
+    "sourcesEmpty": "Nessuna fonte",
+    "undoRun": "Annulla le modifiche di questa esecuzione",
+    "undoRunConfirm": "Ripristinare i seguenti file allo stato precedente a questa esecuzione?\n\n{{files}}",
+    "undoRunPartial": "Copertura parziale: alcuni file non hanno una pre-immagine (limite di dimensione raggiunto).",
+    "undoRunSuccess": "Modifiche dell’esecuzione annullate ({{restored}} ripristinati, {{deleted}} eliminati).",
+    "undoRunFailed": "Annullamento non riuscito: {{error}}",
+    "undoRunInProgress": "Impossibile annullare mentre un’esecuzione è in corso.",
+    "undoRunNone": "Nessun file da ripristinare per questa esecuzione."
   },
   "schedule": {
     "createTitle": "Crea pianificazione",

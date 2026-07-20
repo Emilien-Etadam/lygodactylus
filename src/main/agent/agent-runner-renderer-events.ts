@@ -1,4 +1,5 @@
 import type { Message, ServerEvent, TraceStep } from '../../renderer/types';
+import { checkpointService } from '../checkpoints';
 import { log } from '../utils/logger';
 
 export interface AgentRunnerRendererOptions {
@@ -38,6 +39,9 @@ export class AgentRunnerRenderer {
   }
 
   sendMessage(sessionId: string, message: Message): void {
+    if (message.role === 'assistant') {
+      checkpointService.tryRegisterAssistantMessage(sessionId, message.id);
+    }
     if (this.saveMessage) {
       this.saveMessage(message);
     }

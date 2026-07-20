@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { setMaxListeners } from 'node:events';
 import type { Message, Session } from '../../renderer/types';
+import { checkpointService } from '../checkpoints';
 import { configStore } from '../config/config-store';
 import { getSandboxAdapter } from '../sandbox/sandbox-adapter';
 import { SandboxSync } from '../sandbox/sandbox-sync';
@@ -40,6 +41,7 @@ export async function executeAgentRun(
     // Older runtimes that cannot adjust EventTarget listener limits can be ignored.
   }
   ctx.activeControllers.set(session.id, controller);
+  checkpointService.markSessionRunning(session.id, true);
 
   let sandboxPath: string | null = null;
   let useSandboxIsolation = false;
@@ -53,6 +55,8 @@ export async function executeAgentRun(
   };
 
   const thinkingStepId = uuidv4();
+  const checkpointRunId = uuidv4();
+  let checkpointStarted = false;
 
   try {
     ctx.pathResolver.registerSession(session.id, session.mountedPaths);
@@ -107,6 +111,12 @@ export async function executeAgentRun(
         runStartTime,
       })
     );
+
+    const checkpointWorkspaceRoot = piSetup.effectiveCwd || workingDir || session.cwd || '';
+    if (checkpointWorkspaceRoot) {
+      checkpointService.startRun(session.id, checkpointRunId, checkpointWorkspaceRoot);
+      checkpointStarted = true;
+    }
 
     const streamResult = await runPromptWithStreamHandling({
       ctx,
@@ -188,6 +198,26 @@ export async function executeAgentRun(
     }
   } finally {
     ctx.activeControllers.delete(session.id);
+    checkpointService.markSessionRunning(session.id, false);
+    if (checkpointStarted) {
+      try {
+        const summary = await checkpointService.endRun(session.id, checkpointRunId);
+        if (summary && summary.files.length > 0) {
+          ctx.renderer.dispatch({
+            type: 'checkpoint.runReady',
+            payload: {
+              sessionId: session.id,
+              runId: summary.runId,
+              messageIds: summary.messageIds,
+              partialCoverage: summary.partialCoverage,
+              files: summary.files,
+            },
+          });
+        }
+      } catch (checkpointErr) {
+        logError('[AgentRunner] Checkpoint endRun failed:', checkpointErr);
+      }
+    }
     ctx.pathResolver.unregisterSession(session.id);
 
     if (useSandboxIsolation && sandboxPath) {

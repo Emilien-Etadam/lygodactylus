@@ -98,7 +98,9 @@
     "speechSynthesis": "Read aloud",
     "speechSynthesisDesc": "Show a speaker button on assistant messages to read them offline with the system voice.",
     "modelStats": "Model stats",
-    "modelStatsDesc": "Show generation speed (tok/s), context fill, and model metadata (parameters/quantization) when known."
+    "modelStatsDesc": "Show generation speed (tok/s), context fill, and model metadata (parameters/quantization) when known.",
+    "checkpoints": "Run checkpoints",
+    "checkpointsDesc": "Before the agent modifies files, save pre-images so you can undo a run’s changes in one click (no git required)."
   },
   "webSearch": {
     "title": "Web search",
@@ -926,7 +928,14 @@
     "stopSpeaking": "Stop reading",
     "tokensPerSecond": "{{rate}} tok/s",
     "sources": "Sources",
-    "sourcesEmpty": "No sources"
+    "sourcesEmpty": "No sources",
+    "undoRun": "Undo changes from this run",
+    "undoRunConfirm": "Restore the following files to their state before this run?\n\n{{files}}",
+    "undoRunPartial": "Partial coverage: some files have no pre-image (size cap reached).",
+    "undoRunSuccess": "Run changes undone ({{restored}} restored, {{deleted}} deleted).",
+    "undoRunFailed": "Undo failed: {{error}}",
+    "undoRunInProgress": "Cannot undo while a run is in progress.",
+    "undoRunNone": "No files to restore for this run."
   },
   "schedule": {
     "createTitle": "Create Schedule",

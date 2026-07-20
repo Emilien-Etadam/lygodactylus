@@ -98,7 +98,9 @@
     "speechSynthesis": "Czytanie na głos",
     "speechSynthesisDesc": "Pokazuje przycisk głośnika przy wiadomościach asystenta, aby odczytać je offline głosem systemowym.",
     "modelStats": "Statystyki modelu",
-    "modelStatsDesc": "Pokazuje szybkość generowania (tok/s), wypełnienie kontekstu oraz metadane modelu (parametry/kwantyzacja), jeśli są znane."
+    "modelStatsDesc": "Pokazuje szybkość generowania (tok/s), wypełnienie kontekstu oraz metadane modelu (parametry/kwantyzacja), jeśli są znane.",
+    "checkpoints": "Punkty kontrolne uruchomień",
+    "checkpointsDesc": "Przed modyfikacją plików przez agenta zapisuje obrazy wstępne, aby jednym kliknięciem cofnąć zmiany uruchomienia (bez gita)."
   },
   "webSearch": {
     "title": "Web search",
@@ -837,7 +839,14 @@
     "stopSpeaking": "Zatrzymaj czytanie",
     "tokensPerSecond": "{{rate}} tok/s",
     "sources": "Źródła",
-    "sourcesEmpty": "Brak źródeł"
+    "sourcesEmpty": "Brak źródeł",
+    "undoRun": "Cofnij zmiany z tego uruchomienia",
+    "undoRunConfirm": "Przywrócić następujące pliki do stanu sprzed tego uruchomienia?\n\n{{files}}",
+    "undoRunPartial": "Częściowe pokrycie: niektóre pliki nie mają obrazu wstępnego (osiągnięto limit rozmiaru).",
+    "undoRunSuccess": "Cofnięto zmiany uruchomienia (przywrócono {{restored}}, usunięto {{deleted}}).",
+    "undoRunFailed": "Cofanie nie powiodło się: {{error}}",
+    "undoRunInProgress": "Nie można cofnąć, gdy uruchomienie jest w toku.",
+    "undoRunNone": "Brak plików do przywrócenia dla tego uruchomienia."
   },
   "schedule": {
     "createTitle": "Utwórz harmonogram",

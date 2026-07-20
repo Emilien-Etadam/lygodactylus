@@ -53,7 +53,11 @@ export type BackendMessageKey =
   | 'atMentionDirectoryFailed'
   | 'atMentionFileTruncated'
   | 'atMentionFileFailed'
-  | 'atMentionUrlFailed';
+  | 'atMentionUrlFailed'
+  | 'checkpointRestoreInvalidArgs'
+  | 'checkpointRestoreRunInProgress'
+  | 'checkpointRestoreNotFound'
+  | 'checkpointRestoreFailed';
 
 export type BackendMessages = Record<BackendMessageKey, string>;
 
@@ -130,6 +134,10 @@ export const backendCatalog: Record<string, BackendMessages> = {
     atMentionFileTruncated: '[已截断：仅包含前 {{limit}} 字节，原文件 {{size}} 字节]',
     atMentionFileFailed: '无法读取文件 {{path}}：{{error}}',
     atMentionUrlFailed: '无法获取 URL {{url}}：{{error}}',
+    checkpointRestoreInvalidArgs: '撤销参数无效。',
+    checkpointRestoreRunInProgress: '当前会话仍有正在运行的任务，无法撤销此运行。',
+    checkpointRestoreNotFound: '找不到此运行的检查点。',
+    checkpointRestoreFailed: '撤销此运行的更改失败。',
   },
   en: {
     errModelTimeout:
@@ -191,6 +199,10 @@ export const backendCatalog: Record<string, BackendMessages> = {
     atMentionFileTruncated: '[Truncated: first {{limit}} bytes of {{size}}]',
     atMentionFileFailed: 'Could not read file {{path}}: {{error}}',
     atMentionUrlFailed: 'Could not fetch URL {{url}}: {{error}}',
+    checkpointRestoreInvalidArgs: 'Invalid undo arguments.',
+    checkpointRestoreRunInProgress: 'A run is still in progress on this session; cannot undo.',
+    checkpointRestoreNotFound: 'No checkpoint found for this run.',
+    checkpointRestoreFailed: 'Failed to undo changes from this run.',
   },
   es: {
     errModelTimeout:
@@ -252,6 +264,10 @@ export const backendCatalog: Record<string, BackendMessages> = {
     atMentionFileTruncated: '[Truncado: primeros {{limit}} bytes de {{size}}]',
     atMentionFileFailed: 'No se pudo leer el archivo {{path}}: {{error}}',
     atMentionUrlFailed: 'No se pudo obtener la URL {{url}}: {{error}}',
+    checkpointRestoreInvalidArgs: 'Argumentos de deshacer no válidos.',
+    checkpointRestoreRunInProgress: 'Todavía hay una ejecución en curso en esta sesión; no se puede deshacer.',
+    checkpointRestoreNotFound: 'No se encontró ningún punto de control para esta ejecución.',
+    checkpointRestoreFailed: 'No se pudieron deshacer los cambios de esta ejecución.',
   },
   fr: {
     errModelTimeout:
@@ -313,6 +329,10 @@ export const backendCatalog: Record<string, BackendMessages> = {
     atMentionFileTruncated: '[Tronqué : {{limit}} premiers octets sur {{size}}]',
     atMentionFileFailed: 'Impossible de lire le fichier {{path}} : {{error}}',
     atMentionUrlFailed: 'Impossible de récupérer l’URL {{url}} : {{error}}',
+    checkpointRestoreInvalidArgs: 'Arguments d\'annulation invalides.',
+    checkpointRestoreRunInProgress: 'Une exécution est encore en cours sur cette session ; annulation impossible.',
+    checkpointRestoreNotFound: 'Aucun point de contrôle trouvé pour ce run.',
+    checkpointRestoreFailed: 'Échec de l\'annulation des changements de ce run.',
   },
   de: {
     errModelTimeout:
@@ -374,6 +394,10 @@ export const backendCatalog: Record<string, BackendMessages> = {
     atMentionFileTruncated: '[Gekürzt: erste {{limit}} Bytes von {{size}}]',
     atMentionFileFailed: 'Datei {{path}} konnte nicht gelesen werden: {{error}}',
     atMentionUrlFailed: 'URL {{url}} konnte nicht abgerufen werden: {{error}}',
+    checkpointRestoreInvalidArgs: 'Ungültige Argumente für das Rückgängigmachen.',
+    checkpointRestoreRunInProgress: 'In dieser Sitzung läuft noch ein Run; Rückgängigmachen nicht möglich.',
+    checkpointRestoreNotFound: 'Kein Checkpoint für diesen Run gefunden.',
+    checkpointRestoreFailed: 'Änderungen dieses Runs konnten nicht rückgängig gemacht werden.',
   },
   it: {
     errModelTimeout:
@@ -436,6 +460,11 @@ export const backendCatalog: Record<string, BackendMessages> = {
     atMentionFileTruncated: '[Troncato: primi {{limit}} byte di {{size}}]',
     atMentionFileFailed: 'Impossibile leggere il file {{path}}: {{error}}',
     atMentionUrlFailed: 'Impossibile recuperare l’URL {{url}}: {{error}}',
+    checkpointRestoreInvalidArgs: "Argomenti di annullamento non validi.",
+    checkpointRestoreRunInProgress:
+      "È ancora in corso un'esecuzione su questa sessione; impossibile annullare.",
+    checkpointRestoreNotFound: 'Nessun checkpoint trovato per questa esecuzione.',
+    checkpointRestoreFailed: 'Impossibile annullare le modifiche di questa esecuzione.',
   },
   uk: {
     errModelTimeout:
@@ -497,6 +526,10 @@ export const backendCatalog: Record<string, BackendMessages> = {
     atMentionFileTruncated: '[Обрізано: перші {{limit}} байтів із {{size}}]',
     atMentionFileFailed: 'Не вдалося прочитати файл {{path}}: {{error}}',
     atMentionUrlFailed: 'Не вдалося отримати URL {{url}}: {{error}}',
+    checkpointRestoreInvalidArgs: 'Недійсні аргументи скасування.',
+    checkpointRestoreRunInProgress: 'У цій сесії все ще виконується запуск; скасування неможливе.',
+    checkpointRestoreNotFound: 'Контрольну точку для цього запуску не знайдено.',
+    checkpointRestoreFailed: 'Не вдалося скасувати зміни цього запуску.',
   },
   pl: {
     errModelTimeout:
@@ -558,6 +591,10 @@ export const backendCatalog: Record<string, BackendMessages> = {
     atMentionFileTruncated: '[Obcięto: pierwsze {{limit}} bajtów z {{size}}]',
     atMentionFileFailed: 'Nie udało się odczytać pliku {{path}}: {{error}}',
     atMentionUrlFailed: 'Nie udało się pobrać URL {{url}}: {{error}}',
+    checkpointRestoreInvalidArgs: 'Nieprawidłowe argumenty cofania.',
+    checkpointRestoreRunInProgress: 'W tej sesji nadal trwa uruchomienie; nie można cofnąć.',
+    checkpointRestoreNotFound: 'Nie znaleziono punktu kontrolnego dla tego uruchomienia.',
+    checkpointRestoreFailed: 'Nie udało się cofnąć zmian z tego uruchomienia.',
   },
   sv: {
     errModelTimeout:
@@ -619,6 +656,10 @@ export const backendCatalog: Record<string, BackendMessages> = {
     atMentionFileTruncated: '[Avkortad: första {{limit}} byten av {{size}}]',
     atMentionFileFailed: 'Kunde inte läsa filen {{path}}: {{error}}',
     atMentionUrlFailed: 'Kunde inte hämta URL {{url}}: {{error}}',
+    checkpointRestoreInvalidArgs: 'Ogiltiga argument för ångra.',
+    checkpointRestoreRunInProgress: 'En körning pågår fortfarande i den här sessionen; kan inte ångra.',
+    checkpointRestoreNotFound: 'Ingen kontrollpunkt hittades för den här körningen.',
+    checkpointRestoreFailed: 'Det gick inte att ångra ändringarna från den här körningen.',
   },
   no: {
     errModelTimeout:
@@ -680,6 +721,10 @@ export const backendCatalog: Record<string, BackendMessages> = {
     atMentionFileTruncated: '[Avkortet: første {{limit}} byte av {{size}}]',
     atMentionFileFailed: 'Kunne ikke lese filen {{path}}: {{error}}',
     atMentionUrlFailed: 'Kunne ikke hente URL {{url}}: {{error}}',
+    checkpointRestoreInvalidArgs: 'Ugyldige argumenter for angre.',
+    checkpointRestoreRunInProgress: 'En kjøring pågår fortsatt i denne økten; kan ikke angre.',
+    checkpointRestoreNotFound: 'Ingen sjekkpunkt funnet for denne kjøringen.',
+    checkpointRestoreFailed: 'Kunne ikke angre endringene fra denne kjøringen.',
   },
   nl: {
     errModelTimeout:
@@ -741,6 +786,10 @@ export const backendCatalog: Record<string, BackendMessages> = {
     atMentionFileTruncated: '[Afgekapt: eerste {{limit}} bytes van {{size}}]',
     atMentionFileFailed: 'Kon bestand {{path}} niet lezen: {{error}}',
     atMentionUrlFailed: 'Kon URL {{url}} niet ophalen: {{error}}',
+    checkpointRestoreInvalidArgs: 'Ongeldige argumenten voor ongedaan maken.',
+    checkpointRestoreRunInProgress: 'Er loopt nog een uitvoering in deze sessie; ongedaan maken is niet mogelijk.',
+    checkpointRestoreNotFound: 'Geen checkpoint gevonden voor deze uitvoering.',
+    checkpointRestoreFailed: 'Wijzigingen van deze uitvoering ongedaan maken is mislukt.',
   },
   ro: {
     errModelTimeout:
@@ -802,5 +851,9 @@ export const backendCatalog: Record<string, BackendMessages> = {
     atMentionFileTruncated: '[Trunchiat: primii {{limit}} octeți din {{size}}]',
     atMentionFileFailed: 'Nu s-a putut citi fișierul {{path}}: {{error}}',
     atMentionUrlFailed: 'Nu s-a putut prelua URL-ul {{url}}: {{error}}',
+    checkpointRestoreInvalidArgs: 'Argumente invalide pentru anulare.',
+    checkpointRestoreRunInProgress: 'O execuție este încă în curs pe această sesiune; nu se poate anula.',
+    checkpointRestoreNotFound: 'Nu a fost găsit niciun punct de control pentru această execuție.',
+    checkpointRestoreFailed: 'Nu s-au putut anula modificările acestei execuții.',
   },
 };

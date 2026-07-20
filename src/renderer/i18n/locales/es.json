@@ -98,7 +98,9 @@
     "speechSynthesis": "Lectura en voz alta",
     "speechSynthesisDesc": "Muestra un botón de altavoz en los mensajes del asistente para leerlos sin conexión con la voz del sistema.",
     "modelStats": "Estadísticas del modelo",
-    "modelStatsDesc": "Muestra la velocidad de generación (tok/s), el llenado del contexto y los metadatos del modelo (parámetros/cuantización) cuando se conocen."
+    "modelStatsDesc": "Muestra la velocidad de generación (tok/s), el llenado del contexto y los metadatos del modelo (parámetros/cuantización) cuando se conocen.",
+    "checkpoints": "Puntos de control de ejecución",
+    "checkpointsDesc": "Antes de que el agente modifique archivos, guarda preimágenes para deshacer los cambios de una ejecución con un clic (sin git)."
   },
   "webSearch": {
     "title": "Web search",
@@ -837,7 +839,14 @@
     "stopSpeaking": "Detener lectura",
     "tokensPerSecond": "{{rate}} tok/s",
     "sources": "Fuentes",
-    "sourcesEmpty": "Sin fuentes"
+    "sourcesEmpty": "Sin fuentes",
+    "undoRun": "Deshacer los cambios de esta ejecución",
+    "undoRunConfirm": "¿Restaurar los siguientes archivos a su estado anterior a esta ejecución?\n\n{{files}}",
+    "undoRunPartial": "Cobertura parcial: algunos archivos no tienen preimagen (se alcanzó el límite).",
+    "undoRunSuccess": "Cambios de la ejecución deshechos ({{restored}} restaurados, {{deleted}} eliminados).",
+    "undoRunFailed": "Error al deshacer: {{error}}",
+    "undoRunInProgress": "No se puede deshacer mientras hay una ejecución en curso.",
+    "undoRunNone": "No hay archivos que restaurar para esta ejecución."
   },
   "schedule": {
     "createTitle": "Crear programación",

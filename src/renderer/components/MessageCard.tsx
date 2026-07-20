@@ -9,6 +9,7 @@ import { useAppConfig } from '../store/selectors';
 import { ContentBlockView } from './message/ContentBlockView';
 import { CopyButton } from './message/CopyButton';
 import { SpeakButton } from './message/SpeakButton';
+import { UndoRunButton } from './message/UndoRunButton';
 import { MessageSourcesCard } from './message/MessageSourcesCard';
 import {
   collectWebSourcesForAssistantMessage,
@@ -179,10 +180,21 @@ export const MessageCard = memo(function MessageCard({
       ) : (
         // Assistant message — no bubble, direct content (Claude style)
         <div className="group/assistant space-y-1.5">
-          {hasCopyableText && !isStreaming && (
+          {!isStreaming && (
             <div className="flex justify-end gap-1 opacity-0 group-hover/assistant:opacity-100 transition-opacity -mb-1">
-              {speechEnabled && <SpeakButton messageId={message.id} text={textContent} />}
-              <CopyButton text={textContent} title={t('messageCard.copyMessage')} />
+              {message.sessionId && (
+                <UndoRunButton
+                  sessionId={message.sessionId}
+                  messageId={message.id}
+                  disabled={isStreaming}
+                />
+              )}
+              {hasCopyableText && speechEnabled && (
+                <SpeakButton messageId={message.id} text={textContent} />
+              )}
+              {hasCopyableText && (
+                <CopyButton text={textContent} title={t('messageCard.copyMessage')} />
+              )}
             </div>
           )}
           {contentBlocks.map((block, index) => {

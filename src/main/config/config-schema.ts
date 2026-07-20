@@ -101,6 +101,11 @@ export interface AppConfig {
    */
   modelStatsEnabled: boolean;
   /**
+   * Capture pre-images before agent file mutations so the user can undo a run
+   * without depending on git. On by default; opt-out in Settings.
+   */
+  checkpointsEnabled: boolean;
+  /**
    * Global Quick Ask floating window (Phase 1). Off by default — opt-in in Settings.
    */
   quickAskEnabled: boolean;
@@ -198,6 +203,7 @@ export const DIRECT_READ_KEYS = new Set<keyof AppConfig>([
   'thinkingLevel',
   'speechSynthesisEnabled',
   'modelStatsEnabled',
+  'checkpointsEnabled',
   'quickAskEnabled',
   'quickAskShortcut',
   'ollamaKeepAlive',
@@ -323,6 +329,7 @@ export const defaultConfig: AppConfig = {
   thinkingLevel: 'medium',
   speechSynthesisEnabled: false,
   modelStatsEnabled: true,
+  checkpointsEnabled: true,
   quickAskEnabled: false,
   quickAskShortcut: DEFAULT_QUICK_ASK_SHORTCUT,
   ollamaKeepAlive: DEFAULT_OLLAMA_KEEP_ALIVE,

@@ -80,6 +80,7 @@ function makeConfig(): AppConfig {
     thinkingLevel: 'medium',
     speechSynthesisEnabled: false,
     modelStatsEnabled: true,
+    checkpointsEnabled: true,
     quickAskEnabled: false,
     quickAskShortcut: 'CommandOrControl+Shift+Space',
     ollamaKeepAlive: '30m',

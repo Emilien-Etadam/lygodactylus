@@ -1,9 +1,12 @@
 import {
   createBashToolDefinition,
+  createEditToolDefinition,
+  createWriteToolDefinition,
   type AgentSession as PiAgentSession,
   type BashToolOptions,
   type ToolDefinition,
 } from '@earendil-works/pi-coding-agent';
+import { wrapFileMutationToolsForCheckpoints } from '../checkpoints';
 import type { Message, Session } from '../../renderer/types';
 import { configStore } from '../config/config-store';
 import {
@@ -82,6 +85,8 @@ export interface PreparedPiSessionRun {
   thinkingLevel: 'off' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh';
   promptPrefix?: string;
   compactionEnabled: boolean;
+  /** Host-visible cwd used by write/edit/bash (UNC on WSL sandbox). */
+  effectiveCwd: string;
 }
 
 interface PreparePiSessionRunOptions {
@@ -488,9 +493,20 @@ export async function preparePiSessionRun({
     effectiveCwd,
     ctx.requestSudoPassword
   ).find((tool) => tool.name === 'bash');
+  // Override built-in write/edit with wrapped copies so checkpoints can capture
+  // pre-images before the first mutation of each file in the run (no git).
+  const checkpointFileTools = wrapFileMutationToolsForCheckpoints(
+    [
+      createWriteToolDefinition(effectiveCwd) as ToolDefinition,
+      createEditToolDefinition(effectiveCwd) as ToolDefinition,
+    ],
+    session.id,
+    effectiveCwd
+  );
   // Assemble the full toolset, then filter once for plan mode (single gating point).
   const assembledCustomTools = [
     ...(wrappedBash ? [wrappedBash] : []),
+    ...checkpointFileTools,
     ...nativeCustomTools,
     ...semanticSearchCustomTools,
     ...scheduleCustomTools,
@@ -534,6 +550,7 @@ export async function preparePiSessionRun({
     thinkingLevel,
     promptPrefix: extensionResult.promptPrefix,
     compactionEnabled,
+    effectiveCwd,
   });
 
   const reusedSession = await reuseCachedPiSession({

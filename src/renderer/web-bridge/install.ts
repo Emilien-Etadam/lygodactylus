@@ -177,6 +177,7 @@ function makeWebElectronApi(): Record<string, unknown> {
     },
 
     artifacts: namespaceProxy('artifacts'),
+    checkpoints: namespaceProxy('checkpoints'),
     config: namespaceProxy('config'),
     mcp: namespaceProxy('mcp'),
     memory: namespaceProxy('memory'),
