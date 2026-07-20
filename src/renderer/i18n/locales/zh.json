@@ -100,7 +100,15 @@
     "modelStats": "模型统计",
     "modelStatsDesc": "显示生成速度（tok/s）、上下文占用，以及已知的模型元数据（参数量/量化）。",
     "checkpoints": "运行检查点",
-    "checkpointsDesc": "在智能体修改文件之前保存预映像，以便一键撤销某次运行的更改（无需 git）。"
+    "checkpointsDesc": "在智能体修改文件之前保存预映像，以便一键撤销某次运行的更改（无需 git）。",
+    "workspaceToolingTitle": "质量命令（自主模式）",
+    "workspaceToolingHint": "可选。在自主模式下，有文件修改的运行结束后执行。",
+    "lintCmd": "Lint 命令",
+    "testCmd": "测试命令",
+    "lintCmdPlaceholder": "例如 npm run lint",
+    "testCmdPlaceholder": "例如 npm test",
+    "noWorkspace": "打开工作文件夹以配置 lint/测试。",
+    "saveTooling": "保存"
   },
   "webSearch": {
     "title": "Web search",
@@ -769,7 +777,16 @@
       "directoryDescription": "附加目录列表",
       "urlDescription": "获取 URL 内容",
       "placeholder": "在 @ 后输入路径或粘贴 URL"
-    }
+    },
+    "autonomyToggle": "自主级别",
+    "autonomyCareful": "谨慎",
+    "autonomyNormal": "标准",
+    "autonomyAutonomous": "自主",
+    "autonomyCarefulTooltip": "每次写入/编辑都需通过差异审批",
+    "autonomyNormalTooltip": "标准行为（权限不变）",
+    "autonomyAutonomousTooltip": "修改后运行 lint/测试并循环自动修复",
+    "autonomyCarefulBadge": "谨慎",
+    "autonomyAutonomousBadge": "自主"
   },
   "context": {
     "progress": "进度",
@@ -1073,7 +1090,11 @@
       "execute_command": "在工作区中执行 shell 命令",
       "glob": "按模式搜索文件",
       "grep": "搜索文件内容"
-    }
+    },
+    "carefulApproveTitle": "批准修改",
+    "carefulApproveDescription": "文件 {{path}}（约 {{bytes}} 字节）",
+    "diff": "差异",
+    "allowRun": "批准本次运行的全部修改"
   },
   "sudo": {
     "title": "需要管理员权限",

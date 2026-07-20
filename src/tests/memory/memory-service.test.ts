@@ -18,7 +18,6 @@ const mockConfigState = vi.hoisted(() => ({
     theme: 'light',
     sandboxEnabled: false,
     memoryEnabled: true,
-    mode: 'act' as const,
     memoryRuntime: {
       llm: {
         inheritFromActive: true,
@@ -328,6 +327,7 @@ function makeSession(id: string, title: string, cwd?: string) {
     allowedTools: [],
     memoryEnabled: true,
     mode: 'act' as const,
+    autonomy: 'normal' as const,
     createdAt: 1000,
     updatedAt: 1000,
   };

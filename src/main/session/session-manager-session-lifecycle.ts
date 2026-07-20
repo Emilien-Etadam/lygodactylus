@@ -1,10 +1,17 @@
 import { v4 as uuidv4 } from 'uuid';
-import type { Session, SessionMode } from '../../renderer/types';
+import type { Session, SessionAutonomy, SessionMode } from '../../renderer/types';
+import {
+  DEFAULT_SESSION_AUTONOMY,
+  isSessionAutonomy,
+  normalizeSessionAutonomy,
+} from '../../shared/session-autonomy';
 import {
   DEFAULT_SESSION_MODE,
   isSessionMode,
   normalizeSessionMode,
 } from '../../shared/session-mode';
+import { clearCarefulAllowRun } from '../autonomy/careful-run-allow';
+import { resetAutonomousIteration } from '../autonomy/autonomous-loop';
 import { configStore } from '../config/config-store';
 import { forgetSessionPermissions } from '../config/permission-rules-store';
 import {
@@ -76,6 +83,7 @@ export function createSession(
     ],
     memoryEnabled: resolvedMemoryEnabled,
     mode: normalizeSessionMode(mode ?? DEFAULT_SESSION_MODE),
+    autonomy: DEFAULT_SESSION_AUTONOMY,
     model: configStore.get('model') || undefined,
     createdAt: now,
     updatedAt: now,
@@ -153,6 +161,61 @@ export function updateSessionMode(
   deps.sendToRenderer({
     type: 'session.update',
     payload: { sessionId, updates: { mode: nextMode, updatedAt: updated.updatedAt } },
+  });
+  return updated;
+}
+
+export function getSessionAutonomy(
+  deps: SessionManagerFacadeSupportDeps,
+  sessionId: string
+): { autonomy: SessionAutonomy } {
+  const session = deps.store.loadSession(sessionId);
+  if (!session) {
+    throw new Error('Session not found');
+  }
+  return { autonomy: normalizeSessionAutonomy(session.autonomy) };
+}
+
+export function updateSessionAutonomy(
+  deps: SessionManagerFacadeSupportDeps,
+  sessionId: string,
+  autonomy: SessionAutonomy
+): Session {
+  if (!isSessionAutonomy(autonomy)) {
+    throw new Error(`Invalid session autonomy: ${String(autonomy)}`);
+  }
+  const session = deps.store.loadSession(sessionId);
+  if (!session) {
+    throw new Error('Session not found');
+  }
+  if (session.status === 'running' || deps.activeSessions.has(sessionId)) {
+    throw new Error('Cannot change session autonomy while a run is in progress');
+  }
+
+  const nextAutonomy = normalizeSessionAutonomy(autonomy);
+  if (normalizeSessionAutonomy(session.autonomy) === nextAutonomy) {
+    return session;
+  }
+
+  const updated: Session = {
+    ...session,
+    autonomy: nextAutonomy,
+    updatedAt: Date.now(),
+  };
+  deps.db.sessions.update(sessionId, {
+    autonomy: nextAutonomy,
+    updated_at: updated.updatedAt,
+  });
+  // Autonomy changes careful/autonomous wrapping; drop the cached pi session.
+  deps.getAgentRunner().clearSdkSession?.(sessionId);
+  clearCarefulAllowRun(sessionId);
+  resetAutonomousIteration(sessionId);
+  deps.sendToRenderer({
+    type: 'session.update',
+    payload: {
+      sessionId,
+      updates: { autonomy: nextAutonomy, updatedAt: updated.updatedAt },
+    },
   });
   return updated;
 }

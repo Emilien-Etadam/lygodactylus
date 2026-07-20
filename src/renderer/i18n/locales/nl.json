@@ -100,7 +100,15 @@
     "modelStats": "Modelstatistieken",
     "modelStatsDesc": "Toont generatiesnelheid (tok/s), contextvulling en modelmetadata (parameters/kwantisatie) wanneer bekend.",
     "checkpoints": "Uitvoeringscheckpoints",
-    "checkpointsDesc": "Slaat voorafbeelden op voordat de agent bestanden wijzigt, zodat je wijzigingen van een uitvoering met één klik ongedaan kunt maken (zonder git)."
+    "checkpointsDesc": "Slaat voorafbeelden op voordat de agent bestanden wijzigt, zodat je wijzigingen van een uitvoering met één klik ongedaan kunt maken (zonder git).",
+    "workspaceToolingTitle": "Quality commands (autonomous mode)",
+    "workspaceToolingHint": "Optional. Run after a mutating run when Autonomous mode is active.",
+    "lintCmd": "Lint command",
+    "testCmd": "Test command",
+    "lintCmdPlaceholder": "e.g. npm run lint",
+    "testCmdPlaceholder": "e.g. npm test",
+    "noWorkspace": "Open a working folder to configure lint/tests.",
+    "saveTooling": "Opslaan"
   },
   "webSearch": {
     "title": "Web search",
@@ -769,7 +777,16 @@
       "directoryDescription": "Maplijst bijvoegen",
       "urlDescription": "URL-inhoud ophalen",
       "placeholder": "Typ een pad of plak een URL na @"
-    }
+    },
+    "autonomyToggle": "Autonomieniveau",
+    "autonomyCareful": "Voorzichtig",
+    "autonomyNormal": "Normaal",
+    "autonomyAutonomous": "Autonoom",
+    "autonomyCarefulTooltip": "Elke schrijf-/bewerkingsactie moet met een diff worden goedgekeurd",
+    "autonomyNormalTooltip": "Standaardgedrag (rechten ongewijzigd)",
+    "autonomyAutonomousTooltip": "Na wijzigingen lint/tests uitvoeren en in een lus corrigeren",
+    "autonomyCarefulBadge": "Voorzichtig",
+    "autonomyAutonomousBadge": "Autonoom"
   },
   "context": {
     "progress": "Voortgang",
@@ -1073,7 +1090,11 @@
       "execute_command": "Shell-commando's in de werkruimte uitvoeren",
       "glob": "Bestanden op patroon zoeken",
       "grep": "Bestandsinhoud doorzoeken"
-    }
+    },
+    "carefulApproveTitle": "Wijziging goedkeuren",
+    "carefulApproveDescription": "Bestand {{path}} (≈ {{bytes}} bytes)",
+    "diff": "Diff",
+    "allowRun": "Alles goedkeuren voor deze run"
   },
   "sudo": {
     "title": "Beheerdersmachtiging vereist",

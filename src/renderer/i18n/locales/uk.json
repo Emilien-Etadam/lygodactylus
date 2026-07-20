@@ -100,7 +100,15 @@
     "modelStats": "Статистика моделі",
     "modelStatsDesc": "Показує швидкість генерації (tok/s), заповнення контексту та метадані моделі (параметри/квантизація), якщо відомі.",
     "checkpoints": "Контрольні точки запусків",
-    "checkpointsDesc": "Перед зміною файлів агентом зберігає попередні образи, щоб одним кліком скасувати зміни запуску (без git)."
+    "checkpointsDesc": "Перед зміною файлів агентом зберігає попередні образи, щоб одним кліком скасувати зміни запуску (без git).",
+    "workspaceToolingTitle": "Quality commands (autonomous mode)",
+    "workspaceToolingHint": "Optional. Run after a mutating run when Autonomous mode is active.",
+    "lintCmd": "Lint command",
+    "testCmd": "Test command",
+    "lintCmdPlaceholder": "e.g. npm run lint",
+    "testCmdPlaceholder": "e.g. npm test",
+    "noWorkspace": "Open a working folder to configure lint/tests.",
+    "saveTooling": "Зберегти"
   },
   "webSearch": {
     "title": "Web search",
@@ -769,7 +777,16 @@
       "directoryDescription": "Долучити список каталогу",
       "urlDescription": "Отримати вміст URL",
       "placeholder": "Введіть шлях або вставте URL після @"
-    }
+    },
+    "autonomyToggle": "Рівень автономії",
+    "autonomyCareful": "Обережний",
+    "autonomyNormal": "Звичайний",
+    "autonomyAutonomous": "Автономний",
+    "autonomyCarefulTooltip": "Кожен запис/редагування потребує схвалення з diff",
+    "autonomyNormalTooltip": "Стандартна поведінка (дозволи без змін)",
+    "autonomyAutonomousTooltip": "Після змін запускає lint/тести й виправляє в циклі",
+    "autonomyCarefulBadge": "Обережний",
+    "autonomyAutonomousBadge": "Автономний"
   },
   "context": {
     "progress": "Прогрес",
@@ -1073,7 +1090,11 @@
       "execute_command": "Виконувати команди оболонки в робочому просторі",
       "glob": "Шукати файли за шаблоном",
       "grep": "Шукати у вмісті файлів"
-    }
+    },
+    "carefulApproveTitle": "Схвалити зміну",
+    "carefulApproveDescription": "Файл {{path}} (≈ {{bytes}} байт)",
+    "diff": "Diff",
+    "allowRun": "Схвалити все для цього запуску"
   },
   "sudo": {
     "title": "Потрібен дозвіл адміністратора",

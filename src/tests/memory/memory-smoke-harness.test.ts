@@ -18,7 +18,6 @@ const mockConfigState = vi.hoisted(() => ({
     theme: 'light',
     sandboxEnabled: false,
     memoryEnabled: true,
-    mode: 'act' as const,
     memoryRuntime: {
       llm: {
         inheritFromActive: true,
@@ -325,6 +324,7 @@ describe('memory smoke harness', () => {
         allowedTools: [],
         memoryEnabled: true,
         mode: 'act' as const,
+        autonomy: 'normal' as const,
         createdAt: 1000,
         updatedAt: 1000,
       },
@@ -355,6 +355,7 @@ describe('memory smoke harness', () => {
         allowedTools: [],
         memoryEnabled: true,
         mode: 'act' as const,
+        autonomy: 'normal' as const,
         createdAt: 2000,
         updatedAt: 2000,
       },

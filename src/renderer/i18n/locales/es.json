@@ -100,7 +100,15 @@
     "modelStats": "Estadísticas del modelo",
     "modelStatsDesc": "Muestra la velocidad de generación (tok/s), el llenado del contexto y los metadatos del modelo (parámetros/cuantización) cuando se conocen.",
     "checkpoints": "Puntos de control de ejecución",
-    "checkpointsDesc": "Antes de que el agente modifique archivos, guarda preimágenes para deshacer los cambios de una ejecución con un clic (sin git)."
+    "checkpointsDesc": "Antes de que el agente modifique archivos, guarda preimágenes para deshacer los cambios de una ejecución con un clic (sin git).",
+    "workspaceToolingTitle": "Comandos de calidad (modo autónomo)",
+    "workspaceToolingHint": "Opcional. Se ejecutan tras un run con cambios si el modo Autónomo está activo.",
+    "lintCmd": "Comando lint",
+    "testCmd": "Comando de tests",
+    "lintCmdPlaceholder": "p. ej. npm run lint",
+    "testCmdPlaceholder": "p. ej. npm test",
+    "noWorkspace": "Abra una carpeta de trabajo para configurar lint/tests.",
+    "saveTooling": "Guardar"
   },
   "webSearch": {
     "title": "Web search",
@@ -769,7 +777,16 @@
       "directoryDescription": "Adjuntar listado del directorio",
       "urlDescription": "Obtener contenido de la URL",
       "placeholder": "Escribe una ruta o pega una URL después de @"
-    }
+    },
+    "autonomyToggle": "Nivel de autonomía",
+    "autonomyCareful": "Prudente",
+    "autonomyNormal": "Normal",
+    "autonomyAutonomous": "Autónomo",
+    "autonomyCarefulTooltip": "Cada escritura/edición debe aprobarse con un diff",
+    "autonomyNormalTooltip": "Comportamiento estándar (permisos sin cambios)",
+    "autonomyAutonomousTooltip": "Tras los cambios, ejecuta lint/tests y corrige en bucle",
+    "autonomyCarefulBadge": "Prudente",
+    "autonomyAutonomousBadge": "Autónomo"
   },
   "context": {
     "progress": "Progreso",
@@ -1073,7 +1090,11 @@
       "execute_command": "Ejecutar comandos de shell en el espacio de trabajo",
       "glob": "Buscar archivos por patrón",
       "grep": "Buscar en el contenido de los archivos"
-    }
+    },
+    "carefulApproveTitle": "Aprobar cambio",
+    "carefulApproveDescription": "Archivo {{path}} (≈ {{bytes}} bytes)",
+    "diff": "Diff",
+    "allowRun": "Aprobar todo en esta ejecución"
   },
   "sudo": {
     "title": "Se requiere permiso de administrador",

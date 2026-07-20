@@ -1,6 +1,7 @@
 import type { SessionMode } from '../../shared/session-mode';
+import type { SessionAutonomy } from '../../shared/session-autonomy';
 
-export type { SessionMode };
+export type { SessionMode, SessionAutonomy };
 
 // Session types
 export interface Session {
@@ -15,6 +16,8 @@ export interface Session {
   memoryEnabled: boolean;
   /** Plan = read-only exploration; Act = full tools (default). */
   mode: SessionMode;
+  /** Careful / Normal / Autonomous — orthogonal to Plan/Act (default normal). */
+  autonomy: SessionAutonomy;
   model?: string;
   createdAt: number;
   updatedAt: number;
@@ -426,14 +429,28 @@ export interface MemoryReadResult extends MemorySearchResult {
 }
 
 // Permission types
+/** Optional unified-diff payload for careful-mode write/edit approval. */
+export interface PermissionDiffPayload {
+  path: string;
+  oldContent?: string;
+  newContent: string;
+  unifiedDiff: string;
+  changeBytes: number;
+  isNewFile: boolean;
+}
+
 export interface PermissionRequest {
   toolUseId: string;
   toolName: string;
   input: Record<string, unknown>;
   sessionId: string;
+  /** Present when careful mode asks for a per-edit approval. */
+  diff?: PermissionDiffPayload;
+  /** Show "approve all for this run" (careful mode). */
+  allowRunOption?: boolean;
 }
 
-export type PermissionResult = 'allow' | 'deny' | 'allow_always';
+export type PermissionResult = 'allow' | 'deny' | 'allow_always' | 'allow_run';
 
 // Sudo password types
 export interface SudoPasswordRequest {
@@ -515,6 +532,11 @@ export type ClientEvent =
   | { type: 'session.setMemoryEnabled'; payload: { sessionId: string; memoryEnabled: boolean } }
   | { type: 'session.setMode'; payload: { sessionId: string; mode: SessionMode } }
   | { type: 'session.getMode'; payload: { sessionId: string } }
+  | {
+      type: 'session.setAutonomy';
+      payload: { sessionId: string; autonomy: SessionAutonomy };
+    }
+  | { type: 'session.getAutonomy'; payload: { sessionId: string } }
   | { type: 'session.list'; payload: Record<string, never> }
   | { type: 'session.getMessages'; payload: { sessionId: string } }
   | { type: 'session.getTraceSteps'; payload: { sessionId: string } }
@@ -840,6 +862,8 @@ export interface AppConfig {
    * so the user can undo a run without git. On by default.
    */
   checkpointsEnabled?: boolean;
+  /** Per-workspace lint/test commands for autonomous mode. */
+  workspaceTooling?: Record<string, { lintCmd?: string; testCmd?: string }>;
   /** Global Quick Ask floating window. Off by default. */
   quickAskEnabled?: boolean;
   /** Electron Accelerator for the Quick Ask global shortcut. */

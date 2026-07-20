@@ -106,6 +106,11 @@ export interface AppConfig {
    */
   checkpointsEnabled: boolean;
   /**
+   * Per-workspace lint/test commands for autonomous mode (empty by default).
+   * Keyed by normalized workspace absolute path.
+   */
+  workspaceTooling: Record<string, { lintCmd?: string; testCmd?: string }>;
+  /**
    * Global Quick Ask floating window (Phase 1). Off by default — opt-in in Settings.
    */
   quickAskEnabled: boolean;
@@ -330,6 +335,7 @@ export const defaultConfig: AppConfig = {
   speechSynthesisEnabled: false,
   modelStatsEnabled: true,
   checkpointsEnabled: true,
+  workspaceTooling: {},
   quickAskEnabled: false,
   quickAskShortcut: DEFAULT_QUICK_ASK_SHORTCUT,
   ollamaKeepAlive: DEFAULT_OLLAMA_KEEP_ALIVE,
@@ -356,6 +362,37 @@ export function isAppTheme(value: unknown): value is AppTheme {
 
 export function isThinkingLevel(value: unknown): value is ThinkingLevel {
   return typeof value === 'string' && THINKING_LEVELS.includes(value as ThinkingLevel);
+}
+
+export function normalizeWorkspaceTooling(
+  value: unknown
+): Record<string, { lintCmd?: string; testCmd?: string }> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {};
+  }
+  const out: Record<string, { lintCmd?: string; testCmd?: string }> = {};
+  for (const [rawKey, rawEntry] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof rawKey !== 'string' || !rawKey.trim()) {
+      continue;
+    }
+    if (!rawEntry || typeof rawEntry !== 'object' || Array.isArray(rawEntry)) {
+      continue;
+    }
+    const entry = rawEntry as Record<string, unknown>;
+    const lintCmd =
+      typeof entry.lintCmd === 'string' && entry.lintCmd.trim()
+        ? entry.lintCmd.trim()
+        : undefined;
+    const testCmd =
+      typeof entry.testCmd === 'string' && entry.testCmd.trim()
+        ? entry.testCmd.trim()
+        : undefined;
+    if (!lintCmd && !testCmd) {
+      continue;
+    }
+    out[rawKey.trim()] = { lintCmd, testCmd };
+  }
+  return out;
 }
 
 function isMemoryModelRuntimeConfig(value: unknown): value is Partial<MemoryModelRuntimeConfig> {

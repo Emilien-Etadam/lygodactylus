@@ -3,6 +3,7 @@ import type {
   Message,
   ServerEvent,
   Session,
+  SessionAutonomy,
   SessionMode,
 } from '../../renderer/types';
 import { buildScheduledTaskTitle } from '../schedule/schedule-title-i18n';
@@ -20,9 +21,11 @@ import {
   createSession,
   deleteSession,
   ensureSandboxInitialized,
+  getSessionAutonomy,
   getSessionMode,
   reloadSandbox,
   stopSession,
+  updateSessionAutonomy,
   updateSessionCwd,
   updateSessionMemoryEnabled,
   updateSessionMode,
@@ -148,6 +151,14 @@ export class SessionManagerFacadeSupport {
 
   updateSessionMode(sessionId: string, mode: SessionMode): Session {
     return updateSessionMode(this.deps, sessionId, mode);
+  }
+
+  getSessionAutonomy(sessionId: string): { autonomy: SessionAutonomy } {
+    return getSessionAutonomy(this.deps, sessionId);
+  }
+
+  updateSessionAutonomy(sessionId: string, autonomy: SessionAutonomy): Session {
+    return updateSessionAutonomy(this.deps, sessionId, autonomy);
   }
 
   updateSessionStatus(sessionId: string, status: Session['status']): void {

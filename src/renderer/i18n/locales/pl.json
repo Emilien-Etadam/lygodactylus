@@ -100,7 +100,15 @@
     "modelStats": "Statystyki modelu",
     "modelStatsDesc": "Pokazuje szybkość generowania (tok/s), wypełnienie kontekstu oraz metadane modelu (parametry/kwantyzacja), jeśli są znane.",
     "checkpoints": "Punkty kontrolne uruchomień",
-    "checkpointsDesc": "Przed modyfikacją plików przez agenta zapisuje obrazy wstępne, aby jednym kliknięciem cofnąć zmiany uruchomienia (bez gita)."
+    "checkpointsDesc": "Przed modyfikacją plików przez agenta zapisuje obrazy wstępne, aby jednym kliknięciem cofnąć zmiany uruchomienia (bez gita).",
+    "workspaceToolingTitle": "Quality commands (autonomous mode)",
+    "workspaceToolingHint": "Optional. Run after a mutating run when Autonomous mode is active.",
+    "lintCmd": "Lint command",
+    "testCmd": "Test command",
+    "lintCmdPlaceholder": "e.g. npm run lint",
+    "testCmdPlaceholder": "e.g. npm test",
+    "noWorkspace": "Open a working folder to configure lint/tests.",
+    "saveTooling": "Zapisz"
   },
   "webSearch": {
     "title": "Web search",
@@ -769,7 +777,16 @@
       "directoryDescription": "Dołącz listę katalogu",
       "urlDescription": "Pobierz zawartość URL",
       "placeholder": "Wpisz ścieżkę lub wklej URL po @"
-    }
+    },
+    "autonomyToggle": "Poziom autonomii",
+    "autonomyCareful": "Ostrożny",
+    "autonomyNormal": "Normalny",
+    "autonomyAutonomous": "Autonomiczny",
+    "autonomyCarefulTooltip": "Każdy zapis/edycja wymaga zatwierdzenia z diffem",
+    "autonomyNormalTooltip": "Standardowe zachowanie (uprawnienia bez zmian)",
+    "autonomyAutonomousTooltip": "Po zmianach uruchamia lint/testy i poprawia w pętli",
+    "autonomyCarefulBadge": "Ostrożny",
+    "autonomyAutonomousBadge": "Autonomiczny"
   },
   "context": {
     "progress": "Postęp",
@@ -1073,7 +1090,11 @@
       "execute_command": "Wykonywanie poleceń powłoki w obszarze roboczym",
       "glob": "Wyszukiwanie plików według wzorca",
       "grep": "Wyszukiwanie w zawartości plików"
-    }
+    },
+    "carefulApproveTitle": "Zatwierdź zmianę",
+    "carefulApproveDescription": "Plik {{path}} (≈ {{bytes}} bajtów)",
+    "diff": "Diff",
+    "allowRun": "Zatwierdź wszystko w tym uruchomieniu"
   },
   "sudo": {
     "title": "Wymagane uprawnienia administratora",

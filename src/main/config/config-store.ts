@@ -55,6 +55,7 @@ import {
   normalizeQuickAskShortcut,
   DEFAULT_QUICK_ASK_SHORTCUT,
   normalizeWebSearchConfig,
+  normalizeWorkspaceTooling,
   nowISO,
   PROFILE_KEYS,
   profileKeyFromProvider,
@@ -468,6 +469,10 @@ export class ConfigStore {
         updates.checkpointsEnabled !== undefined
           ? updates.checkpointsEnabled
           : current.checkpointsEnabled,
+      workspaceTooling:
+        updates.workspaceTooling !== undefined
+          ? normalizeWorkspaceTooling(updates.workspaceTooling)
+          : current.workspaceTooling,
       quickAskEnabled:
         updates.quickAskEnabled !== undefined
           ? updates.quickAskEnabled

@@ -39,6 +39,8 @@ export function sessionRowToSession(row: SessionRow): MemoryIngestionInput['sess
     allowedTools: [],
     memoryEnabled: row.memory_enabled === 1,
     mode: row.mode === 'plan' ? 'plan' : 'act',
+    autonomy:
+      row.autonomy === 'careful' || row.autonomy === 'autonomous' ? row.autonomy : 'normal',
     model: row.model || undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

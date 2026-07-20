@@ -79,6 +79,7 @@ export async function forkSessionFromMessage(
     );
     newSession.model = session.model;
     newSession.mode = session.mode ?? 'act';
+    newSession.autonomy = session.autonomy ?? 'normal';
 
     const forkMessages = cloneMessagesForSession(
       messages.slice(0, messageIndex + 1),

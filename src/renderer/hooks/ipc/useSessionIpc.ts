@@ -86,6 +86,7 @@ export function useSessionIpc({
           ],
           memoryEnabled: true,
           mode: mode === 'plan' ? 'plan' : 'act',
+          autonomy: 'normal',
         };
 
         addSession(session);

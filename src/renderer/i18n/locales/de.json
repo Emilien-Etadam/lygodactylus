@@ -100,7 +100,15 @@
     "modelStats": "Modellstatistiken",
     "modelStatsDesc": "Zeigt die Generierungsgeschwindigkeit (tok/s), die Kontextauslastung und Modellmetadaten (Parameter/Quantisierung), sofern bekannt.",
     "checkpoints": "Run-Checkpoints",
-    "checkpointsDesc": "Speichert vor Agent-Dateänderungen Vorabbilder, damit Sie die Änderungen eines Runs mit einem Klick rückgängig machen können (ohne git)."
+    "checkpointsDesc": "Speichert vor Agent-Dateänderungen Vorabbilder, damit Sie die Änderungen eines Runs mit einem Klick rückgängig machen können (ohne git).",
+    "workspaceToolingTitle": "Qualitätsbefehle (autonomer Modus)",
+    "workspaceToolingHint": "Optional. Wird nach einem Run mit Dateiänderungen im Modus Autonom ausgeführt.",
+    "lintCmd": "Lint-Befehl",
+    "testCmd": "Test-Befehl",
+    "lintCmdPlaceholder": "z. B. npm run lint",
+    "testCmdPlaceholder": "z. B. npm test",
+    "noWorkspace": "Öffnen Sie einen Arbeitsordner, um Lint/Tests zu konfigurieren.",
+    "saveTooling": "Speichern"
   },
   "webSearch": {
     "title": "Web search",
@@ -769,7 +777,16 @@
       "directoryDescription": "Verzeichnisliste anhängen",
       "urlDescription": "URL-Inhalt abrufen",
       "placeholder": "Pfad eingeben oder URL nach @ einfügen"
-    }
+    },
+    "autonomyToggle": "Autonomiestufe",
+    "autonomyCareful": "Vorsichtig",
+    "autonomyNormal": "Normal",
+    "autonomyAutonomous": "Autonom",
+    "autonomyCarefulTooltip": "Jede Schreib-/Bearbeitungsaktion muss per Diff bestätigt werden",
+    "autonomyNormalTooltip": "Standardverhalten (Berechtigungen unverändert)",
+    "autonomyAutonomousTooltip": "Nach Änderungen Lint/Tests ausführen und in einer Schleife korrigieren",
+    "autonomyCarefulBadge": "Vorsichtig",
+    "autonomyAutonomousBadge": "Autonom"
   },
   "context": {
     "progress": "Fortschritt",
@@ -1073,7 +1090,11 @@
       "execute_command": "Shell-Befehle im Workspace ausführen",
       "glob": "Dateien nach Muster suchen",
       "grep": "Dateiinhalte durchsuchen"
-    }
+    },
+    "carefulApproveTitle": "Änderung genehmigen",
+    "carefulApproveDescription": "Datei {{path}} (≈ {{bytes}} Bytes)",
+    "diff": "Diff",
+    "allowRun": "Alles für diesen Lauf genehmigen"
   },
   "sudo": {
     "title": "Administratorberechtigung erforderlich",

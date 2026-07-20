@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useIPC } from '../hooks/useIPC';
 import type { PermissionRequest } from '../types';
-import { Shield, X, Check, AlertTriangle } from 'lucide-react';
+import { Shield, X, Check, AlertTriangle, Layers } from 'lucide-react';
 
 interface PermissionDialogProps {
   permission: PermissionRequest;
@@ -33,9 +33,16 @@ export function PermissionDialog({ permission }: PermissionDialogProps) {
     'edit_file',
   ].includes(permission.toolName);
 
+  const hasDiff = Boolean(permission.diff?.unifiedDiff);
+  const showAllowRun = Boolean(permission.allowRunOption);
+
   return (
     <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-      <div className="card w-full max-w-md p-6 m-4 shadow-elevated animate-slide-up">
+      <div
+        className={`card w-full p-6 m-4 shadow-elevated animate-slide-up ${
+          hasDiff ? 'max-w-2xl' : 'max-w-md'
+        }`}
+      >
         {/* Header */}
         <div className="flex items-start gap-4">
           <div
@@ -52,31 +59,47 @@ export function PermissionDialog({ permission }: PermissionDialogProps) {
 
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-text-primary">
-              {t('permission.permissionRequired')}
+              {hasDiff
+                ? t('permission.carefulApproveTitle')
+                : t('permission.permissionRequired')}
             </h2>
             <p className="text-sm text-text-secondary mt-1">
-              {getToolDescription(permission.toolName)}
+              {hasDiff && permission.diff
+                ? t('permission.carefulApproveDescription', {
+                    path: permission.diff.path,
+                    bytes: permission.diff.changeBytes,
+                  })
+                : getToolDescription(permission.toolName)}
             </p>
           </div>
         </div>
 
-        {/* Tool Details */}
+        {/* Tool Details / Diff */}
         <div className="mt-4 p-4 bg-surface-muted rounded-xl">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-sm font-medium text-text-primary">{t('permission.tool')}</span>
             <span className="font-mono text-accent text-sm">{permission.toolName}</span>
           </div>
 
-          <div className="text-sm text-text-secondary">
-            <span className="font-medium text-text-primary">{t('permission.input')}</span>
-            <pre className="mt-1 text-xs code-block max-h-32 overflow-auto">
-              {JSON.stringify(permission.input, null, 2)}
-            </pre>
-          </div>
+          {hasDiff && permission.diff ? (
+            <div className="text-sm text-text-secondary">
+              <span className="font-medium text-text-primary">{t('permission.diff')}</span>
+              <pre className="mt-1 text-xs code-block max-h-64 overflow-auto whitespace-pre-wrap">
+                {permission.diff.unifiedDiff}
+              </pre>
+            </div>
+          ) : (
+            <div className="text-sm text-text-secondary">
+              <span className="font-medium text-text-primary">{t('permission.input')}</span>
+              <pre className="mt-1 text-xs code-block max-h-32 overflow-auto">
+                {JSON.stringify(permission.input, null, 2)}
+              </pre>
+            </div>
+          )}
         </div>
 
         {/* Warning */}
-        {isHighRisk && (
+        {isHighRisk && !hasDiff && (
           <div className="mt-4 p-3 bg-warning/10 border border-warning/20 rounded-xl">
             <div className="flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
@@ -104,48 +127,59 @@ export function PermissionDialog({ permission }: PermissionDialogProps) {
           </button>
         </div>
 
-        {/* Always Allow option */}
-        {!pendingAlwaysAllow ? (
+        {showAllowRun && (
           <button
-            onClick={() => {
-              const dangerousTools = ['bash', 'write', 'edit', 'execute_command'];
-              const isDangerous = dangerousTools.some((tool) =>
-                permission.toolName?.toLowerCase().includes(tool)
-              );
-              if (isDangerous) {
-                setPendingAlwaysAllow(true);
-              } else {
-                respondToPermission(permission.toolUseId, 'allow_always');
-              }
-            }}
+            onClick={() => respondToPermission(permission.toolUseId, 'allow_run')}
             className="w-full mt-2 btn btn-ghost text-sm"
           >
-            {t('permission.alwaysAllow')}
+            <Layers className="w-4 h-4" />
+            {t('permission.allowRun')}
           </button>
-        ) : (
-          <div className="mt-2 p-3 bg-warning/10 border border-warning/20 rounded-xl">
-            <p className="text-sm text-warning mb-2">
-              {`Are you sure you want to always allow "${permission.toolName}"? This tool can modify your system.`}
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPendingAlwaysAllow(false)}
-                className="flex-1 btn btn-secondary text-sm"
-              >
-                {t('permission.deny')}
-              </button>
-              <button
-                onClick={() => {
-                  setPendingAlwaysAllow(false);
-                  respondToPermission(permission.toolUseId, 'allow_always');
-                }}
-                className="flex-1 btn btn-primary text-sm"
-              >
-                {t('permission.alwaysAllow')}
-              </button>
-            </div>
-          </div>
         )}
+
+        {/* Always Allow option (hidden for careful diff prompts — use allow_run instead) */}
+        {!showAllowRun &&
+          (!pendingAlwaysAllow ? (
+            <button
+              onClick={() => {
+                const dangerousTools = ['bash', 'write', 'edit', 'execute_command'];
+                const isDangerous = dangerousTools.some((tool) =>
+                  permission.toolName?.toLowerCase().includes(tool)
+                );
+                if (isDangerous) {
+                  setPendingAlwaysAllow(true);
+                } else {
+                  respondToPermission(permission.toolUseId, 'allow_always');
+                }
+              }}
+              className="w-full mt-2 btn btn-ghost text-sm"
+            >
+              {t('permission.alwaysAllow')}
+            </button>
+          ) : (
+            <div className="mt-2 p-3 bg-warning/10 border border-warning/20 rounded-xl">
+              <p className="text-sm text-warning mb-2">
+                {`Are you sure you want to always allow "${permission.toolName}"? This tool can modify your system.`}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPendingAlwaysAllow(false)}
+                  className="flex-1 btn btn-secondary text-sm"
+                >
+                  {t('permission.deny')}
+                </button>
+                <button
+                  onClick={() => {
+                    setPendingAlwaysAllow(false);
+                    respondToPermission(permission.toolUseId, 'allow_always');
+                  }}
+                  className="flex-1 btn btn-primary text-sm"
+                >
+                  {t('permission.alwaysAllow')}
+                </button>
+              </div>
+            </div>
+          ))}
       </div>
     </div>
   );

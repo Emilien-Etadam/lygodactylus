@@ -81,6 +81,7 @@ function makeConfig(): AppConfig {
     speechSynthesisEnabled: false,
     modelStatsEnabled: true,
     checkpointsEnabled: true,
+    workspaceTooling: {},
     quickAskEnabled: false,
     quickAskShortcut: 'CommandOrControl+Shift+Space',
     ollamaKeepAlive: '30m',
