@@ -8,6 +8,7 @@ import { sendToRenderer } from '../main-renderer-bridge';
 import { handleClientEvent } from '../main-client-events';
 import { revealFileInFolder } from '../main-shell-reveal';
 import { listRecentWorkspaceFiles } from '../utils/recent-workspace-files';
+import { searchWorkspacePaths } from '../utils/workspace-path-search';
 import type { ClientEvent } from '../../renderer/types';
 import { isAllowedClientEvent } from '../../shared/client-event-allowlist';
 
@@ -92,6 +93,22 @@ export function registerClientShellIpc(): void {
         return [];
       }
       return listRecentWorkspaceFiles(cwd, sinceMs, limit);
+    }
+  );
+
+  ipcMain.handle(
+    'workspace.searchPaths',
+    async (_event, cwd: string, query: string, limit: number = 20) => {
+      if (!cwd || !isAbsolute(cwd) || typeof query !== 'string') {
+        return [];
+      }
+      const max = Math.min(typeof limit === 'number' && Number.isFinite(limit) ? limit : 20, 20);
+      try {
+        return await searchWorkspacePaths(cwd, query, max);
+      } catch {
+        // Optional autocomplete: degrade silently when the workspace cannot be scanned.
+        return [];
+      }
     }
   );
 

@@ -759,7 +759,15 @@
     "planMode": "Plan",
     "actMode": "Act",
     "switchToAct": "Zu Act wechseln",
-    "planModeBadge": "Planungsmodus"
+    "planModeBadge": "Planungsmodus",
+    "atMentions": {
+      "menuLabel": "Erwähnungen",
+      "empty": "Keine passenden Dateien oder Ordner",
+      "fileDescription": "Dateiinhalt anhängen",
+      "directoryDescription": "Verzeichnisliste anhängen",
+      "urlDescription": "URL-Inhalt abrufen",
+      "placeholder": "Pfad eingeben oder URL nach @ einfügen"
+    }
   },
   "context": {
     "progress": "Fortschritt",
@@ -795,7 +803,9 @@
     "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
     "modelMeta": "{{meta}}",
     "contextFillHint": "Kontextauslastung",
-    "projectRulesLoaded": "Projektregeln geladen: {{file}}"
+    "projectRulesLoaded": "Projektregeln geladen: {{file}}",
+    "attachedContext": "Angehängter Kontext",
+    "attachedContextFailed": "Fehler"
   },
   "messageCard": {
     "request": "Anfrage",

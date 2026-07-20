@@ -848,7 +848,15 @@
     "planMode": "Plan",
     "actMode": "Act",
     "switchToAct": "Switch to Act",
-    "planModeBadge": "Planning mode"
+    "planModeBadge": "Planning mode",
+    "atMentions": {
+      "menuLabel": "Mentions",
+      "empty": "No matching files or folders",
+      "fileDescription": "Attach file contents",
+      "directoryDescription": "Attach directory listing",
+      "urlDescription": "Fetch URL contents",
+      "placeholder": "Type a path or paste a URL after @"
+    }
   },
   "context": {
     "progress": "Progress",
@@ -884,7 +892,9 @@
     "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
     "modelMeta": "{{meta}}",
     "contextFillHint": "Context fill",
-    "projectRulesLoaded": "Project rules loaded: {{file}}"
+    "projectRulesLoaded": "Project rules loaded: {{file}}",
+    "attachedContext": "Attached context",
+    "attachedContextFailed": "Failed"
   },
   "messageCard": {
     "request": "Request",

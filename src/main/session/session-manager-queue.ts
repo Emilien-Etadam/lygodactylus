@@ -11,6 +11,11 @@ import type {
 import { configStore } from '../config/config-store';
 import type { AgentRuntimeExtensionManager } from '../extensions/agent-runtime-extension-manager';
 import {
+  applyAttachedContextPrefix,
+  formatAttachedContextItemsForTrace,
+  resolveAtMentions,
+} from '../mentions/resolve-at-mentions';
+import {
   generateTraceId,
   log,
   logCtx,
@@ -196,6 +201,60 @@ export async function processPrompt(options: ProcessPromptOptions): Promise<void
           .join('\n');
         enhancedPrompt = `${prompt}\n\n[Attached files - use Read tool to access them]:\n${fileInfo}`;
         logCtx('[SessionManager] Enhanced prompt with file info:', enhancedPrompt);
+      }
+
+      // Resolve @file / @folder / @url mentions into prefixed <attached_context> blocks.
+      // The persisted/displayed user message keeps the compact @mentions unchanged.
+      try {
+        const mentionResult = await resolveAtMentions(prompt, session.cwd);
+        if (mentionResult.items.length > 0) {
+          // Model prompt: only successful attachments. Panel/trace keep every item.
+          enhancedPrompt = applyAttachedContextPrefix(enhancedPrompt, mentionResult.prefix);
+          options.sendToRenderer({
+            type: 'session.attachedContext',
+            payload: {
+              sessionId: session.id,
+              items: mentionResult.items.map((item) => ({
+                source: item.source,
+                kind: item.kind,
+                body: item.body,
+                ok: item.ok,
+              })),
+            },
+          });
+          options.sendToRenderer({
+            type: 'trace.step',
+            payload: {
+              sessionId: session.id,
+              step: {
+                id: `attached-context-${uuidv4()}`,
+                type: 'text',
+                status: 'completed',
+                title: 'Attached context',
+                content: formatAttachedContextItemsForTrace(mentionResult.items),
+                timestamp: Date.now(),
+              },
+            },
+          });
+          logCtx(
+            '[SessionManager] Attached context items:',
+            mentionResult.items.length,
+            'ok for model:',
+            mentionResult.items.filter((item) => item.ok).length
+          );
+        } else {
+          options.sendToRenderer({
+            type: 'session.attachedContext',
+            payload: { sessionId: session.id, items: [] },
+          });
+        }
+      } catch (mentionError) {
+        // Optional capability: degrade silently to current behavior.
+        logCtxError('[SessionManager] @-mention resolution failed:', mentionError);
+        options.sendToRenderer({
+          type: 'session.attachedContext',
+          payload: { sessionId: session.id, items: [] },
+        });
       }
 
       const existingMessages = options.getMessages(session.id);

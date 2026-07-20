@@ -25,22 +25,30 @@ import {
   normalizePluginSlashPromptForExpansion,
   type SlashCommandDefinition,
 } from '../../shared/slash-commands';
-import {
-  buildPresetInsertionText,
-  type PromptPreset,
-} from '../../shared/prompt-presets';
+import { getAtMentionQuery, isAtMentionUrlQuery } from '../../shared/at-mentions';
+import { buildPresetInsertionText, type PromptPreset } from '../../shared/prompt-presets';
 import { SlashCommandMenu } from './SlashCommandMenu';
+import { MentionMenu, type MentionSuggestion } from './MentionMenu';
 import { PresetPickerDialog } from './PresetPickerDialog';
 import { PresetVariableDialog } from './PresetVariableDialog';
 import { ThinkingLevelToggle } from './ThinkingLevelToggle';
 import { PlanActToggle } from './PlanActToggle';
-import { Send, Square, Plus, Loader2, Plug, X, Clock, ChevronDown, StickyNote, FileText, Zap } from 'lucide-react';
+import {
+  Send,
+  Square,
+  Plus,
+  Loader2,
+  Plug,
+  X,
+  Clock,
+  ChevronDown,
+  StickyNote,
+  FileText,
+  Zap,
+} from 'lucide-react';
 import { MemoryContextBar } from './MemoryContextBar';
 import { stopSpeechSynthesis } from '../utils/speech-synthesis';
-import {
-  computeTokensPerSecondFromText,
-  formatTokensPerSecond,
-} from '../utils/generation-stats';
+import { computeTokensPerSecondFromText, formatTokensPerSecond } from '../utils/generation-stats';
 
 export function ChatView() {
   const { t } = useTranslation();
@@ -60,9 +68,7 @@ export function ChatView() {
     s.activeSessionId ? (s.sessionStates[s.activeSessionId]?.streamStartedAt ?? null) : null
   );
   const tokensPerSecondByMessageId = useAppStore((s) =>
-    s.activeSessionId
-      ? (s.sessionStates[s.activeSessionId]?.tokensPerSecondByMessageId ?? {})
-      : {}
+    s.activeSessionId ? (s.sessionStates[s.activeSessionId]?.tokensPerSecondByMessageId ?? {}) : {}
   );
   const {
     continueSession,
@@ -92,7 +98,12 @@ export function ChatView() {
   const isComposingRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const handleAttachmentNotice = useCallback(
-    (notice: { id: string; type: 'info' | 'warning' | 'error'; message: string; messageKey?: string }) => {
+    (notice: {
+      id: string;
+      type: 'info' | 'warning' | 'error';
+      message: string;
+      messageKey?: string;
+    }) => {
       setGlobalNotice(notice);
     },
     [setGlobalNotice]
@@ -119,6 +130,10 @@ export function ChatView() {
   const [slashMenuDismissed, setSlashMenuDismissed] = useState(false);
   const [slashHighlightIndex, setSlashHighlightIndex] = useState(0);
   const [pluginSlashCommands, setPluginSlashCommands] = useState<PluginSlashCommandInfo[]>([]);
+  const [mentionMenuDismissed, setMentionMenuDismissed] = useState(false);
+  const [mentionHighlightIndex, setMentionHighlightIndex] = useState(0);
+  const [mentionSuggestions, setMentionSuggestions] = useState<MentionSuggestion[]>([]);
+  const workingDir = useAppStore((s) => s.workingDir);
   const [presetPickerOpen, setPresetPickerOpen] = useState(false);
   const [presetPickerItems, setPresetPickerItems] = useState<PromptPreset[]>([]);
   const [pendingPreset, setPendingPreset] = useState<PromptPreset | null>(null);
@@ -138,9 +153,7 @@ export function ChatView() {
   const canStop = isSessionRunning || hasActiveTurn || pendingCount > 0;
   const sessionMode: SessionMode = activeSession?.mode === 'plan' ? 'plan' : 'act';
   const showSwitchToAct =
-    sessionMode === 'plan' &&
-    !canStop &&
-    messages.some((message) => message.role === 'assistant');
+    sessionMode === 'plan' && !canStop && messages.some((message) => message.role === 'assistant');
 
   const handleSessionModeChange = useCallback(
     (mode: SessionMode) => {
@@ -165,6 +178,18 @@ export function ChatView() {
   );
 
   const showSlashMenu = !slashMenuDismissed && slashQuery !== null && slashSuggestions.length > 0;
+
+  const mentionQuery = useMemo(() => {
+    if (showSlashMenu) {
+      return null;
+    }
+    return getAtMentionQuery(prompt);
+  }, [prompt, showSlashMenu]);
+
+  const showMentionMenu =
+    !mentionMenuDismissed &&
+    mentionQuery !== null &&
+    (mentionSuggestions.length > 0 || mentionQuery !== '');
 
   const insertPromptDraft = useCallback((nextPrompt: string) => {
     setPrompt(nextPrompt);
@@ -271,6 +296,79 @@ export function ChatView() {
   useEffect(() => {
     setSlashHighlightIndex(0);
   }, [slashQuery, slashSuggestions.length]);
+
+  useEffect(() => {
+    if (mentionQuery === null) {
+      setMentionMenuDismissed(false);
+      setMentionSuggestions([]);
+      return;
+    }
+    setMentionMenuDismissed(false);
+  }, [mentionQuery]);
+
+  useEffect(() => {
+    setMentionHighlightIndex(0);
+  }, [mentionQuery, mentionSuggestions.length]);
+
+  useEffect(() => {
+    if (mentionQuery === null) {
+      return;
+    }
+
+    let cancelled = false;
+    const cwd = activeSession?.cwd || workingDir || '';
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        const next: MentionSuggestion[] = [];
+        if (isAtMentionUrlQuery(mentionQuery)) {
+          next.push({ kind: 'url', url: mentionQuery });
+        }
+
+        if (isElectron && cwd && window.electronAPI?.workspace?.searchPaths) {
+          try {
+            const paths = await window.electronAPI.workspace.searchPaths(cwd, mentionQuery, 20);
+            for (const entry of paths) {
+              next.push({
+                kind: entry.kind,
+                relativePath: entry.relativePath,
+              });
+            }
+          } catch {
+            // Optional autocomplete: keep URL suggestion only / empty list.
+          }
+        }
+
+        if (!cancelled) {
+          setMentionSuggestions(next);
+        }
+      })();
+    }, 120);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [mentionQuery, activeSession?.cwd, workingDir, isElectron]);
+
+  const applyMentionSuggestion = useCallback(
+    (suggestion: MentionSuggestion) => {
+      const insertion =
+        suggestion.kind === 'url' ? suggestion.url : suggestion.relativePath.replace(/\\/g, '/');
+      const atIndex = prompt.lastIndexOf('@');
+      const nextPrompt =
+        atIndex >= 0 ? `${prompt.slice(0, atIndex + 1)}${insertion} ` : `${prompt}@${insertion} `;
+      setPrompt(nextPrompt);
+      setMentionMenuDismissed(false);
+      setMentionHighlightIndex(0);
+      requestAnimationFrame(() => {
+        if (textareaRef.current) {
+          textareaRef.current.value = nextPrompt;
+          textareaRef.current.focus();
+        }
+      });
+    },
+    [prompt]
+  );
 
   const refreshPluginSlashCommands = useCallback(async () => {
     if (!isElectron || !window.electronAPI?.plugins?.listCommands) {
@@ -456,12 +554,7 @@ export function ChatView() {
       }
     }, 50);
     return () => window.clearInterval(timer);
-  }, [
-    activeSessionId,
-    messages.length,
-    scrollToMessageRequest,
-    setScrollToMessageRequest,
-  ]);
+  }, [activeSessionId, messages.length, scrollToMessageRequest, setScrollToMessageRequest]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -931,6 +1024,14 @@ export function ChatView() {
                 onHighlight={setSlashHighlightIndex}
               />
             )}
+            {!showSlashMenu && showMentionMenu && (
+              <MentionMenu
+                suggestions={mentionSuggestions}
+                highlightedIndex={mentionHighlightIndex}
+                onSelect={applyMentionSuggestion}
+                onHighlight={setMentionHighlightIndex}
+              />
+            )}
 
             {/* Image previews */}
             {pastedImages.length > 0 && (
@@ -1040,6 +1141,35 @@ export function ChatView() {
                     }
                   }
 
+                  if (showMentionMenu && mentionSuggestions.length > 0) {
+                    if (e.key === 'ArrowDown') {
+                      e.preventDefault();
+                      setMentionHighlightIndex((index) => (index + 1) % mentionSuggestions.length);
+                      return;
+                    }
+                    if (e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      setMentionHighlightIndex(
+                        (index) =>
+                          (index - 1 + mentionSuggestions.length) % mentionSuggestions.length
+                      );
+                      return;
+                    }
+                    if (e.key === 'Escape') {
+                      e.preventDefault();
+                      setMentionMenuDismissed(true);
+                      return;
+                    }
+                    if (e.key === 'Tab') {
+                      e.preventDefault();
+                      const selected = mentionSuggestions[mentionHighlightIndex];
+                      if (selected) {
+                        applyMentionSuggestion(selected);
+                      }
+                      return;
+                    }
+                  }
+
                   // Enter to send, Shift+Enter for new line
                   if (e.key === 'Enter' && !e.shiftKey) {
                     if (e.nativeEvent.isComposing || isComposingRef.current || e.keyCode === 229) {
@@ -1054,6 +1184,14 @@ export function ChatView() {
                       const selected = slashSuggestions[slashHighlightIndex];
                       if (selected) {
                         applySlashCommand(selected);
+                      }
+                      return;
+                    }
+                    if (showMentionMenu && mentionSuggestions.length > 0) {
+                      e.preventDefault();
+                      const selected = mentionSuggestions[mentionHighlightIndex];
+                      if (selected) {
+                        applyMentionSuggestion(selected);
                       }
                       return;
                     }

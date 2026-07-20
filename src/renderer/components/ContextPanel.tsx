@@ -59,6 +59,8 @@ export function ContextPanel() {
   const setGlobalNotice = useAppStore((s) => s.setGlobalNotice);
   const { getMCPServers, changeWorkingDir } = useIPC();
   const [artifactsOpen, setArtifactsOpen] = useState(true);
+  const [attachedContextOpen, setAttachedContextOpen] = useState(true);
+  const [expandedAttachedSource, setExpandedAttachedSource] = useState<string | null>(null);
   const [expandedConnector, setExpandedConnector] = useState<string | null>(null);
   const [mcpServers, setMcpServers] = useState<MCPServerInfo[]>([]);
   const [copiedPath, setCopiedPath] = useState(false);
@@ -389,6 +391,65 @@ export function ContextPanel() {
                 remaining: formatTokenCount(contextUsage.remaining),
               })}
             </p>
+          )}
+        </div>
+      )}
+
+      {/* Attached @-mention context (full blocks; chat bubbles stay compact) */}
+      {activeSession && (ss?.attachedContextItems?.length ?? 0) > 0 && (
+        <div className="border-b border-border-muted">
+          <button
+            type="button"
+            onClick={() => setAttachedContextOpen(!attachedContextOpen)}
+            className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-surface-hover transition-colors"
+          >
+            <span className="text-xs font-medium text-text-muted uppercase tracking-wider">
+              {t('context.attachedContext')}
+            </span>
+            {attachedContextOpen ? (
+              <ChevronUp className="w-3.5 h-3.5 text-text-muted" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
+            )}
+          </button>
+          {attachedContextOpen && (
+            <div className="pb-2 max-h-64 overflow-y-auto space-y-1">
+              {(ss?.attachedContextItems ?? []).map((item) => {
+                const isExpanded = expandedAttachedSource === item.source;
+                return (
+                  <div key={`${item.kind}:${item.source}`} className="px-3">
+                    <button
+                      type="button"
+                      onClick={() => setExpandedAttachedSource(isExpanded ? null : item.source)}
+                      className="w-full text-left px-2 py-1.5 rounded-md hover:bg-surface-hover transition-colors"
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        {item.kind === 'directory' ? (
+                          <FolderOpen className="w-3.5 h-3.5 text-accent shrink-0" />
+                        ) : item.kind === 'url' ? (
+                          <FileText className="w-3.5 h-3.5 text-accent shrink-0" />
+                        ) : (
+                          <File className="w-3.5 h-3.5 text-accent shrink-0" />
+                        )}
+                        <span className="text-xs font-mono text-text-primary truncate">
+                          @{item.source}
+                        </span>
+                        {!item.ok && (
+                          <span className="text-[10px] text-warning shrink-0">
+                            {t('context.attachedContextFailed')}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                    {isExpanded && (
+                      <pre className="mt-1 mb-2 mx-1 px-2 py-2 rounded-md bg-surface-muted text-[11px] text-text-secondary whitespace-pre-wrap break-words max-h-40 overflow-y-auto">
+                        {item.body}
+                      </pre>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       )}

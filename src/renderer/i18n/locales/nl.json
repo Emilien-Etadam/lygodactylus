@@ -759,7 +759,15 @@
     "planMode": "Plan",
     "actMode": "Act",
     "switchToAct": "Overschakelen naar Act",
-    "planModeBadge": "Planningsmodus"
+    "planModeBadge": "Planningsmodus",
+    "atMentions": {
+      "menuLabel": "Vermeldingen",
+      "empty": "Geen overeenkomende bestanden of mappen",
+      "fileDescription": "Bestandsinhoud bijvoegen",
+      "directoryDescription": "Maplijst bijvoegen",
+      "urlDescription": "URL-inhoud ophalen",
+      "placeholder": "Typ een pad of plak een URL na @"
+    }
   },
   "context": {
     "progress": "Voortgang",
@@ -795,7 +803,9 @@
     "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
     "modelMeta": "{{meta}}",
     "contextFillHint": "Contextvulling",
-    "projectRulesLoaded": "Projectregels geladen: {{file}}"
+    "projectRulesLoaded": "Projectregels geladen: {{file}}",
+    "attachedContext": "Bijgevoegde context",
+    "attachedContextFailed": "Mislukt"
   },
   "messageCard": {
     "request": "Aanvraag",

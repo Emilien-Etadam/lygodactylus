@@ -12,6 +12,7 @@ import type {
   SandboxSyncStatus,
   SkillsStorageChangeEvent,
   MemoryInjectedItem,
+  AttachedContextItem,
 } from '../types';
 import { applySessionUpdate } from '../utils/session-update';
 import { computeTokensPerSecondFromText } from '../utils/generation-stats';
@@ -56,6 +57,7 @@ export interface SessionState {
   /** Frozen tok/s keyed by assistant message id (ephemeral, not persisted). */
   tokensPerSecondByMessageId: Record<string, number>;
   memoryContextItems: MemoryInjectedItem[];
+  attachedContextItems: AttachedContextItem[];
 }
 
 const DEFAULT_SESSION_STATE: SessionState = {
@@ -74,6 +76,7 @@ const DEFAULT_SESSION_STATE: SessionState = {
   streamStartedAt: null,
   tokensPerSecondByMessageId: {},
   memoryContextItems: [],
+  attachedContextItems: [],
 };
 
 // Helper to immutably update a single session's state within the record
@@ -229,6 +232,7 @@ interface AppState {
     }
   ) => void;
   setSessionMemoryContext: (sessionId: string, items: MemoryInjectedItem[]) => void;
+  setSessionAttachedContext: (sessionId: string, items: AttachedContextItem[]) => void;
   bumpPluginCommandsRevision: () => void;
 
   setSpeakingMessageId: (messageId: string | null) => void;
@@ -700,6 +704,13 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({
       sessionStates: patchSession(state.sessionStates, sessionId, {
         memoryContextItems: items,
+      }),
+    })),
+
+  setSessionAttachedContext: (sessionId, items) =>
+    set((state) => ({
+      sessionStates: patchSession(state.sessionStates, sessionId, {
+        attachedContextItems: items,
       }),
     })),
 

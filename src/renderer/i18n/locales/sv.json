@@ -759,7 +759,15 @@
     "planMode": "Plan",
     "actMode": "Act",
     "switchToAct": "Byt till Act",
-    "planModeBadge": "Planeringsläge"
+    "planModeBadge": "Planeringsläge",
+    "atMentions": {
+      "menuLabel": "Omnämnanden",
+      "empty": "Inga matchande filer eller mappar",
+      "fileDescription": "Bifoga filinnehåll",
+      "directoryDescription": "Bifoga kataloglista",
+      "urlDescription": "Hämta URL-innehåll",
+      "placeholder": "Skriv en sökväg eller klistra in en URL efter @"
+    }
   },
   "context": {
     "progress": "Förlopp",
@@ -795,7 +803,9 @@
     "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
     "modelMeta": "{{meta}}",
     "contextFillHint": "Kontextfyllnad",
-    "projectRulesLoaded": "Projektregler inlästa: {{file}}"
+    "projectRulesLoaded": "Projektregler inlästa: {{file}}",
+    "attachedContext": "Bifogad kontext",
+    "attachedContextFailed": "Misslyckades"
   },
   "messageCard": {
     "request": "Begäran",

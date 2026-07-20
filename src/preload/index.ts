@@ -115,6 +115,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('artifacts.listRecentFiles', cwd, sinceMs, Math.min(limit, 500)),
   },
 
+  workspace: {
+    searchPaths: (
+      cwd: string,
+      query: string,
+      limit = 20
+    ): Promise<Array<{ relativePath: string; kind: 'file' | 'directory' }>> =>
+      ipcRenderer.invoke('workspace.searchPaths', cwd, query, Math.min(limit, 20)),
+  },
+
   // Config methods
   config: {
     get: (): Promise<AppConfig> => ipcRenderer.invoke('config.get'),
@@ -455,6 +464,13 @@ declare global {
           sinceMs: number,
           limit?: number
         ) => Promise<Array<{ path: string; modifiedAt: number; size: number }>>;
+      };
+      workspace: {
+        searchPaths: (
+          cwd: string,
+          query: string,
+          limit?: number
+        ) => Promise<Array<{ relativePath: string; kind: 'file' | 'directory' }>>;
       };
       config: {
         get: () => Promise<AppConfig>;

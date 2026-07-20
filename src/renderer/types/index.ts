@@ -607,6 +607,10 @@ export type ServerEvent =
       payload: { sessionId: string; items: MemoryInjectedItem[] };
     }
   | {
+      type: 'session.attachedContext';
+      payload: { sessionId: string; items: AttachedContextItem[] };
+    }
+  | {
       type: 'session.contextInfo';
       payload: {
         sessionId: string;
@@ -785,6 +789,13 @@ export interface MemoryInjectedItem {
   sourceWorkspace?: string | null;
   sourceSessionId?: string;
   sourceSessionTitle?: string;
+}
+
+export interface AttachedContextItem {
+  source: string;
+  kind: 'file' | 'directory' | 'url';
+  body: string;
+  ok: boolean;
 }
 
 export interface AppConfig {

@@ -22,6 +22,7 @@ const CHAT_LAN_EVENT_TYPES = new Set<ServerEvent['type']>([
   'session.notice',
   'session.contextInfo',
   'session.memoryContext',
+  'session.attachedContext',
   'trace.step',
   'trace.update',
   'permission.request',
