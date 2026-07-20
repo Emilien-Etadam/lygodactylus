@@ -413,11 +413,14 @@ export function useSessionIpc({
   const forkSessionFromMessage = useCallback(
     async (
       sessionId: string,
-      messageId: string
+      messageId: string,
+      options?: { asSubChat?: boolean }
     ): Promise<{ success: boolean; newSessionId?: string; errorKey?: string }> => {
       if (!isElectron) {
         return { success: false, errorKey: 'errForkFailed' };
       }
+
+      const asSubChat = options?.asSubChat === true;
 
       try {
         const result = await invoke<{
@@ -428,7 +431,7 @@ export function useSessionIpc({
           error?: string;
         }>({
           type: 'session.forkFromMessage',
-          payload: { sessionId, messageId },
+          payload: { sessionId, messageId, asSubChat },
         });
 
         if (!result?.success || !result.newSession) {
@@ -454,8 +457,8 @@ export function useSessionIpc({
         store.setGlobalNotice({
           id: `notice-fork-${Date.now()}`,
           type: 'success',
-          message: i18n.t('chat.forkSuccess'),
-          messageKey: 'chat.forkSuccess',
+          message: i18n.t(asSubChat ? 'chat.subChatSuccess' : 'chat.forkSuccess'),
+          messageKey: asSubChat ? 'chat.subChatSuccess' : 'chat.forkSuccess',
         });
 
         return { success: true, newSessionId: result.newSession.id };

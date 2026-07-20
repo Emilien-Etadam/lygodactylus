@@ -698,7 +698,17 @@
     "searchUntitled": "未命名对话",
     "searchTitleMatch": "标题匹配",
     "searchRoleUser": "你",
-    "searchRoleAssistant": "助手"
+    "searchRoleAssistant": "助手",
+    "newFolder": "新建文件夹",
+    "folderNamePlaceholder": "文件夹名称",
+    "renameFolder": "重命名文件夹",
+    "deleteFolder": "删除文件夹",
+    "moveToFolder": "移动到文件夹",
+    "noFolder": "无文件夹",
+    "expandFolder": "展开文件夹",
+    "collapseFolder": "折叠文件夹",
+    "folderEmpty": "此文件夹中没有对话",
+    "subChatBadge": "↳"
   },
   "chat": {
     "sendMessage": "发送消息",
@@ -744,8 +754,9 @@
     "forkSuccess": "New session created from this message.",
     "forkErrors": {
       "errForkSessionNotFound": "Session not found.",
-      "errForkMessageNotFound": "User message not found.",
-      "errForkFailed": "Could not fork from this message."
+      "errForkMessageNotFound": "找不到消息。",
+      "errForkFailed": "Could not fork from this message.",
+      "errSessionParentCycle": "不能将会话嵌套到其自身的后代之下。"
     },
     "rewindErrors": {
       "errRewindSessionNotFound": "Session not found.",
@@ -786,7 +797,9 @@
     "autonomyNormalTooltip": "标准行为（权限不变）",
     "autonomyAutonomousTooltip": "修改后运行 lint/测试并循环自动修复",
     "autonomyCarefulBadge": "谨慎",
-    "autonomyAutonomousBadge": "自主"
+    "autonomyAutonomousBadge": "自主",
+    "backToParent": "返回父对话",
+    "subChatSuccess": "已从此消息打开子对话。"
   },
   "context": {
     "progress": "进度",
@@ -863,7 +876,8 @@
     "undoRunSuccess": "已撤销此次运行的更改（恢复 {{restored}}，删除 {{deleted}}）。",
     "undoRunFailed": "撤销失败：{{error}}",
     "undoRunInProgress": "运行进行中时无法撤销。",
-    "undoRunNone": "此次运行没有可恢复的文件。"
+    "undoRunNone": "此次运行没有可恢复的文件。",
+    "openSubChat": "打开子对话"
   },
   "schedule": {
     "createTitle": "新建定时任务",

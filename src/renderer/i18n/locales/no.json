@@ -698,7 +698,17 @@
     "searchUntitled": "Samtale uten tittel",
     "searchTitleMatch": "Titteltreff",
     "searchRoleUser": "Deg",
-    "searchRoleAssistant": "Assistent"
+    "searchRoleAssistant": "Assistent",
+    "newFolder": "Ny mappe",
+    "folderNamePlaceholder": "Mappenavn",
+    "renameFolder": "Gi mappe nytt navn",
+    "deleteFolder": "Slett mappe",
+    "moveToFolder": "Flytt til mappe",
+    "noFolder": "Ingen mappe",
+    "expandFolder": "Utvid mappe",
+    "collapseFolder": "Skjul mappe",
+    "folderEmpty": "Ingen samtaler i denne mappen",
+    "subChatBadge": "↳"
   },
   "chat": {
     "sendMessage": "Send melding",
@@ -744,8 +754,9 @@
     "forkSuccess": "New session created from this message.",
     "forkErrors": {
       "errForkSessionNotFound": "Session not found.",
-      "errForkMessageNotFound": "User message not found.",
-      "errForkFailed": "Could not fork from this message."
+      "errForkMessageNotFound": "Melding ikke funnet.",
+      "errForkFailed": "Could not fork from this message.",
+      "errSessionParentCycle": "Kan ikke legge en økt under sin egen etterkommer."
     },
     "rewindErrors": {
       "errRewindSessionNotFound": "Session not found.",
@@ -786,7 +797,9 @@
     "autonomyNormalTooltip": "Standardoppførsel (uendrede tillatelser)",
     "autonomyAutonomousTooltip": "Etter endringer kjører lint/tester og retter i en løkke",
     "autonomyCarefulBadge": "Forsiktig",
-    "autonomyAutonomousBadge": "Autonom"
+    "autonomyAutonomousBadge": "Autonom",
+    "backToParent": "Tilbake til overordnet chat",
+    "subChatSuccess": "Underchat åpnet fra denne meldingen."
   },
   "context": {
     "progress": "Fremdrift",
@@ -863,7 +876,8 @@
     "undoRunSuccess": "Kjøringens endringer angret ({{restored}} gjenopprettet, {{deleted}} slettet).",
     "undoRunFailed": "Angre mislyktes: {{error}}",
     "undoRunInProgress": "Kan ikke angre mens en kjøring pågår.",
-    "undoRunNone": "Ingen filer å gjenopprette for denne kjøringen."
+    "undoRunNone": "Ingen filer å gjenopprette for denne kjøringen.",
+    "openSubChat": "Åpne underchat"
   },
   "schedule": {
     "createTitle": "Opprett tidsplan",

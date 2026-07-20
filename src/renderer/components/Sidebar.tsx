@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store';
 import { useIPC } from '../hooks/useIPC';
 import {
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Trash2,
@@ -15,9 +16,15 @@ import {
   ListChecks,
   Check,
   X,
+  FolderPlus,
+  Folder as FolderIcon,
 } from 'lucide-react';
-import type { Session } from '../types';
+import type { ChatFolder, Session } from '../types';
 import type { SessionMessageSearchHit } from '../../shared/session-message-search';
+import {
+  partitionSessionsByFolder,
+  type SessionTreeNode,
+} from '../utils/sidebar-session-tree';
 
 import sidebarLogoSrc from '../assets/logo.png';
 
@@ -30,12 +37,28 @@ type SessionGroup = {
 type SearchResultGroup = {
   sessionId: string;
   sessionTitle: string;
+  folderName?: string;
   hits: SessionMessageSearchHit[];
+};
+
+type SessionContextMenuState = {
+  sessionId: string;
+  x: number;
+  y: number;
+};
+
+type FolderContextMenuState = {
+  folderId: string;
+  x: number;
+  y: number;
 };
 
 export function Sidebar() {
   const { t } = useTranslation();
   const sessions = useAppStore((s) => s.sessions);
+  const folders = useAppStore((s) => s.folders);
+  const setFolders = useAppStore((s) => s.setFolders);
+  const updateSession = useAppStore((s) => s.updateSession);
   const activeSessionId = useAppStore((s) => s.activeSessionId);
   const settings = useAppStore((s) => s.settings);
   const setActiveSession = useAppStore((s) => s.setActiveSession);
@@ -61,8 +84,21 @@ export function Sidebar() {
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [sessionMenu, setSessionMenu] = useState<SessionContextMenuState | null>(null);
+  const [folderMenu, setFolderMenu] = useState<FolderContextMenuState | null>(null);
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
+  const [renamingFolderId, setRenamingFolderId] = useState<string | null>(null);
+  const [renameFolderValue, setRenameFolderValue] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchRequestIdRef = useRef(0);
+  const folderById = useMemo(() => {
+    const map = new Map<string, ChatFolder>();
+    for (const folder of folders) {
+      map.set(folder.id, folder);
+    }
+    return map;
+  }, [folders]);
 
   const normalizedQuery = useMemo(() => searchQuery.trim(), [searchQuery]);
   const isSearchActive = normalizedQuery.length > 0;
@@ -73,10 +109,50 @@ export function Sidebar() {
     return sessions;
   }, [sessions, isSearchActive]);
 
-  const groupedSessions = useMemo(
-    () => groupSessionsByDate(filteredSessions, t),
-    [filteredSessions, t]
+  const { folderTrees, rootNodes } = useMemo(
+    () => partitionSessionsByFolder(filteredSessions, folders),
+    [filteredSessions, folders]
   );
+
+  const groupedRootSessions = useMemo(() => {
+    const rootSessions = rootNodes.map((node) => node.session);
+    return groupSessionsByDate(rootSessions, t);
+  }, [rootNodes, t]);
+
+  const rootNodesBySessionId = useMemo(() => {
+    const map = new Map<string, SessionTreeNode>();
+    for (const node of rootNodes) {
+      map.set(node.session.id, node);
+    }
+    return map;
+  }, [rootNodes]);
+
+  const collectVisibleSessionIds = useCallback(
+    (nodes: SessionTreeNode[]): string[] => {
+      const ids: string[] = [];
+      const walk = (list: SessionTreeNode[]) => {
+        for (const node of list) {
+          ids.push(node.session.id);
+          if (node.children.length > 0) {
+            walk(node.children);
+          }
+        }
+      };
+      walk(nodes);
+      return ids;
+    },
+    []
+  );
+
+  const visibleSessionIds = useMemo(() => {
+    const ids: string[] = [];
+    for (const { folder, nodes } of folderTrees) {
+      if (folder.collapsed) continue;
+      ids.push(...collectVisibleSessionIds(nodes));
+    }
+    ids.push(...collectVisibleSessionIds(rootNodes));
+    return ids;
+  }, [collectVisibleSessionIds, folderTrees, rootNodes]);
 
   const groupedSearchResults = useMemo((): SearchResultGroup[] => {
     const groups = new Map<string, SearchResultGroup>();
@@ -85,15 +161,21 @@ export function Sidebar() {
       if (existing) {
         existing.hits.push(hit);
       } else {
+        const session = sessions.find((item) => item.id === hit.sessionId);
+        const folderName =
+          session?.folderId && folderById.has(session.folderId)
+            ? folderById.get(session.folderId)?.name
+            : undefined;
         groups.set(hit.sessionId, {
           sessionId: hit.sessionId,
           sessionTitle: hit.sessionTitle || t('sidebar.searchUntitled'),
+          folderName,
           hits: [hit],
         });
       }
     }
     return Array.from(groups.values());
-  }, [searchHits, t]);
+  }, [folderById, searchHits, sessions, t]);
 
   // Debounced full-text search across all conversations.
   useEffect(() => {
@@ -217,8 +299,6 @@ export function Sidebar() {
     });
   }, []);
 
-  const visibleSessionIds = useMemo(() => filteredSessions.map((s) => s.id), [filteredSessions]);
-
   const allVisibleSelected =
     visibleSessionIds.length > 0 && visibleSessionIds.every((id) => selectedIds.has(id));
 
@@ -318,6 +398,138 @@ export function Sidebar() {
     deleteSession(sessionId);
   };
 
+  const closeMenus = useCallback(() => {
+    setSessionMenu(null);
+    setFolderMenu(null);
+  }, []);
+
+  useEffect(() => {
+    if (!sessionMenu && !folderMenu) return;
+    const onPointerDown = () => closeMenus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeMenus();
+    };
+    window.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [closeMenus, folderMenu, sessionMenu]);
+
+  const refreshFoldersFromApi = useCallback(async () => {
+    if (!isElectron || !window.electronAPI?.folders?.list) return;
+    try {
+      const next = await window.electronAPI.folders.list();
+      if (Array.isArray(next)) {
+        setFolders(next);
+      }
+    } catch (error) {
+      console.error('[Sidebar] Failed to list folders:', error);
+    }
+  }, [isElectron, setFolders]);
+
+  useEffect(() => {
+    void refreshFoldersFromApi();
+  }, [refreshFoldersFromApi]);
+
+  const handleCreateFolder = useCallback(async () => {
+    const name = newFolderName.trim();
+    if (!name || !isElectron || !window.electronAPI?.folders?.create) {
+      setIsCreatingFolder(false);
+      setNewFolderName('');
+      return;
+    }
+    try {
+      const folder = await window.electronAPI.folders.create({ name });
+      setFolders([...folders, folder].sort((a, b) => a.position - b.position));
+    } catch (error) {
+      console.error('[Sidebar] Failed to create folder:', error);
+    } finally {
+      setIsCreatingFolder(false);
+      setNewFolderName('');
+    }
+  }, [folders, isElectron, newFolderName, setFolders]);
+
+  const handleToggleFolderCollapsed = useCallback(
+    async (folder: ChatFolder) => {
+      const nextCollapsed = !folder.collapsed;
+      setFolders(
+        folders.map((item) =>
+          item.id === folder.id ? { ...item, collapsed: nextCollapsed } : item
+        )
+      );
+      if (!isElectron || !window.electronAPI?.folders?.update) return;
+      try {
+        await window.electronAPI.folders.update(folder.id, { collapsed: nextCollapsed });
+      } catch (error) {
+        console.error('[Sidebar] Failed to toggle folder:', error);
+        void refreshFoldersFromApi();
+      }
+    },
+    [folders, isElectron, refreshFoldersFromApi, setFolders]
+  );
+
+  const handleRenameFolder = useCallback(async () => {
+    if (!renamingFolderId) return;
+    const name = renameFolderValue.trim();
+    if (!name || !isElectron || !window.electronAPI?.folders?.update) {
+      setRenamingFolderId(null);
+      setRenameFolderValue('');
+      return;
+    }
+    try {
+      const updated = await window.electronAPI.folders.update(renamingFolderId, { name });
+      if (updated) {
+        setFolders(folders.map((item) => (item.id === updated.id ? updated : item)));
+      }
+    } catch (error) {
+      console.error('[Sidebar] Failed to rename folder:', error);
+    } finally {
+      setRenamingFolderId(null);
+      setRenameFolderValue('');
+    }
+  }, [folders, isElectron, renameFolderValue, renamingFolderId, setFolders]);
+
+  const handleDeleteFolder = useCallback(
+    async (folderId: string) => {
+      if (!isElectron || !window.electronAPI?.folders?.delete) return;
+      try {
+        const result = await window.electronAPI.folders.delete(folderId);
+        if (result?.success) {
+          setFolders(folders.filter((item) => item.id !== folderId));
+          for (const session of sessions) {
+            if (session.folderId === folderId) {
+              updateSession(session.id, { folderId: null });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('[Sidebar] Failed to delete folder:', error);
+      } finally {
+        closeMenus();
+      }
+    },
+    [closeMenus, folders, isElectron, sessions, setFolders, updateSession]
+  );
+
+  const handleAssignSessionFolder = useCallback(
+    async (sessionId: string, folderId: string | null) => {
+      if (!isElectron || !window.electronAPI?.folders?.assign) return;
+      try {
+        const result = await window.electronAPI.folders.assign({ sessionId, folderId });
+        if (result?.success) {
+          updateSession(sessionId, { folderId });
+        }
+      } catch (error) {
+        console.error('[Sidebar] Failed to assign session folder:', error);
+      } finally {
+        closeMenus();
+      }
+    },
+    [closeMenus, isElectron, updateSession]
+  );
+
   const toggleTheme = () => {
     const next =
       settings.theme === 'dark' ? 'light' : settings.theme === 'light' ? 'system' : 'dark';
@@ -411,13 +623,55 @@ export function Sidebar() {
           </button>
         </div>
 
-        <button
-          onClick={handleNewSession}
-          className="mt-3 w-full flex items-center gap-2 rounded-xl bg-background/60 px-3 py-2 text-left text-text-primary hover:bg-surface-hover transition-colors"
-        >
-          <Plus className="w-4 h-4 text-text-secondary flex-shrink-0" />
-          <span className="text-[13px] font-medium">{t('sidebar.newTask')}</span>
-        </button>
+        <div className="mt-3 flex items-center gap-2">
+          <button
+            onClick={handleNewSession}
+            className="flex-1 flex items-center gap-2 rounded-xl bg-background/60 px-3 py-2 text-left text-text-primary hover:bg-surface-hover transition-colors"
+          >
+            <Plus className="w-4 h-4 text-text-secondary flex-shrink-0" />
+            <span className="text-[13px] font-medium">{t('sidebar.newTask')}</span>
+          </button>
+          {isElectron && window.electronAPI?.folders && (
+            <button
+              type="button"
+              onClick={() => {
+                setIsCreatingFolder(true);
+                setNewFolderName('');
+              }}
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors flex-shrink-0"
+              title={t('sidebar.newFolder')}
+              aria-label={t('sidebar.newFolder')}
+            >
+              <FolderPlus className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        {isCreatingFolder && (
+          <div className="mt-2 flex items-center gap-1.5">
+            <input
+              autoFocus
+              type="text"
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') void handleCreateFolder();
+                if (e.key === 'Escape') {
+                  setIsCreatingFolder(false);
+                  setNewFolderName('');
+                }
+              }}
+              placeholder={t('sidebar.folderNamePlaceholder')}
+              className="flex-1 min-w-0 rounded-lg border border-border bg-background px-2.5 py-1.5 text-[12px] text-text-primary placeholder:text-text-muted focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => void handleCreateFolder()}
+              className="px-2 py-1.5 rounded-lg text-[12px] font-medium bg-accent text-white"
+            >
+              {t('common.add')}
+            </button>
+          </div>
+        )}
 
         {sessions.length > 0 && (
           <div className="mt-2 flex items-center gap-2">
@@ -479,9 +733,16 @@ export function Sidebar() {
             <div className="space-y-3">
               {groupedSearchResults.map((group) => (
                 <section key={group.sessionId}>
-                  <div className="px-3 pb-2 text-[11px] font-medium tracking-[0.04em] text-text-muted truncate">
+                  <div className="px-3 pb-1 text-[11px] font-medium tracking-[0.04em] text-text-muted truncate">
                     {group.sessionTitle}
                   </div>
+                  {group.folderName ? (
+                    <div className="px-3 pb-2 text-[10px] text-text-muted/80 truncate">
+                      {group.folderName}
+                    </div>
+                  ) : (
+                    <div className="pb-1" />
+                  )}
                   <div className="space-y-0.5">
                     {group.hits.map((hit, index) => {
                       const isActive = activeSessionId === hit.sessionId;
@@ -515,71 +776,123 @@ export function Sidebar() {
               ))}
             </div>
           )
-        ) : groupedSessions.length === 0 ? (
+        ) : folders.length === 0 && groupedRootSessions.length === 0 ? (
           <div className="px-3 py-6">
             <p className="text-sm text-text-secondary">{t('sidebar.noTasks')}</p>
             <p className="mt-1 text-xs leading-5 text-text-muted">{t('sidebar.noTasksHint')}</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {groupedSessions.map((group) => (
+            {folderTrees.map(({ folder, nodes }) => (
+              <section key={folder.id}>
+                <div
+                  className="flex items-center gap-1 px-2 pb-1.5 group/folder"
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    setFolderMenu({ folderId: folder.id, x: e.clientX, y: e.clientY });
+                    setSessionMenu(null);
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => void handleToggleFolderCollapsed(folder)}
+                    className="flex-1 min-w-0 flex items-center gap-1.5 text-left rounded-md px-1 py-0.5 hover:bg-surface-hover/50 transition-colors"
+                    title={
+                      folder.collapsed ? t('sidebar.expandFolder') : t('sidebar.collapseFolder')
+                    }
+                  >
+                    {folder.collapsed ? (
+                      <ChevronRight className="w-3 h-3 text-text-muted flex-shrink-0" />
+                    ) : (
+                      <ChevronDown className="w-3 h-3 text-text-muted flex-shrink-0" />
+                    )}
+                    <FolderIcon className="w-3 h-3 text-text-muted flex-shrink-0" />
+                    {renamingFolderId === folder.id ? (
+                      <input
+                        autoFocus
+                        type="text"
+                        value={renameFolderValue}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) => setRenameFolderValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          e.stopPropagation();
+                          if (e.key === 'Enter') void handleRenameFolder();
+                          if (e.key === 'Escape') {
+                            setRenamingFolderId(null);
+                            setRenameFolderValue('');
+                          }
+                        }}
+                        onBlur={() => void handleRenameFolder()}
+                        className="min-w-0 flex-1 rounded border border-border bg-background px-1.5 py-0.5 text-[11px] text-text-primary focus:outline-none"
+                      />
+                    ) : (
+                      <span className="text-[11px] font-medium tracking-[0.04em] text-text-muted truncate">
+                        {folder.name}
+                      </span>
+                    )}
+                  </button>
+                </div>
+                {!folder.collapsed && (
+                  <div className="space-y-0.5">
+                    {nodes.length === 0 ? (
+                      <p className="px-3 py-1 text-[11px] text-text-muted">
+                        {t('sidebar.folderEmpty')}
+                      </p>
+                    ) : (
+                      nodes.map((node) => (
+                        <SessionTreeRows
+                          key={node.session.id}
+                          node={node}
+                          depth={0}
+                          activeSessionId={activeSessionId}
+                          hoveredSession={hoveredSession}
+                          isSelectMode={isSelectMode}
+                          selectedIds={selectedIds}
+                          onHover={setHoveredSession}
+                          onSelectToggle={toggleSelectSession}
+                          onOpen={(sessionId) => void handleSessionClick(sessionId)}
+                          onDelete={handleDeleteSession}
+                          onContextMenu={(sessionId, x, y) => {
+                            setSessionMenu({ sessionId, x, y });
+                            setFolderMenu(null);
+                          }}
+                          t={t}
+                        />
+                      ))
+                    )}
+                  </div>
+                )}
+              </section>
+            ))}
+
+            {groupedRootSessions.map((group) => (
               <section key={group.key}>
                 <div className="px-3 pb-2 text-[11px] font-medium tracking-[0.04em] text-text-muted">
                   {group.label}
                 </div>
                 <div className="space-y-0.5">
                   {group.sessions.map((session) => {
-                    const isActive = activeSessionId === session.id;
-                    const isSelected = selectedIds.has(session.id);
+                    const node = rootNodesBySessionId.get(session.id);
+                    if (!node) return null;
                     return (
-                      <div
+                      <SessionTreeRows
                         key={session.id}
-                        onClick={() => {
-                          if (isSelectMode) {
-                            toggleSelectSession(session.id);
-                          } else {
-                            void handleSessionClick(session.id);
-                          }
+                        node={node}
+                        depth={0}
+                        activeSessionId={activeSessionId}
+                        hoveredSession={hoveredSession}
+                        isSelectMode={isSelectMode}
+                        selectedIds={selectedIds}
+                        onHover={setHoveredSession}
+                        onSelectToggle={toggleSelectSession}
+                        onOpen={(sessionId) => void handleSessionClick(sessionId)}
+                        onDelete={handleDeleteSession}
+                        onContextMenu={(sessionId, x, y) => {
+                          setSessionMenu({ sessionId, x, y });
+                          setFolderMenu(null);
                         }}
-                        onMouseEnter={() => setHoveredSession(session.id)}
-                        onMouseLeave={() => setHoveredSession(null)}
-                        className={`group relative cursor-pointer rounded-lg px-2.5 py-1.5 transition-colors ${
-                          isSelectMode && isSelected
-                            ? 'bg-accent-muted/20'
-                            : isActive && !isSelectMode
-                              ? 'bg-surface-hover/80'
-                              : 'hover:bg-surface-hover/60'
-                        }`}
-                      >
-                        <div className={`flex items-center gap-2 ${!isSelectMode ? 'pr-6' : ''}`}>
-                          {isSelectMode && (
-                            <div
-                              className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 transition-colors ${
-                                isSelected
-                                  ? 'bg-accent text-white'
-                                  : 'border border-border-muted bg-background'
-                              }`}
-                            >
-                              {isSelected && <Check className="w-2.5 h-2.5" />}
-                            </div>
-                          )}
-                          <div className="min-w-0 flex-1">
-                            <div className="text-[13px] font-medium leading-5 text-text-primary truncate">
-                              {session.title}
-                            </div>
-                          </div>
-                        </div>
-
-                        {!isSelectMode && hoveredSession === session.id && (
-                          <button
-                            onClick={(e) => handleDeleteSession(e, session.id)}
-                            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-lg flex items-center justify-center text-text-muted hover:text-error hover:bg-surface-active transition-colors"
-                            title={t('common.delete')}
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        )}
-                      </div>
+                        t={t}
+                      />
                     );
                   })}
                 </div>
@@ -588,6 +901,63 @@ export function Sidebar() {
           </div>
         )}
       </div>
+
+      {sessionMenu && isElectron && window.electronAPI?.folders && (
+        <div
+          className="fixed z-50 min-w-[11rem] rounded-lg border border-border bg-surface shadow-lg py-1"
+          style={{ left: sessionMenu.x, top: sessionMenu.y }}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <div className="px-3 py-1.5 text-[10px] uppercase tracking-[0.06em] text-text-muted">
+            {t('sidebar.moveToFolder')}
+          </div>
+          <button
+            type="button"
+            className="w-full px-3 py-1.5 text-left text-[12px] text-text-primary hover:bg-surface-hover"
+            onClick={() => void handleAssignSessionFolder(sessionMenu.sessionId, null)}
+          >
+            {t('sidebar.noFolder')}
+          </button>
+          {folders.map((folder) => (
+            <button
+              key={folder.id}
+              type="button"
+              className="w-full px-3 py-1.5 text-left text-[12px] text-text-primary hover:bg-surface-hover truncate"
+              onClick={() => void handleAssignSessionFolder(sessionMenu.sessionId, folder.id)}
+            >
+              {folder.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {folderMenu && isElectron && window.electronAPI?.folders && (
+        <div
+          className="fixed z-50 min-w-[10rem] rounded-lg border border-border bg-surface shadow-lg py-1"
+          style={{ left: folderMenu.x, top: folderMenu.y }}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            className="w-full px-3 py-1.5 text-left text-[12px] text-text-primary hover:bg-surface-hover"
+            onClick={() => {
+              const folder = folderById.get(folderMenu.folderId);
+              setRenamingFolderId(folderMenu.folderId);
+              setRenameFolderValue(folder?.name ?? '');
+              closeMenus();
+            }}
+          >
+            {t('sidebar.renameFolder')}
+          </button>
+          <button
+            type="button"
+            className="w-full px-3 py-1.5 text-left text-[12px] text-error hover:bg-surface-hover"
+            onClick={() => void handleDeleteFolder(folderMenu.folderId)}
+          >
+            {t('sidebar.deleteFolder')}
+          </button>
+        </div>
+      )}
 
       {isSelectMode ? (
         <div className="px-3 py-3 border-t border-border-muted">
@@ -672,6 +1042,118 @@ export function Sidebar() {
         </div>
       )}
     </aside>
+  );
+}
+
+function SessionTreeRows({
+  node,
+  depth,
+  activeSessionId,
+  hoveredSession,
+  isSelectMode,
+  selectedIds,
+  onHover,
+  onSelectToggle,
+  onOpen,
+  onDelete,
+  onContextMenu,
+  t,
+}: {
+  node: SessionTreeNode;
+  depth: number;
+  activeSessionId: string | null;
+  hoveredSession: string | null;
+  isSelectMode: boolean;
+  selectedIds: Set<string>;
+  onHover: (sessionId: string | null) => void;
+  onSelectToggle: (sessionId: string) => void;
+  onOpen: (sessionId: string) => void;
+  onDelete: (e: React.MouseEvent, sessionId: string) => void;
+  onContextMenu: (sessionId: string, x: number, y: number) => void;
+  t: (key: string) => string;
+}) {
+  const session = node.session;
+  const isActive = activeSessionId === session.id;
+  const isSelected = selectedIds.has(session.id);
+  const isSubChat = Boolean(session.parentSessionId);
+
+  return (
+    <>
+      <div
+        onClick={() => {
+          if (isSelectMode) {
+            onSelectToggle(session.id);
+          } else {
+            onOpen(session.id);
+          }
+        }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          onContextMenu(session.id, e.clientX, e.clientY);
+        }}
+        onMouseEnter={() => onHover(session.id)}
+        onMouseLeave={() => onHover(null)}
+        className={`group relative cursor-pointer rounded-lg py-1.5 transition-colors ${
+          isSelectMode && isSelected
+            ? 'bg-accent-muted/20'
+            : isActive && !isSelectMode
+              ? 'bg-surface-hover/80'
+              : 'hover:bg-surface-hover/60'
+        }`}
+        style={{ paddingLeft: `${10 + depth * 12}px`, paddingRight: '10px' }}
+      >
+        <div className={`flex items-center gap-2 ${!isSelectMode ? 'pr-6' : ''}`}>
+          {isSelectMode && (
+            <div
+              className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 transition-colors ${
+                isSelected
+                  ? 'bg-accent text-white'
+                  : 'border border-border-muted bg-background'
+              }`}
+            >
+              {isSelected && <Check className="w-2.5 h-2.5" />}
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <div className="text-[13px] font-medium leading-5 text-text-primary truncate">
+              {isSubChat ? (
+                <span className="text-text-muted mr-1" aria-hidden="true">
+                  {t('sidebar.subChatBadge')}
+                </span>
+              ) : null}
+              {session.title}
+            </div>
+          </div>
+        </div>
+
+        {!isSelectMode && hoveredSession === session.id && (
+          <button
+            onClick={(e) => onDelete(e, session.id)}
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-lg flex items-center justify-center text-text-muted hover:text-error hover:bg-surface-active transition-colors"
+            title={t('common.delete')}
+          >
+            <Trash2 className="w-3 h-3" />
+          </button>
+        )}
+      </div>
+      {node.children.map((child) => (
+        <SessionTreeRows
+          key={child.session.id}
+          node={child}
+          depth={depth + 1}
+          activeSessionId={activeSessionId}
+          hoveredSession={hoveredSession}
+          isSelectMode={isSelectMode}
+          selectedIds={selectedIds}
+          onHover={onHover}
+          onSelectToggle={onSelectToggle}
+          onOpen={onOpen}
+          onDelete={onDelete}
+          onContextMenu={onContextMenu}
+          t={t}
+        />
+      ))}
+    </>
   );
 }
 

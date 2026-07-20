@@ -804,7 +804,17 @@
     "searchUntitled": "Untitled conversation",
     "searchTitleMatch": "Title match",
     "searchRoleUser": "You",
-    "searchRoleAssistant": "Assistant"
+    "searchRoleAssistant": "Assistant",
+    "newFolder": "New folder",
+    "folderNamePlaceholder": "Folder name",
+    "renameFolder": "Rename folder",
+    "deleteFolder": "Delete folder",
+    "moveToFolder": "Move to folder",
+    "noFolder": "No folder",
+    "expandFolder": "Expand folder",
+    "collapseFolder": "Collapse folder",
+    "folderEmpty": "No conversations in this folder",
+    "subChatBadge": "↳"
   },
   "chat": {
     "sendMessage": "Send message",
@@ -838,8 +848,9 @@
     "forkSuccess": "New session created from this message.",
     "forkErrors": {
       "errForkSessionNotFound": "Session not found.",
-      "errForkMessageNotFound": "User message not found.",
-      "errForkFailed": "Could not fork from this message."
+      "errForkMessageNotFound": "Message not found.",
+      "errForkFailed": "Could not fork from this message.",
+      "errSessionParentCycle": "Cannot nest a session under its own descendant."
     },
     "rewindErrors": {
       "errRewindSessionNotFound": "Session not found.",
@@ -892,7 +903,9 @@
     "autonomyNormalTooltip": "Standard behavior (unchanged permissions)",
     "autonomyAutonomousTooltip": "After edits, run lint/tests and auto-fix in a loop",
     "autonomyCarefulBadge": "Careful",
-    "autonomyAutonomousBadge": "Autonomous"
+    "autonomyAutonomousBadge": "Autonomous",
+    "backToParent": "Back to parent chat",
+    "subChatSuccess": "Sub-chat opened from this message."
   },
   "context": {
     "progress": "Progress",
@@ -969,7 +982,8 @@
     "undoRunSuccess": "Run changes undone ({{restored}} restored, {{deleted}} deleted).",
     "undoRunFailed": "Undo failed: {{error}}",
     "undoRunInProgress": "Cannot undo while a run is in progress.",
-    "undoRunNone": "No files to restore for this run."
+    "undoRunNone": "No files to restore for this run.",
+    "openSubChat": "Open sub-chat"
   },
   "schedule": {
     "createTitle": "Create Schedule",

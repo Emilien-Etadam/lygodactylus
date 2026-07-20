@@ -11,8 +11,10 @@ describe('MessageCard user actions', () => {
 
     expect(source).toContain('onFork');
     expect(source).toContain('onEditPrompt');
+    expect(source).toContain('onOpenSubChat');
     expect(source).toContain('forkFromMessage');
     expect(source).toContain('editPrompt');
+    expect(source).toContain('openSubChat');
     expect(source).toContain('GitBranch');
     expect(source).toContain('Pencil');
   });
@@ -27,6 +29,7 @@ describe('session message branch IPC', () => {
     );
 
     expect(types).toContain('session.forkFromMessage');
+    expect(types).toContain('asSubChat');
     expect(types).toContain('session.rewindToMessage');
     expect(allowlist).toContain('session.forkFromMessage');
     expect(allowlist).toContain('session.rewindToMessage');

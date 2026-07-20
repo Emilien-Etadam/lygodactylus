@@ -115,14 +115,15 @@ export class SessionManagerFacadeSupport {
       messageId
     );
   }
-  async forkSessionFromMessage(sessionId: string, messageId: string) {
+  async forkSessionFromMessage(sessionId: string, messageId: string, asSubChat = false) {
     return forkSessionFromMessage(
       this.deps,
       (id) => this.stopSession(id),
       (title, cwd, allowedTools, memoryEnabled) =>
         this.createSession(title, cwd, allowedTools, memoryEnabled),
       sessionId,
-      messageId
+      messageId,
+      asSubChat
     );
   }
   async rewindSessionForEdit(sessionId: string, messageId: string) {

@@ -13,6 +13,7 @@ import type {
   SkillsStorageChangeEvent,
   MemoryInjectedItem,
   AttachedContextItem,
+  ChatFolder,
 } from '../types';
 import { applySessionUpdate } from '../utils/session-update';
 import { computeTokensPerSecondFromText } from '../utils/generation-stats';
@@ -100,6 +101,8 @@ function getSession(states: Record<string, SessionState>, sessionId: string): Se
 interface AppState {
   // Sessions
   sessions: Session[];
+  /** Sidebar chat folders (project groups). Hydrated via session.list. */
+  folders: ChatFolder[];
   activeSessionId: string | null;
 
   // Per-session state (messages, partials, turns, traces, etc.)
@@ -155,6 +158,7 @@ interface AppState {
 
   // Actions
   setSessions: (sessions: Session[]) => void;
+  setFolders: (folders: ChatFolder[]) => void;
   addSession: (session: Session) => void;
   updateSession: (sessionId: string, updates: Partial<Session>) => void;
   removeSession: (sessionId: string) => void;
@@ -273,6 +277,7 @@ const defaultSettings: Settings = {
 export const useAppStore = create<AppState>((set) => ({
   // Initial state
   sessions: [],
+  folders: [],
   activeSessionId: null,
   sessionStates: {},
   isLoading: false,
@@ -302,6 +307,7 @@ export const useAppStore = create<AppState>((set) => ({
 
   // Session actions
   setSessions: (sessions) => set({ sessions }),
+  setFolders: (folders) => set({ folders }),
 
   addSession: (session) =>
     set((state) => ({

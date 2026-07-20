@@ -698,7 +698,17 @@
     "searchUntitled": "Naamloos gesprek",
     "searchTitleMatch": "Titelovereenkomst",
     "searchRoleUser": "Jij",
-    "searchRoleAssistant": "Assistent"
+    "searchRoleAssistant": "Assistent",
+    "newFolder": "Nieuwe map",
+    "folderNamePlaceholder": "Mapnaam",
+    "renameFolder": "Map hernoemen",
+    "deleteFolder": "Map verwijderen",
+    "moveToFolder": "Verplaatsen naar map",
+    "noFolder": "Geen map",
+    "expandFolder": "Map uitvouwen",
+    "collapseFolder": "Map invouwen",
+    "folderEmpty": "Geen gesprekken in deze map",
+    "subChatBadge": "↳"
   },
   "chat": {
     "sendMessage": "Bericht verzenden",
@@ -744,8 +754,9 @@
     "forkSuccess": "New session created from this message.",
     "forkErrors": {
       "errForkSessionNotFound": "Session not found.",
-      "errForkMessageNotFound": "User message not found.",
-      "errForkFailed": "Could not fork from this message."
+      "errForkMessageNotFound": "Bericht niet gevonden.",
+      "errForkFailed": "Could not fork from this message.",
+      "errSessionParentCycle": "Een sessie kan niet onder de eigen afstammeling worden geplaatst."
     },
     "rewindErrors": {
       "errRewindSessionNotFound": "Session not found.",
@@ -786,7 +797,9 @@
     "autonomyNormalTooltip": "Standaardgedrag (rechten ongewijzigd)",
     "autonomyAutonomousTooltip": "Na wijzigingen lint/tests uitvoeren en in een lus corrigeren",
     "autonomyCarefulBadge": "Voorzichtig",
-    "autonomyAutonomousBadge": "Autonoom"
+    "autonomyAutonomousBadge": "Autonoom",
+    "backToParent": "Terug naar bovenliggende chat",
+    "subChatSuccess": "Subchat geopend vanaf dit bericht."
   },
   "context": {
     "progress": "Voortgang",
@@ -863,7 +876,8 @@
     "undoRunSuccess": "Wijzigingen van de uitvoering ongedaan gemaakt ({{restored}} hersteld, {{deleted}} verwijderd).",
     "undoRunFailed": "Ongedaan maken mislukt: {{error}}",
     "undoRunInProgress": "Kan niet ongedaan maken terwijl een uitvoering bezig is.",
-    "undoRunNone": "Geen bestanden om te herstellen voor deze uitvoering."
+    "undoRunNone": "Geen bestanden om te herstellen voor deze uitvoering.",
+    "openSubChat": "Subchat openen"
   },
   "schedule": {
     "createTitle": "Planning maken",

@@ -804,7 +804,17 @@
     "searchUntitled": "Conversation sans titre",
     "searchTitleMatch": "Correspondance dans le titre",
     "searchRoleUser": "Vous",
-    "searchRoleAssistant": "Assistant"
+    "searchRoleAssistant": "Assistant",
+    "newFolder": "Nouveau dossier",
+    "folderNamePlaceholder": "Nom du dossier",
+    "renameFolder": "Renommer le dossier",
+    "deleteFolder": "Supprimer le dossier",
+    "moveToFolder": "Déplacer vers un dossier",
+    "noFolder": "Aucun dossier",
+    "expandFolder": "Développer le dossier",
+    "collapseFolder": "Replier le dossier",
+    "folderEmpty": "Aucune conversation dans ce dossier",
+    "subChatBadge": "↳"
   },
   "chat": {
     "sendMessage": "Envoyer le message",
@@ -838,8 +848,9 @@
     "forkSuccess": "Nouvelle session créée à partir de ce message.",
     "forkErrors": {
       "errForkSessionNotFound": "Session introuvable.",
-      "errForkMessageNotFound": "Message utilisateur introuvable.",
-      "errForkFailed": "Impossible de créer la branche depuis ce message."
+      "errForkMessageNotFound": "Message introuvable.",
+      "errForkFailed": "Impossible de créer la branche depuis ce message.",
+      "errSessionParentCycle": "Impossible d’imbriquer une session sous son propre descendant."
     },
     "rewindErrors": {
       "errRewindSessionNotFound": "Session introuvable.",
@@ -892,7 +903,9 @@
     "autonomyNormalTooltip": "Comportement standard (permissions inchangées)",
     "autonomyAutonomousTooltip": "Après les modifications, lance lint/tests et corrige en boucle",
     "autonomyCarefulBadge": "Prudent",
-    "autonomyAutonomousBadge": "Autonome"
+    "autonomyAutonomousBadge": "Autonome",
+    "backToParent": "Retour au chat parent",
+    "subChatSuccess": "Sous-chat ouvert depuis ce message."
   },
   "context": {
     "progress": "Progression",
@@ -969,7 +982,8 @@
     "undoRunSuccess": "Changements du run annulés ({{restored}} restaurés, {{deleted}} supprimés).",
     "undoRunFailed": "Échec de l’annulation : {{error}}",
     "undoRunInProgress": "Impossible d’annuler pendant qu’un run est en cours.",
-    "undoRunNone": "Aucun fichier à restaurer pour ce run."
+    "undoRunNone": "Aucun fichier à restaurer pour ce run.",
+    "openSubChat": "Ouvrir un sous-chat"
   },
   "schedule": {
     "createTitle": "Créer une planification",

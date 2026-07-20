@@ -698,7 +698,17 @@
     "searchUntitled": "Conversație fără titlu",
     "searchTitleMatch": "Potrivire în titlu",
     "searchRoleUser": "Tu",
-    "searchRoleAssistant": "Asistent"
+    "searchRoleAssistant": "Asistent",
+    "newFolder": "Folder nou",
+    "folderNamePlaceholder": "Nume folder",
+    "renameFolder": "Redenumește folderul",
+    "deleteFolder": "Șterge folderul",
+    "moveToFolder": "Mută în folder",
+    "noFolder": "Fără folder",
+    "expandFolder": "Extinde folderul",
+    "collapseFolder": "Restrânge folderul",
+    "folderEmpty": "Nicio conversație în acest folder",
+    "subChatBadge": "↳"
   },
   "chat": {
     "sendMessage": "Trimite mesajul",
@@ -744,8 +754,9 @@
     "forkSuccess": "New session created from this message.",
     "forkErrors": {
       "errForkSessionNotFound": "Session not found.",
-      "errForkMessageNotFound": "User message not found.",
-      "errForkFailed": "Could not fork from this message."
+      "errForkMessageNotFound": "Mesaj negăsit.",
+      "errForkFailed": "Could not fork from this message.",
+      "errSessionParentCycle": "Nu se poate imbrica o sesiune sub propriul său descendent."
     },
     "rewindErrors": {
       "errRewindSessionNotFound": "Session not found.",
@@ -786,7 +797,9 @@
     "autonomyNormalTooltip": "Comportament standard (permisiuni neschimbate)",
     "autonomyAutonomousTooltip": "După modificări rulează lint/teste și corectează în buclă",
     "autonomyCarefulBadge": "Prudent",
-    "autonomyAutonomousBadge": "Autonom"
+    "autonomyAutonomousBadge": "Autonom",
+    "backToParent": "Înapoi la chatul părinte",
+    "subChatSuccess": "Sub-chat deschis din acest mesaj."
   },
   "context": {
     "progress": "Progres",
@@ -863,7 +876,8 @@
     "undoRunSuccess": "Modificările execuției au fost anulate ({{restored}} restaurate, {{deleted}} șterse).",
     "undoRunFailed": "Anularea a eșuat: {{error}}",
     "undoRunInProgress": "Nu se poate anula în timp ce o execuție este în curs.",
-    "undoRunNone": "Niciun fișier de restaurat pentru această execuție."
+    "undoRunNone": "Niciun fișier de restaurat pentru această execuție.",
+    "openSubChat": "Deschide sub-chat"
   },
   "schedule": {
     "createTitle": "Creează programare",

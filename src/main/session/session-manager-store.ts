@@ -27,6 +27,8 @@ function mapSessionRow(row: SessionRow): Session {
     mode: normalizeSessionMode(row.mode),
     autonomy: normalizeSessionAutonomy(row.autonomy),
     model: row.model || undefined,
+    folderId: row.folder_id ?? null,
+    parentSessionId: row.parent_session_id ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -77,6 +79,8 @@ export class SessionManagerStore {
       mode: session.mode || 'act',
       autonomy: session.autonomy || 'normal',
       model: session.model || null,
+      folder_id: session.folderId ?? null,
+      parent_session_id: session.parentSessionId ?? null,
       created_at: session.createdAt,
       updated_at: session.updatedAt,
     });

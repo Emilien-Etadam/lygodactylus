@@ -12,6 +12,7 @@ import { registerMarketplaceIpc } from './ipc-marketplace';
 import { registerAutoUpdateIpc } from './ipc-auto-update';
 import { registerPromptPresetsIpc } from './ipc-prompt-presets';
 import { registerCheckpointsIpc } from './ipc-checkpoints';
+import { registerChatFoldersIpc } from './ipc-chat-folders';
 
 export function registerMainIpc(): void {
   registerClientShellIpc();
@@ -25,4 +26,5 @@ export function registerMainIpc(): void {
   registerChatLanIpc();
   registerPromptPresetsIpc();
   registerCheckpointsIpc();
+  registerChatFoldersIpc();
 }

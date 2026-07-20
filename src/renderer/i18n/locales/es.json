@@ -698,7 +698,17 @@
     "searchUntitled": "Conversación sin título",
     "searchTitleMatch": "Coincidencia en el título",
     "searchRoleUser": "Tú",
-    "searchRoleAssistant": "Asistente"
+    "searchRoleAssistant": "Asistente",
+    "newFolder": "Nueva carpeta",
+    "folderNamePlaceholder": "Nombre de la carpeta",
+    "renameFolder": "Renombrar carpeta",
+    "deleteFolder": "Eliminar carpeta",
+    "moveToFolder": "Mover a carpeta",
+    "noFolder": "Sin carpeta",
+    "expandFolder": "Expandir carpeta",
+    "collapseFolder": "Contraer carpeta",
+    "folderEmpty": "No hay conversaciones en esta carpeta",
+    "subChatBadge": "↳"
   },
   "chat": {
     "sendMessage": "Enviar mensaje",
@@ -744,8 +754,9 @@
     "forkSuccess": "New session created from this message.",
     "forkErrors": {
       "errForkSessionNotFound": "Session not found.",
-      "errForkMessageNotFound": "User message not found.",
-      "errForkFailed": "Could not fork from this message."
+      "errForkMessageNotFound": "Mensaje no encontrado.",
+      "errForkFailed": "Could not fork from this message.",
+      "errSessionParentCycle": "No se puede anidar una sesión bajo su propio descendiente."
     },
     "rewindErrors": {
       "errRewindSessionNotFound": "Session not found.",
@@ -786,7 +797,9 @@
     "autonomyNormalTooltip": "Comportamiento estándar (permisos sin cambios)",
     "autonomyAutonomousTooltip": "Tras los cambios, ejecuta lint/tests y corrige en bucle",
     "autonomyCarefulBadge": "Prudente",
-    "autonomyAutonomousBadge": "Autónomo"
+    "autonomyAutonomousBadge": "Autónomo",
+    "backToParent": "Volver al chat principal",
+    "subChatSuccess": "Subchat abierto desde este mensaje."
   },
   "context": {
     "progress": "Progreso",
@@ -863,7 +876,8 @@
     "undoRunSuccess": "Cambios de la ejecución deshechos ({{restored}} restaurados, {{deleted}} eliminados).",
     "undoRunFailed": "Error al deshacer: {{error}}",
     "undoRunInProgress": "No se puede deshacer mientras hay una ejecución en curso.",
-    "undoRunNone": "No hay archivos que restaurar para esta ejecución."
+    "undoRunNone": "No hay archivos que restaurar para esta ejecución.",
+    "openSubChat": "Abrir subchat"
   },
   "schedule": {
     "createTitle": "Crear programación",

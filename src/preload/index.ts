@@ -40,6 +40,12 @@ import type { DiagnosticInput, DiagnosticResult } from '../renderer/types';
 import type { McpServerConfig, McpTool, McpServerStatus, McpPresetsMap } from '../shared/ipc-types';
 import type { FirefoxExtensionInstallResult } from '../shared/firefox-extension';
 import type { SessionMessageSearchHit } from '../shared/session-message-search';
+import type {
+  ChatFolder,
+  ChatFolderAssignInput,
+  ChatFolderCreateInput,
+  ChatFolderUpdateInput,
+} from '../shared/chat-folders';
 import { subscribeServerEvents } from './server-event-bus';
 import { isAllowedClientEventType } from '../shared/client-event-allowlist';
 
@@ -401,6 +407,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('presets.delete', id),
   },
 
+  folders: {
+    list: (): Promise<ChatFolder[]> => ipcRenderer.invoke('folder.list'),
+    create: (payload: ChatFolderCreateInput): Promise<ChatFolder> =>
+      ipcRenderer.invoke('folder.create', payload),
+    update: (id: string, updates: ChatFolderUpdateInput): Promise<ChatFolder | null> =>
+      ipcRenderer.invoke('folder.update', id, updates),
+    delete: (id: string): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke('folder.delete', id),
+    assign: (payload: ChatFolderAssignInput): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('folder.assign', payload),
+  },
+
   chatLan: {
     getConfig: (): Promise<{
       enabled: boolean;
@@ -732,6 +750,13 @@ declare global {
         create: (payload: PromptPresetCreateInput) => Promise<PromptPreset>;
         update: (id: string, updates: PromptPresetUpdateInput) => Promise<PromptPreset | null>;
         delete: (id: string) => Promise<{ success: boolean }>;
+      };
+      folders: {
+        list: () => Promise<ChatFolder[]>;
+        create: (payload: ChatFolderCreateInput) => Promise<ChatFolder>;
+        update: (id: string, updates: ChatFolderUpdateInput) => Promise<ChatFolder | null>;
+        delete: (id: string) => Promise<{ success: boolean }>;
+        assign: (payload: ChatFolderAssignInput) => Promise<{ success: boolean; error?: string }>;
       };
       chatLan: {
         getConfig: () => Promise<{
