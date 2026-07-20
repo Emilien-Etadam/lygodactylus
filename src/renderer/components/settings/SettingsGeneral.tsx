@@ -20,8 +20,10 @@ export function SettingsGeneral() {
   const appConfig = useAppConfig();
   const speechEnabled = appConfig?.speechSynthesisEnabled === true;
   const modelStatsEnabled = appConfig?.modelStatsEnabled !== false;
+  const checkpointsEnabled = appConfig?.checkpointsEnabled !== false;
   const [isSavingSpeech, setIsSavingSpeech] = useState(false);
   const [isSavingModelStats, setIsSavingModelStats] = useState(false);
+  const [isSavingCheckpoints, setIsSavingCheckpoints] = useState(false);
   const baseLang = i18n.language.split('-')[0];
   const currentLang = baseLang === 'nb' || baseLang === 'nn' ? 'no' : baseLang;
   const [appVer, setAppVer] = useState('');
@@ -178,6 +180,27 @@ export function SettingsGeneral() {
     }
   }, [isSavingModelStats, modelStatsEnabled, setAppConfig]);
 
+  const handleToggleCheckpoints = useCallback(async () => {
+    if (!isElectron || isSavingCheckpoints || !window.electronAPI?.config?.save) {
+      return;
+    }
+
+    const nextEnabled = !checkpointsEnabled;
+    setIsSavingCheckpoints(true);
+    try {
+      const result = await window.electronAPI.config.save({
+        checkpointsEnabled: nextEnabled,
+      });
+      if (result?.config) {
+        setAppConfig(result.config);
+      }
+    } catch {
+      // Keep previous value; config.status may still sync later.
+    } finally {
+      setIsSavingCheckpoints(false);
+    }
+  }, [checkpointsEnabled, isSavingCheckpoints, setAppConfig]);
+
   const languages = [
     { code: 'en', nativeName: 'English' },
     { code: 'zh', nativeName: '中文' },
@@ -303,6 +326,35 @@ export function SettingsGeneral() {
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-text-primary transition-transform ${
                 modelStatsEnabled ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-border-subtle bg-background px-4 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h4 className="text-sm font-semibold text-text-primary">
+              {t('general.checkpoints')}
+            </h4>
+            <p className="mt-1 text-xs leading-5 text-text-muted">
+              {t('general.checkpointsDesc')}
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={checkpointsEnabled}
+            onClick={() => void handleToggleCheckpoints()}
+            disabled={isSavingCheckpoints}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 disabled:opacity-50 flex-shrink-0 ${
+              checkpointsEnabled ? 'bg-accent' : 'bg-surface-muted'
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-text-primary transition-transform ${
+                checkpointsEnabled ? 'translate-x-6' : 'translate-x-1'
               }`}
             />
           </button>

@@ -98,7 +98,9 @@
     "speechSynthesis": "Opplesing",
     "speechSynthesisDesc": "Viser en høyttalerknapp på assistentens meldinger for frakoblet opplesing med systemstemmen.",
     "modelStats": "Modellstatistikk",
-    "modelStatsDesc": "Viser genereringshastighet (tok/s), kontekstfylling og modellmetadata (parametere/kvantisering) når de er kjent."
+    "modelStatsDesc": "Viser genereringshastighet (tok/s), kontekstfylling og modellmetadata (parametere/kvantisering) når de er kjent.",
+    "checkpoints": "Sjekkpunkter for kjøringer",
+    "checkpointsDesc": "Lagrer forhåndsbilder før agenten endrer filer, slik at du kan angre endringene fra en kjøring med ett klikk (uten git)."
   },
   "webSearch": {
     "title": "Web search",
@@ -837,7 +839,14 @@
     "stopSpeaking": "Stopp opplesing",
     "tokensPerSecond": "{{rate}} tok/s",
     "sources": "Kilder",
-    "sourcesEmpty": "Ingen kilder"
+    "sourcesEmpty": "Ingen kilder",
+    "undoRun": "Angre endringer fra denne kjøringen",
+    "undoRunConfirm": "Gjenopprette følgende filer til tilstanden før denne kjøringen?\n\n{{files}}",
+    "undoRunPartial": "Delvis dekning: noen filer mangler forhåndsbilde (størrelsesgrensen er nådd).",
+    "undoRunSuccess": "Kjøringens endringer angret ({{restored}} gjenopprettet, {{deleted}} slettet).",
+    "undoRunFailed": "Angre mislyktes: {{error}}",
+    "undoRunInProgress": "Kan ikke angre mens en kjøring pågår.",
+    "undoRunNone": "Ingen filer å gjenopprette for denne kjøringen."
   },
   "schedule": {
     "createTitle": "Opprett tidsplan",

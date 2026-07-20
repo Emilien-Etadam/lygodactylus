@@ -592,6 +592,16 @@ export type ServerEvent =
     }
   | { type: 'folder.selected'; payload: { path: string } }
   | { type: 'config.status'; payload: { isConfigured: boolean; config: AppConfig } }
+  | {
+      type: 'checkpoint.runReady';
+      payload: {
+        sessionId: string;
+        runId: string;
+        messageIds: string[];
+        partialCoverage: boolean;
+        files: Array<{ path: string; action: 'modified' | 'created' }>;
+      };
+    }
   | { type: 'sandbox.progress'; payload: SandboxSetupProgress }
   | { type: 'sandbox.sync'; payload: SandboxSyncStatus }
   | { type: 'skills.storageChanged'; payload: SkillsStorageChangeEvent }
@@ -825,6 +835,11 @@ export interface AppConfig {
   speechSynthesisEnabled?: boolean;
   /** Show model stats (tok/s, context %, params/quant). On by default. */
   modelStatsEnabled?: boolean;
+  /**
+   * Capture pre-images before agent write/edit (and best-effort bash via watcher)
+   * so the user can undo a run without git. On by default.
+   */
+  checkpointsEnabled?: boolean;
   /** Global Quick Ask floating window. Off by default. */
   quickAskEnabled?: boolean;
   /** Electron Accelerator for the Quick Ask global shortcut. */

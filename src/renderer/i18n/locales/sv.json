@@ -98,7 +98,9 @@
     "speechSynthesis": "Uppläsning",
     "speechSynthesisDesc": "Visar en högtalarknapp på assistentens meddelanden för offlineuppläsning med systemrösten.",
     "modelStats": "Modellstatistik",
-    "modelStatsDesc": "Visar genereringshastighet (tok/s), kontextfyllnad och modellmetadata (parametrar/kvantisering) när de är kända."
+    "modelStatsDesc": "Visar genereringshastighet (tok/s), kontextfyllnad och modellmetadata (parametrar/kvantisering) när de är kända.",
+    "checkpoints": "Kontrollpunkter för körningar",
+    "checkpointsDesc": "Sparar förhandsbilder innan agenten ändrar filer så att du kan ångra en körnings ändringar med ett klick (utan git)."
   },
   "webSearch": {
     "title": "Web search",
@@ -837,7 +839,14 @@
     "stopSpeaking": "Stoppa uppläsning",
     "tokensPerSecond": "{{rate}} tok/s",
     "sources": "Källor",
-    "sourcesEmpty": "Inga källor"
+    "sourcesEmpty": "Inga källor",
+    "undoRun": "Ångra ändringar från denna körning",
+    "undoRunConfirm": "Återställ följande filer till tillståndet före denna körning?\n\n{{files}}",
+    "undoRunPartial": "Delvis täckning: vissa filer saknar förhandsbild (storleksgränsen nåddes).",
+    "undoRunSuccess": "Körningens ändringar ångrades ({{restored}} återställda, {{deleted}} borttagna).",
+    "undoRunFailed": "Kunde inte ångra: {{error}}",
+    "undoRunInProgress": "Kan inte ångra medan en körning pågår.",
+    "undoRunNone": "Inga filer att återställa för denna körning."
   },
   "schedule": {
     "createTitle": "Skapa schema",

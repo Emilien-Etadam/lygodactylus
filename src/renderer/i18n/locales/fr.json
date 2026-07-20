@@ -98,7 +98,9 @@
     "speechSynthesis": "Lecture vocale",
     "speechSynthesisDesc": "Affiche un bouton haut-parleur sur les réponses de l'assistant pour les lire hors ligne avec la voix système.",
     "modelStats": "Stats du modèle",
-    "modelStatsDesc": "Affiche la vitesse de génération (tok/s), le remplissage du contexte et les méta du modèle (paramètres/quantization) quand elles sont connues."
+    "modelStatsDesc": "Affiche la vitesse de génération (tok/s), le remplissage du contexte et les méta du modèle (paramètres/quantization) quand elles sont connues.",
+    "checkpoints": "Points de contrôle des runs",
+    "checkpointsDesc": "Avant chaque modification de fichier par l’agent, enregistre une pré-image pour pouvoir annuler les changements d’un run en un clic (sans git)."
   },
   "webSearch": {
     "title": "Recherche web",
@@ -926,7 +928,14 @@
     "stopSpeaking": "Arrêter la lecture",
     "tokensPerSecond": "{{rate}} tok/s",
     "sources": "Sources",
-    "sourcesEmpty": "Aucune source"
+    "sourcesEmpty": "Aucune source",
+    "undoRun": "Annuler les changements de ce run",
+    "undoRunConfirm": "Restaurer les fichiers suivants à leur état d’avant ce run ?\n\n{{files}}",
+    "undoRunPartial": "Couverture partielle : certains fichiers n’ont pas de pré-image (plafond atteint).",
+    "undoRunSuccess": "Changements du run annulés ({{restored}} restaurés, {{deleted}} supprimés).",
+    "undoRunFailed": "Échec de l’annulation : {{error}}",
+    "undoRunInProgress": "Impossible d’annuler pendant qu’un run est en cours.",
+    "undoRunNone": "Aucun fichier à restaurer pour ce run."
   },
   "schedule": {
     "createTitle": "Créer une planification",

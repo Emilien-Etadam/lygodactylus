@@ -92,6 +92,7 @@ function makeConfig(timeoutMs: number, overrides: Partial<AppConfig> = {}): AppC
     constrainedOutputCapability: null,
     ...overrides,
     ollamaKeepAlive: overrides.ollamaKeepAlive ?? '30m',
+    checkpointsEnabled: overrides.checkpointsEnabled ?? true,
   };
 }
 

@@ -98,7 +98,9 @@
     "speechSynthesis": "Voorlezen",
     "speechSynthesisDesc": "Toont een luidsprekerknop bij berichten van de assistent om ze offline voor te lezen met de systeemstem.",
     "modelStats": "Modelstatistieken",
-    "modelStatsDesc": "Toont generatiesnelheid (tok/s), contextvulling en modelmetadata (parameters/kwantisatie) wanneer bekend."
+    "modelStatsDesc": "Toont generatiesnelheid (tok/s), contextvulling en modelmetadata (parameters/kwantisatie) wanneer bekend.",
+    "checkpoints": "Uitvoeringscheckpoints",
+    "checkpointsDesc": "Slaat voorafbeelden op voordat de agent bestanden wijzigt, zodat je wijzigingen van een uitvoering met één klik ongedaan kunt maken (zonder git)."
   },
   "webSearch": {
     "title": "Web search",
@@ -837,7 +839,14 @@
     "stopSpeaking": "Stoppen met voorlezen",
     "tokensPerSecond": "{{rate}} tok/s",
     "sources": "Bronnen",
-    "sourcesEmpty": "Geen bronnen"
+    "sourcesEmpty": "Geen bronnen",
+    "undoRun": "Wijzigingen van deze uitvoering ongedaan maken",
+    "undoRunConfirm": "De volgende bestanden terugzetten naar hun staat vóór deze uitvoering?\n\n{{files}}",
+    "undoRunPartial": "Gedeeltelijke dekking: sommige bestanden hebben geen voorafbeelding (limiet bereikt).",
+    "undoRunSuccess": "Wijzigingen van de uitvoering ongedaan gemaakt ({{restored}} hersteld, {{deleted}} verwijderd).",
+    "undoRunFailed": "Ongedaan maken mislukt: {{error}}",
+    "undoRunInProgress": "Kan niet ongedaan maken terwijl een uitvoering bezig is.",
+    "undoRunNone": "Geen bestanden om te herstellen voor deze uitvoering."
   },
   "schedule": {
     "createTitle": "Planning maken",

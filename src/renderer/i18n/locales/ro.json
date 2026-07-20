@@ -98,7 +98,9 @@
     "speechSynthesis": "Citire vocală",
     "speechSynthesisDesc": "Afișează un buton de difuzor pe mesajele asistentului pentru citire offline cu vocea sistemului.",
     "modelStats": "Statistici model",
-    "modelStatsDesc": "Afișează viteza de generare (tok/s), umplerea contextului și metadatele modelului (parametri/cuantizare) când sunt cunoscute."
+    "modelStatsDesc": "Afișează viteza de generare (tok/s), umplerea contextului și metadatele modelului (parametri/cuantizare) când sunt cunoscute.",
+    "checkpoints": "Puncte de control ale execuțiilor",
+    "checkpointsDesc": "Înainte ca agentul să modifice fișierele, salvează pre-imagini pentru a anula modificările unei execuții dintr-un clic (fără git)."
   },
   "webSearch": {
     "title": "Web search",
@@ -837,7 +839,14 @@
     "stopSpeaking": "Oprește citirea",
     "tokensPerSecond": "{{rate}} tok/s",
     "sources": "Surse",
-    "sourcesEmpty": "Nicio sursă"
+    "sourcesEmpty": "Nicio sursă",
+    "undoRun": "Anulează modificările acestei execuții",
+    "undoRunConfirm": "Restabiliți următoarele fișiere la starea dinaintea acestei execuții?\n\n{{files}}",
+    "undoRunPartial": "Acoperire parțială: unele fișiere nu au pre-imagine (s-a atins plafonul de dimensiune).",
+    "undoRunSuccess": "Modificările execuției au fost anulate ({{restored}} restaurate, {{deleted}} șterse).",
+    "undoRunFailed": "Anularea a eșuat: {{error}}",
+    "undoRunInProgress": "Nu se poate anula în timp ce o execuție este în curs.",
+    "undoRunNone": "Niciun fișier de restaurat pentru această execuție."
   },
   "schedule": {
     "createTitle": "Creează programare",

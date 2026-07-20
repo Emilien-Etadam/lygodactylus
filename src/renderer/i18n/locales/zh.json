@@ -98,7 +98,9 @@
     "speechSynthesis": "朗读",
     "speechSynthesisDesc": "在助手消息上显示扬声器按钮，使用系统离线语音朗读。",
     "modelStats": "模型统计",
-    "modelStatsDesc": "显示生成速度（tok/s）、上下文占用，以及已知的模型元数据（参数量/量化）。"
+    "modelStatsDesc": "显示生成速度（tok/s）、上下文占用，以及已知的模型元数据（参数量/量化）。",
+    "checkpoints": "运行检查点",
+    "checkpointsDesc": "在智能体修改文件之前保存预映像，以便一键撤销某次运行的更改（无需 git）。"
   },
   "webSearch": {
     "title": "Web search",
@@ -837,7 +839,14 @@
     "stopSpeaking": "停止朗读",
     "tokensPerSecond": "{{rate}} tok/s",
     "sources": "来源",
-    "sourcesEmpty": "暂无来源"
+    "sourcesEmpty": "暂无来源",
+    "undoRun": "撤销此次运行的更改",
+    "undoRunConfirm": "将以下文件恢复为此次运行之前的状态？\n\n{{files}}",
+    "undoRunPartial": "部分覆盖：某些文件没有预映像（已达大小上限）。",
+    "undoRunSuccess": "已撤销此次运行的更改（恢复 {{restored}}，删除 {{deleted}}）。",
+    "undoRunFailed": "撤销失败：{{error}}",
+    "undoRunInProgress": "运行进行中时无法撤销。",
+    "undoRunNone": "此次运行没有可恢复的文件。"
   },
   "schedule": {
     "createTitle": "新建定时任务",

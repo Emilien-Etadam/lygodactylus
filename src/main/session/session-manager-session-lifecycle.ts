@@ -208,6 +208,12 @@ export async function deleteSession(
     await deps.extensionManager.onSessionDeleted({ sessionId, session: existingSession });
   }
   forgetSessionPermissions(sessionId);
+  try {
+    const { checkpointService } = await import('../checkpoints');
+    checkpointService.purgeSession(sessionId);
+  } catch (error) {
+    logError('[SessionManager] Failed to purge checkpoints for session:', error);
+  }
   log('[SessionManager] Session deleted:', sessionId);
 }
 
@@ -249,6 +255,15 @@ export async function batchDeleteSessions(
         session: sessionsById.get(sessionId) || null,
       });
     }
+  }
+
+  try {
+    const { checkpointService } = await import('../checkpoints');
+    for (const sessionId of sessionIds) {
+      checkpointService.purgeSession(sessionId);
+    }
+  } catch (error) {
+    logError('[SessionManager] Failed to purge checkpoints during batch delete:', error);
   }
 
   log('[SessionManager] Batch deleted sessions:', sessionIds.length);
