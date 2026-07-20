@@ -171,6 +171,17 @@ export function createUnifiedDiff(
   return out.join('\n');
 }
 
+/** Walk back so `end` lands on a UTF-8 code-point boundary. */
+function utf8SafeEnd(buf: Buffer, end: number): number {
+  let i = Math.max(0, Math.min(end, buf.length));
+  // Continuation bytes are 10xxxxxx (0x80–0xBF). Back up over them, then
+  // ensure we didn't land mid-sequence by also dropping a leading partial.
+  while (i > 0 && (buf[i]! & 0xc0) === 0x80) {
+    i -= 1;
+  }
+  return i;
+}
+
 /** Truncate a string to at most `maxBytes` UTF-8 bytes, appending a marker. */
 export function truncateUtf8(text: string, maxBytes: number): string {
   if (maxBytes <= 0) {
@@ -182,6 +193,9 @@ export function truncateUtf8(text: string, maxBytes: number): string {
   }
   const marker = '\n…[truncated]';
   const markerBuf = Buffer.from(marker, 'utf8');
-  const keep = Math.max(0, maxBytes - markerBuf.length);
+  if (markerBuf.length >= maxBytes) {
+    return markerBuf.subarray(0, maxBytes).toString('utf8');
+  }
+  const keep = utf8SafeEnd(buf, maxBytes - markerBuf.length);
   return Buffer.concat([buf.subarray(0, keep), markerBuf]).toString('utf8');
 }
