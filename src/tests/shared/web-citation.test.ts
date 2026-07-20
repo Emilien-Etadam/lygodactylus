@@ -172,6 +172,29 @@ describe('web-citation inline markers', () => {
       '[1](https://already.test) and [[1]](https://a.test)'
     );
   });
+
+  it('does not linkify [n] inside a fenced code block', () => {
+    const map = sourcesByIndexMap([{ index: 1, title: 'A', url: 'https://a.test' }]);
+    const text = 'Intro [1]\n```ts\nconst x = "[1]";\n```\nOutro [1]';
+    expect(linkifyCitationMarkers(text, map)).toBe(
+      'Intro [[1]](https://a.test)\n```ts\nconst x = "[1]";\n```\nOutro [[1]](https://a.test)'
+    );
+  });
+
+  it('does not linkify [n] inside inline code', () => {
+    const map = sourcesByIndexMap([{ index: 1, title: 'A', url: 'https://a.test' }]);
+    expect(linkifyCitationMarkers('Voir [1] et `ref [1]` puis [1].', map)).toBe(
+      'Voir [[1]](https://a.test) et `ref [1]` puis [[1]](https://a.test).'
+    );
+  });
+
+  it('treats an unclosed fence as code for the remainder (conservative)', () => {
+    const map = sourcesByIndexMap([{ index: 1, title: 'A', url: 'https://a.test' }]);
+    const text = 'Avant [1]\n```\ncode [1]\nencore [1]';
+    expect(linkifyCitationMarkers(text, map)).toBe(
+      'Avant [[1]](https://a.test)\n```\ncode [1]\nencore [1]'
+    );
+  });
 });
 
 describe('formatWebSearchResponse citation index', () => {

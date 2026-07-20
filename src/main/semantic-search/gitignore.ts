@@ -4,7 +4,7 @@ import { glob } from 'glob';
 import ignore from 'ignore';
 import { SEMANTIC_ALWAYS_IGNORE_DIR_NAMES } from './constants';
 import { clampFileList, isAllowedTextFile, isWithinFileSizeLimit } from './file-filters';
-import { resolveContainedWorkspacePath, toWorkspaceRelativePath } from './path-safety';
+import { resolveContainedWorkspacePath, toWorkspaceRelativePath } from '../tools/path-safety';
 
 type IgnoreFilter = ReturnType<typeof ignore>;
 
