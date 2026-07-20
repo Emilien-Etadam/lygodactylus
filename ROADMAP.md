@@ -130,7 +130,7 @@ Current stable fork baseline: **`6.0.2`** — [CHANGELOG](CHANGELOG.md)
 - **Installation Experience**: Smoother first-run — auto-detect dependencies, clearer errors, one-click setup
 - **Linux Support**: First-class Linux builds — **done v5.6** (AppImage CI release; deb/rpm later)
 - **Model Location Picker (UX)**: sélecteur clair de *où* tourne chaque modèle (local vs machine distante via Chat LAN) — version allégée du « compute location as control plane » de LM Studio Bionic, sans cloud. UX polish, pas un sous-système. — _candidate_
-- **Skill Lockfile & Pinning**: enregistrer à l'install le commit sha résolu + un hash d'intégrité dans `marketplace-installed-store` (aujourd'hui : install à un `ref` de catalogue, sans lockfile). Reproductibilité, détection/rollback de dérive, et sécurité supply-chain (un skill exécute du code dans le sandbox). Inspiré du `skills.lock` de trivium ; extension du store existant, pas un sous-système. — _planned_
+- **Skill Lockfile & Pinning**: enregistrer à l'install le commit sha résolu + un hash d'intégrité dans `marketplace-installed-store` (aujourd'hui : install à un `ref` de catalogue, sans lockfile). Reproductibilité, détection/rollback de dérive, et sécurité supply-chain (un skill exécute du code dans le sandbox). Inspiré du `skills.lock` de trivium ; extension du store existant, pas un sous-système. — **→ lot 3**
 - **Chat Organization**: groupes/dossiers de chats par projet + **sous-chats** (brancher une discussion annexe sans polluer le contexte principal) — UX locale self-contained, prolonge le fork/édition de messages existant. Inspiré d'Atlantis (roia.io). — _candidate_
 
 ### Lot veille 2026-07 — ✅ livré (PRs #131–#139)
@@ -163,7 +163,20 @@ _Prompts Cursor : `docs/cursor-prompts-lot2-2026-07.md` (workflow : Cursor code,
 
 _Écartés volontairement par le mainteneur : RAG « chat avec mes docs » (risque d'usine à gaz) et compare multi-modèles côte à côte._
 
-- **Cleanup post-lot 2**: dédup `path-safety` (#146/#147), linkification citations hors blocs de code (#145), `void offset` (#142) — prompt : section « Ménage » de `docs/cursor-prompts-lot2-2026-07.md`. — _planned_
+- **Cleanup post-lot 2**: dédup `path-safety` (#146/#147), linkification citations hors blocs de code (#145), `void offset` (#142). — **done** (PR #151)
+
+### 3e lot veille — en cours (2026-07)
+
+_Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates restantes des analyses projet (trivium, Atlantis, Bionic) et du cadrage lot 2, + la phase 2 du Quick-Ask._
+
+- **Model Location Picker** — badge local/LAN/distant dans le sélecteur de modèle. — _planned_
+- **Skill Lockfile & Pinning** — sha épinglé + hash d'intégrité à l'install (trivium). — _planned_
+- **Chat Organization** — dossiers repliables + sous-chats via le fork existant (Atlantis). — _planned_
+- **Quick-Ask phase 2** — actions sur le presse-papier (résumer/traduire/reformuler), 2e hotkey. — _planned_
+- **Content Watch + Digest** — watchers dossier/RSS/URL sur le cron existant, diff #149, session Veille en mode plan. — _planned_
+- **PII Scrub sortant** — jetons réversibles par règles (email/tél/IBAN/Luhn + termes custom), fail-closed, opt-in. — _planned_
+- **Artifacts / Canvas** — aperçu iframe sandboxée (html/svg, CSP no-network), versions. Mermaid exclu (dépendance). — _planned_
+- **Local STT (dictée)** — whisper.cpp on-demand (pattern runtimes v5.3), push-to-talk, transcription au release. — _planned_
 
 ### Mid-term (v3.5.0+)
 
@@ -181,4 +194,4 @@ _Écartés volontairement par le mainteneur : RAG « chat avec mes docs » (risq
 
 ---
 
-_Last updated: 2026-07-20 (lot veille 2 livré — PRs #141–#149 : stats modèle, recherche historique, AGENTS.md, presets, citations, recherche sémantique, @-mentions, checkpoints, modes d'autonomie ; reste : cleanup + candidates artifacts/PII/watch)_
+_Last updated: 2026-07-20 (lot 2 livré #141–#149 + cleanup #151 ; **lot 3 lancé** — 8 items, prompts dans docs/cursor-prompts-lot3-2026-07.md)_
