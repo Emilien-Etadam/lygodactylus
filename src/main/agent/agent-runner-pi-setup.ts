@@ -34,6 +34,7 @@ import {
 import { buildCoworkAppendPrompt } from './agent-runner-prompts';
 import { buildNativeCustomTools } from './agent-runner-native-tools';
 import { buildWebSearchCustomTools } from './agent-runner-web-search-tool';
+import { createWebCitationCounter } from '../../shared/web-citation';
 import { createScheduleTools } from '../schedule/schedule-tools';
 import { mainAppState } from '../main-app-state';
 import { getWorkspacePathUnsupportedReason } from '../main-working-dir';
@@ -415,10 +416,13 @@ export async function preparePiSessionRun({
     ];
   }
   const mcpCustomTools = ctx.mcpManager ? buildMcpCustomTools(ctx.mcpManager) : [];
-  const webSearchCustomTools = buildWebSearchCustomTools();
+  // Turn-wide [n] numbering shared by web_search and web_fetch for this run.
+  const citationCounter = createWebCitationCounter();
+  const webSearchCustomTools = buildWebSearchCustomTools(citationCounter);
   const nativeCustomTools = buildNativeCustomTools({
     cwd: effectiveCwd,
     sessionId: session.id,
+    citationCounter,
     requestUserQuestion: ctx.requestUserQuestion,
   });
   const scheduleCustomTools = createScheduleTools({

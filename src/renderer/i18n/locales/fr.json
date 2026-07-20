@@ -907,7 +907,9 @@
     "copyThinking": "Copier la réflexion",
     "speakMessage": "Lire le message",
     "stopSpeaking": "Arrêter la lecture",
-    "tokensPerSecond": "{{rate}} tok/s"
+    "tokensPerSecond": "{{rate}} tok/s",
+    "sources": "Sources",
+    "sourcesEmpty": "Aucune source"
   },
   "schedule": {
     "createTitle": "Créer une planification",

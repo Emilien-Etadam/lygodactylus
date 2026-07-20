@@ -818,7 +818,9 @@
     "copyThinking": "Copia riflessione",
     "speakMessage": "Leggi ad alta voce",
     "stopSpeaking": "Interrompi lettura",
-    "tokensPerSecond": "{{rate}} tok/s"
+    "tokensPerSecond": "{{rate}} tok/s",
+    "sources": "Fonti",
+    "sourcesEmpty": "Nessuna fonte"
   },
   "schedule": {
     "createTitle": "Crea pianificazione",

@@ -818,7 +818,9 @@
     "copyThinking": "Denkprozess kopieren",
     "speakMessage": "Vorlesen",
     "stopSpeaking": "Vorlesen stoppen",
-    "tokensPerSecond": "{{rate}} tok/s"
+    "tokensPerSecond": "{{rate}} tok/s",
+    "sources": "Quellen",
+    "sourcesEmpty": "Keine Quellen"
   },
   "schedule": {
     "createTitle": "Zeitplan erstellen",

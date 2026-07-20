@@ -818,7 +818,9 @@
     "copyThinking": "Kopier tenking",
     "speakMessage": "Les opp",
     "stopSpeaking": "Stopp opplesing",
-    "tokensPerSecond": "{{rate}} tok/s"
+    "tokensPerSecond": "{{rate}} tok/s",
+    "sources": "Kilder",
+    "sourcesEmpty": "Ingen kilder"
   },
   "schedule": {
     "createTitle": "Opprett tidsplan",

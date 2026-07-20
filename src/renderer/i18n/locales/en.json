@@ -907,7 +907,9 @@
     "copyThinking": "Copy thinking",
     "speakMessage": "Read aloud",
     "stopSpeaking": "Stop reading",
-    "tokensPerSecond": "{{rate}} tok/s"
+    "tokensPerSecond": "{{rate}} tok/s",
+    "sources": "Sources",
+    "sourcesEmpty": "No sources"
   },
   "schedule": {
     "createTitle": "Create Schedule",

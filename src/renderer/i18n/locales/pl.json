@@ -818,7 +818,9 @@
     "copyThinking": "Kopiuj myślenie",
     "speakMessage": "Czytaj na głos",
     "stopSpeaking": "Zatrzymaj czytanie",
-    "tokensPerSecond": "{{rate}} tok/s"
+    "tokensPerSecond": "{{rate}} tok/s",
+    "sources": "Źródła",
+    "sourcesEmpty": "Brak źródeł"
   },
   "schedule": {
     "createTitle": "Utwórz harmonogram",

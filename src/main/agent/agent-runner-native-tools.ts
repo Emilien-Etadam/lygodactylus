@@ -6,6 +6,11 @@ import {
 } from '@earendil-works/pi-coding-agent';
 import type { QuestionItem } from '../../renderer/types';
 import {
+  allocateWebCitationIndex,
+  hostnameFromUrl,
+  type WebCitationCounter,
+} from '../../shared/web-citation';
+import {
   executeHttpRequest,
   formatHttpRequestResult,
   parseHttpRequestOptions,
@@ -66,6 +71,8 @@ const askUserQuestionParameters = Type.Object({
 export interface NativeToolsContext {
   cwd: string;
   sessionId: string;
+  /** Shared across web_search / web_fetch for turn-wide [n] numbering. */
+  citationCounter?: WebCitationCounter;
   requestUserQuestion?: (
     sessionId: string,
     toolUseId: string,
@@ -82,7 +89,11 @@ function cloneToolWithName(tool: ToolDefinition, name: string, label: string): T
   };
 }
 
-function createWebFetchTool(name: string, label: string): ToolDefinition<TSchema, unknown> {
+function createWebFetchTool(
+  name: string,
+  label: string,
+  citationCounter?: WebCitationCounter
+): ToolDefinition<TSchema, unknown> {
   return {
     name,
     label,
@@ -94,8 +105,11 @@ function createWebFetchTool(name: string, label: string): ToolDefinition<TSchema
         typeof params === 'object' && params !== null ? (params as Record<string, unknown>) : {};
       const options = parseHttpRequestOptions(record);
       const result = await executeHttpRequest({ ...options, signal, timeoutMs: 15_000 });
+      const body = formatHttpRequestResult(result);
+      const title = hostnameFromUrl(result.url);
+      const text = allocateWebCitationIndex(citationCounter, [{ title, url: result.url }], body);
       return {
-        content: [{ type: 'text' as const, text: formatHttpRequestResult(result) }],
+        content: [{ type: 'text' as const, text }],
         details: undefined,
       };
     },
@@ -312,8 +326,8 @@ export function buildNativeCustomTools(ctx: NativeToolsContext): ToolDefinition[
     cloneToolWithName(findTool, 'glob', 'Glob'),
     cloneToolWithName(findTool, 'find', 'Find'),
     grepTool,
-    createWebFetchTool('web_fetch', 'Web Fetch'),
-    createWebFetchTool('WebFetch', 'Web Fetch'),
+    createWebFetchTool('web_fetch', 'Web Fetch', ctx.citationCounter),
+    createWebFetchTool('WebFetch', 'Web Fetch', ctx.citationCounter),
     createHttpRequestTool('http_request', 'HTTP Request'),
     createHttpRequestTool('HttpRequest', 'HTTP Request'),
     createTodoWriteTool('todo_write', 'Todo Write'),

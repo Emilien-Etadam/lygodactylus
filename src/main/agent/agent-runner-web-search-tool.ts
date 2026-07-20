@@ -2,12 +2,17 @@ import { Type, type TSchema } from 'typebox';
 import type { ToolDefinition } from '@earendil-works/pi-coding-agent';
 import { configStore } from '../config/config-store';
 import { runWebSearch } from '../../shared/web-search';
+import type { WebCitationCounter } from '../../shared/web-citation';
 
 const webSearchParameters = Type.Object({
   query: Type.String({ description: 'Search query' }),
 });
 
-function createWebSearchTool(name: string, label: string): ToolDefinition<TSchema, unknown> {
+function createWebSearchTool(
+  name: string,
+  label: string,
+  citationCounter?: WebCitationCounter
+): ToolDefinition<TSchema, unknown> {
   return {
     name,
     label,
@@ -19,7 +24,7 @@ function createWebSearchTool(name: string, label: string): ToolDefinition<TSchem
         typeof params === 'object' && params !== null ? (params as Record<string, unknown>) : {};
       const query = typeof record.query === 'string' ? record.query : '';
       const config = configStore.get('webSearch');
-      const text = await runWebSearch(query, config);
+      const text = await runWebSearch(query, config, { citationCounter });
       return {
         content: [{ type: 'text' as const, text }],
         details: undefined,
@@ -28,10 +33,12 @@ function createWebSearchTool(name: string, label: string): ToolDefinition<TSchem
   };
 }
 
-export function buildWebSearchCustomTools(): ToolDefinition[] {
+export function buildWebSearchCustomTools(
+  citationCounter?: WebCitationCounter
+): ToolDefinition[] {
   return [
-    createWebSearchTool('web_search', 'Web Search'),
-    createWebSearchTool('websearch', 'Web Search'),
-    createWebSearchTool('WebSearch', 'Web Search'),
+    createWebSearchTool('web_search', 'Web Search', citationCounter),
+    createWebSearchTool('websearch', 'Web Search', citationCounter),
+    createWebSearchTool('WebSearch', 'Web Search', citationCounter),
   ];
 }

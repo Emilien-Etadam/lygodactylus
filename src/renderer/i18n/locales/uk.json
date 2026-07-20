@@ -818,7 +818,9 @@
     "copyThinking": "Копіювати мислення",
     "speakMessage": "Озвучити повідомлення",
     "stopSpeaking": "Зупинити озвучення",
-    "tokensPerSecond": "{{rate}} tok/s"
+    "tokensPerSecond": "{{rate}} tok/s",
+    "sources": "Джерела",
+    "sourcesEmpty": "Немає джерел"
   },
   "schedule": {
     "createTitle": "Створити розклад",

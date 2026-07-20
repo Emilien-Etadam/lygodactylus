@@ -16,6 +16,7 @@ import {
 import { normalizeLatexDelimiters } from '../../utils/latex-delimiters';
 import type { ToolUseContent, ToolResultContent, FileAttachmentContent } from '../../types';
 import { isTextNoteFilename, formatAttachmentSize } from '../../../shared/long-paste';
+import { linkifyCitationMarkers, sourcesByIndexMap } from '../../../shared/web-citation';
 import { FileText, StickyNote } from 'lucide-react';
 import { CodeBlock } from './CodeBlock';
 import { CopyButton } from './CopyButton';
@@ -41,6 +42,7 @@ export const ContentBlockView = memo(function ContentBlockView({
   isStreaming,
   allBlocks,
   message,
+  citationSources,
 }: ContentBlockViewProps) {
   const { t } = useTranslation();
   const activeSessionId = useAppStore((s) => s.activeSessionId);
@@ -258,8 +260,15 @@ export const ContentBlockView = memo(function ContentBlockView({
     case 'text': {
       const textBlock = block as { type: 'text'; text: string };
       const text = textBlock.text || '';
+      const citationUrlByIndex =
+        !isUser && citationSources && citationSources.length > 0
+          ? sourcesByIndexMap(citationSources)
+          : null;
+      const withCitationLinks = citationUrlByIndex
+        ? linkifyCitationMarkers(text, citationUrlByIndex)
+        : text;
       const normalizedText = normalizeCitationMarkdownLinks(
-        normalizeLocalFileMarkdownLinks(normalizeLatexDelimiters(text))
+        normalizeLocalFileMarkdownLinks(normalizeLatexDelimiters(withCitationLinks))
       );
 
       if (!text) {

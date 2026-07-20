@@ -6,6 +6,8 @@
  * - YaCy (yacysearch.json API)
  */
 
+import { allocateWebCitationIndex, type WebCitationCounter } from './web-citation';
+
 export type WebSearchProvider = 'duckduckgo' | 'searxng' | 'yacy';
 
 export interface WebSearchConfig {
@@ -357,7 +359,10 @@ export async function executeWebSearch(
   }
 }
 
-export function formatWebSearchResponse(response: WebSearchResponse): string {
+export function formatWebSearchResponse(
+  response: WebSearchResponse,
+  options?: { citationCounter?: WebCitationCounter }
+): string {
   const lines: string[] = [];
   lines.push(`Query: ${response.query}`);
   lines.push(`Source: ${response.sourceLabel}`);
@@ -379,13 +384,18 @@ export function formatWebSearchResponse(response: WebSearchResponse): string {
     lines.push('Results: No related topics found.');
   }
 
-  return truncateOutput(lines.join('\n'));
+  const body = truncateOutput(lines.join('\n'));
+  const citeable = response.results
+    .filter((item): item is WebSearchResultItem & { url: string } => Boolean(item.url?.trim()))
+    .map((item) => ({ title: item.title, url: item.url }));
+  return allocateWebCitationIndex(options?.citationCounter, citeable, body);
 }
 
 export async function runWebSearch(
   query: string,
-  configInput?: Partial<WebSearchConfig>
+  configInput?: Partial<WebSearchConfig>,
+  options?: { citationCounter?: WebCitationCounter }
 ): Promise<string> {
   const response = await executeWebSearch(query, configInput);
-  return formatWebSearchResponse(response);
+  return formatWebSearchResponse(response, options);
 }

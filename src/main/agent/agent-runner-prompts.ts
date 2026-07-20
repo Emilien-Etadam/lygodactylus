@@ -63,7 +63,7 @@ LAN network access from the sandbox is disabled in Settings. Enable "Sandbox LAN
     ...(mode === 'plan' ? [PLAN_MODE_SYSTEM_PROMPT] : []),
     workspaceInfoPrompt,
     `<citation_requirements>
-If your answer uses linkable content from MCP tools, include a "Sources:" section and otherwise use standard Markdown links: [Title](https://claude.ai/chat/URL).
+When web_search or web_fetch results include a "Source index:" block with numbered entries like [1] title — url, cite those sources inline in your answer using the markers [1], [2], etc. next to the claims they support. Prefer inline [n] markers over inventing URLs. If your answer uses linkable content from MCP tools (no Source index), include a "Sources:" section and otherwise use standard Markdown links: [Title](https://example.com/URL).
 </citation_requirements>`,
     `<tool_behavior>
 Tool routing:
