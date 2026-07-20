@@ -23,6 +23,8 @@ import {
   toggleQuickAskWindow,
 } from './quick-ask-window';
 import { ensureMainWindowVisible } from './quick-ask-open-in-app';
+import { getDatabase } from '../db/database';
+import { listChatFolders } from '../session/chat-folders-store';
 
 export interface QuickAskStatusPayload {
   enabled: boolean;
@@ -113,7 +115,13 @@ export function openQuickAskSessionInMain(sessionId: string): void {
   // Refresh the session list so the main window knows about the Quick Ask session
   // (it may have been created only in the Quick Ask renderer via invoke).
   const sessions = mainAppState.sessionManager?.listSessions() ?? [];
-  sendToRenderer({ type: 'session.list', payload: { sessions } });
+  let folders: ReturnType<typeof listChatFolders> = [];
+  try {
+    folders = listChatFolders(getDatabase());
+  } catch {
+    folders = [];
+  }
+  sendToRenderer({ type: 'session.list', payload: { sessions, folders } });
 
   sendToRenderer({
     type: 'navigate.to',

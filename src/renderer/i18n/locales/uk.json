@@ -698,7 +698,17 @@
     "searchUntitled": "Розмова без назви",
     "searchTitleMatch": "Збіг у назві",
     "searchRoleUser": "Ви",
-    "searchRoleAssistant": "Асистент"
+    "searchRoleAssistant": "Асистент",
+    "newFolder": "Нова тека",
+    "folderNamePlaceholder": "Назва теки",
+    "renameFolder": "Перейменувати теку",
+    "deleteFolder": "Видалити теку",
+    "moveToFolder": "Перемістити до теки",
+    "noFolder": "Без теки",
+    "expandFolder": "Розгорнути теку",
+    "collapseFolder": "Згорнути теку",
+    "folderEmpty": "У цій теці немає розмов",
+    "subChatBadge": "↳"
   },
   "chat": {
     "sendMessage": "Надіслати повідомлення",
@@ -744,8 +754,9 @@
     "forkSuccess": "New session created from this message.",
     "forkErrors": {
       "errForkSessionNotFound": "Session not found.",
-      "errForkMessageNotFound": "User message not found.",
-      "errForkFailed": "Could not fork from this message."
+      "errForkMessageNotFound": "Повідомлення не знайдено.",
+      "errForkFailed": "Could not fork from this message.",
+      "errSessionParentCycle": "Неможливо вкласти сесію під її власного нащадка."
     },
     "rewindErrors": {
       "errRewindSessionNotFound": "Session not found.",
@@ -786,7 +797,9 @@
     "autonomyNormalTooltip": "Стандартна поведінка (дозволи без змін)",
     "autonomyAutonomousTooltip": "Після змін запускає lint/тести й виправляє в циклі",
     "autonomyCarefulBadge": "Обережний",
-    "autonomyAutonomousBadge": "Автономний"
+    "autonomyAutonomousBadge": "Автономний",
+    "backToParent": "Назад до батьківського чату",
+    "subChatSuccess": "Підчат відкрито з цього повідомлення."
   },
   "context": {
     "progress": "Прогрес",
@@ -863,7 +876,8 @@
     "undoRunSuccess": "Зміни запуску скасовано (відновлено {{restored}}, видалено {{deleted}}).",
     "undoRunFailed": "Не вдалося скасувати: {{error}}",
     "undoRunInProgress": "Неможливо скасувати, поки триває запуск.",
-    "undoRunNone": "Немає файлів для відновлення для цього запуску."
+    "undoRunNone": "Немає файлів для відновлення для цього запуску.",
+    "openSubChat": "Відкрити підчат"
   },
   "schedule": {
     "createTitle": "Створити розклад",

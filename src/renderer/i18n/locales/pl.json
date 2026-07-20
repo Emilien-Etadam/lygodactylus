@@ -698,7 +698,17 @@
     "searchUntitled": "Rozmowa bez tytułu",
     "searchTitleMatch": "Dopasowanie w tytule",
     "searchRoleUser": "Ty",
-    "searchRoleAssistant": "Asystent"
+    "searchRoleAssistant": "Asystent",
+    "newFolder": "Nowy folder",
+    "folderNamePlaceholder": "Nazwa folderu",
+    "renameFolder": "Zmień nazwę folderu",
+    "deleteFolder": "Usuń folder",
+    "moveToFolder": "Przenieś do folderu",
+    "noFolder": "Bez folderu",
+    "expandFolder": "Rozwiń folder",
+    "collapseFolder": "Zwiń folder",
+    "folderEmpty": "Brak rozmów w tym folderze",
+    "subChatBadge": "↳"
   },
   "chat": {
     "sendMessage": "Wyślij wiadomość",
@@ -744,8 +754,9 @@
     "forkSuccess": "New session created from this message.",
     "forkErrors": {
       "errForkSessionNotFound": "Session not found.",
-      "errForkMessageNotFound": "User message not found.",
-      "errForkFailed": "Could not fork from this message."
+      "errForkMessageNotFound": "Nie znaleziono wiadomości.",
+      "errForkFailed": "Could not fork from this message.",
+      "errSessionParentCycle": "Nie można zagnieździć sesji pod jej własnym potomkiem."
     },
     "rewindErrors": {
       "errRewindSessionNotFound": "Session not found.",
@@ -786,7 +797,9 @@
     "autonomyNormalTooltip": "Standardowe zachowanie (uprawnienia bez zmian)",
     "autonomyAutonomousTooltip": "Po zmianach uruchamia lint/testy i poprawia w pętli",
     "autonomyCarefulBadge": "Ostrożny",
-    "autonomyAutonomousBadge": "Autonomiczny"
+    "autonomyAutonomousBadge": "Autonomiczny",
+    "backToParent": "Wróć do czatu nadrzędnego",
+    "subChatSuccess": "Otwarto podczat z tej wiadomości."
   },
   "context": {
     "progress": "Postęp",
@@ -863,7 +876,8 @@
     "undoRunSuccess": "Cofnięto zmiany uruchomienia (przywrócono {{restored}}, usunięto {{deleted}}).",
     "undoRunFailed": "Cofanie nie powiodło się: {{error}}",
     "undoRunInProgress": "Nie można cofnąć, gdy uruchomienie jest w toku.",
-    "undoRunNone": "Brak plików do przywrócenia dla tego uruchomienia."
+    "undoRunNone": "Brak plików do przywrócenia dla tego uruchomienia.",
+    "openSubChat": "Otwórz podczat"
   },
   "schedule": {
     "createTitle": "Utwórz harmonogram",

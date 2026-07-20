@@ -25,6 +25,17 @@ export interface DatabaseInstance {
     delete: (id: string) => void;
   };
 
+  // Sidebar chat folders (project groups)
+  folders: {
+    create: (folder: FolderRow) => void;
+    update: (id: string, updates: Partial<FolderRow>) => void;
+    get: (id: string) => FolderRow | undefined;
+    getAll: () => FolderRow[];
+    delete: (id: string) => void;
+    /** Clear folder_id on all sessions pointing at this folder (orphan → root). */
+    clearSessionFolderRefs: (folderId: string) => void;
+  };
+
   // Message operations
   messages: {
     create: (message: MessageRow) => void;
@@ -81,8 +92,20 @@ export interface SessionRow {
   /** 'careful' | 'normal' | 'autonomous' — defaults to 'normal' for existing rows. */
   autonomy: string;
   model: string | null;
+  /** Sidebar folder id, or null when at root. */
+  folder_id: string | null;
+  /** Parent session id for sub-chats, or null for top-level sessions. */
+  parent_session_id: string | null;
   created_at: number;
   updated_at: number;
+}
+
+export interface FolderRow {
+  id: string;
+  name: string;
+  collapsed: number;
+  position: number;
+  created_at: number;
 }
 
 export interface MessageRow {
@@ -260,7 +283,30 @@ function initializeSchema(database: Database.Database): void {
     ensureColumn(database, 'sessions', 'agent_session_id', 'agent_session_id TEXT');
     ensureColumn(database, 'sessions', 'mode', "mode TEXT NOT NULL DEFAULT 'act'");
     ensureColumn(database, 'sessions', 'autonomy', "autonomy TEXT NOT NULL DEFAULT 'normal'");
+    ensureColumn(database, 'sessions', 'folder_id', 'folder_id TEXT');
+    ensureColumn(database, 'sessions', 'parent_session_id', 'parent_session_id TEXT');
     migrateLegacySessionIds(database);
+
+    // Sidebar chat folders (project groups) — additive, no FK cascade on sessions
+    database.exec(`
+    CREATE TABLE IF NOT EXISTS folders (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      collapsed INTEGER NOT NULL DEFAULT 0,
+      position INTEGER NOT NULL DEFAULT 0,
+      created_at INTEGER NOT NULL
+    )
+  `);
+
+    database.exec(`
+    CREATE INDEX IF NOT EXISTS idx_sessions_folder_id
+    ON sessions(folder_id)
+  `);
+
+    database.exec(`
+    CREATE INDEX IF NOT EXISTS idx_sessions_parent_session_id
+    ON sessions(parent_session_id)
+  `);
 
     // Create messages table
     database.exec(`
@@ -465,8 +511,29 @@ export function initDatabase(): DatabaseInstance {
   // Prepare statements for better performance
   const insertSession = rawDb.prepare(`
     INSERT OR REPLACE INTO sessions
-    (id, title, claude_session_id, agent_session_id, openai_thread_id, status, cwd, mounted_paths, allowed_tools, memory_enabled, mode, autonomy, model, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (id, title, claude_session_id, agent_session_id, openai_thread_id, status, cwd, mounted_paths, allowed_tools, memory_enabled, mode, autonomy, model, folder_id, parent_session_id, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  const insertFolder = rawDb.prepare(`
+    INSERT OR REPLACE INTO folders (id, name, collapsed, position, created_at)
+    VALUES (?, ?, ?, ?, ?)
+  `);
+
+  const getFolderStmt = rawDb.prepare(`
+    SELECT * FROM folders WHERE id = ?
+  `);
+
+  const getAllFoldersStmt = rawDb.prepare(`
+    SELECT * FROM folders ORDER BY position ASC, created_at ASC
+  `);
+
+  const deleteFolderStmt = rawDb.prepare(`
+    DELETE FROM folders WHERE id = ?
+  `);
+
+  const clearSessionFolderRefsStmt = rawDb.prepare(`
+    UPDATE sessions SET folder_id = NULL, updated_at = ? WHERE folder_id = ?
   `);
 
   // Note: Dynamic update queries are built in sessions.update() for flexibility
@@ -569,6 +636,8 @@ export function initDatabase(): DatabaseInstance {
           session.mode || 'act',
           session.autonomy || 'normal',
           session.model,
+          session.folder_id ?? null,
+          session.parent_session_id ?? null,
           session.created_at,
           session.updated_at
         );
@@ -620,6 +689,54 @@ export function initDatabase(): DatabaseInstance {
         messageSearchIndex.removeSession(id);
         // Messages will be deleted automatically due to ON DELETE CASCADE
         deleteSessionStmt.run(id);
+      },
+    },
+
+    folders: {
+      create: (folder: FolderRow) => {
+        insertFolder.run(
+          folder.id,
+          folder.name,
+          folder.collapsed,
+          folder.position,
+          folder.created_at
+        );
+      },
+
+      update: (id: string, updates: Partial<FolderRow>) => {
+        const setClauses: string[] = [];
+        const values: unknown[] = [];
+
+        for (const [key, value] of Object.entries(updates)) {
+          if (value !== undefined) {
+            if (key === 'id' || key === 'created_at') continue;
+            validateIdentifier(key);
+            setClauses.push(`${key} = ?`);
+            values.push(value);
+          }
+        }
+
+        if (setClauses.length === 0) return;
+
+        values.push(id);
+        const sql = `UPDATE folders SET ${setClauses.join(', ')} WHERE id = ?`;
+        rawDb.prepare(sql).run(...values);
+      },
+
+      get: (id: string): FolderRow | undefined => {
+        return getFolderStmt.get(id) as FolderRow | undefined;
+      },
+
+      getAll: (): FolderRow[] => {
+        return getAllFoldersStmt.all() as FolderRow[];
+      },
+
+      delete: (id: string) => {
+        deleteFolderStmt.run(id);
+      },
+
+      clearSessionFolderRefs: (folderId: string) => {
+        clearSessionFolderRefsStmt.run(Date.now(), folderId);
       },
     },
 

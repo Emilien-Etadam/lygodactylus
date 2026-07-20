@@ -160,6 +160,12 @@ export function ChatView() {
       : 'normal';
   const showSwitchToAct =
     sessionMode === 'plan' && !canStop && messages.some((message) => message.role === 'assistant');
+  const sessions = useAppStore((s) => s.sessions);
+  const parentSession = useMemo(() => {
+    const parentId = activeSession?.parentSessionId;
+    if (!parentId) return null;
+    return sessions.find((session) => session.id === parentId) ?? null;
+  }, [activeSession?.parentSessionId, sessions]);
 
   const handleSessionModeChange = useCallback(
     (mode: SessionMode) => {
@@ -831,6 +837,13 @@ export function ChatView() {
     await forkSessionFromMessage(activeSessionId, message.id);
   };
 
+  const handleOpenSubChat = async (message: Message) => {
+    if (!activeSessionId || isSubmitting) {
+      return;
+    }
+    await forkSessionFromMessage(activeSessionId, message.id, { asSubChat: true });
+  };
+
   const handleEditPrompt = async (message: Message) => {
     if (!activeSessionId || isSubmitting) {
       return;
@@ -864,29 +877,46 @@ export function ChatView() {
       {/* Header */}
       <div
         ref={headerRef}
-        className="relative h-12 border-b border-border-muted grid grid-cols-[1fr_auto_1fr] items-center px-4 lg:px-8 bg-background/88 backdrop-blur-md"
+        className="relative min-h-12 border-b border-border-muted grid grid-cols-[1fr_auto_1fr] items-center px-4 lg:px-8 py-2 bg-background/88 backdrop-blur-md"
       >
         <div className="text-[11px] font-medium tracking-[0.08em] uppercase text-text-muted">
           Lygodactylus
         </div>
-        <div className="flex items-center justify-center gap-2 min-w-0">
-          <h2
-            ref={titleRef}
-            className="text-[15px] font-medium text-text-primary text-center truncate max-w-[40vw] lg:max-w-[32rem]"
-          >
-            {activeSession.title}
-          </h2>
-          {sessionMode === 'plan' && (
-            <span className="shrink-0 px-2 py-0.5 rounded-full border border-accent/30 bg-accent/10 text-[11px] font-medium text-accent">
-              {t('chat.planModeBadge')}
-            </span>
-          )}
-          {sessionMode === 'act' && sessionAutonomy !== 'normal' && (
-            <span className="shrink-0 px-2 py-0.5 rounded-full border border-accent/30 bg-accent/10 text-[11px] font-medium text-accent">
-              {sessionAutonomy === 'careful'
-                ? t('chat.autonomyCarefulBadge')
-                : t('chat.autonomyAutonomousBadge')}
-            </span>
+        <div className="flex flex-col items-center justify-center gap-0.5 min-w-0">
+          <div className="flex items-center justify-center gap-2 min-w-0">
+            <h2
+              ref={titleRef}
+              className="text-[15px] font-medium text-text-primary text-center truncate max-w-[40vw] lg:max-w-[32rem]"
+            >
+              {activeSession.title}
+            </h2>
+            {sessionMode === 'plan' && (
+              <span className="shrink-0 px-2 py-0.5 rounded-full border border-accent/30 bg-accent/10 text-[11px] font-medium text-accent">
+                {t('chat.planModeBadge')}
+              </span>
+            )}
+            {sessionMode === 'act' && sessionAutonomy !== 'normal' && (
+              <span className="shrink-0 px-2 py-0.5 rounded-full border border-accent/30 bg-accent/10 text-[11px] font-medium text-accent">
+                {sessionAutonomy === 'careful'
+                  ? t('chat.autonomyCarefulBadge')
+                  : t('chat.autonomyAutonomousBadge')}
+              </span>
+            )}
+          </div>
+          {activeSession.parentSessionId && (
+            <button
+              type="button"
+              onClick={() => {
+                if (activeSession.parentSessionId) {
+                  setActiveSession(activeSession.parentSessionId);
+                }
+              }}
+              className="text-[11px] text-text-muted hover:text-accent transition-colors truncate max-w-[40vw] lg:max-w-[32rem]"
+              title={t('chat.backToParent')}
+            >
+              {t('chat.backToParent')}
+              {parentSession?.title ? ` — ${parentSession.title}` : ''}
+            </button>
           )}
         </div>
         {activeConnectors.length > 0 && (
@@ -962,6 +992,11 @@ export function ChatView() {
                     onEditPrompt={
                       message.role === 'user' && !isStreaming
                         ? () => void handleEditPrompt(message)
+                        : undefined
+                    }
+                    onOpenSubChat={
+                      message.role === 'assistant' && !isStreaming
+                        ? () => void handleOpenSubChat(message)
                         : undefined
                     }
                   />

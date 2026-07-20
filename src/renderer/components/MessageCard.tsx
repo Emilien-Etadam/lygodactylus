@@ -23,6 +23,8 @@ interface MessageCardProps {
   isStreaming?: boolean;
   onFork?: () => void;
   onEditPrompt?: () => void;
+  /** Open a sub-chat forked from this assistant message. */
+  onOpenSubChat?: () => void;
 }
 
 function messageHasText(message: Message): boolean {
@@ -34,6 +36,7 @@ export const MessageCard = memo(function MessageCard({
   isStreaming,
   onFork,
   onEditPrompt,
+  onOpenSubChat,
 }: MessageCardProps) {
   const { t } = useTranslation();
   const appConfig = useAppConfig();
@@ -188,6 +191,16 @@ export const MessageCard = memo(function MessageCard({
                   messageId={message.id}
                   disabled={isStreaming}
                 />
+              )}
+              {onOpenSubChat && (
+                <button
+                  type="button"
+                  onClick={onOpenSubChat}
+                  className="w-6 h-6 flex items-center justify-center rounded-md bg-surface-muted hover:bg-surface-active transition-colors"
+                  title={t('messageCard.openSubChat')}
+                >
+                  <GitBranch className="w-3 h-3 text-text-muted" />
+                </button>
               )}
               {hasCopyableText && speechEnabled && (
                 <SpeakButton messageId={message.id} text={textContent} />

@@ -698,7 +698,17 @@
     "searchUntitled": "Unbenannte Unterhaltung",
     "searchTitleMatch": "Treffer im Titel",
     "searchRoleUser": "Sie",
-    "searchRoleAssistant": "Assistent"
+    "searchRoleAssistant": "Assistent",
+    "newFolder": "Neuer Ordner",
+    "folderNamePlaceholder": "Ordnername",
+    "renameFolder": "Ordner umbenennen",
+    "deleteFolder": "Ordner löschen",
+    "moveToFolder": "In Ordner verschieben",
+    "noFolder": "Kein Ordner",
+    "expandFolder": "Ordner erweitern",
+    "collapseFolder": "Ordner einklappen",
+    "folderEmpty": "Keine Unterhaltungen in diesem Ordner",
+    "subChatBadge": "↳"
   },
   "chat": {
     "sendMessage": "Nachricht senden",
@@ -744,8 +754,9 @@
     "forkSuccess": "New session created from this message.",
     "forkErrors": {
       "errForkSessionNotFound": "Session not found.",
-      "errForkMessageNotFound": "User message not found.",
-      "errForkFailed": "Could not fork from this message."
+      "errForkMessageNotFound": "Nachricht nicht gefunden.",
+      "errForkFailed": "Could not fork from this message.",
+      "errSessionParentCycle": "Eine Sitzung kann nicht unter ihrem eigenen Nachkommen verschachtelt werden."
     },
     "rewindErrors": {
       "errRewindSessionNotFound": "Session not found.",
@@ -786,7 +797,9 @@
     "autonomyNormalTooltip": "Standardverhalten (Berechtigungen unverändert)",
     "autonomyAutonomousTooltip": "Nach Änderungen Lint/Tests ausführen und in einer Schleife korrigieren",
     "autonomyCarefulBadge": "Vorsichtig",
-    "autonomyAutonomousBadge": "Autonom"
+    "autonomyAutonomousBadge": "Autonom",
+    "backToParent": "Zurück zum übergeordneten Chat",
+    "subChatSuccess": "Unterchat aus dieser Nachricht geöffnet."
   },
   "context": {
     "progress": "Fortschritt",
@@ -863,7 +876,8 @@
     "undoRunSuccess": "Run-Änderungen rückgängig gemacht ({{restored}} wiederhergestellt, {{deleted}} gelöscht).",
     "undoRunFailed": "Rückgängigmachen fehlgeschlagen: {{error}}",
     "undoRunInProgress": "Während ein Run läuft, kann nicht rückgängig gemacht werden.",
-    "undoRunNone": "Keine Dateien zum Wiederherstellen für diesen Run."
+    "undoRunNone": "Keine Dateien zum Wiederherstellen für diesen Run.",
+    "openSubChat": "Unterchat öffnen"
   },
   "schedule": {
     "createTitle": "Zeitplan erstellen",

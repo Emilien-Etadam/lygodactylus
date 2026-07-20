@@ -68,6 +68,9 @@ export function useIPC() {
         switch (event.type) {
           case 'session.list':
             store.setSessions(event.payload.sessions);
+            if (Array.isArray(event.payload.folders)) {
+              store.setFolders(event.payload.folders);
+            }
             break;
 
           case 'session.status':

@@ -271,7 +271,8 @@ export class SessionManager {
 
   async forkSessionFromMessage(
     sessionId: string,
-    messageId: string
+    messageId: string,
+    asSubChat = false
   ): Promise<{
     success: boolean;
     newSession?: Session;
@@ -279,7 +280,7 @@ export class SessionManager {
     errorKey?: string;
     error?: string;
   }> {
-    return this.facadeSupport.forkSessionFromMessage(sessionId, messageId);
+    return this.facadeSupport.forkSessionFromMessage(sessionId, messageId, asSubChat);
   }
 
   async rewindSessionForEdit(

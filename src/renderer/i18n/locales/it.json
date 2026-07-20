@@ -698,7 +698,17 @@
     "searchUntitled": "Conversazione senza titolo",
     "searchTitleMatch": "Corrispondenza nel titolo",
     "searchRoleUser": "Tu",
-    "searchRoleAssistant": "Assistente"
+    "searchRoleAssistant": "Assistente",
+    "newFolder": "Nuova cartella",
+    "folderNamePlaceholder": "Nome cartella",
+    "renameFolder": "Rinomina cartella",
+    "deleteFolder": "Elimina cartella",
+    "moveToFolder": "Sposta nella cartella",
+    "noFolder": "Nessuna cartella",
+    "expandFolder": "Espandi cartella",
+    "collapseFolder": "Comprimi cartella",
+    "folderEmpty": "Nessuna conversazione in questa cartella",
+    "subChatBadge": "↳"
   },
   "chat": {
     "sendMessage": "Invia messaggio",
@@ -744,8 +754,9 @@
     "forkSuccess": "New session created from this message.",
     "forkErrors": {
       "errForkSessionNotFound": "Session not found.",
-      "errForkMessageNotFound": "User message not found.",
-      "errForkFailed": "Could not fork from this message."
+      "errForkMessageNotFound": "Messaggio non trovato.",
+      "errForkFailed": "Could not fork from this message.",
+      "errSessionParentCycle": "Impossibile annidare una sessione sotto il proprio discendente."
     },
     "rewindErrors": {
       "errRewindSessionNotFound": "Session not found.",
@@ -786,7 +797,9 @@
     "autonomyNormalTooltip": "Comportamento standard (permessi invariati)",
     "autonomyAutonomousTooltip": "Dopo le modifiche esegue lint/test e corregge in loop",
     "autonomyCarefulBadge": "Prudente",
-    "autonomyAutonomousBadge": "Autonomo"
+    "autonomyAutonomousBadge": "Autonomo",
+    "backToParent": "Torna alla chat principale",
+    "subChatSuccess": "Sotto-chat aperta da questo messaggio."
   },
   "context": {
     "progress": "Avanzamento",
@@ -863,7 +876,8 @@
     "undoRunSuccess": "Modifiche dell’esecuzione annullate ({{restored}} ripristinati, {{deleted}} eliminati).",
     "undoRunFailed": "Annullamento non riuscito: {{error}}",
     "undoRunInProgress": "Impossibile annullare mentre un’esecuzione è in corso.",
-    "undoRunNone": "Nessun file da ripristinare per questa esecuzione."
+    "undoRunNone": "Nessun file da ripristinare per questa esecuzione.",
+    "openSubChat": "Apri sotto-chat"
   },
   "schedule": {
     "createTitle": "Crea pianificazione",

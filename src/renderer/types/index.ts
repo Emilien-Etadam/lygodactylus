@@ -1,7 +1,8 @@
 import type { SessionMode } from '../../shared/session-mode';
 import type { SessionAutonomy } from '../../shared/session-autonomy';
+import type { ChatFolder } from '../../shared/chat-folders';
 
-export type { SessionMode, SessionAutonomy };
+export type { SessionMode, SessionAutonomy, ChatFolder };
 
 // Session types
 export interface Session {
@@ -19,6 +20,10 @@ export interface Session {
   /** Careful / Normal / Autonomous — orthogonal to Plan/Act (default normal). */
   autonomy: SessionAutonomy;
   model?: string;
+  /** Sidebar folder id when grouped; null/undefined at root. */
+  folderId?: string | null;
+  /** Parent session id for sub-chats; null/undefined for top-level sessions. */
+  parentSessionId?: string | null;
   createdAt: number;
   updatedAt: number;
 }
@@ -521,7 +526,7 @@ export type ClientEvent =
     }
   | {
       type: 'session.forkFromMessage';
-      payload: { sessionId: string; messageId: string };
+      payload: { sessionId: string; messageId: string; asSubChat?: boolean };
     }
   | {
       type: 'session.rewindToMessage';
@@ -600,7 +605,10 @@ export type ServerEvent =
       payload: { sessionId: string; status: SessionStatus; error?: string };
     }
   | { type: 'session.update'; payload: { sessionId: string; updates: Partial<Session> } }
-  | { type: 'session.list'; payload: { sessions: Session[] } }
+  | {
+      type: 'session.list';
+      payload: { sessions: Session[]; folders?: ChatFolder[] };
+    }
   | { type: 'permission.request'; payload: PermissionRequest }
   | { type: 'permission.dismiss'; payload: { toolUseId: string } }
   | { type: 'question.request'; payload: UserQuestionRequest }

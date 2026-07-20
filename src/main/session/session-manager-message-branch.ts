@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Message, Session, TextContent } from '../../renderer/types';
 import { log, logError } from '../utils/logger';
 import type { SessionManagerFacadeSupportDeps } from './session-manager-facade-support';
+import { wouldCreateSessionParentCycle } from './session-parent-cycle';
 
 type StopSession = (sessionId: string) => void;
 
@@ -17,9 +18,9 @@ function extractPromptText(message: Message): string {
     .trim();
 }
 
-function buildForkTitle(sourceTitle: string): string {
+function buildForkTitle(sourceTitle: string, asSubChat: boolean): string {
   const base = sourceTitle.trim() || 'New Session';
-  const forkTitle = `Fork — ${base}`;
+  const forkTitle = asSubChat ? `↳ ${base}` : `Fork — ${base}`;
   return forkTitle.length > 50 ? `${forkTitle.slice(0, 47)}...` : forkTitle;
 }
 
@@ -36,6 +37,12 @@ function findUserMessageIndex(messages: Message[], messageId: string): number {
   return messages.findIndex((message) => message.id === messageId && message.role === 'user');
 }
 
+function findAssistantMessageIndex(messages: Message[], messageId: string): number {
+  return messages.findIndex(
+    (message) => message.id === messageId && message.role === 'assistant'
+  );
+}
+
 export async function forkSessionFromMessage(
   deps: SessionManagerFacadeSupportDeps,
   stopSession: StopSession,
@@ -46,7 +53,8 @@ export async function forkSessionFromMessage(
     memoryEnabled?: boolean
   ) => Session,
   sessionId: string,
-  messageId: string
+  messageId: string,
+  asSubChat = false
 ): Promise<{
   success: boolean;
   newSession?: Session;
@@ -54,7 +62,12 @@ export async function forkSessionFromMessage(
   errorKey?: string;
   error?: string;
 }> {
-  log('[SessionManager] Fork from message requested:', sessionId, messageId);
+  log(
+    '[SessionManager] Fork from message requested:',
+    sessionId,
+    messageId,
+    asSubChat ? '(sub-chat)' : ''
+  );
   const session = deps.loadSession(sessionId);
   if (!session) {
     return { success: false, errorKey: 'errForkSessionNotFound' };
@@ -65,14 +78,16 @@ export async function forkSessionFromMessage(
   }
 
   const messages = deps.getMessages(sessionId);
-  const messageIndex = findUserMessageIndex(messages, messageId);
+  const messageIndex = asSubChat
+    ? findAssistantMessageIndex(messages, messageId)
+    : findUserMessageIndex(messages, messageId);
   if (messageIndex < 0) {
     return { success: false, errorKey: 'errForkMessageNotFound' };
   }
 
   try {
     const newSession = createSession(
-      buildForkTitle(session.title),
+      buildForkTitle(session.title, asSubChat),
       session.cwd,
       session.allowedTools,
       session.memoryEnabled
@@ -80,6 +95,16 @@ export async function forkSessionFromMessage(
     newSession.model = session.model;
     newSession.mode = session.mode ?? 'act';
     newSession.autonomy = session.autonomy ?? 'normal';
+    // Sub-chats inherit the parent's folder grouping and link back via parentSessionId.
+    newSession.folderId = session.folderId ?? null;
+    if (asSubChat) {
+      if (wouldCreateSessionParentCycle(deps.db, newSession.id, sessionId)) {
+        return { success: false, errorKey: 'errSessionParentCycle' };
+      }
+      newSession.parentSessionId = sessionId;
+    } else {
+      newSession.parentSessionId = null;
+    }
 
     const forkMessages = cloneMessagesForSession(
       messages.slice(0, messageIndex + 1),

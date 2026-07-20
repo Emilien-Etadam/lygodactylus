@@ -24,6 +24,8 @@ import {
   getSavedThemePreference,
   resolveEffectiveTheme,
 } from './main-app-window';
+import { getDatabase } from './db/database';
+import { listChatFolders } from './session/chat-folders-store';
 
 export async function handleClientEvent(event: ClientEvent): Promise<unknown> {
   if (
@@ -91,7 +93,11 @@ export async function handleClientEvent(event: ClientEvent): Promise<unknown> {
       );
 
     case 'session.forkFromMessage':
-      return sm.forkSessionFromMessage(event.payload.sessionId, event.payload.messageId);
+      return sm.forkSessionFromMessage(
+        event.payload.sessionId,
+        event.payload.messageId,
+        event.payload.asSubChat === true
+      );
 
     case 'session.rewindToMessage':
       return sm.rewindSessionForEdit(event.payload.sessionId, event.payload.messageId);
@@ -122,7 +128,14 @@ export async function handleClientEvent(event: ClientEvent): Promise<unknown> {
 
     case 'session.list': {
       const sessions = sm.listSessions();
-      sendToRenderer({ type: 'session.list', payload: { sessions } });
+      let folders: ReturnType<typeof listChatFolders> = [];
+      try {
+        folders = listChatFolders(getDatabase());
+      } catch {
+        // Soft-fail: remote/desktop still get sessions without folder metadata.
+        folders = [];
+      }
+      sendToRenderer({ type: 'session.list', payload: { sessions, folders } });
       return sessions;
     }
 

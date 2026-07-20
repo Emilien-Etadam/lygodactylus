@@ -698,7 +698,17 @@
     "searchUntitled": "Namnlös konversation",
     "searchTitleMatch": "Titelträff",
     "searchRoleUser": "Du",
-    "searchRoleAssistant": "Assistent"
+    "searchRoleAssistant": "Assistent",
+    "newFolder": "Ny mapp",
+    "folderNamePlaceholder": "Mappnamn",
+    "renameFolder": "Byt namn på mapp",
+    "deleteFolder": "Ta bort mapp",
+    "moveToFolder": "Flytta till mapp",
+    "noFolder": "Ingen mapp",
+    "expandFolder": "Expandera mapp",
+    "collapseFolder": "Komprimera mapp",
+    "folderEmpty": "Inga konversationer i den här mappen",
+    "subChatBadge": "↳"
   },
   "chat": {
     "sendMessage": "Skicka meddelande",
@@ -744,8 +754,9 @@
     "forkSuccess": "New session created from this message.",
     "forkErrors": {
       "errForkSessionNotFound": "Session not found.",
-      "errForkMessageNotFound": "User message not found.",
-      "errForkFailed": "Could not fork from this message."
+      "errForkMessageNotFound": "Meddelandet hittades inte.",
+      "errForkFailed": "Could not fork from this message.",
+      "errSessionParentCycle": "Det går inte att kapsla en session under sin egen ättling."
     },
     "rewindErrors": {
       "errRewindSessionNotFound": "Session not found.",
@@ -786,7 +797,9 @@
     "autonomyNormalTooltip": "Standardbeteende (oförändrade behörigheter)",
     "autonomyAutonomousTooltip": "Efter ändringar körs lint/tester och rättas i en loop",
     "autonomyCarefulBadge": "Försiktig",
-    "autonomyAutonomousBadge": "Autonom"
+    "autonomyAutonomousBadge": "Autonom",
+    "backToParent": "Tillbaka till överordnad chatt",
+    "subChatSuccess": "Underchatt öppnad från det här meddelandet."
   },
   "context": {
     "progress": "Förlopp",
@@ -863,7 +876,8 @@
     "undoRunSuccess": "Körningens ändringar ångrades ({{restored}} återställda, {{deleted}} borttagna).",
     "undoRunFailed": "Kunde inte ångra: {{error}}",
     "undoRunInProgress": "Kan inte ångra medan en körning pågår.",
-    "undoRunNone": "Inga filer att återställa för denna körning."
+    "undoRunNone": "Inga filer att återställa för denna körning.",
+    "openSubChat": "Öppna underchatt"
   },
   "schedule": {
     "createTitle": "Skapa schema",
