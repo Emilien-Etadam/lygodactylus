@@ -1232,7 +1232,29 @@
     "shortcutInvalid": "Format de raccourci invalide.",
     "shortcutTaken": "Ce raccourci est déjà utilisé par le système ou une autre application.",
     "shortcutRegisterFailed": "Impossible d'enregistrer le raccourci global.",
-    "sessionTitle": "Quick Ask"
+    "sessionTitle": "Quick Ask",
+    "selectionTitle": "Quick Ask — Sélection",
+    "selectionSubtitle": "Agir sur le texte copié, prêt à coller",
+    "selectionEmptyHint": "Copiez d’abord un texte (Ctrl/Cmd+C), puis réutilisez ce raccourci.",
+    "selectionPlaceholder": "Copiez d’abord un texte, ou tapez une question…",
+    "selectionTruncated": "Le texte du presse-papier a été tronqué à 32 Ko.",
+    "selectionShortcutLabel": "Raccourci sélection",
+    "selectionShortcutHint": "Copiez un texte dans une autre app, puis appuyez sur ce raccourci. Format Electron, ex. CommandOrControl+Shift+Y",
+    "copyResult": "Copier le résultat",
+    "copied": "Copié",
+    "uiLanguageName": "français",
+    "actions": {
+      "summarize": "Résumer",
+      "translate": "Traduire",
+      "rephrase": "Reformuler",
+      "correct": "Corriger"
+    },
+    "templates": {
+      "summarize": "Résume le texte suivant de façon concise :\n\n{{text}}",
+      "translate": "Traduis le texte suivant en {{language}} :\n\n{{text}}",
+      "rephrase": "Reformule clairement le texte suivant, en préservant le sens :\n\n{{text}}",
+      "correct": "Corrige l’orthographe, la grammaire et la clarté du texte suivant. Renvoie uniquement le texte corrigé :\n\n{{text}}"
+    }
   },
   "presets": {
     "pickerTitle": "Choisir un preset",

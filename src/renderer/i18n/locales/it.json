@@ -1232,7 +1232,29 @@
     "shortcutInvalid": "Formato scorciatoia non valido.",
     "shortcutTaken": "Questa scorciatoia è già usata dal sistema o da un'altra app.",
     "shortcutRegisterFailed": "Impossibile registrare la scorciatoia globale.",
-    "sessionTitle": "Quick Ask"
+    "sessionTitle": "Quick Ask",
+    "selectionTitle": "Quick Ask — Selezione",
+    "selectionSubtitle": "Agisci sul testo copiato, pronto da incollare",
+    "selectionEmptyHint": "Copia prima un testo (Ctrl/Cmd+C), poi usa di nuovo questa scorciatoia.",
+    "selectionPlaceholder": "Copia prima un testo oppure digita una domanda…",
+    "selectionTruncated": "Il testo degli appunti è stato troncato a 32 KB.",
+    "selectionShortcutLabel": "Scorciatoia selezione",
+    "selectionShortcutHint": "Copia testo in un’altra app, poi premi questa scorciatoia. Formato Electron, es. CommandOrControl+Shift+Y",
+    "copyResult": "Copia il risultato",
+    "copied": "Copiato",
+    "uiLanguageName": "italiano",
+    "actions": {
+      "summarize": "Riassumi",
+      "translate": "Traduci",
+      "rephrase": "Riformula",
+      "correct": "Correggi"
+    },
+    "templates": {
+      "summarize": "Riassumi in modo conciso il seguente testo:\n\n{{text}}",
+      "translate": "Traduci il seguente testo in {{language}}:\n\n{{text}}",
+      "rephrase": "Riformula chiaramente il seguente testo, preservando il significato:\n\n{{text}}",
+      "correct": "Correggi ortografia, grammatica e chiarezza del seguente testo. Restituisci solo il testo corretto:\n\n{{text}}"
+    }
   },
   "presets": {
     "pickerTitle": "Scegli un preset",

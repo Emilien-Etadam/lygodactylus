@@ -1232,7 +1232,29 @@
     "shortcutInvalid": "Ongeldig sneltoetsformaat.",
     "shortcutTaken": "Deze sneltoets is al in gebruik door het systeem of een andere app.",
     "shortcutRegisterFailed": "Kon de globale sneltoets niet registreren.",
-    "sessionTitle": "Quick Ask"
+    "sessionTitle": "Quick Ask",
+    "selectionTitle": "Quick Ask — Selectie",
+    "selectionSubtitle": "Werk met gekopieerde tekst, klaar om te plakken",
+    "selectionEmptyHint": "Kopieer eerst tekst (Ctrl/Cmd+C) en gebruik daarna opnieuw deze snelkoppeling.",
+    "selectionPlaceholder": "Kopieer eerst tekst of typ een vraag…",
+    "selectionTruncated": "Klembordtekst is afgekapt tot 32 KB.",
+    "selectionShortcutLabel": "Selectiesnelkoppeling",
+    "selectionShortcutHint": "Kopieer tekst in een andere app en druk daarna op deze snelkoppeling. Electron-indeling, bijv. CommandOrControl+Shift+Y",
+    "copyResult": "Resultaat kopiëren",
+    "copied": "Gekopieerd",
+    "uiLanguageName": "Nederlands",
+    "actions": {
+      "summarize": "Samenvatten",
+      "translate": "Vertalen",
+      "rephrase": "Herformuleren",
+      "correct": "Corrigeren"
+    },
+    "templates": {
+      "summarize": "Vat de volgende tekst beknopt samen:\n\n{{text}}",
+      "translate": "Vertaal de volgende tekst naar het {{language}}:\n\n{{text}}",
+      "rephrase": "Herformuleer de volgende tekst duidelijk en behoud de betekenis:\n\n{{text}}",
+      "correct": "Corrigeer spelling, grammatica en duidelijkheid in de volgende tekst. Geef alleen de gecorrigeerde tekst terug:\n\n{{text}}"
+    }
   },
   "presets": {
     "pickerTitle": "Kies een preset",

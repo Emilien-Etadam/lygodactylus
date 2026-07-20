@@ -2,24 +2,28 @@
  * @module main/quick-ask/quick-ask-controller
  *
  * Wires config ↔ globalShortcut ↔ Quick Ask window. Safe no-ops when disabled.
+ * Registers two shortcuts when enabled: Ask (toggle) and Sélection (clipboard).
  */
-import { globalShortcut } from 'electron';
+import { clipboard, globalShortcut } from 'electron';
 import { configStore } from '../config/config-store';
 import { log, logWarn } from '../utils/logger';
 import { mainAppState } from '../main-app-state';
 import { sendToRenderer } from '../main-renderer-bridge';
 import {
+  DEFAULT_QUICK_ASK_SELECTION_SHORTCUT,
   DEFAULT_QUICK_ASK_SHORTCUT,
   normalizeQuickAskShortcut,
+  prepareQuickAskClipboardText,
 } from '../../shared/quick-ask';
 import {
   registerQuickAskShortcut,
-  unregisterQuickAskShortcut,
+  unregisterAllQuickAskShortcuts,
   type QuickAskShortcutRegistrationResult,
 } from './quick-ask-shortcut';
 import {
   destroyQuickAskWindow,
   hideQuickAskWindow,
+  showQuickAskSelectionWindow,
   toggleQuickAskWindow,
 } from './quick-ask-window';
 import { ensureMainWindowVisible } from './quick-ask-open-in-app';
@@ -29,6 +33,9 @@ export interface QuickAskStatusPayload {
   shortcut: string;
   registered: boolean;
   error: string | null;
+  selectionShortcut: string;
+  selectionRegistered: boolean;
+  selectionError: string | null;
 }
 
 function shortcutApi() {
@@ -40,6 +47,30 @@ function shortcutApi() {
   };
 }
 
+function resolveAskShortcut(): string {
+  return (
+    normalizeQuickAskShortcut(configStore.get('quickAskShortcut')) || DEFAULT_QUICK_ASK_SHORTCUT
+  );
+}
+
+function resolveSelectionShortcut(): string {
+  return (
+    normalizeQuickAskShortcut(configStore.get('quickAskSelectionShortcut')) ||
+    DEFAULT_QUICK_ASK_SELECTION_SHORTCUT
+  );
+}
+
+function registrationErrorMessage(
+  result: QuickAskShortcutRegistrationResult
+): string {
+  if (result.ok) {
+    return '';
+  }
+  return result.error === 'shortcut_taken'
+    ? 'shortcut_taken'
+    : result.error || 'shortcut_register_failed';
+}
+
 function broadcastStatus(): void {
   const status = getQuickAskStatus();
   sendToRenderer({ type: 'quickAsk.status', payload: status });
@@ -47,58 +78,114 @@ function broadcastStatus(): void {
 
 export function getQuickAskStatus(): QuickAskStatusPayload {
   const enabled = configStore.get('quickAskEnabled') === true;
-  const shortcut =
-    normalizeQuickAskShortcut(configStore.get('quickAskShortcut')) || DEFAULT_QUICK_ASK_SHORTCUT;
   return {
     enabled,
-    shortcut,
+    shortcut: resolveAskShortcut(),
     registered: mainAppState.quickAskShortcutRegistered,
     error: mainAppState.quickAskShortcutError,
+    selectionShortcut: resolveSelectionShortcut(),
+    selectionRegistered: mainAppState.quickAskSelectionShortcutRegistered,
+    selectionError: mainAppState.quickAskSelectionShortcutError,
   };
+}
+
+/** Read the system clipboard and open Quick Ask in Sélection mode. */
+export function openQuickAskFromClipboard(): void {
+  if (!configStore.get('quickAskEnabled')) {
+    return;
+  }
+
+  let raw = '';
+  try {
+    raw = clipboard.readText();
+  } catch (error) {
+    logWarn('[QuickAsk] clipboard.readText failed:', error);
+    raw = '';
+  }
+
+  const prepared = prepareQuickAskClipboardText(raw);
+  showQuickAskSelectionWindow({
+    mode: 'selection',
+    sourceText: prepared.text,
+    truncated: prepared.truncated,
+    empty: prepared.empty,
+  });
 }
 
 /**
  * Sync global shortcut registration with current config.
  * Call after app ready and whenever quick-ask config changes.
  */
-export function syncQuickAskFromConfig(): QuickAskShortcutRegistrationResult | null {
+export function syncQuickAskFromConfig(): {
+  ask: QuickAskShortcutRegistrationResult | null;
+  selection: QuickAskShortcutRegistrationResult | null;
+} {
   const enabled = configStore.get('quickAskEnabled') === true;
-  const rawShortcut = configStore.get('quickAskShortcut');
-  const shortcut = normalizeQuickAskShortcut(rawShortcut) || DEFAULT_QUICK_ASK_SHORTCUT;
+  const askShortcut = resolveAskShortcut();
+  const selectionShortcut = resolveSelectionShortcut();
+  const api = shortcutApi();
 
   if (!enabled) {
-    unregisterQuickAskShortcut(shortcutApi());
+    unregisterAllQuickAskShortcuts(api);
     mainAppState.quickAskShortcutRegistered = false;
     mainAppState.quickAskShortcutError = null;
+    mainAppState.quickAskSelectionShortcutRegistered = false;
+    mainAppState.quickAskSelectionShortcutError = null;
     hideQuickAskWindow();
     broadcastStatus();
-    log('[QuickAsk] Feature disabled — shortcut unregistered');
-    return null;
+    log('[QuickAsk] Feature disabled — shortcuts unregistered');
+    return { ask: null, selection: null };
   }
 
-  const result = registerQuickAskShortcut(shortcut, () => toggleQuickAskWindow(), shortcutApi());
+  const askResult = registerQuickAskShortcut(
+    askShortcut,
+    () => toggleQuickAskWindow(),
+    api,
+    'ask'
+  );
 
-  mainAppState.quickAskShortcutRegistered = result.ok;
-  if (result.ok) {
+  mainAppState.quickAskShortcutRegistered = askResult.ok;
+  if (askResult.ok) {
     mainAppState.quickAskShortcutError = null;
-    log('[QuickAsk] Shortcut registered:', result.accelerator);
+    log('[QuickAsk] Ask shortcut registered:', askResult.accelerator);
   } else {
-    const message =
-      result.error === 'shortcut_taken'
-        ? 'shortcut_taken'
-        : result.error || 'shortcut_register_failed';
-    mainAppState.quickAskShortcutError = message;
-    logWarn('[QuickAsk] Shortcut registration failed:', message, result.accelerator);
+    mainAppState.quickAskShortcutError = registrationErrorMessage(askResult);
+    logWarn(
+      '[QuickAsk] Ask shortcut registration failed:',
+      mainAppState.quickAskShortcutError,
+      askResult.accelerator
+    );
+  }
+
+  const selectionResult = registerQuickAskShortcut(
+    selectionShortcut,
+    () => openQuickAskFromClipboard(),
+    api,
+    'selection'
+  );
+
+  mainAppState.quickAskSelectionShortcutRegistered = selectionResult.ok;
+  if (selectionResult.ok) {
+    mainAppState.quickAskSelectionShortcutError = null;
+    log('[QuickAsk] Selection shortcut registered:', selectionResult.accelerator);
+  } else {
+    mainAppState.quickAskSelectionShortcutError = registrationErrorMessage(selectionResult);
+    logWarn(
+      '[QuickAsk] Selection shortcut registration failed:',
+      mainAppState.quickAskSelectionShortcutError,
+      selectionResult.accelerator
+    );
   }
 
   broadcastStatus();
-  return result;
+  return { ask: askResult, selection: selectionResult };
 }
 
-/** Unregister shortcut and destroy window — call on app quit. */
+/** Unregister shortcuts and destroy window — call on app quit. */
 export function shutdownQuickAsk(): void {
-  unregisterQuickAskShortcut(shortcutApi());
+  unregisterAllQuickAskShortcuts(shortcutApi());
   mainAppState.quickAskShortcutRegistered = false;
+  mainAppState.quickAskSelectionShortcutRegistered = false;
   destroyQuickAskWindow();
 }
 

@@ -53,6 +53,7 @@ import {
   normalizeMemoryRuntimeConfig,
   normalizeOllamaKeepAlive,
   normalizeQuickAskShortcut,
+  DEFAULT_QUICK_ASK_SELECTION_SHORTCUT,
   DEFAULT_QUICK_ASK_SHORTCUT,
   normalizeWebSearchConfig,
   normalizeWorkspaceTooling,
@@ -483,6 +484,12 @@ export class ConfigStore {
             current.quickAskShortcut ||
             DEFAULT_QUICK_ASK_SHORTCUT
           : current.quickAskShortcut,
+      quickAskSelectionShortcut:
+        updates.quickAskSelectionShortcut !== undefined
+          ? normalizeQuickAskShortcut(updates.quickAskSelectionShortcut) ||
+            current.quickAskSelectionShortcut ||
+            DEFAULT_QUICK_ASK_SELECTION_SHORTCUT
+          : current.quickAskSelectionShortcut,
       ollamaKeepAlive:
         updates.ollamaKeepAlive !== undefined
           ? normalizeOllamaKeepAlive(updates.ollamaKeepAlive)

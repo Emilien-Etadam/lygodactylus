@@ -3,6 +3,7 @@
  *
  * Thin wrappers around Electron `globalShortcut` for Quick Ask.
  * Pure register/unregister helpers are unit-tested with an injected API.
+ * Supports two slots: the floating Ask window and Sélection (clipboard).
  */
 
 export interface GlobalShortcutApi {
@@ -19,51 +20,73 @@ export interface QuickAskShortcutRegistrationResult {
   error?: string;
 }
 
-let registeredAccelerator: string | null = null;
+export type QuickAskShortcutSlot = 'ask' | 'selection';
 
-export function getRegisteredQuickAskAccelerator(): string | null {
-  return registeredAccelerator;
+const registeredAccelerators: Record<QuickAskShortcutSlot, string | null> = {
+  ask: null,
+  selection: null,
+};
+
+function otherSlot(slot: QuickAskShortcutSlot): QuickAskShortcutSlot {
+  return slot === 'ask' ? 'selection' : 'ask';
+}
+
+export function getRegisteredQuickAskAccelerator(
+  slot: QuickAskShortcutSlot = 'ask'
+): string | null {
+  return registeredAccelerators[slot];
 }
 
 /**
- * Register a global shortcut. Unregisters any previously registered Quick Ask
- * accelerator first. Never throws — failures become `{ ok: false, error }`.
+ * Register a global shortcut for a Quick Ask slot. Unregisters any previously
+ * registered accelerator for that slot first. Never throws — failures become
+ * `{ ok: false, error }`. Refuses when the other slot already owns the same
+ * accelerator (Electron allows only one callback per accelerator).
  */
 export function registerQuickAskShortcut(
   accelerator: string,
   callback: () => void,
-  api: GlobalShortcutApi
+  api: GlobalShortcutApi,
+  slot: QuickAskShortcutSlot = 'ask'
 ): QuickAskShortcutRegistrationResult {
-  const previous = registeredAccelerator;
+  if (registeredAccelerators[otherSlot(slot)] === accelerator) {
+    return {
+      ok: false,
+      accelerator,
+      error: 'shortcut_taken',
+    };
+  }
+
+  const previous = registeredAccelerators[slot];
   if (previous && previous !== accelerator) {
     try {
       api.unregister(previous);
     } catch {
       // Best-effort cleanup before switching accelerators.
     }
-    registeredAccelerator = null;
+    registeredAccelerators[slot] = null;
   }
 
   try {
     if (previous === accelerator && api.isRegistered(accelerator)) {
       // Re-bind: unregister then register so the callback is refreshed.
       api.unregister(accelerator);
-      registeredAccelerator = null;
+      registeredAccelerators[slot] = null;
     }
 
     const ok = api.register(accelerator, callback);
     if (!ok) {
-      registeredAccelerator = null;
+      registeredAccelerators[slot] = null;
       return {
         ok: false,
         accelerator,
         error: 'shortcut_taken',
       };
     }
-    registeredAccelerator = accelerator;
+    registeredAccelerators[slot] = accelerator;
     return { ok: true, accelerator };
   } catch (error) {
-    registeredAccelerator = null;
+    registeredAccelerators[slot] = null;
     return {
       ok: false,
       accelerator,
@@ -72,9 +95,12 @@ export function registerQuickAskShortcut(
   }
 }
 
-/** Unregister the current Quick Ask accelerator (no-op if none). */
-export function unregisterQuickAskShortcut(api: GlobalShortcutApi): void {
-  const current = registeredAccelerator;
+/** Unregister the current accelerator for a slot (no-op if none). */
+export function unregisterQuickAskShortcut(
+  api: GlobalShortcutApi,
+  slot: QuickAskShortcutSlot = 'ask'
+): void {
+  const current = registeredAccelerators[slot];
   if (!current) {
     return;
   }
@@ -83,10 +109,17 @@ export function unregisterQuickAskShortcut(api: GlobalShortcutApi): void {
   } catch {
     // Ignore unregister failures during shutdown.
   }
-  registeredAccelerator = null;
+  registeredAccelerators[slot] = null;
+}
+
+/** Unregister every Quick Ask shortcut slot. */
+export function unregisterAllQuickAskShortcuts(api: GlobalShortcutApi): void {
+  unregisterQuickAskShortcut(api, 'ask');
+  unregisterQuickAskShortcut(api, 'selection');
 }
 
 /** Test helper — reset module state between vitest cases. */
 export function resetQuickAskShortcutStateForTests(): void {
-  registeredAccelerator = null;
+  registeredAccelerators.ask = null;
+  registeredAccelerators.selection = null;
 }

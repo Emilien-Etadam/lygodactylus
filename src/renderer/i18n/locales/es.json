@@ -1232,7 +1232,29 @@
     "shortcutInvalid": "Formato de atajo no válido.",
     "shortcutTaken": "Este atajo ya está en uso por el sistema u otra aplicación.",
     "shortcutRegisterFailed": "No se pudo registrar el atajo global.",
-    "sessionTitle": "Quick Ask"
+    "sessionTitle": "Quick Ask",
+    "selectionTitle": "Quick Ask — Selección",
+    "selectionSubtitle": "Actúa sobre el texto copiado, listo para pegar",
+    "selectionEmptyHint": "Copia primero un texto (Ctrl/Cmd+C) y vuelve a usar este atajo.",
+    "selectionPlaceholder": "Copia un texto primero o escribe una pregunta…",
+    "selectionTruncated": "El texto del portapapeles se truncó a 32 KB.",
+    "selectionShortcutLabel": "Atajo de selección",
+    "selectionShortcutHint": "Copia texto en otra app y pulsa este atajo. Formato Electron, p. ej. CommandOrControl+Shift+Y",
+    "copyResult": "Copiar el resultado",
+    "copied": "Copiado",
+    "uiLanguageName": "español",
+    "actions": {
+      "summarize": "Resumir",
+      "translate": "Traducir",
+      "rephrase": "Reformular",
+      "correct": "Corregir"
+    },
+    "templates": {
+      "summarize": "Resume el siguiente texto de forma concisa:\n\n{{text}}",
+      "translate": "Traduce el siguiente texto al {{language}}:\n\n{{text}}",
+      "rephrase": "Reformula con claridad el siguiente texto, preservando el significado:\n\n{{text}}",
+      "correct": "Corrige la ortografía, la gramática y la claridad del siguiente texto. Devuelve solo el texto corregido:\n\n{{text}}"
+    }
   },
   "presets": {
     "pickerTitle": "Elegir un preset",

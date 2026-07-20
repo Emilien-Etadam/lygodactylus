@@ -16,6 +16,8 @@ export const mainAppState = {
   quickAskWindow: null as BrowserWindow | null,
   quickAskShortcutRegistered: false,
   quickAskShortcutError: null as string | null,
+  quickAskSelectionShortcutRegistered: false,
+  quickAskSelectionShortcutError: null as string | null,
   sessionManager: null as SessionManager | null,
   skillsManager: null as SkillsManager | null,
   pluginRuntimeService: null as PluginRuntimeService | null,

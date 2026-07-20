@@ -126,7 +126,8 @@ export function registerConfigMcpIpc(): void {
 
     const quickAskChanged =
       previousConfig.quickAskEnabled !== updatedConfig.quickAskEnabled ||
-      previousConfig.quickAskShortcut !== updatedConfig.quickAskShortcut;
+      previousConfig.quickAskShortcut !== updatedConfig.quickAskShortcut ||
+      previousConfig.quickAskSelectionShortcut !== updatedConfig.quickAskSelectionShortcut;
     if (quickAskChanged) {
       syncQuickAskFromConfig();
     }
@@ -135,6 +136,7 @@ export function registerConfigMcpIpc(): void {
       success: true,
       config: updatedConfig,
       quickAskShortcutError: mainAppState.quickAskShortcutError,
+      quickAskSelectionShortcutError: mainAppState.quickAskSelectionShortcutError,
     };
   });
 

@@ -1232,7 +1232,29 @@
     "shortcutInvalid": "快捷键格式无效。",
     "shortcutTaken": "该快捷键已被系统或其他应用占用。",
     "shortcutRegisterFailed": "无法注册全局快捷键。",
-    "sessionTitle": "Quick Ask"
+    "sessionTitle": "Quick Ask",
+    "selectionTitle": "Quick Ask — 选区",
+    "selectionSubtitle": "处理已复制文本，结果可直接粘贴",
+    "selectionEmptyHint": "请先复制一段文本（Ctrl/Cmd+C），然后再使用此快捷键。",
+    "selectionPlaceholder": "请先复制文本，或直接输入问题…",
+    "selectionTruncated": "剪贴板文本已截断至 32 KB。",
+    "selectionShortcutLabel": "选区快捷键",
+    "selectionShortcutHint": "在其他应用中复制文本后按此快捷键。Electron 格式，例如 CommandOrControl+Shift+Y",
+    "copyResult": "复制结果",
+    "copied": "已复制",
+    "uiLanguageName": "中文",
+    "actions": {
+      "summarize": "总结",
+      "translate": "翻译",
+      "rephrase": "改写",
+      "correct": "校对"
+    },
+    "templates": {
+      "summarize": "请简明总结以下文本：\n\n{{text}}",
+      "translate": "请将以下文本翻译成{{language}}：\n\n{{text}}",
+      "rephrase": "请在保持原意的前提下清晰改写以下文本：\n\n{{text}}",
+      "correct": "请纠正以下文本的拼写、语法与表达清晰度。只返回纠正后的文本：\n\n{{text}}"
+    }
   },
   "presets": {
     "pickerTitle": "选择预设",

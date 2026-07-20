@@ -3,6 +3,7 @@ import {
   getRegisteredQuickAskAccelerator,
   registerQuickAskShortcut,
   resetQuickAskShortcutStateForTests,
+  unregisterAllQuickAskShortcuts,
   unregisterQuickAskShortcut,
   type GlobalShortcutApi,
 } from '../../main/quick-ask/quick-ask-shortcut';
@@ -84,5 +85,59 @@ describe('registerQuickAskShortcut / unregisterQuickAskShortcut', () => {
 
     expect(api.unregister).toHaveBeenCalledTimes(1);
     expect(getRegisteredQuickAskAccelerator()).toBeNull();
+  });
+
+  it('registers Ask and Sélection shortcuts independently', () => {
+    const api = createMockApi();
+    const askCb = vi.fn();
+    const selectionCb = vi.fn();
+
+    const ask = registerQuickAskShortcut(
+      'CommandOrControl+Shift+Space',
+      askCb,
+      api,
+      'ask'
+    );
+    const selection = registerQuickAskShortcut(
+      'CommandOrControl+Shift+Y',
+      selectionCb,
+      api,
+      'selection'
+    );
+
+    expect(ask.ok).toBe(true);
+    expect(selection.ok).toBe(true);
+    expect(getRegisteredQuickAskAccelerator('ask')).toBe('CommandOrControl+Shift+Space');
+    expect(getRegisteredQuickAskAccelerator('selection')).toBe('CommandOrControl+Shift+Y');
+    expect(api.register).toHaveBeenCalledWith('CommandOrControl+Shift+Space', askCb);
+    expect(api.register).toHaveBeenCalledWith('CommandOrControl+Shift+Y', selectionCb);
+  });
+
+  it('rejects Sélection when it collides with the Ask accelerator', () => {
+    const api = createMockApi();
+    registerQuickAskShortcut('CommandOrControl+Shift+Y', vi.fn(), api, 'ask');
+    const selection = registerQuickAskShortcut(
+      'CommandOrControl+Shift+Y',
+      vi.fn(),
+      api,
+      'selection'
+    );
+
+    expect(selection.ok).toBe(false);
+    expect(selection.error).toBe('shortcut_taken');
+    expect(getRegisteredQuickAskAccelerator('ask')).toBe('CommandOrControl+Shift+Y');
+    expect(getRegisteredQuickAskAccelerator('selection')).toBeNull();
+  });
+
+  it('unregisterAllQuickAskShortcuts clears both slots', () => {
+    const api = createMockApi();
+    registerQuickAskShortcut('CommandOrControl+Shift+Space', vi.fn(), api, 'ask');
+    registerQuickAskShortcut('CommandOrControl+Shift+Y', vi.fn(), api, 'selection');
+    unregisterAllQuickAskShortcuts(api);
+
+    expect(getRegisteredQuickAskAccelerator('ask')).toBeNull();
+    expect(getRegisteredQuickAskAccelerator('selection')).toBeNull();
+    expect(api.unregister).toHaveBeenCalledWith('CommandOrControl+Shift+Space');
+    expect(api.unregister).toHaveBeenCalledWith('CommandOrControl+Shift+Y');
   });
 });

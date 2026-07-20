@@ -1232,7 +1232,29 @@
     "shortcutInvalid": "Ugyldig snarveiformat.",
     "shortcutTaken": "Denne snarveien er allerede i bruk av systemet eller en annen app.",
     "shortcutRegisterFailed": "Kunne ikke registrere den globale snarveien.",
-    "sessionTitle": "Quick Ask"
+    "sessionTitle": "Quick Ask",
+    "selectionTitle": "Quick Ask — Utvalg",
+    "selectionSubtitle": "Jobb med kopiert tekst, klar til å lime inn",
+    "selectionEmptyHint": "Kopier først tekst (Ctrl/Cmd+C), og bruk deretter snarveien på nytt.",
+    "selectionPlaceholder": "Kopier tekst først, eller skriv et spørsmål…",
+    "selectionTruncated": "Utklippsteksten ble avkortet til 32 KB.",
+    "selectionShortcutLabel": "Utvalgsnarvei",
+    "selectionShortcutHint": "Kopier tekst i en annen app, og trykk deretter på denne snarveien. Electron-format, f.eks. CommandOrControl+Shift+Y",
+    "copyResult": "Kopier resultatet",
+    "copied": "Kopiert",
+    "uiLanguageName": "norsk",
+    "actions": {
+      "summarize": "Oppsummer",
+      "translate": "Oversett",
+      "rephrase": "Omformuler",
+      "correct": "Korriger"
+    },
+    "templates": {
+      "summarize": "Oppsummer følgende tekst kortfattet:\n\n{{text}}",
+      "translate": "Oversett følgende tekst til {{language}}:\n\n{{text}}",
+      "rephrase": "Omformuler følgende tekst tydelig og behold meningen:\n\n{{text}}",
+      "correct": "Korriger stavemåte, grammatikk og klarhet i følgende tekst. Returner bare den korrigerte teksten:\n\n{{text}}"
+    }
   },
   "presets": {
     "pickerTitle": "Velg en forhåndsinnstilling",
