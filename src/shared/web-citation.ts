@@ -266,7 +266,9 @@ export function linkifyCitationMarkers(
 
   return splitPlainAndCodeSegments(text)
     .map((segment) =>
-      segment.linkify ? linkifyCitationMarkersInPlainText(segment.value, sourcesByIndex) : segment.value
+      segment.linkify
+        ? linkifyCitationMarkersInPlainText(segment.value, sourcesByIndex)
+        : segment.value
     )
     .join('');
 }
