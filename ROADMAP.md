@@ -145,23 +145,25 @@ _Issu d'une veille (moltagent, LM Studio Bionic, trivium, Atlantis, Jan/Cline/Ai
 - **Local Reranker (mémoire)**: client `POST /v1/rerank` opt-in (OFF), branché sur recherche **et** injection, fallback ordre d'origine, fraîcheur/confiance multiplicatifs par-dessus. — **done** (PR #138)
 - _Suivi_ : nettoyage code miroir / prompts / test tautologique — **done** (PR #139)
 
-### 2e lot — veille cadrée avec le mainteneur (2026-07)
+### 2e lot veille — ✅ livré (PRs #141–#149)
 
-_Prompts Cursor : `docs/cursor-prompts-lot2-2026-07.md` (même workflow : Cursor code, Claude vérifie)._
+_Prompts Cursor : `docs/cursor-prompts-lot2-2026-07.md` (workflow : Cursor code, Claude vérifie)._
 
-- **Autonomy / Safety Modes (Prudent / Normal / Autonome)**: un sélecteur de niveau qui regroupe 4 mécanismes — validation par diff avant écriture (Prudent), application d'édition robuste avec retry auto (Normal+), boucle auto-fix lint/test (Autonome) — au-dessus de **checkpoints/rollback toujours actifs** (snapshots shadow-git dans app-data) comme filet de sécurité. Réf. Cline (Plan/Act + auto-approve), Aider (edit-formats + auto-lint/test), Roo/Plandex (checkpoints). — _planned_
-- **Semantic File Search**: outil « grep par le sens » — index d'embeddings local + recherche langage naturel renvoyant des hits `file:line`, complément du grep/glob littéral. Réutilise l'embed/cosine existant ; `grepai` testable en MCP. — _planned_
-- **Inline Citations UI**: réponses avec références `[1][2]` → cartes sources (titre/favicon/extrait), sur le `web_search` SearXNG existant (puis docs). — _planned_
-- **Global Conversation Search**: index full-text local sur tout l'historique des chats. — _planned_
-- **Project Rules File (AGENTS.md)**: auto-chargement d'un fichier de consignes racine (`AGENTS.md`/`.rules`) comme contexte système du workspace. Statique, standard cross-outil. — _planned_
-- **Prompt / Persona Presets**: bibliothèque locale de prompts + presets système avec variables `{{var}}` et tokens dynamiques (`{date}`), bundle nom/avatar/system-prompt/modèle/params. — _planned_
-- **Live Model Stats**: footer tok/s + % de remplissage du contexte + méta modèle (params/quant via `/api/show`). — _planned_
-- **@-mention Context Attach**: `@file`/`@folder`/`@url`/`@diff` pour épingler du contexte exact ; réutilise glob/grep/web_fetch. — _planned_
+- **Live Model Stats**: tok/s côté client (deltas de stream), % contexte, méta params/quant Ollama via `/api/show` caché — zéro requête pendant la génération. — **done** (PR #141)
+- **Global Conversation Search**: index FTS5 (repli LIKE), sync à tous les points d'écriture DB (y compris rewind/fork), backfill idempotent, IPC desktop-only. — **done** (PR #142)
+- **Project Rules File (AGENTS.md)**: composition avec le chargement natif du SDK (préséance `AGENTS.md` > `.rules` > `CLAUDE.md`, dédup racine, cas sandbox), plafond 32 Ko UTF-8-safe, indicateur UI. — **done** (PR #143)
+- **Prompt / Persona Presets**: bibliothèque locale `{{var}}` + `{date}`/`{os}`, `/preset` avec picker, rejet côté main sur les surfaces sans picker. — **done** (PR #144)
+- **Inline Citations UI**: index `Source index:` dans les tool results web, numérotation monotone par session, carte Sources + linkification `[n]` défensive. — **done** (PR #145)
+- **Semantic File Search**: outil `semantic_search` opt-in (gate embeddings), index SQLite par workspace, chokidar incrémental, containment realpath, rerank composé. — **done** (PR #146)
+- **@-mention Context Attach**: `@fichier`/`@dossier`/`@url` avec autocomplétion, résolution main-side (64 Ko, realpath-safe), préfixe modèle ok-only. — **done** (PR #147)
+- **Autonomy / Safety Modes**: checkpoints par pré-images (write/edit exacts via wrap des outils SDK, bash best-effort chokidar, « Annuler ce run » gardé) + sélecteur Prudent/Normal/Autonome par session (diff-approve via le flux permissions, boucle auto-fix lint/test max 3, autonomie lue en live). — **done** (PRs #148, #149)
 - **Artifacts / Canvas Panel**: preview live HTML/SVG/code en panneau latéral + sélecteur de versions (Mermaid = quick win) ; iframe sandbox, exécution possible dans le sandbox existant. — _candidate_ (plus gros, à cadrer)
 - **PII Scrub (outbound)**: détection + tokenisation réversible des données perso avant `web_search`/`web_fetch`/`http_request`/MCP, restauration en réponse. Lib JS/WASM ou sidecar Presidio. — _candidate_ (à cadrer)
 - **Content Watch + Proactive Digest**: watchers dossier/RSS/URL (mode diff) résumant seulement le nouveau contenu, surfacé en digest ; étend le cron existant. — _candidate_ (à cadrer)
 
 _Écartés volontairement par le mainteneur : RAG « chat avec mes docs » (risque d'usine à gaz) et compare multi-modèles côte à côte._
+
+- **Cleanup post-lot 2**: dédup `path-safety` (#146/#147), linkification citations hors blocs de code (#145), `void offset` (#142) — prompt : section « Ménage » de `docs/cursor-prompts-lot2-2026-07.md`. — _planned_
 
 ### Mid-term (v3.5.0+)
 
@@ -179,4 +181,4 @@ _Écartés volontairement par le mainteneur : RAG « chat avec mes docs » (risq
 
 ---
 
-_Last updated: 2026-07-19 (lot veille 1 livré — PRs #131–#139 : TTS, mémoire freshness/confiance, latence, Plan/Act, Quick-Ask, constrained output, reranker, cleanup ; prompts du 2e lot publiés)_
+_Last updated: 2026-07-20 (lot veille 2 livré — PRs #141–#149 : stats modèle, recherche historique, AGENTS.md, presets, citations, recherche sémantique, @-mentions, checkpoints, modes d'autonomie ; reste : cleanup + candidates artifacts/PII/watch)_
