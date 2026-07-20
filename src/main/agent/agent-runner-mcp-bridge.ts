@@ -3,12 +3,21 @@ import type { ToolDefinition } from '@earendil-works/pi-coding-agent';
 import type { Message } from '../../renderer/types';
 import type { MCPManager } from '../mcp/mcp-manager';
 import { logError } from '../utils/logger';
-import { mergePiiMaskedDetails, takePiiMaskedCount } from './pii-scrub-egress';
+import {
+  beginPiiScrubSession,
+  piiMaskedDetails,
+  scrubToolArgsForEgress,
+  unscrubUnknownForModel,
+} from './pii-scrub-egress';
 import { normalizeMcpToolResultForModel } from './tool-result-utils';
 
 /**
  * Bridge MCP tools from MCPManager into ToolDefinition[] format for the agent SDK.
  * Each MCP tool becomes a customTool whose execute() delegates to mcpManager.callTool().
+ *
+ * PII scrubbing is applied here immediately before the unique MCP egress
+ * (`mcpManager.callTool`), so unit tests of the MCP manager stay free of
+ * config-store/electron imports.
  */
 export function buildMcpCustomTools(mcpManager: MCPManager): ToolDefinition[] {
   // Deterministic order so tool registration (and any prompt snippets) stay stable.
@@ -28,13 +37,18 @@ export function buildMcpCustomTools(mcpManager: MCPManager): ToolDefinition[] {
       parameters,
       async execute(_toolCallId, params, _signal, _onUpdate, _ctx) {
         try {
-          const result = await mcpManager.callTool(mcpTool.name, params as Record<string, unknown>);
-          const piiMaskedCount = takePiiMaskedCount(result);
-          const normalizedResult = normalizeMcpToolResultForModel(result);
+          const piiSession = beginPiiScrubSession();
+          const scrubbedArgs = scrubToolArgsForEgress(
+            params as Record<string, unknown>,
+            piiSession
+          );
+          const result = await mcpManager.callTool(mcpTool.name, scrubbedArgs);
+          const restored = unscrubUnknownForModel(result, piiSession);
+          const normalizedResult = normalizeMcpToolResultForModel(restored);
           return {
             content: [{ type: 'text' as const, text: normalizedResult.text }],
-            details: mergePiiMaskedDetails(
-              piiMaskedCount,
+            details: piiMaskedDetails(
+              piiSession,
               normalizedResult.images.length > 0
                 ? { openCoworkImages: normalizedResult.images }
                 : undefined

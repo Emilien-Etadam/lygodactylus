@@ -14,11 +14,9 @@ import { configStore } from '../../main/config/config-store';
 import {
   beginPiiScrubSession,
   piiMaskedDetails,
-  rememberPiiMaskedCount,
   scrubHttpOptionsForEgress,
   scrubQueryForEgress,
   scrubToolArgsForEgress,
-  takePiiMaskedCount,
   unscrubTextForModel,
 } from '../../main/agent/pii-scrub-egress';
 
@@ -70,13 +68,6 @@ describe('pii-scrub-egress', () => {
       session
     );
     expect(scrubbed).toEqual({ input: { email: '{{PII_1}}' } });
-  });
-
-  it('remembers masked count on result objects without logging the map', () => {
-    const result = { content: [{ type: 'text', text: 'ok' }] };
-    rememberPiiMaskedCount(result, 3);
-    expect(takePiiMaskedCount(result)).toBe(3);
-    expect(takePiiMaskedCount(result)).toBe(0);
   });
 
   it('fail-closed: oversized scrub input becomes a translated tool error', () => {

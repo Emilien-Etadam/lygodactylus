@@ -131,25 +131,6 @@ export function mergePiiMaskedDetails(
   };
 }
 
-const maskedCountByResult = new WeakMap<object, number>();
-
-/** Attach a per-result masked count without serializing the token map. */
-export function rememberPiiMaskedCount(result: unknown, maskedCount: number): unknown {
-  if (maskedCount > 0 && result && typeof result === 'object') {
-    maskedCountByResult.set(result as object, maskedCount);
-  }
-  return result;
-}
-
-export function takePiiMaskedCount(result: unknown): number {
-  if (!result || typeof result !== 'object') {
-    return 0;
-  }
-  const count = maskedCountByResult.get(result as object) ?? 0;
-  maskedCountByResult.delete(result as object);
-  return count;
-}
-
 function unscrubUnknown(value: unknown, unscrubText: (text: string) => string): unknown {
   if (typeof value === 'string') {
     return unscrubText(value);

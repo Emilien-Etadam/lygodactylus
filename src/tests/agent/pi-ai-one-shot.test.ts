@@ -15,7 +15,10 @@ vi.mock('../../main/agent/shared-auth', () => ({
 }));
 
 import type { AppConfig } from '../../main/config/config-store';
-import { DEFAULT_WEB_SEARCH_CONFIG } from '../../main/config/config-store';
+import {
+  DEFAULT_PII_SCRUB_CONFIG,
+  DEFAULT_WEB_SEARCH_CONFIG,
+} from '../../main/config/config-store';
 import { runPiAiOneShot } from '../../main/agent/pi-ai-one-shot';
 
 function makeConfig(): AppConfig {
@@ -76,6 +79,7 @@ function makeConfig(): AppConfig {
       promptIterationRounds: 2,
     },
     webSearch: { ...DEFAULT_WEB_SEARCH_CONFIG },
+    piiScrub: { ...DEFAULT_PII_SCRUB_CONFIG, customTerms: [] },
     enableThinking: false,
     thinkingLevel: 'medium',
     speechSynthesisEnabled: false,
