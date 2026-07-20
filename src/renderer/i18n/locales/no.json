@@ -220,7 +220,9 @@
     "rerankerTest": "Test",
     "rerankerTesting": "Tester…",
     "rerankerTestSuccess": "Omrangering OK ({{ms}} ms).",
-    "rerankerTestFailed": "Omrangeringstest mislyktes."
+    "rerankerTestFailed": "Omrangeringstest mislyktes.",
+    "semanticSearchEnabled": "Semantisk søk",
+    "semanticSearchDescription": "Indekserer tekstfiler i workspace med lokale embeddings og eksponerer verktøyet semantic_search (grep etter mening). Krever en konfigurert embeddings-endepunkt. Av som standard."
   },
   "language": {
     "english": "Engelsk",

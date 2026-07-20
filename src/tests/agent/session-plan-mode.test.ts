@@ -19,6 +19,7 @@ const FULL_TOOLSET = [
   tool('glob'),
   tool('find'),
   tool('grep'),
+  tool('semantic_search'),
   tool('web_fetch'),
   tool('WebFetch'),
   tool('http_request'),
@@ -58,6 +59,7 @@ describe('session plan/act mode', () => {
 
     expect(names).toContain('glob');
     expect(names).toContain('grep');
+    expect(names).toContain('semantic_search');
     expect(names).toContain('find');
     expect(names).toContain('web_search');
     expect(names).toContain('web_fetch');

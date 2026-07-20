@@ -220,7 +220,9 @@
     "rerankerTest": "Testen",
     "rerankerTesting": "Bezig met testen…",
     "rerankerTestSuccess": "Herordening OK ({{ms}} ms).",
-    "rerankerTestFailed": "Herordeningstest mislukt."
+    "rerankerTestFailed": "Herordeningstest mislukt.",
+    "semanticSearchEnabled": "Semantisch zoeken",
+    "semanticSearchDescription": "Indexeert tekstbestanden in de workspace met lokale embeddings en stelt de tool semantic_search beschikbaar (grep op betekenis). Vereist een geconfigureerd embeddings-endpoint. Standaard uit."
   },
   "language": {
     "english": "Engels",

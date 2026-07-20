@@ -257,7 +257,9 @@
     "rerankerTest": "Test",
     "rerankerTesting": "Testing…",
     "rerankerTestSuccess": "Rerank OK ({{ms}} ms).",
-    "rerankerTestFailed": "Rerank test failed."
+    "rerankerTestFailed": "Rerank test failed.",
+    "semanticSearchEnabled": "Semantic search",
+    "semanticSearchDescription": "Indexes workspace text files with local embeddings and exposes the semantic_search tool (grep by meaning). Requires a configured embeddings endpoint. Off by default."
   },
   "language": {
     "english": "English",
