@@ -787,7 +787,8 @@
     "contextUsageLabel": "{{used}} / {{total}}",
     "contextUsageDetail": "{{input}} input + {{output}} reserved · {{remaining}} remaining",
     "modelMeta": "{{meta}}",
-    "contextFillHint": "Llenado del contexto"
+    "contextFillHint": "Llenado del contexto",
+    "projectRulesLoaded": "Reglas del proyecto cargadas: {{file}}"
   },
   "messageCard": {
     "request": "Solicitud",

@@ -616,6 +616,8 @@ export type ServerEvent =
         parameterSize?: string;
         /** Ollama /api/show quantization_level when known. */
         quantization?: string;
+        /** Workspace-root rules file basename when loaded (AGENTS.md / .rules / CLAUDE.md). */
+        projectRulesFile?: string | null;
       };
     }
   | {

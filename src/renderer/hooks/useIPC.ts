@@ -246,6 +246,7 @@ export function useIPC() {
               maxTokens: event.payload.maxTokens,
               parameterSize: event.payload.parameterSize,
               quantization: event.payload.quantization,
+              projectRulesFile: event.payload.projectRulesFile,
             });
             break;
 

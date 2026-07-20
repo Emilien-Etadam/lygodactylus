@@ -25,6 +25,11 @@ import { log, logError, logWarn } from '../utils/logger';
 import { withAsyncTimeout } from '../utils/async-timeout';
 import { buildCompactionSettings, estimateTokensFromText } from './context-budget';
 import type { AgentRunnerRunContext } from './agent-runner-run-context';
+import {
+  applyProjectRulesAgentsFilesOverride,
+  resolveProjectRulesFile,
+  type ProjectRulesFile,
+} from './project-rules-file';
 import { ModelRegistry } from './shared-auth';
 import { sortSkillsForStablePrefix } from './stable-system-prefix';
 
@@ -416,6 +421,8 @@ interface CreatePiSessionOptions {
   promptPrefix?: string;
   modelContextWindow: number;
   modelMaxTokens: number;
+  /** Pre-resolved workspace rules; resolved from effectiveCwd when omitted. */
+  projectRules?: ProjectRulesFile | null;
 }
 
 export async function createPiSession({
@@ -436,7 +443,18 @@ export async function createPiSession({
   promptPrefix,
   modelContextWindow,
   modelMaxTokens,
+  projectRules,
 }: CreatePiSessionOptions): Promise<{ piSession: PiAgentSession; compactionEnabled: boolean }> {
+  const resolvedProjectRules =
+    projectRules === undefined ? resolveProjectRulesFile(effectiveCwd) : projectRules;
+  if (resolvedProjectRules) {
+    log(
+      '[AgentRunner] Project rules file loaded:',
+      resolvedProjectRules.fileName,
+      resolvedProjectRules.truncated ? '(truncated)' : ''
+    );
+  }
+
   const resourceLoader = new DefaultResourceLoader({
     cwd: effectiveCwd,
     agentDir: getAgentDir(),
@@ -449,7 +467,11 @@ export async function createPiSession({
       skills: sortSkillsForStablePrefix(base.skills),
     }),
     agentsFilesOverride: (base) => ({
-      agentsFiles: [...base.agentsFiles].sort((left, right) => left.path.localeCompare(right.path)),
+      agentsFiles: applyProjectRulesAgentsFilesOverride(
+        base.agentsFiles,
+        effectiveCwd,
+        resolvedProjectRules
+      ),
     }),
   });
   const reloadSucceeded = await reloadResourceLoaderWithTimeout(resourceLoader, promptTemplatePaths);
