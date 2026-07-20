@@ -311,7 +311,10 @@ async function maybeRunAutonomousQualityLoop(options: {
   if (!runCompletedOk) {
     return;
   }
-  if (normalizeSessionAutonomy(session.autonomy) !== 'autonomous') {
+  // Live autonomy (not the session snapshot from run start / prep).
+  const autonomy =
+    ctx.getSessionAutonomy?.(session.id) ?? normalizeSessionAutonomy(session.autonomy);
+  if (autonomy !== 'autonomous') {
     return;
   }
 

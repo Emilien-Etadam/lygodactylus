@@ -137,6 +137,13 @@ export class SessionManager {
           }
           this.enqueuePrompt(session, prompt);
         },
+        getSessionAutonomy: (sessionId) => {
+          try {
+            return this.getSessionAutonomy(sessionId).autonomy;
+          } catch {
+            return 'normal';
+          }
+        },
       },
       this.pathResolver,
       this.mcpManager,

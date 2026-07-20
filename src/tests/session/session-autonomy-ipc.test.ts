@@ -53,7 +53,7 @@ describe('session autonomy IPC helpers', () => {
     expect(getSessionAutonomy(deps, 'session-1')).toEqual({ autonomy: 'normal' });
   });
 
-  it('setSessionAutonomy persists careful and clears cached pi session', () => {
+  it('setSessionAutonomy persists careful without clearing the cached pi session', () => {
     const session = makeSession({ autonomy: 'normal' });
     const { deps, db, sendToRenderer, clearSdkSession } = makeDeps(session);
 
@@ -64,7 +64,8 @@ describe('session autonomy IPC helpers', () => {
       'session-1',
       expect.objectContaining({ autonomy: 'careful' })
     );
-    expect(clearSdkSession).toHaveBeenCalledWith('session-1');
+    // Live getAutonomy reads the store; no need to recreate the pi session.
+    expect(clearSdkSession).not.toHaveBeenCalled();
     expect(sendToRenderer).toHaveBeenCalledWith({
       type: 'session.update',
       payload: {

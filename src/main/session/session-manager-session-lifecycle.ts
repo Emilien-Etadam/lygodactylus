@@ -206,8 +206,8 @@ export function updateSessionAutonomy(
     autonomy: nextAutonomy,
     updated_at: updated.updatedAt,
   });
-  // Autonomy changes careful/autonomous wrapping; drop the cached pi session.
-  deps.getAgentRunner().clearSdkSession?.(sessionId);
+  // Do NOT clear the cached pi session: careful/autonomous gates re-read
+  // autonomy live via getSessionAutonomy on each tool execute / post-run check.
   clearCarefulAllowRun(sessionId);
   resetAutonomousIteration(sessionId);
   deps.sendToRenderer({

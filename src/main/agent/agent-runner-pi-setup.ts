@@ -497,8 +497,10 @@ export async function preparePiSessionRun({
   ).find((tool) => tool.name === 'bash');
   // Override built-in write/edit: careful approval (outer) then checkpoint capture.
   // Order matters — do not capture a pre-image for a denied careful edit.
-  const sessionAutonomy = normalizeSessionAutonomy(session.autonomy);
-  const getAutonomy = () => sessionAutonomy;
+  // Live lookup: re-read store on every call so autonomy changes apply without
+  // recreating the cached pi session (same source as session.getAutonomy IPC).
+  const getAutonomy = () =>
+    ctx.getSessionAutonomy?.(session.id) ?? normalizeSessionAutonomy(session.autonomy);
   const checkpointFileTools = wrapFileMutationToolsForCheckpoints(
     [
       createWriteToolDefinition(effectiveCwd) as ToolDefinition,

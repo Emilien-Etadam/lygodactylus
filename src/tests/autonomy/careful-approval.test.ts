@@ -150,6 +150,69 @@ describe('wrapFileMutationToolsForCareful', () => {
     expect(writeExecute).toHaveBeenCalledTimes(2);
   });
 
+  it('live getAutonomy switch normal→careful asks without rebuilding the wrap', async () => {
+    const writeExecute = vi.fn(async () => ({
+      content: [{ type: 'text' as const, text: 'written' }],
+      details: undefined,
+    }));
+    const requestPermission = vi.fn(async () => 'allow' as const);
+    // Mutable store standing in for session.getAutonomy IPC source.
+    let liveAutonomy: 'careful' | 'normal' | 'autonomous' = 'normal';
+
+    const tools = [
+      {
+        name: 'write',
+        label: 'write',
+        description: 'write',
+        parameters: {},
+        execute: writeExecute,
+      },
+    ] as unknown as ToolDefinition[];
+
+    // Wrapper built once while autonomy is normal (same as reused pi session).
+    const wrapped = wrapFileMutationToolsForCareful(
+      tools,
+      sessionId,
+      tmpDir,
+      () => liveAutonomy,
+      requestPermission
+    );
+
+    await wrapped[0]!.execute(
+      'c-normal',
+      { path: 'a.ts', content: 'one\n' },
+      undefined,
+      undefined,
+      {} as never
+    );
+    expect(requestPermission).not.toHaveBeenCalled();
+    expect(writeExecute).toHaveBeenCalledTimes(1);
+
+    // Store flips to careful — next execute must ask, without rebuilding wrap/pi session.
+    liveAutonomy = 'careful';
+    await wrapped[0]!.execute(
+      'c-careful',
+      { path: 'a.ts', content: 'two\n' },
+      undefined,
+      undefined,
+      {} as never
+    );
+    expect(requestPermission).toHaveBeenCalledOnce();
+    expect(writeExecute).toHaveBeenCalledTimes(2);
+
+    // And back to normal — no further asks.
+    liveAutonomy = 'normal';
+    await wrapped[0]!.execute(
+      'c-normal-again',
+      { path: 'a.ts', content: 'three\n' },
+      undefined,
+      undefined,
+      {} as never
+    );
+    expect(requestPermission).toHaveBeenCalledOnce();
+    expect(writeExecute).toHaveBeenCalledTimes(3);
+  });
+
   it('normal autonomy does not intercept', async () => {
     const writeExecute = vi.fn(async () => ({
       content: [{ type: 'text' as const, text: 'written' }],
