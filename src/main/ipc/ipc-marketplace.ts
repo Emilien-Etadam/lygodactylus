@@ -128,4 +128,36 @@ export function registerMarketplaceIpc(): void {
     }
     return result;
   });
+
+  ipcMain.handle('marketplace.verifyIntegrity', async (_event, catalogId: string) => {
+    if (!mainAppState.marketplaceService) {
+      throw new Error('MarketplaceService not initialized');
+    }
+    return mainAppState.marketplaceService.verifyIntegrity(catalogId);
+  });
+
+  ipcMain.handle('marketplace.update', async (_event, catalogId: string) => {
+    if (!mainAppState.marketplaceService) {
+      throw new Error('MarketplaceService not initialized');
+    }
+    const result = await mainAppState.marketplaceService.update(catalogId);
+    if (result.type === 'skill' || result.type === 'plugin') {
+      mainAppState.sessionManager?.invalidateSkillsSetup();
+    }
+    if (result.type === 'plugin') {
+      notifyPluginCommandsChanged();
+    }
+    return result;
+  });
+
+  ipcMain.handle('marketplace.rollback', async (_event, catalogId: string) => {
+    if (!mainAppState.marketplaceService) {
+      throw new Error('MarketplaceService not initialized');
+    }
+    const result = await mainAppState.marketplaceService.rollback(catalogId);
+    if (result.type === 'skill' || result.type === 'plugin') {
+      mainAppState.sessionManager?.invalidateSkillsSetup();
+    }
+    return result;
+  });
 }

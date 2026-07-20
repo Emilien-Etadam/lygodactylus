@@ -5,6 +5,7 @@ import {
   CheckCircle,
   FolderOpen,
   Globe,
+  History,
   Library,
   Loader2,
   Package,
@@ -15,13 +16,16 @@ import {
   RefreshCw,
   ShieldAlert,
   ShieldCheck,
+  ShieldQuestion,
   Trash2,
+  Undo2,
 } from 'lucide-react';
 import type {
   CatalogEntryType,
   CatalogManifestMeta,
   CatalogSourceStatus,
   MarketplaceEntry,
+  SkillIntegrityStatus,
 } from '../../types';
 import { SettingsContentSection } from './shared';
 import { MarketplaceMcpAdvanced } from './MarketplaceMcpAdvanced';
@@ -161,6 +165,72 @@ export function SettingsMarketplace({ isActive }: { isActive: boolean }) {
       await loadEntries();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('marketplace.uninstallFailed'));
+    } finally {
+      setActionId(null);
+    }
+  }
+
+  async function handleVerifyIntegrity(entry: MarketplaceEntry) {
+    if (!isElectron) {
+      return;
+    }
+    setActionId(entry.id);
+    setError('');
+    try {
+      const result = await window.electronAPI.marketplace.verifyIntegrity(entry.id);
+      if (result.status === 'ok') {
+        setSuccess(t('marketplace.verifyIntegritySuccess', { name: entry.name }));
+      } else if (result.status === 'modified') {
+        setError(t('marketplace.verifyIntegrityModified', { name: entry.name }));
+      } else {
+        setSuccess(t('marketplace.verifyIntegrityUnverified', { name: entry.name }));
+      }
+      await loadEntries();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('marketplace.verifyIntegrityFailed'));
+    } finally {
+      setActionId(null);
+    }
+  }
+
+  async function handleUpdate(entry: MarketplaceEntry) {
+    if (!isElectron) {
+      return;
+    }
+    setActionId(entry.id);
+    setError('');
+    try {
+      const result = await window.electronAPI.marketplace.update(entry.id);
+      const shortSha = result.pinnedSha ? result.pinnedSha.slice(0, 7) : '';
+      setSuccess(
+        shortSha
+          ? t('marketplace.updateSuccessPinned', { name: result.name, sha: shortSha })
+          : t('marketplace.updateSuccess', { name: result.name })
+      );
+      await loadEntries();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('marketplace.updateFailed'));
+    } finally {
+      setActionId(null);
+    }
+  }
+
+  async function handleRollback(entry: MarketplaceEntry) {
+    if (!isElectron) {
+      return;
+    }
+    const shortSha = entry.pinnedSha ? entry.pinnedSha.slice(0, 7) : '';
+    if (!confirm(t('marketplace.rollbackConfirm', { name: entry.name, sha: shortSha }))) {
+      return;
+    }
+    setActionId(entry.id);
+    setError('');
+    try {
+      const result = await window.electronAPI.marketplace.rollback(entry.id);
+      setSuccess(t('marketplace.rollbackSuccess', { name: result.name, sha: shortSha }));
+      await loadEntries();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('marketplace.rollbackFailed'));
     } finally {
       setActionId(null);
     }
@@ -477,6 +547,9 @@ export function SettingsMarketplace({ isActive }: { isActive: boolean }) {
                 onInstall={() => void handleInstall(entry)}
                 onToggle={() => void handleToggle(entry)}
                 onUninstall={() => void handleUninstall(entry)}
+                onVerifyIntegrity={() => void handleVerifyIntegrity(entry)}
+                onUpdate={() => void handleUpdate(entry)}
+                onRollback={() => void handleRollback(entry)}
               />
             ))}
           </div>
@@ -552,22 +625,61 @@ export function SettingsMarketplace({ isActive }: { isActive: boolean }) {
   );
 }
 
+function shortSha(sha: string): string {
+  return sha.slice(0, 7);
+}
+
+function IntegrityBadge({ status }: { status: SkillIntegrityStatus }) {
+  const { t } = useTranslation();
+  if (status === 'ok') {
+    return (
+      <span className="inline-flex items-center gap-1 text-success">
+        <ShieldCheck className="w-3 h-3" />
+        {t('marketplace.integrityOk')}
+      </span>
+    );
+  }
+  if (status === 'modified') {
+    return (
+      <span className="inline-flex items-center gap-1 text-warning">
+        <ShieldAlert className="w-3 h-3" />
+        {t('marketplace.integrityModified')}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 text-text-muted">
+      <ShieldQuestion className="w-3 h-3" />
+      {t('marketplace.integrityUnverified')}
+    </span>
+  );
+}
+
 function MarketplaceCard({
   entry,
   isBusy,
   onInstall,
   onToggle,
   onUninstall,
+  onVerifyIntegrity,
+  onUpdate,
+  onRollback,
 }: {
   entry: MarketplaceEntry;
   isBusy: boolean;
   onInstall: () => void;
   onToggle: () => void;
   onUninstall: () => void;
+  onVerifyIntegrity: () => void;
+  onUpdate: () => void;
+  onRollback: () => void;
 }) {
   const { t } = useTranslation();
   const isInstalled = entry.installState === 'installed' || entry.installState === 'builtin';
   const TypeIcon = entry.type === 'mcp' ? Plug : Package;
+  const isGithubSkill =
+    entry.type === 'skill' && entry.resolve.via === 'github' && entry.installState === 'installed';
+  const hasPin = Boolean(entry.pinnedSha);
 
   return (
     <div className="rounded-xl border border-border bg-background-secondary/50 p-4 space-y-3">
@@ -576,6 +688,15 @@ function MarketplaceCard({
           <div className="flex items-center gap-2">
             <TypeIcon className="w-4 h-4 text-accent flex-shrink-0" />
             <h4 className="font-medium text-text-primary truncate">{entry.name}</h4>
+            {entry.integrityStatus === 'modified' && (
+              <span
+                className="inline-flex items-center gap-1 rounded-full bg-warning/10 text-warning text-[11px] px-2 py-1 flex-shrink-0"
+                title={t('marketplace.integrityModified')}
+              >
+                <ShieldAlert className="w-3 h-3" />
+                {t('marketplace.integrityModified')}
+              </span>
+            )}
           </div>
           <p className="mt-1 text-sm text-text-muted line-clamp-3">{entry.description}</p>
         </div>
@@ -595,10 +716,16 @@ function MarketplaceCard({
         )}
       </div>
 
-      <div className="flex items-center gap-2 text-xs text-text-muted">
+      <div className="flex flex-wrap items-center gap-2 text-xs text-text-muted">
         <span className="uppercase tracking-wide">{entry.type}</span>
         {entry.sourceName && <span className="truncate">{entry.sourceName}</span>}
         {entry.deprecated && <span className="text-warning">{t('marketplace.deprecated')}</span>}
+        {entry.pinnedSha && (
+          <span className="font-mono text-text-secondary">
+            {t('marketplace.pinnedTo', { sha: shortSha(entry.pinnedSha) })}
+          </span>
+        )}
+        {entry.integrityStatus && <IntegrityBadge status={entry.integrityStatus} />}
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -621,6 +748,36 @@ function MarketplaceCard({
               {entry.enabled ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
               {entry.enabled ? t('marketplace.disable') : t('marketplace.enable')}
             </button>
+            {isGithubSkill && (
+              <>
+                <button
+                  onClick={onVerifyIntegrity}
+                  disabled={isBusy}
+                  className="px-3 py-1.5 rounded-lg border border-border text-sm inline-flex items-center gap-2 disabled:opacity-50"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  {t('marketplace.verifyIntegrity')}
+                </button>
+                <button
+                  onClick={onUpdate}
+                  disabled={isBusy}
+                  className="px-3 py-1.5 rounded-lg border border-border text-sm inline-flex items-center gap-2 disabled:opacity-50"
+                >
+                  <History className="w-4 h-4" />
+                  {t('marketplace.update')}
+                </button>
+                {hasPin && (
+                  <button
+                    onClick={onRollback}
+                    disabled={isBusy}
+                    className="px-3 py-1.5 rounded-lg border border-border text-sm inline-flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <Undo2 className="w-4 h-4" />
+                    {t('marketplace.rollback')}
+                  </button>
+                )}
+              </>
+            )}
             {entry.installState === 'installed' && (
               <button
                 onClick={onUninstall}
