@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -71,14 +71,34 @@ describe('resolveAtMentions', () => {
     expect(result.items[0]?.body.startsWith('x'.repeat(100))).toBe(true);
   });
 
-  it('enforces path containment and fails silently inside the block', async () => {
+  it('rejects path traversal without injecting a model prefix block', async () => {
     const root = await makeWorkspace();
     const result = await resolveAtMentions('bad @../outside.txt', root);
 
     expect(result.items).toHaveLength(1);
     expect(result.items[0]?.ok).toBe(false);
-    expect(result.items[0]?.body.toLowerCase()).toMatch(/escape|outside|ignored|workspace/);
-    expect(result.prefix).toContain('<attached_context source="../outside.txt">');
+    expect(result.items[0]?.body).toContain('Path escapes the workspace');
+    expect(result.prefix).toBe('');
+    expect(applyAttachedContextPrefix('bad @../outside.txt', result.prefix)).toBe(
+      'bad @../outside.txt'
+    );
+  });
+
+  it('rejects a workspace symlink that points outside the workspace', async () => {
+    const root = await makeWorkspace();
+    const outsideDir = await mkdtemp(path.join(tmpdir(), 'at-mentions-outside-'));
+    tempDirs.push(outsideDir);
+    const outsideFile = path.join(outsideDir, 'secret.txt');
+    await writeFile(outsideFile, 'secret-data\n', 'utf8');
+    await symlink(outsideFile, path.join(root, 'src', 'leak.txt'));
+
+    const result = await resolveAtMentions('@src/leak.txt', root);
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.ok).toBe(false);
+    expect(result.items[0]?.body).toContain('Path escapes the workspace');
+    expect(result.prefix).toBe('');
+    expect(result.prefix).not.toContain('secret-data');
   });
 
   it('lists one directory level for folder mentions', async () => {
@@ -97,11 +117,29 @@ describe('resolveAtMentions', () => {
     expect(lines.join('\n')).not.toContain('docs');
   });
 
-  it('notes missing files without throwing', async () => {
+  it('keeps missing files as ok:false items without injecting prefix blocks', async () => {
     const root = await makeWorkspace();
     const result = await resolveAtMentions('@src/missing.ts', root);
+    expect(result.items).toHaveLength(1);
     expect(result.items[0]?.ok).toBe(false);
     expect(result.items[0]?.body.toLowerCase()).toMatch(/not found|introuvable|존재하지/);
+    expect(result.prefix).toBe('');
+    expect(result.prefix).not.toContain('<attached_context');
+  });
+
+  it('includes only successful items in the model prefix when mixed with failures', async () => {
+    const root = await makeWorkspace();
+    const result = await resolveAtMentions(
+      'See @src/hello.ts and @src/missing.ts and @docs/note.md',
+      root
+    );
+
+    expect(result.items).toHaveLength(3);
+    expect(result.items.map((item) => item.ok)).toEqual([true, false, true]);
+    expect(result.prefix).toContain('<attached_context source="src/hello.ts">');
+    expect(result.prefix).toContain('<attached_context source="docs/note.md">');
+    expect(result.prefix).not.toContain('src/missing.ts');
+    expect(result.prefix).not.toContain('not found');
   });
 
   it('resolves URL mentions via web_fetch helper', async () => {

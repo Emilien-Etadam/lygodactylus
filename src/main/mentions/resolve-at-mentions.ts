@@ -8,7 +8,7 @@ import {
 } from '../../shared/at-mentions';
 import { executeHttpRequest, formatHttpRequestResult } from '../agent/http-request';
 import { mt } from '../i18n';
-import { isPathWithinRoot } from '../tools/path-containment';
+import { resolveContainedWorkspacePath } from '../tools/path-safety';
 
 export interface AttachedContextItem {
   source: string;
@@ -27,7 +27,8 @@ export interface ResolveAtMentionsResult {
 
 /**
  * Resolve @file / @folder / @url mentions into `<attached_context>` blocks.
- * Failures are silent per mention (short note inside the block).
+ * Only successful items (`ok: true`) are included in `prefix` for the model.
+ * Failures stay in `items` for the UI panel / trace (short note per mention).
  */
 export async function resolveAtMentions(
   prompt: string,
@@ -44,9 +45,15 @@ export async function resolveAtMentions(
   }
 
   const prefix = items
+    .filter((item) => item.ok)
     .map((item) => formatAttachedContextBlock(item.source, item.body))
     .join('\n\n');
   return { prompt, prefix, items };
+}
+
+/** Format every resolved item (including failures) for the context/trace panel. */
+export function formatAttachedContextItemsForTrace(items: readonly AttachedContextItem[]): string {
+  return items.map((item) => formatAttachedContextBlock(item.source, item.body)).join('\n\n');
 }
 
 async function resolveOneMention(
@@ -95,10 +102,8 @@ async function resolvePathMention(
     };
   }
 
-  const root = path.resolve(workspaceRoot);
-  const candidate = path.resolve(root, relativeOrPath);
-
-  if (!isPathWithinRoot(candidate, root, process.platform === 'win32')) {
+  const containedPath = resolveContainedWorkspacePath(workspaceRoot, relativeOrPath);
+  if (!containedPath) {
     return {
       source,
       kind: 'file',
@@ -109,7 +114,7 @@ async function resolvePathMention(
 
   let stats;
   try {
-    stats = await fs.stat(candidate);
+    stats = await fs.stat(containedPath);
   } catch {
     return {
       source,
@@ -120,7 +125,7 @@ async function resolvePathMention(
   }
 
   if (stats.isDirectory()) {
-    return resolveDirectoryMention(source, candidate);
+    return resolveDirectoryMention(source, containedPath);
   }
 
   if (!stats.isFile()) {
@@ -132,7 +137,7 @@ async function resolvePathMention(
     };
   }
 
-  return resolveFileMention(source, candidate, stats.size);
+  return resolveFileMention(source, containedPath, stats.size);
 }
 
 async function resolveDirectoryMention(

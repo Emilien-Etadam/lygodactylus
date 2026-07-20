@@ -10,7 +10,11 @@ import type {
 } from '../../renderer/types';
 import { configStore } from '../config/config-store';
 import type { AgentRuntimeExtensionManager } from '../extensions/agent-runtime-extension-manager';
-import { applyAttachedContextPrefix, resolveAtMentions } from '../mentions/resolve-at-mentions';
+import {
+  applyAttachedContextPrefix,
+  formatAttachedContextItemsForTrace,
+  resolveAtMentions,
+} from '../mentions/resolve-at-mentions';
 import {
   generateTraceId,
   log,
@@ -204,6 +208,7 @@ export async function processPrompt(options: ProcessPromptOptions): Promise<void
       try {
         const mentionResult = await resolveAtMentions(prompt, session.cwd);
         if (mentionResult.items.length > 0) {
+          // Model prompt: only successful attachments. Panel/trace keep every item.
           enhancedPrompt = applyAttachedContextPrefix(enhancedPrompt, mentionResult.prefix);
           options.sendToRenderer({
             type: 'session.attachedContext',
@@ -226,15 +231,16 @@ export async function processPrompt(options: ProcessPromptOptions): Promise<void
                 type: 'text',
                 status: 'completed',
                 title: 'Attached context',
-                content: mentionResult.prefix,
+                content: formatAttachedContextItemsForTrace(mentionResult.items),
                 timestamp: Date.now(),
               },
             },
           });
           logCtx(
-            '[SessionManager] Prefixed prompt with',
+            '[SessionManager] Attached context items:',
             mentionResult.items.length,
-            'attached context block(s)'
+            'ok for model:',
+            mentionResult.items.filter((item) => item.ok).length
           );
         } else {
           options.sendToRenderer({
