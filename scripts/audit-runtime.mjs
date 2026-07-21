@@ -9,7 +9,15 @@
 import { execSync } from 'node:child_process';
 
 /** GHSA IDs with no fixed release at audit time (document why). */
-const ALLOWED_UNFIXED = new Set();
+const ALLOWED_UNFIXED = new Set([
+  // brace-expansion DoS (exponential {} expansion). All resolvable copies are
+  // forced to fixed versions via package.json overrides; the ONLY remaining
+  // vulnerable copy is bundled inside @earendil-works/pi-coding-agent@0.80.3's
+  // tarball (bundled deps are not overridable by npm). Exit plan: bump the pi
+  // SDK to >=0.81 (planned maintenance — patches/ must be regenerated).
+  // Local-only DoS surface (glob patterns), no network exposure.
+  'GHSA-3JXR-9VMJ-R5CP',
+]);
 
 function loadAudit() {
   try {
