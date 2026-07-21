@@ -113,6 +113,12 @@ export interface AppConfig {
   thinkingLevel: ThinkingLevel;
   /** Offline speechSynthesis for assistant replies (Chromium voices). Off by default. */
   speechSynthesisEnabled: boolean;
+  /** Offline local STT (whisper.cpp) dictation into the composer. Off by default. */
+  speechToTextEnabled: boolean;
+  /** ggml model size for local STT. */
+  speechToTextModel: 'base' | 'small';
+  /** Whisper language mode: detect (`auto`) or follow UI locale (`ui`). */
+  speechToTextLanguage: 'auto' | 'ui';
   /**
    * Show model stats (tok/s, context %, params/quant) in the chat UI.
    * On by default; opt-out in Settings.
@@ -233,6 +239,9 @@ export const DIRECT_READ_KEYS = new Set<keyof AppConfig>([
   'enableThinking',
   'thinkingLevel',
   'speechSynthesisEnabled',
+  'speechToTextEnabled',
+  'speechToTextModel',
+  'speechToTextLanguage',
   'modelStatsEnabled',
   'checkpointsEnabled',
   'quickAskEnabled',
@@ -361,6 +370,9 @@ export const defaultConfig: AppConfig = {
   enableThinking: false,
   thinkingLevel: 'medium',
   speechSynthesisEnabled: false,
+  speechToTextEnabled: false,
+  speechToTextModel: 'base',
+  speechToTextLanguage: 'ui',
   modelStatsEnabled: true,
   checkpointsEnabled: true,
   workspaceTooling: {},

@@ -388,6 +388,15 @@ export function normalizeConfig(rawConfig: Partial<AppConfig> | undefined): AppC
       raw.speechSynthesisEnabled,
       defaultConfig.speechSynthesisEnabled
     ),
+    speechToTextEnabled: toBoolean(raw.speechToTextEnabled, defaultConfig.speechToTextEnabled),
+    speechToTextModel:
+      raw.speechToTextModel === 'small' || raw.speechToTextModel === 'base'
+        ? raw.speechToTextModel
+        : defaultConfig.speechToTextModel,
+    speechToTextLanguage:
+      raw.speechToTextLanguage === 'auto' || raw.speechToTextLanguage === 'ui'
+        ? raw.speechToTextLanguage
+        : defaultConfig.speechToTextLanguage,
     modelStatsEnabled: toBoolean(raw.modelStatsEnabled, defaultConfig.modelStatsEnabled),
     checkpointsEnabled: toBoolean(raw.checkpointsEnabled, defaultConfig.checkpointsEnabled),
     workspaceTooling: normalizeWorkspaceTooling(raw.workspaceTooling),

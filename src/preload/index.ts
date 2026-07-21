@@ -520,6 +520,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
     testReranker: (payload: MemoryRerankerTestInput): Promise<MemoryRerankerTestResult> =>
       ipcRenderer.invoke('memory.testReranker', payload),
   },
+
+  stt: {
+    getStatus: () => ipcRenderer.invoke('stt.getStatus'),
+    ensure: (modelId?: 'base' | 'small') => ipcRenderer.invoke('stt.ensure', modelId),
+    cancelDownload: () => ipcRenderer.invoke('stt.cancelDownload'),
+    remove: () => ipcRenderer.invoke('stt.remove'),
+    transcribe: (payload: { wav: ArrayBuffer | Uint8Array; modelId?: 'base' | 'small' }) =>
+      ipcRenderer.invoke('stt.transcribe', payload),
+    cancelTranscribe: () => ipcRenderer.invoke('stt.cancelTranscribe'),
+    requestMicrophoneAccess: () => ipcRenderer.invoke('stt.requestMicrophoneAccess'),
+  },
 });
 
 // Type declaration for the renderer process
@@ -853,6 +864,48 @@ declare global {
         ) => Promise<MemoryInspectSessionResult | null>;
         setEnabled: (enabled: boolean) => Promise<{ success: boolean; enabled: boolean }>;
         testReranker: (payload: MemoryRerankerTestInput) => Promise<MemoryRerankerTestResult>;
+      };
+      stt: {
+        getStatus: () => Promise<{
+          version: string;
+          binaryReady: boolean;
+          binaryPath: string | null;
+          libDir: string | null;
+          modelsRoot: string;
+          runtimeRoot: string;
+          tmpRoot: string;
+          models: {
+            base: { ready: boolean; path: string; bytes: number };
+            small: { ready: boolean; path: string; bytes: number };
+          };
+          downloadBytes: { binary: number; base: number; small: number };
+          platformSupported: boolean;
+        }>;
+        ensure: (modelId?: 'base' | 'small') => Promise<{
+          success: boolean;
+          cancelled?: boolean;
+          error?: string;
+          binaryPath?: string;
+          modelPath?: string;
+          status?: unknown;
+        }>;
+        cancelDownload: () => Promise<{ success: boolean }>;
+        remove: () => Promise<{ success: boolean; error?: string; status?: unknown }>;
+        transcribe: (payload: {
+          wav: ArrayBuffer | Uint8Array;
+          modelId?: 'base' | 'small';
+        }) => Promise<{
+          success: boolean;
+          text?: string;
+          language?: string;
+          cancelled?: boolean;
+          error?: string;
+        }>;
+        cancelTranscribe: () => Promise<{ success: boolean }>;
+        requestMicrophoneAccess: () => Promise<{
+          granted: boolean;
+          status: string;
+        }>;
       };
     };
   }

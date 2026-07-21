@@ -176,7 +176,11 @@ _Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates
 - **Content Watch + Digest** — watchers dossier/RSS/URL sur le cron existant, diff #149, session Veille en mode plan. — **done** (PR #158)
 - **PII Scrub sortant** — jetons réversibles par règles (email/tél/IBAN/Luhn + termes custom), fail-closed, opt-in. — **done** (PR #159)
 - **Artifacts / Canvas** — aperçu iframe sandboxée (html/svg, CSP no-network), versions. Mermaid exclu (dépendance). — **done** (PR #161)
+<<<<<<< HEAD
 - **Local STT (dictée)** — whisper.cpp on-demand (pattern runtimes v5.3), push-to-talk, transcription au release. — _en cours — **voie A actée** (2026-07-21)_ : Win/Linux = releases officielles v1.9.1, macOS = bottle Homebrew `whisper-cpp` (pattern cliclick). Investigation : [`docs/local-stt-investigation-2026-07.md`](docs/local-stt-investigation-2026-07.md) ; implémentation : **Prompt 8-bis** (`cursor/local-stt-impl`) dans `docs/cursor-prompts-lot3-2026-07.md`.
+=======
+- **Local STT (dictée)** — whisper.cpp on-demand (pattern runtimes v5.3), push-to-talk, transcription au release. — _en cours_ (voie A : officiel win/linux + bottle Homebrew macOS pinné ; voir [`docs/local-stt-investigation-2026-07.md`](docs/local-stt-investigation-2026-07.md)).
+>>>>>>> 811d19f (feat(stt): dictée locale whisper.cpp v1.9.1 (voie A))
 
 ### Mid-term (v3.5.0+)
 

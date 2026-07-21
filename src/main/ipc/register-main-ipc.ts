@@ -14,6 +14,7 @@ import { registerPromptPresetsIpc } from './ipc-prompt-presets';
 import { registerCheckpointsIpc } from './ipc-checkpoints';
 import { registerChatFoldersIpc } from './ipc-chat-folders';
 import { registerWatchIpc } from './ipc-watch';
+import { registerSttIpc } from './ipc-stt';
 
 export function registerMainIpc(): void {
   registerClientShellIpc();
@@ -29,4 +30,5 @@ export function registerMainIpc(): void {
   registerCheckpointsIpc();
   registerChatFoldersIpc();
   registerWatchIpc();
+  registerSttIpc();
 }

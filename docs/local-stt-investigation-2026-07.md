@@ -1,9 +1,9 @@
 # Local STT — Étape 0 investigation (2026-07)
 
-> **Décision** : **STOP** — les releases officielles `ggml-org/whisper.cpp`
-> ne fournissent **pas** de binaire CLI macOS (`whisper-cli` / `mac-arm64`).
-> Implémentation bloquée jusqu’à choix d’une alternative (compilation locale
-> utilisateur exclue par le prompt).
+> **Décision** : **voie A retenue** (2026-07-21) — win/linux = assets officiels
+> `ggml-org/whisper.cpp` v1.9.1 ; macOS = bottles Homebrew `whisper-cpp` 1.9.1
+> pinnés par digest ghcr.io (même mécanique que cliclick, sans résolution
+> dynamique formulae.brew.sh au runtime).
 >
 > Branche : `cursor/local-stt` · Prompt : `docs/cursor-prompts-lot3-2026-07.md` §8
 
