@@ -303,6 +303,12 @@ construction du srcdoc avec CSP (snapshot) ; versions ordonnées par arrivée.
 
 ## Prompt 8 — Dictée vocale locale (STT)  `cursor/local-stt`
 
+> **État 2026-07-21 — STOP étape 0.** Releases officielles `ggml-org/whisper.cpp`
+> v1.9.1 : CLI win-x64 + linux-x64 OK, **pas de CLI mac-arm64** (XCFramework
+> seulement). Rapport : [`local-stt-investigation-2026-07.md`](./local-stt-investigation-2026-07.md).
+> Relancer l’implémentation seulement après choix A (Homebrew bottle macOS) ou
+> B (CI self-publish macOS CLI).
+
 ```text
 [Règles communes du lot 1]
 
