@@ -303,11 +303,12 @@ construction du srcdoc avec CSP (snapshot) ; versions ordonnées par arrivée.
 
 ## Prompt 8 — Dictée vocale locale (STT)  `cursor/local-stt`
 
-> **État 2026-07-21 — STOP étape 0.** Releases officielles `ggml-org/whisper.cpp`
-> v1.9.1 : CLI win-x64 + linux-x64 OK, **pas de CLI mac-arm64** (XCFramework
-> seulement). Rapport : [`local-stt-investigation-2026-07.md`](./local-stt-investigation-2026-07.md).
-> Relancer l’implémentation seulement après choix A (Homebrew bottle macOS) ou
-> B (CI self-publish macOS CLI).
+> **État 2026-07-21 — DÉBLOQUÉ, voie A actée.** L'étape 0 (rapport :
+> [`local-stt-investigation-2026-07.md`](./local-stt-investigation-2026-07.md))
+> a montré l'absence de CLI mac dans les releases officielles. Décision :
+> **A — bottle Homebrew macOS** + releases officielles Win/Linux.
+> L'implémentation suit le **Prompt 8-bis** ci-dessous (qui REMPLACE la
+> spécification du prompt 8 original — l'étape 0 n'est plus à refaire).
 
 ```text
 [Règles communes du lot 1]
@@ -364,3 +365,80 @@ Rituel habituel : « vérifie la branche cursor/xxx » → revue Claude complèt
 Points d'attention spécifiques lot 3 : chokepoints PII réellement uniques,
 sandbox iframe sans fuite preload, spawn STT sans interpolation shell,
 lockfile rétro-compatible, sous-chats sans cycle.
+
+---
+
+## Prompt 8-bis — STT locale, implémentation voie A  `cursor/local-stt-impl`
+
+```text
+[Règles communes du lot 1]
+
+CONTEXTE : L'étape 0 est FAITE (docs/local-stt-investigation-2026-07.md) et la
+décision est prise : voie A. Ne pas re-investiguer. Implémenter la dictée
+vocale locale avec whisper.cpp v1.9.1 :
+- win-x64   : release officielle ggml-org/whisper.cpp v1.9.1 → whisper-bin-x64.zip
+              (extraire whisper-cli.exe + TOUTES les DLLs du même dossier).
+- linux-x64 : whisper-bin-ubuntu-x64.tar.gz (whisper-cli + libwhisper/libggml .so).
+- macOS     : bottle Homebrew de la formula whisper-cpp 1.9.1 — MÊME MÉCANIQUE
+              que cliclick (scripts/lib/gui-tools-runtime.mjs), arm64 ET x86_64.
+
+FICHIERS À LIRE D'ABORD : scripts/lib/gui-tools-runtime.mjs (bottle : résolution,
+download, extraction tar args-array), scripts/lib/node-runtime.mjs (checksum),
+src/main/runtime/gui-tools-runtime.ts (wrapper ensure*), le rapport étape 0.
+
+SPÉCIFICATION :
+1. Runtime : scripts/lib/stt-runtime.mjs + src/main/runtime/stt-runtime.ts,
+   stockage userData/runtimes/stt/<version whisper>/ (aligné Node/Python).
+   Téléchargement AU PREMIER USAGE avec progression visible + annulable.
+2. ÉPINGLAGE STRICT (leçon fragilité cliclick — ne PAS dépendre de la version
+   courante de la formule) :
+   - Win/Linux : URLs des assets du tag v1.9.1 (immuables) + sha256 FIGÉS en
+     constantes dans stt-runtime.mjs.
+   - macOS : URL du blob ghcr.io par DIGEST sha256 (stable à jamais) + le même
+     sha256 comme checksum, PAS de résolution dynamique formulae.brew.sh au
+     runtime (la garder seulement en fallback commenté). Un blob par arch
+     (arm64 / x86_64), clés bottle relevées dans le rapport étape 0.
+   - Toute archive téléchargée : vérifier le sha256 AVANT extraction ; mismatch
+     → supprimer + erreur claire, jamais d'exécution d'un binaire non vérifié.
+3. Chargement dynamique des libs au spawn (le binaire n'est PAS déplacé hors de
+   son dossier d'extraction) :
+   - Windows : cwd = dossier du binaire (résolution DLL implicite).
+   - Linux   : env LD_LIBRARY_PATH = dossier des .so (préfixé à l'existant).
+   - macOS   : env DYLD_LIBRARY_PATH + DYLD_FALLBACK_LIBRARY_PATH = <bottle>/lib
+     (dyld résout par nom de feuille en priorité — couvre les install_names
+     absolus /opt/homebrew du bottle ; SIP ne s'applique pas à un binaire
+     téléchargé). Test manuel de lancement documenté dans la PR.
+4. Modèle : ggml-base.bin multilingue depuis huggingface
+   ggerganov/whisper.cpp, URL figée PAR COMMIT (resolve/<commit>/ggml-base.bin)
+   + sha256 + taille en constantes. Download .part → rename atomique après
+   checksum OK. Option Réglages : ggml-small.bin (même mécanique). Stockage
+   userData/runtimes/stt/models/.
+5. Capture : bouton micro dans la zone de saisie (ChatView) — MAINTENIR
+   (push-to-talk) ou CLIC pour démarrer/arrêter. getUserMedia audio →
+   AudioContext → mono 16 kHz PCM16 → en-tête WAV écrit À LA MAIN (44 octets,
+   zéro dépendance). macOS : systemPreferences.askForMediaAccess('microphone')
+   + NSMicrophoneUsageDescription dans la config electron-builder (exception
+   packaging légitime, la documenter dans la PR ; ne rien toucher d'autre au
+   build/CI).
+6. Transcription : spawn du binaire en ARGS ARRAY STRICT (jamais de shell) :
+   ['-m', modelPath, '-f', wavPath, '-l', lang, '--no-timestamps'] ; lang =
+   langue UI mappée vers les codes whisper + option « auto » ; lire la
+   transcription sur STDOUT (PAS de -otxt : aucun fichier de sortie à gérer) ;
+   timeout (5 min) + kill à l'annulation utilisateur.
+7. Fichier WAV temporaire dans userData/runtimes/stt/tmp/, supprimé en finally
+   (succès, échec ET annulation). Aucun audio persisté, jamais.
+8. Résultat : INSÉRÉ dans le champ de saisie à la position du curseur —
+   l'utilisateur relit et envoie lui-même. JAMAIS d'envoi automatique.
+9. Réglages « Voix » : activer la dictée (OFF par défaut), modèle base/small,
+   langue auto/UI, état du runtime (téléchargé ou non + bouton supprimer).
+10. i18n ×12 (UI + erreurs backend via catalog mt()).
+
+HORS PÉRIMÈTRE : streaming temps réel, VAD, ponctuation avancée, autres
+modèles, autres langues de FORMATS que la liste whisper, toute modification CI.
+
+TESTS : en-tête WAV (44 octets exacts, champs riff/fmt/data) ; resample vers
+16 kHz mono (fixtures) ; construction des args spawn (aucune interpolation,
+chemins avec espaces OK) ; checksum mismatch → refus + fichier supprimé ;
+nettoyage tmp sur échec ET annulation ; mapping langue UI → code whisper ;
+résolution du chemin binaire par plateforme (mocks fs).
+```

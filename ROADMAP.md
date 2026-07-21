@@ -176,7 +176,7 @@ _Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates
 - **Content Watch + Digest** — watchers dossier/RSS/URL sur le cron existant, diff #149, session Veille en mode plan. — **done** (PR #158)
 - **PII Scrub sortant** — jetons réversibles par règles (email/tél/IBAN/Luhn + termes custom), fail-closed, opt-in. — **done** (PR #159)
 - **Artifacts / Canvas** — aperçu iframe sandboxée (html/svg, CSP no-network), versions. Mermaid exclu (dépendance). — **done** (PR #161)
-- **Local STT (dictée)** — whisper.cpp on-demand (pattern runtimes v5.3), push-to-talk, transcription au release. — _bloqué (étape 0)_ : releases officielles `ggml-org/whisper.cpp` v1.9.1 fournissent `whisper-cli` pour **win-x64** et **linux-x64**, mais **pas** de CLI mac-arm64 (seulement un XCFramework). Rapport + alternatives : [`docs/local-stt-investigation-2026-07.md`](docs/local-stt-investigation-2026-07.md).
+- **Local STT (dictée)** — whisper.cpp on-demand (pattern runtimes v5.3), push-to-talk, transcription au release. — _en cours — **voie A actée** (2026-07-21)_ : Win/Linux = releases officielles v1.9.1, macOS = bottle Homebrew `whisper-cpp` (pattern cliclick). Investigation : [`docs/local-stt-investigation-2026-07.md`](docs/local-stt-investigation-2026-07.md) ; implémentation : **Prompt 8-bis** (`cursor/local-stt-impl`) dans `docs/cursor-prompts-lot3-2026-07.md`.
 
 ### Mid-term (v3.5.0+)
 
@@ -194,4 +194,4 @@ _Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates
 
 ---
 
-_Last updated: 2026-07-21 (lot 3 : 7/8 mergés — #153–#155, #157–#159, #161 ; local-stt bloqué étape 0 — pas de CLI macOS officiel whisper.cpp ; investigation `docs/local-stt-investigation-2026-07.md`)_
+_Last updated: 2026-07-21 (lot 3 : 7/8 mergés — #153–#155, #157–#159, #161 ; local-stt débloqué **voie A** (bottle Homebrew macOS, #163) — prompt 8-bis publié, implémentation en attente)_
