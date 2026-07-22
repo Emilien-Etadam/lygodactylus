@@ -9,17 +9,61 @@ AI-friendly CLI for .docx, .xlsx, .pptx. Single binary, no dependencies, no Offi
 
 ## Install
 
-If `officecli` is not installed:
+If `officecli` is not installed, download the **pinned** GitHub release asset
+for your platform, **verify sha256 before any execution**, then install the
+binary onto `PATH`. Do **not** use floating installers.
+
+Pinned release: **v1.0.140**
+Base URL: `https://github.com/iOfficeAI/OfficeCLI/releases/download/v1.0.140/`
+Checksums source: release file `SHA256SUMS` (same release).
+
+| Platform | Asset | sha256 |
+|---|---|---|
+| linux-x64 | `officecli-linux-x64` | `cee68cc2108074e5ae5ad114e1cd5cab4514da8ead4983d5d94aa0acba4f41e8` |
+| linux-arm64 | `officecli-linux-arm64` | `924dd58f57891d1b3fe8cf77f06990f58f8f0c0ddf6fe22e1d91c7f10d3e7576` |
+| mac-arm64 | `officecli-mac-arm64` | `d83d68a6138c9a8456707db86f9ff62813a2d752d08ea725b3c8f077950086ba` |
+| mac-x64 | `officecli-mac-x64` | `61b864e628d0cf4e203b2b8e679bccdaf657e0328d54f17d08173181a2adba13` |
+| win-x64 | `officecli-win-x64.exe` | `43ad45527bf2c486da1dd7c8d9257b90ac17a6b83028d7064ea38235cd43ec3e` |
+| win-arm64 | `officecli-win-arm64.exe` | `a83bcfbab9a092dd060d6016168c42a639865d198ef6aa3772dd196109433551` |
+
+**Unix (macOS / Linux)** — pick the matching row, then:
 
 ```bash
-# macOS / Linux
-curl -fsSL https://d.officecli.ai/install.sh | bash
-
-# Windows (PowerShell)
-irm https://d.officecli.ai/install.ps1 | iex
+REL=v1.0.140
+ASSET=officecli-linux-x64   # or officecli-linux-arm64 / officecli-mac-arm64 / officecli-mac-x64
+SHA=cee68cc2108074e5ae5ad114e1cd5cab4514da8ead4983d5d94aa0acba4f41e8
+URL="https://github.com/iOfficeAI/OfficeCLI/releases/download/${REL}/${ASSET}"
+PART="${TMPDIR:-/tmp}/officecli.part"
+DEST="${HOME}/.local/bin/officecli"
+mkdir -p "$(dirname "$DEST")"
+curl -fsSL "$URL" -o "$PART"
+echo "${SHA}  ${PART}" | sha256sum -c - || { rm -f "$PART"; echo "sha256 mismatch — abort"; exit 1; }
+install -m 755 "$PART" "$DEST"
+rm -f "$PART"
 ```
 
-Verify with `officecli --version`. If still not found after install, open a new terminal.
+On checksum failure: delete the `.part` file and **stop** (fail-closed). Do not run the binary.
+
+**Windows (PowerShell)** — win-x64 example (swap asset/hash for win-arm64):
+
+```powershell
+$Rel = 'v1.0.140'
+$Asset = 'officecli-win-x64.exe'
+$Expected = '43ad45527bf2c486da1dd7c8d9257b90ac17a6b83028d7064ea38235cd43ec3e'
+$Url = "https://github.com/iOfficeAI/OfficeCLI/releases/download/$Rel/$Asset"
+$Part = Join-Path $env:TEMP 'officecli.part'
+$Dest = Join-Path $env:LOCALAPPDATA 'Programs\officecli\officecli.exe'
+New-Item -ItemType Directory -Force -Path (Split-Path $Dest) | Out-Null
+Invoke-WebRequest -Uri $Url -OutFile $Part
+$hash = (Get-FileHash -Algorithm SHA256 -Path $Part).Hash.ToLowerInvariant()
+if ($hash -ne $Expected) { Remove-Item -Force $Part; throw 'sha256 mismatch — abort' }
+Move-Item -Force $Part $Dest
+# Ensure (Split-Path $Dest) is on PATH for the current user, then reopen the terminal.
+```
+
+On checksum failure: delete the download and **stop** (fail-closed). Do not run the binary.
+
+Verify with `officecli --version` (expect `1.0.140`). If still not found after install, open a new terminal.
 
 ---
 
@@ -323,7 +367,7 @@ When using `--after` or `--before`, `--to` can be omitted — the target contain
 
 ### batch — multiple operations in one save cycle
 
-Continues on error by default (returns exit 1 if any item fails). Use `--stop-on-error` to abort on the first failure. `--force` is the docx-protection bypass.
+**Atomic by default (v1.0.137+):** every item still runs and is reported (so `N succeeded, M failed` stays meaningful and every failure surfaces), but if *any* item fails the whole batch rolls back — the file on disk is left byte-identical to before the batch ran (confirmed live in both standalone and resident mode). Use `--best-effort` to restore the old apply-what-succeeds behavior (useful for lossy `dump→batch` replays where losing the whole thing over one unsupported item is worse than a partial result). `--stop-on-error` only changes how early the run stops (remaining items are `skipped`), not whether what ran gets kept — combine it with `--best-effort` if you want "stop at first failure but keep what already succeeded." `--force` is unrelated — it's only the docx-protection bypass. Failed items carry a machine-readable `code` field (same list as `error.code`); a rolled-back batch's JSON summary carries `"atomicRolledBack": true`.
 
 `officecli dump <file> [<path>]` emits a replayable batch JSON for round-trip — `.docx` (full coverage), `.pptx` (text/tables/pictures/charts/notes/theme + OLE/3D/video/audio/SmartArt/morph/p15 transitions via raw-set passthrough), and `.xlsx` (cells/formulas/styles + tables, conditional formatting, validations, comments, charts, sparklines, pictures, shapes, pivot tables; slicers/chartEx/OLE via verbatim carrier). Path defaults to `/` (whole document); pass a subtree path (docx: `/body`, `/body/p[N]`, `/body/tbl[N]`, `/theme`, `/settings`, `/numbering`, `/styles`; xlsx: `/SheetName`, `/sheet[N]`) to scope the dump. `officecli refresh <file.docx>` recalculates TOC page numbers / PAGE / cross-references after replay (Word backend on Windows; headless-HTML fallback elsewhere). `officecli plugins list` extends support to `.doc`, `.hwpx`, `.pdf` export.
 
@@ -334,7 +378,7 @@ echo '[
 ]' | officecli batch data.xlsx --json
 
 officecli batch data.xlsx --commands '[{"op":"set","path":"/Sheet1/A1","props":{"value":"Done"}}]' --json
-officecli batch data.xlsx --input updates.json --force --json
+officecli batch data.xlsx --input updates.json --best-effort --json   # keep whatever succeeds even if some items fail
 ```
 
 Supports: `add`, `set`, `get`, `query`, `remove`, `move`, `swap`, `view`, `raw`, `raw-set`, `validate`. Fields: `command` (or `op`), `path`, `parent`, `type`, `from`, `to`, `index`, `after`, `before`, `props`, `selector`, `mode`, `depth`, `part`, `xpath`, `action`, `xml`.

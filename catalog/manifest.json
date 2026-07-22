@@ -234,7 +234,7 @@
       "id": "officecli-skill",
       "type": "skill",
       "name": "OfficeCLI",
-      "description": "Create, analyze, and modify Office documents (.docx, .xlsx, .pptx) via the officecli CLI (Apache-2.0). Downloads the binary on first use.",
+      "description": "Create, analyze, and modify Office documents (.docx, .xlsx, .pptx) via the officecli CLI (Apache-2.0). Downloads the pinned v1.0.140 binary (sha256-verified) on first use.",
       "verified": true,
       "resolve": {
         "via": "github",
