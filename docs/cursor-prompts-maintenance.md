@@ -155,3 +155,60 @@ autres providers.
 
 TESTS : harnais + suite complète verts ; documenter le décompte.
 ```
+
+---
+
+## Prompt M4 — Resync OfficeCLI (skill vendorisé + binaire épinglé)  `cursor/officecli-resync`
+
+```text
+LIRE D'ABORD (OBLIGATOIRE) : docs/cursor-rules-communes.md.
+PARAMÈTRE AU LANCEMENT : la release amont cible (ex. « v1.0.140 »).
+
+CONTEXTE : catalog/skills/officecli/SKILL.md est vendorisé depuis
+iOfficeAI/OfficeCLI (NOTICE.md = provenance). L'amont release quasi
+quotidiennement, et son mécanisme d'install est un `curl | bash` FLOTTANT
+(https://d.officecli.ai/install.sh) — sans version ni checksum : la doc
+vendorisée et le binaire réellement installé divergent avec le temps.
+DÉCISION ACTÉE : notre copie épingle le binaire (version + sha256) et les
+deux avancent ENSEMBLE à chaque resync. Ce prompt sert pour la
+transformation initiale ET pour chaque resync suivant.
+
+ÉTAPE 0 — OBLIGATOIRE (résumer dans la PR) :
+1. Télécharger le SKILL.md amont
+   (https://raw.githubusercontent.com/iOfficeAI/OfficeCLI/main/SKILL.md) et
+   relever le SHA du commit amont qui le porte. Diff avec notre copie :
+   résumer ce qui a changé (commandes, flags, sections).
+2. Lister les assets de la release cible (plateformes couvertes ; y a-t-il
+   un fichier de checksums fourni ?). Cibles requises : win-x64, mac-arm64,
+   mac-x64, linux-x64. Si une plateforme manque → s'arrêter et rapporter.
+3. Release notes depuis le dernier resync (NOTICE.md porte la version
+   précédente) : signaler tout changement de comportement notable.
+
+SPÉCIFICATION :
+1. Re-vendoriser SKILL.md depuis l'amont (verbatim), PUIS appliquer NOTRE
+   unique divergence : remplacer la section d'installation `curl | bash` /
+   `irm | iex` par le téléchargement des assets GitHub de la release ÉPINGLÉE,
+   avec vérification sha256 AVANT toute exécution :
+   - checksums repris du fichier de checksums de la release s'il existe,
+     sinon calculés depuis les assets téléchargés et FIGÉS dans le SKILL.md ;
+   - instructions par plateforme, courtes et actionnables par l'agent
+     (curl -fsSL <url release pinnée> + sha256sum -c sous unix ;
+     Invoke-WebRequest + Get-FileHash sous Windows) ; échec de checksum →
+     supprimer le fichier et s'arrêter (fail-closed) ;
+   - AUCUNE autre modification du texte amont.
+2. NOTICE.md : date de resync, SHA du commit amont du SKILL.md, version
+   binaire épinglée + sha256 par plateforme, et une section
+   « Local modifications » décrivant précisément la divergence d'install
+   (traçabilité curated-strict).
+3. catalog/manifest.json : description de l'entrée mise à jour si elle
+   mentionne une version.
+4. La validation CI du catalogue et la suite complète restent vertes.
+
+HORS PÉRIMÈTRE : modifier le comportement du skill au-delà de l'install,
+bundler le binaire dans l'app, autres skills du catalogue.
+
+TESTS : validation catalogue verte ; si un test verrouille le contenu du
+skill vendorisé, l'adapter — sinon en ajouter un LÉGER : le SKILL.md
+vendorisé ne contient PLUS `d.officecli.ai` ni `| bash` ni `| iex`, et
+contient la version épinglée et des sha256 (40+ hex).
+```
