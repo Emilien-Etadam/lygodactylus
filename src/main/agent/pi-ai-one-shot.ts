@@ -16,7 +16,7 @@ import {
   resolveActiveConstraintField,
   withConstrainedOutputFallback,
 } from '../config/endpoint-capabilities';
-import { getSharedAuthStorage } from './shared-auth';
+import { getSharedModelRuntime } from './shared-auth';
 import {
   applyPiModelRuntimeOverrides,
   buildSyntheticPiModel,
@@ -149,7 +149,7 @@ interface PreparedPiOneShotModel {
   apiKey: string | undefined;
 }
 
-function preparePiModelForOneShot(config: AppConfig): PreparedPiOneShotModel {
+async function preparePiModelForOneShot(config: AppConfig): Promise<PreparedPiOneShotModel> {
   const modelString = resolvePiModelString(config);
   const keyProvider = config.customProtocol || config.provider || 'anthropic';
   const parts = modelString.split('/');
@@ -203,10 +203,10 @@ function preparePiModelForOneShot(config: AppConfig): PreparedPiOneShotModel {
   const resolvedModel = piModel!;
   const apiKey = config.apiKey?.trim();
   if (apiKey) {
-    const authStorage = getSharedAuthStorage();
-    authStorage.setRuntimeApiKey(provider, apiKey);
+    const modelRuntime = await getSharedModelRuntime();
+    await modelRuntime.setRuntimeApiKey(provider, apiKey);
     if (resolvedModel.provider !== provider) {
-      authStorage.setRuntimeApiKey(resolvedModel.provider, apiKey);
+      await modelRuntime.setRuntimeApiKey(resolvedModel.provider, apiKey);
     }
   }
 
@@ -224,7 +224,7 @@ export async function runPiAiOneShot(
   config: AppConfig,
   options?: PiAiOneShotOptions
 ): Promise<{ text: string; hasThinking: boolean; durationMs: number }> {
-  const { resolvedModel, apiKey } = preparePiModelForOneShot(config);
+  const { resolvedModel, apiKey } = await preparePiModelForOneShot(config);
   const start = Date.now();
 
   const userMsg: PiUserMessage = { role: 'user', content: prompt, timestamp: Date.now() };
@@ -305,7 +305,7 @@ export async function runPiAiOneShotStream(
     signal?: AbortSignal;
   }
 ): Promise<void> {
-  const { resolvedModel, apiKey } = preparePiModelForOneShot(config);
+  const { resolvedModel, apiKey } = await preparePiModelForOneShot(config);
   const userMsg: PiUserMessage = { role: 'user', content: prompt, timestamp: Date.now() };
 
   log(

@@ -7,16 +7,15 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Type } from 'typebox';
 import {
-  AuthStorage,
   createAgentSession,
   DefaultResourceLoader,
-  ModelRegistry,
   SessionManager,
   SettingsManager,
   type ToolDefinition,
 } from '@earendil-works/pi-coding-agent';
 import type { Api, Model, StreamOptions } from '@earendil-works/pi-ai';
 import {
+  createHarnessModelRuntime,
   createHarnessWorkspace,
   createSyntheticPiModel,
   writeMinimalSkill,
@@ -44,7 +43,7 @@ async function createPreparedSession(options: {
 }) {
   workspace = createHarnessWorkspace();
   const { cwd, agentDir } = workspace;
-  const authStorage = AuthStorage.inMemory();
+  const modelRuntime = await createHarnessModelRuntime();
   const model = createSyntheticPiModel();
 
   const skillPaths: string[] = [];
@@ -69,8 +68,7 @@ async function createPreparedSession(options: {
   const { session } = await createAgentSession({
     model,
     thinkingLevel: 'off',
-    authStorage,
-    modelRegistry: ModelRegistry.create(authStorage),
+    modelRuntime,
     customTools: options.customTools,
     ...(options.excludeTools && options.excludeTools.length > 0
       ? { excludeTools: options.excludeTools }
