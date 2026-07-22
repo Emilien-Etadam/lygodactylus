@@ -177,6 +177,7 @@ _Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates
 - **PII Scrub sortant** — jetons réversibles par règles (email/tél/IBAN/Luhn + termes custom), fail-closed, opt-in. — **done** (PR #159)
 - **Artifacts / Canvas** — aperçu iframe sandboxée (html/svg, CSP no-network), versions. Mermaid exclu (dépendance). — **done** (PR #161)
 - **Local STT (dictée)** — whisper.cpp v1.9.1 on-demand (voie A : officiel win/linux + bottle Homebrew macOS pinné par digest), push-to-talk, insertion au curseur. — **done** (PR #165 ; étape 0 : [`docs/local-stt-investigation-2026-07.md`](docs/local-stt-investigation-2026-07.md))
+- **Ménage post-lot 3** — suppression des executors morts pré-pi-SDK (dernier `runWebSearch` hors scrub PII), dédups réseau/dossiers, pin préservé au rollback, garde busy STT, `isUncPath` étendu aux UNC forward-slash. — **done** (PR #171)
 
 ### Mid-term (v3.5.0+)
 
@@ -194,4 +195,4 @@ _Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates
 
 ---
 
-_Last updated: 2026-07-22 (**lot 3 livré 8/8** — #153–#155, #157–#159, #161, #165 STT ; + hygiène deps #166/#167 — overrides brace-expansion/js-yaml/fast-uri, exception documentée pi-coding-agent bundlé)_
+_Last updated: 2026-07-22 (**lot 3 clos** : 8/8 livrés #153–#165 + ménage #171 + hygiène deps #166/#167 ; 1574 tests ; reste planifié : bump SDK pi ≥0.81 — sortie de l'exception d'audit brace-expansion)_
