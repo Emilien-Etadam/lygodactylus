@@ -67,7 +67,7 @@ import {
   PLAN_MODE_SYSTEM_PROMPT,
 } from '../../shared/session-mode';
 import { buildPiSessionRuntimeSignature } from './pi-session-runtime';
-import { getSharedAuthStorage } from './shared-auth';
+import { getSharedModelRuntime } from './shared-auth';
 import { createWindowsBashOperations } from './windows-bash-operations';
 import { createWslSandboxBashOperations } from './wsl-sandbox-bash-operations';
 import { isQuickAskSessionTitle, QUICK_ASK_SYSTEM_PROMPT } from '../../shared/quick-ask';
@@ -248,12 +248,12 @@ export async function preparePiSessionRun({
   const modelContextWindow = piModel.contextWindow || 128000;
   const modelMaxTokens = piModel.maxTokens || 16384;
 
-  const authStorage = getSharedAuthStorage();
+  const modelRuntime = await getSharedModelRuntime();
   const apiKey = runtimeConfig.apiKey?.trim();
   if (apiKey) {
-    authStorage.setRuntimeApiKey(provider, apiKey);
+    await modelRuntime.setRuntimeApiKey(provider, apiKey);
     if (piModel.provider !== provider) {
-      authStorage.setRuntimeApiKey(piModel.provider, apiKey);
+      await modelRuntime.setRuntimeApiKey(piModel.provider, apiKey);
       log('[AgentRunner] Set runtime API key for model provider:', piModel.provider);
     }
     log('[AgentRunner] Set runtime API key for config provider:', provider);
@@ -593,7 +593,7 @@ export async function preparePiSessionRun({
     provider,
     piModel,
     thinkingLevel,
-    authStorage,
+    modelRuntime,
     customTools: allCustomTools,
     excludeTools: excludeBuiltinTools,
     skillPaths,

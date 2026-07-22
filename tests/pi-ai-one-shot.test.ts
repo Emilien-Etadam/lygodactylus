@@ -3,7 +3,7 @@ import type { AppConfig } from '../src/main/config/config-store';
 
 const mocks = vi.hoisted(() => ({
   completeSimple: vi.fn(),
-  setRuntimeApiKey: vi.fn(),
+  setRuntimeApiKey: vi.fn(async () => undefined),
   resolvePiRegistryModel: vi.fn(),
   buildSyntheticPiModel: vi.fn(),
 }));
@@ -49,7 +49,7 @@ vi.mock('@earendil-works/pi-ai/compat', () => ({
 }));
 
 vi.mock('../src/main/agent/shared-auth', () => ({
-  getSharedAuthStorage: () => ({
+  getSharedModelRuntime: async () => ({
     setRuntimeApiKey: mocks.setRuntimeApiKey,
   }),
 }));

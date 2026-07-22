@@ -3,12 +3,12 @@
  * is missing. Protects graceful degradation of the Ollama keep_alive/num_ctx wrapper,
  * not the upstream private API itself.
  *
- * Baseline 0.80.3: the SDK agent exposes public `onPayload`, not `_onPayload`.
+ * Baseline 0.81.1: the SDK agent exposes public `onPayload`, not `_onPayload`.
  * createPiSession must warn and skip the wrapper without throwing.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { AuthStorage } from '@earendil-works/pi-coding-agent';
 import {
+  createHarnessModelRuntime,
   createHarnessWorkspace,
   createSyntheticPiModel,
   type HarnessWorkspace,
@@ -66,7 +66,7 @@ describe('sdk-contract private surface — _onPayload defensive degradation', ()
   it('does not throw and logs a warn when the agent has no _onPayload (Ollama path)', async () => {
     workspace = createHarnessWorkspace();
     const { cwd } = workspace;
-    const authStorage = AuthStorage.inMemory();
+    const modelRuntime = await createHarnessModelRuntime();
     const ctx = makeMinimalCtx();
     const piModel = createSyntheticPiModel({
       baseUrl: 'http://127.0.0.1:11434/v1',
@@ -78,7 +78,7 @@ describe('sdk-contract private surface — _onPayload defensive degradation', ()
       provider: 'ollama',
       piModel,
       thinkingLevel: 'off',
-      authStorage,
+      modelRuntime,
       customTools: [],
       skillPaths: [],
       promptTemplatePaths: [],
