@@ -178,6 +178,7 @@ _Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates
 - **Artifacts / Canvas** — aperçu iframe sandboxée (html/svg, CSP no-network), versions. Mermaid exclu (dépendance). — **done** (PR #161)
 - **Local STT (dictée)** — whisper.cpp v1.9.1 on-demand (voie A : officiel win/linux + bottle Homebrew macOS pinné par digest), push-to-talk, insertion au curseur. — **done** (PR #165 ; étape 0 : [`docs/local-stt-investigation-2026-07.md`](docs/local-stt-investigation-2026-07.md))
 - **Ménage post-lot 3** — suppression des executors morts pré-pi-SDK (dernier `runWebSearch` hors scrub PII), dédups réseau/dossiers, pin préservé au rollback, garde busy STT, `isUncPath` étendu aux UNC forward-slash. — **done** (PR #171)
+- **Maintenance SDK pi** — harnais « contrat SDK » (`src/tests/sdk-contract/`, PR #174), bump lockstep **0.80.3 → 0.81.1** (`ModelRuntime`, patch régénéré, exception d'audit supprimée) + keep_alive Ollama réparé via l'API extensions `before_provider_request` (PR #177 ; procédure : `docs/cursor-prompts-maintenance.md`). — **done**
 
 ### Mid-term (v3.5.0+)
 
@@ -195,4 +196,4 @@ _Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates
 
 ---
 
-_Last updated: 2026-07-22 (**lot 3 clos** : 8/8 livrés #153–#165 + ménage #171 + hygiène deps #166/#167 ; 1574 tests ; reste planifié : bump SDK pi ≥0.81 — sortie de l'exception d'audit brace-expansion)_
+_Last updated: 2026-07-22 (lot 3 clos 8/8 + ménage ; **maintenance SDK pi faite** : harnais #174, bump 0.81.1 + fix Ollama #177 — audit sans exception ; 1589 tests)_
