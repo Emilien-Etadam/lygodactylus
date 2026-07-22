@@ -1,14 +1,23 @@
-import { AuthStorage, ModelRegistry } from '@earendil-works/pi-coding-agent';
+import { ModelRuntime } from '@earendil-works/pi-coding-agent';
 
-// Singleton — safe because Electron main process is single-threaded.
-// AuthStorage.create() is synchronous, so no async race possible.
-let sharedAuthStorage: AuthStorage | null = null;
+/**
+ * Shared ModelRuntime singleton for the Electron main process.
+ * Replaces AuthStorage + ModelRegistry.create() removed from the public SDK
+ * surface in pi-coding-agent ≥0.80.8 (ModelRuntime facade).
+ *
+ * create() is async; callers must await. Concurrent callers share one promise
+ * (no double-create race on the single-threaded main process).
+ */
+let sharedModelRuntimePromise: Promise<ModelRuntime> | null = null;
 
-export function getSharedAuthStorage(): AuthStorage {
-  if (!sharedAuthStorage) {
-    sharedAuthStorage = AuthStorage.create();
+export function getSharedModelRuntime(): Promise<ModelRuntime> {
+  if (!sharedModelRuntimePromise) {
+    // Local-first app: never refresh remote model catalogs at create-time.
+    sharedModelRuntimePromise = ModelRuntime.create({
+      allowModelNetwork: false,
+    });
   }
-  return sharedAuthStorage;
+  return sharedModelRuntimePromise;
 }
 
-export { AuthStorage, ModelRegistry };
+export { ModelRuntime };

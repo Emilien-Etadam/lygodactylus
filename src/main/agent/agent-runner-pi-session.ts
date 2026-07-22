@@ -30,7 +30,7 @@ import {
   resolveProjectRulesFile,
   type ProjectRulesFile,
 } from './project-rules-file';
-import { ModelRegistry } from './shared-auth';
+import { type ModelRuntime } from './shared-auth';
 import { sortSkillsForStablePrefix } from './stable-system-prefix';
 
 export interface CachedPiSession {
@@ -325,7 +325,6 @@ export function wrapBashToolWithDefaultTimeout(tools: ToolDefinition[]): ToolDef
 
 type PiSessionModel = Parameters<PiAgentSession['setModel']>[0];
 type PiThinkingLevel = NonNullable<Parameters<PiAgentSession['setThinkingLevel']>[0]>;
-type PiAuthStorage = Parameters<typeof ModelRegistry.create>[0];
 
 interface ReuseCachedPiSessionOptions {
   cachedSession?: CachedPiSession;
@@ -419,7 +418,7 @@ interface CreatePiSessionOptions {
   provider: string;
   piModel: PiSessionModel;
   thinkingLevel: PiThinkingLevel;
-  authStorage: PiAuthStorage;
+  modelRuntime: ModelRuntime;
   customTools: ToolDefinition[];
   /** Built-in tools to disable (e.g. bash/edit/write in plan mode). */
   excludeTools?: string[];
@@ -444,7 +443,7 @@ export async function createPiSession({
   provider,
   piModel,
   thinkingLevel,
-  authStorage,
+  modelRuntime,
   customTools,
   excludeTools,
   skillPaths,
@@ -514,8 +513,7 @@ export async function createPiSession({
       createAgentSession({
         model: piModel,
         thinkingLevel,
-        authStorage,
-        modelRegistry: ModelRegistry.create(authStorage),
+        modelRuntime,
         customTools,
         ...(excludeTools && excludeTools.length > 0 ? { excludeTools } : {}),
         sessionManager: PiSessionManager.inMemory(),
