@@ -7,7 +7,8 @@ import {
   normalizeSessionMode,
   PLAN_MODE_SYSTEM_PROMPT,
 } from '../../shared/session-mode';
-import { buildPiSessionRuntimeSignature } from '../../main/agent/pi-session-runtime';
+
+// buildPiSessionRuntimeSignature invariants moved to src/tests/sdk-contract/stable-prefix.test.ts
 
 function tool(name: string): { name: string } {
   return { name };
@@ -87,24 +88,5 @@ describe('session plan/act mode', () => {
   it('exposes a constant plan-mode system prompt section', () => {
     expect(PLAN_MODE_SYSTEM_PROMPT).toContain('Planning mode');
     expect(PLAN_MODE_SYSTEM_PROMPT).toContain('numbered action plan');
-  });
-
-  it('keeps act-mode runtime signature identical when sessionMode is omitted or act', () => {
-    const baseInput = {
-      configProvider: 'openai',
-      customProtocol: 'openai-completions',
-      modelProvider: 'openai',
-      modelApi: 'openai-completions',
-      modelBaseUrl: 'http://localhost:11434/v1',
-      effectiveCwd: '/tmp/ws',
-      apiKey: 'secret',
-    };
-    const withoutMode = buildPiSessionRuntimeSignature(baseInput);
-    const withAct = buildPiSessionRuntimeSignature({ ...baseInput, sessionMode: 'act' });
-    const withPlan = buildPiSessionRuntimeSignature({ ...baseInput, sessionMode: 'plan' });
-
-    expect(withAct).toBe(withoutMode);
-    expect(withPlan).not.toBe(withoutMode);
-    expect(withPlan).toContain('"sessionMode":"plan"');
   });
 });
