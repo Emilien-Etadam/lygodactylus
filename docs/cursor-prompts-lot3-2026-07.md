@@ -446,8 +446,14 @@ résolution du chemin binaire par plateforme (mocks fs).
 
 ## Ménage post-lot 3  `cursor/cleanup-lot3`
 
+> **Mode autonome** : ce prompt est exécutable tel quel par un agent qui lit
+> le repo — les règles communes sont référencées par chemin, plus de bloc à
+> coller à la main.
+
 ```text
-[Règles communes du lot 1]
+LIRE D'ABORD (OBLIGATOIRE) : docs/cursor-rules-communes.md — les règles
+communes du projet (contexte, règles strictes, leçons lots 1-3, livraison).
+Elles s'appliquent intégralement à ce prompt.
 
 TÂCHE : Ménage ciblé post-lot 3 — suppression de code mort à risque, trois
 déduplications, deux correctifs de robustesse, trois micro-fixes. AUCUN
