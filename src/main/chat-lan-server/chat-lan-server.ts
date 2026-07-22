@@ -24,7 +24,7 @@ import { handleChatLanRpc, isAllowedRpcChannel } from './chat-lan-rpc';
 import { handleClientEvent } from '../main-client-events';
 import { isAllowedClientEvent } from '../../shared/client-event-allowlist';
 import { getDatabase } from '../db/database';
-import { listChatFolders } from '../session/chat-folders-store';
+import { safeListChatFolders } from '../session/chat-folders-store';
 
 const BIND_HOST = '0.0.0.0';
 const MAX_BODY_BYTES = 1024 * 1024;
@@ -328,12 +328,7 @@ async function handleApi(req: IncomingMessage, res: ServerResponse, url: URL): P
   }
 
   if (method === 'GET' && url.pathname === '/api/sessions') {
-    let folders: ReturnType<typeof listChatFolders> = [];
-    try {
-      folders = listChatFolders(getDatabase());
-    } catch {
-      folders = [];
-    }
+    const folders = safeListChatFolders(getDatabase());
     json(res, 200, { sessions: sm!.listSessions(), folders });
     return;
   }

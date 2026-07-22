@@ -46,16 +46,38 @@ function extractTagInner(block: string, tagNames: string[]): string {
 
 function extractLink(block: string, isAtom: boolean): string {
   if (isAtom) {
-    const hrefMatch = block.match(/<link\b[^>]*\bhref\s*=\s*["']([^"']+)["'][^>]*>/i);
-    if (hrefMatch?.[1]) {
-      return decodeXmlEntities(hrefMatch[1].trim());
+    const linkTagRe = /<link\b[^>]*>/gi;
+    let alternateLink: string | undefined;
+    let linkWithoutRel: string | undefined;
+
+    for (const tagMatch of block.matchAll(linkTagRe)) {
+      const tag = tagMatch[0];
+      const relMatch = tag.match(/\brel\s*=\s*["']([^"']+)["']/i);
+      const hrefMatch = tag.match(/\bhref\s*=\s*["']([^"']+)["']/i);
+      if (!hrefMatch?.[1]) {
+        continue;
+      }
+
+      const rel = relMatch?.[1]?.trim().toLowerCase() ?? '';
+      if (rel === 'self') {
+        continue;
+      }
+
+      const href = decodeXmlEntities(hrefMatch[1].trim());
+      if (rel === 'alternate') {
+        alternateLink = href;
+        break;
+      }
+      if (!relMatch) {
+        linkWithoutRel ??= href;
+      }
     }
-    // Prefer rel="alternate" when several links exist.
-    const altMatch = block.match(
-      /<link\b[^>]*\brel\s*=\s*["']alternate["'][^>]*\bhref\s*=\s*["']([^"']+)["'][^>]*>/i
-    );
-    if (altMatch?.[1]) {
-      return decodeXmlEntities(altMatch[1].trim());
+
+    if (alternateLink) {
+      return alternateLink;
+    }
+    if (linkWithoutRel) {
+      return linkWithoutRel;
     }
   }
   return extractTagInner(block, ['link']);

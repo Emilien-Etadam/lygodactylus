@@ -93,8 +93,10 @@ export function registerSttIpc(): void {
           return { success: false, error: mt('errSttDisabled') };
         }
 
-        cancelActiveTranscription();
-        transcribeAbort?.abort();
+        if (transcribeAbort) {
+          return { success: false, error: mt('errSttBusy') };
+        }
+
         transcribeAbort = new AbortController();
 
         const wavBytes =

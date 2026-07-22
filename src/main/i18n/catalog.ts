@@ -41,6 +41,7 @@ export type BackendMessageKey =
   | 'errNodeRuntimeUnavailable'
   | 'errSttDisabled'
   | 'errSttCancelled'
+  | 'errSttBusy'
   | 'errSttTimeout'
   | 'errSttTranscribeFailed'
   | 'errSttDownloadFailed'
@@ -124,6 +125,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
       'Node.js 运行时暂不可用，首次使用 MCP 时将自动下载。\n\n请连接网络后重试启动 MCP 服务器。',
     errSttDisabled: '听写已在设置中禁用。',
     errSttCancelled: '听写已取消。',
+    errSttBusy: '转写进行中，请稍候。',
     errSttTimeout: '听写超时。',
     errSttTranscribeFailed: '本地转写失败。',
     errSttDownloadFailed: '无法下载语音转文字运行时。',
@@ -195,6 +197,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
       'Node.js runtime is not available yet. The app will download it on first MCP use.\n\nConnect to the internet and retry opening MCP servers.',
     errSttDisabled: 'Dictation is disabled in Settings.',
     errSttCancelled: 'Dictation cancelled.',
+    errSttBusy: 'Transcription already in progress.',
     errSttTimeout: 'Dictation timed out.',
     errSttTranscribeFailed: 'Local transcription failed.',
     errSttDownloadFailed: 'Could not download the speech-to-text runtime.',
@@ -266,6 +269,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
       'El runtime de Node.js aún no está disponible. La aplicación lo descargará en el primer uso de MCP.\n\nConéctate a Internet e intenta abrir de nuevo los servidores MCP.',
     errSttDisabled: 'El dictado está desactivado en Ajustes.',
     errSttCancelled: 'Dictado cancelado.',
+    errSttBusy: 'Ya hay una transcripción en curso.',
     errSttTimeout: 'El dictado agotó el tiempo de espera.',
     errSttTranscribeFailed: 'Falló la transcripción local.',
     errSttDownloadFailed: 'No se pudo descargar el runtime de voz a texto.',
@@ -337,6 +341,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
       "Le runtime Node.js n'est pas encore disponible. L'application le téléchargera lors de la première utilisation de MCP.\n\nConnectez-vous à Internet puis réessayez d'ouvrir les serveurs MCP.",
     errSttDisabled: 'La dictée est désactivée dans les Réglages.',
     errSttCancelled: 'Dictée annulée.',
+    errSttBusy: 'Une transcription est déjà en cours.',
     errSttTimeout: 'La dictée a expiré.',
     errSttTranscribeFailed: 'Échec de la transcription locale.',
     errSttDownloadFailed: 'Impossible de télécharger le runtime de reconnaissance vocale.',
@@ -408,6 +413,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
       'Die Node.js-Laufzeitumgebung ist noch nicht verfügbar. Die App lädt sie beim ersten MCP-Einsatz herunter.\n\nBitte mit dem Internet verbinden und das Öffnen der MCP-Server erneut versuchen.',
     errSttDisabled: 'Diktat ist in den Einstellungen deaktiviert.',
     errSttCancelled: 'Diktat abgebrochen.',
+    errSttBusy: 'Transkription läuft bereits.',
     errSttTimeout: 'Diktat zeitüberschritten.',
     errSttTranscribeFailed: 'Lokale Transkription fehlgeschlagen.',
     errSttDownloadFailed: 'Spracherkennungs-Runtime konnte nicht heruntergeladen werden.',
@@ -480,6 +486,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
       'Il runtime Node.js non è ancora disponibile. L’app lo scaricherà al primo utilizzo di MCP.\n\nConnettiti a Internet e riprova ad aprire i server MCP.',
     errSttDisabled: 'La dettatura è disattivata nelle Impostazioni.',
     errSttCancelled: 'Dettatura annullata.',
+    errSttBusy: 'Trascrizione già in corso.',
     errSttTimeout: 'Dettatura scaduta.',
     errSttTranscribeFailed: 'Trascrizione locale non riuscita.',
     errSttDownloadFailed: 'Impossibile scaricare il runtime di riconoscimento vocale.',
@@ -552,6 +559,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
       'Середовище виконання Node.js ще недоступне. Програма завантажить його під час першого використання MCP.\n\nПідключіться до Інтернету та спробуйте знову відкрити сервери MCP.',
     errSttDisabled: 'Диктування вимкнено в Параметрах.',
     errSttCancelled: 'Диктування скасовано.',
+    errSttBusy: 'Триває інше транскрибування.',
     errSttTimeout: 'Час очікування диктування минув.',
     errSttTranscribeFailed: 'Локальне транскрибування не вдалося.',
     errSttDownloadFailed: 'Не вдалося завантажити середовище розпізнавання мовлення.',
@@ -623,6 +631,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
       'Środowisko uruchomieniowe Node.js nie jest jeszcze dostępne. Aplikacja pobierze je przy pierwszym użyciu MCP.\n\nPołącz się z internetem i ponownie spróbuj otworzyć serwery MCP.',
     errSttDisabled: 'Dyktowanie jest wyłączone w Ustawieniach.',
     errSttCancelled: 'Dyktowanie anulowane.',
+    errSttBusy: 'Trwa już inna transkrypcja.',
     errSttTimeout: 'Przekroczono limit czasu dyktowania.',
     errSttTranscribeFailed: 'Lokalna transkrypcja nie powiodła się.',
     errSttDownloadFailed: 'Nie udało się pobrać środowiska zamiany mowy na tekst.',
@@ -694,6 +703,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
       'Node.js-körningsmiljön är ännu inte tillgänglig. Appen laddar ner den vid första MCP-användningen.\n\nAnslut till internet och försök öppna MCP-servrarna igen.',
     errSttDisabled: 'Diktering är inaktiverad i Inställningar.',
     errSttCancelled: 'Diktering avbruten.',
+    errSttBusy: 'Transkribering pågår redan.',
     errSttTimeout: 'Diktering tog för lång tid.',
     errSttTranscribeFailed: 'Lokal transkribering misslyckades.',
     errSttDownloadFailed: 'Kunde inte ladda ner tal-till-text-runtimen.',
@@ -765,6 +775,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
       'Node.js-kjøretiden er ikke tilgjengelig ennå. Appen laster den ned ved første MCP-bruk.\n\nKoble til internett og prøv å åpne MCP-serverne på nytt.',
     errSttDisabled: 'Diktering er deaktivert i Innstillinger.',
     errSttCancelled: 'Diktering avbrutt.',
+    errSttBusy: 'Transkribering pågår allerede.',
     errSttTimeout: 'Diktering tidsavbrutt.',
     errSttTranscribeFailed: 'Lokal transkribering mislyktes.',
     errSttDownloadFailed: 'Kunne ikke laste ned tale-til-tekst-kjøretiden.',
@@ -836,6 +847,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
       'De Node.js-runtime is nog niet beschikbaar. De app downloadt deze bij het eerste MCP-gebruik.\n\nMaak verbinding met internet en probeer de MCP-servers opnieuw te openen.',
     errSttDisabled: 'Dicteren is uitgeschakeld in Instellingen.',
     errSttCancelled: 'Dicteren geannuleerd.',
+    errSttBusy: 'Er wordt al getranscribeerd.',
     errSttTimeout: 'Dicteren is verlopen.',
     errSttTranscribeFailed: 'Lokale transcriptie mislukt.',
     errSttDownloadFailed: 'Kon de spraak-naar-tekst-runtime niet downloaden.',
@@ -907,6 +919,7 @@ export const backendCatalog: Record<string, BackendMessages> = {
       'Runtime-ul Node.js nu este încă disponibil. Aplicația îl va descărca la prima utilizare MCP.\n\nConectează-te la internet și încearcă din nou să deschizi serverele MCP.',
     errSttDisabled: 'Dicteul este dezactivat în Setări.',
     errSttCancelled: 'Dicteu anulat.',
+    errSttBusy: 'O transcriere este deja în curs.',
     errSttTimeout: 'Dicteul a expirat.',
     errSttTranscribeFailed: 'Transcrierea locală a eșuat.',
     errSttDownloadFailed: 'Nu s-a putut descărca runtime-ul de conversie voce-text.',

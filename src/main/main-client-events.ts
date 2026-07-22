@@ -25,7 +25,7 @@ import {
   resolveEffectiveTheme,
 } from './main-app-window';
 import { getDatabase } from './db/database';
-import { listChatFolders } from './session/chat-folders-store';
+import { safeListChatFolders } from './session/chat-folders-store';
 
 export async function handleClientEvent(event: ClientEvent): Promise<unknown> {
   if (
@@ -128,13 +128,7 @@ export async function handleClientEvent(event: ClientEvent): Promise<unknown> {
 
     case 'session.list': {
       const sessions = sm.listSessions();
-      let folders: ReturnType<typeof listChatFolders> = [];
-      try {
-        folders = listChatFolders(getDatabase());
-      } catch {
-        // Soft-fail: remote/desktop still get sessions without folder metadata.
-        folders = [];
-      }
+      const folders = safeListChatFolders(getDatabase());
       sendToRenderer({ type: 'session.list', payload: { sessions, folders } });
       return sessions;
     }

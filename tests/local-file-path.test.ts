@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  isUncPath,
   localPathFromAppUrlPathname,
   localPathFromFileUrl,
 } from '../src/shared/local-file-path';
@@ -41,6 +42,20 @@ describe('localPathFromFileUrl', () => {
     expect(localPathFromFileUrl('file:///home/user/my%20file.txt')).toBe(
       '/home/user/my file.txt'
     );
+  });
+});
+
+describe('isUncPath', () => {
+  it('returns true for Windows and POSIX UNC prefixes', () => {
+    expect(isUncPath('\\\\server\\share')).toBe(true);
+    expect(isUncPath('//server/share')).toBe(true);
+  });
+
+  it('returns false for drive paths, POSIX absolute paths, relative paths, and empty strings', () => {
+    expect(isUncPath('C:\\Users\\x')).toBe(false);
+    expect(isUncPath('/home/x')).toBe(false);
+    expect(isUncPath('relative/path.txt')).toBe(false);
+    expect(isUncPath('')).toBe(false);
   });
 });
 
