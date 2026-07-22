@@ -179,6 +179,7 @@ _Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates
 - **Local STT (dictée)** — whisper.cpp v1.9.1 on-demand (voie A : officiel win/linux + bottle Homebrew macOS pinné par digest), push-to-talk, insertion au curseur. — **done** (PR #165 ; étape 0 : [`docs/local-stt-investigation-2026-07.md`](docs/local-stt-investigation-2026-07.md))
 - **Ménage post-lot 3** — suppression des executors morts pré-pi-SDK (dernier `runWebSearch` hors scrub PII), dédups réseau/dossiers, pin préservé au rollback, garde busy STT, `isUncPath` étendu aux UNC forward-slash. — **done** (PR #171)
 - **Maintenance SDK pi** — harnais « contrat SDK » (`src/tests/sdk-contract/`, PR #174), bump lockstep **0.80.3 → 0.81.1** (`ModelRuntime`, patch régénéré, exception d'audit supprimée) + keep_alive Ollama réparé via l'API extensions `before_provider_request` (PR #177 ; procédure : `docs/cursor-prompts-maintenance.md`). — **done**
+- **OfficeCLI épinglé** — le skill vendorisé remplace l'installeur flottant amont par la release GitHub épinglée **v1.0.140** + sha256 vérifié avant exécution (fail-closed) ; resync doc+binaire ensemble via prompt M4, veille amont par watchers (releases.atom + SKILL.md). — **done** (PR #180)
 
 ### Mid-term (v3.5.0+)
 
@@ -196,4 +197,4 @@ _Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates
 
 ---
 
-_Last updated: 2026-07-22 (lot 3 clos 8/8 + ménage ; **maintenance SDK pi faite** : harnais #174, bump 0.81.1 + fix Ollama #177 — audit sans exception ; 1589 tests)_
+_Last updated: 2026-07-22 (lot 3 clos 8/8 + ménage ; maintenance : SDK pi 0.81.1 #174/#177, OfficeCLI épinglé v1.0.140 #180 — audit sans exception ; 1590 tests ; procédures M1–M4 dans docs/cursor-prompts-maintenance.md)_
