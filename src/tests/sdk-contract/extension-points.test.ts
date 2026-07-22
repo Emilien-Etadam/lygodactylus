@@ -15,7 +15,7 @@ import {
   SettingsManager,
   type ToolDefinition,
 } from '@earendil-works/pi-coding-agent';
-import type { Model, StreamOptions } from '@earendil-works/pi-ai';
+import type { Api, Model, StreamOptions } from '@earendil-works/pi-ai';
 import {
   createHarnessWorkspace,
   createSyntheticPiModel,
@@ -24,6 +24,9 @@ import {
 } from './harness-helpers';
 
 type DefaultResourceLoaderOptions = ConstructorParameters<typeof DefaultResourceLoader>[0];
+type SkillsOverride = NonNullable<DefaultResourceLoaderOptions['skillsOverride']>;
+type AgentsFilesOverride = NonNullable<DefaultResourceLoaderOptions['agentsFilesOverride']>;
+type StreamOnPayload = NonNullable<StreamOptions['onPayload']>;
 
 let workspace: HarnessWorkspace | undefined;
 
@@ -83,21 +86,20 @@ async function createPreparedSession(options: {
 
 describe('sdk-contract extension points — resource loader', () => {
   it('honors skillsOverride (fixture minimale)', async () => {
-    const override = vi.fn((base: { skills: Array<{ name: string }>; diagnostics: unknown[] }) => ({
+    const override: SkillsOverride = (base) => ({
       skills: base.skills.map((skill) =>
-        skill.name === 'alpha-skill'
-          ? { ...skill, name: 'alpha-skill-overridden' }
-          : skill
+        skill.name === 'alpha-skill' ? { ...skill, name: 'alpha-skill-overridden' } : skill
       ),
       diagnostics: base.diagnostics,
-    }));
+    });
+    const overrideSpy = vi.fn(override);
 
     const { session, resourceLoader } = await createPreparedSession({
       skillName: 'alpha-skill',
-      skillsOverride: override as DefaultResourceLoaderOptions['skillsOverride'],
+      skillsOverride: overrideSpy,
     });
 
-    expect(override).toHaveBeenCalled();
+    expect(overrideSpy).toHaveBeenCalled();
     const names = resourceLoader.getSkills().skills.map((skill) => skill.name);
     expect(names).toContain('alpha-skill-overridden');
     expect(names).not.toContain('alpha-skill');
@@ -107,15 +109,16 @@ describe('sdk-contract extension points — resource loader', () => {
   it('honors agentsFilesOverride (fixture minimale)', async () => {
     const markerPath = '/virtual/AGENTS.override.md';
     const markerContent = 'sdk-contract-agents-override';
-    const override = vi.fn((base: { agentsFiles: Array<{ path: string; content: string }> }) => ({
+    const override: AgentsFilesOverride = (base) => ({
       agentsFiles: [...base.agentsFiles, { path: markerPath, content: markerContent }],
-    }));
+    });
+    const overrideSpy = vi.fn(override);
 
     const { session, resourceLoader } = await createPreparedSession({
-      agentsFilesOverride: override,
+      agentsFilesOverride: overrideSpy,
     });
 
-    expect(override).toHaveBeenCalled();
+    expect(overrideSpy).toHaveBeenCalled();
     const files = resourceLoader.getAgentsFiles().agentsFiles;
     expect(files.some((file) => file.path === markerPath && file.content === markerContent)).toBe(
       true
@@ -169,17 +172,24 @@ describe('sdk-contract extension points — StreamOptions.onPayload', () => {
   it('is invoked on a light offline stream mock (mirrors openai-completions call site)', async () => {
     // Same contract as @earendil-works/pi-ai/dist/api/openai-completions.js:
     //   const nextParams = await options?.onPayload?.(params, model);
-    const onPayload = vi.fn(async (payload: unknown, _model: Model<'openai-completions'>) => {
-      const record = payload as Record<string, unknown>;
+    interface ChatParams {
+      model: string;
+      messages: Array<{ role: string }>;
+      patchedByOnPayload?: boolean;
+    }
+
+    const onPayloadImpl: StreamOnPayload = async (payload, _model: Model<Api>) => {
+      const record = payload as ChatParams;
       return { ...record, patchedByOnPayload: true };
-    });
+    };
+    const onPayload = vi.fn(onPayloadImpl);
 
     const options: StreamOptions = { onPayload };
-    let params: Record<string, unknown> = { model: 'sdk-contract-model', messages: [] };
+    let params: ChatParams = { model: 'sdk-contract-model', messages: [] };
     const model = createSyntheticPiModel();
     const nextParams = await options.onPayload?.(params, model);
     if (nextParams !== undefined) {
-      params = nextParams as Record<string, unknown>;
+      params = nextParams as ChatParams;
     }
 
     expect(onPayload).toHaveBeenCalledOnce();
