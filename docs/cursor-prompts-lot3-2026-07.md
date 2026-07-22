@@ -441,3 +441,68 @@ chemins avec espaces OK) ; checksum mismatch → refus + fichier supprimé ;
 nettoyage tmp sur échec ET annulation ; mapping langue UI → code whisper ;
 résolution du chemin binaire par plateforme (mocks fs).
 ```
+
+---
+
+## Ménage post-lot 3  `cursor/cleanup-lot3`
+
+```text
+[Règles communes du lot 1]
+
+TÂCHE : Ménage ciblé post-lot 3 — suppression de code mort à risque, trois
+déduplications, deux correctifs de robustesse, trois micro-fixes. AUCUN
+changement de comportement utilisateur sauf les points explicitement listés.
+
+1. SUPPRIMER LES EXECUTORS MORTS (le point le plus important) :
+   src/main/tools/tool-executor.ts et src/main/tools/sandbox-tool-executor.ts
+   ne sont importés NULLE PART dans src/ (framework pré-pi-SDK) et contiennent
+   un appel runWebSearch NON scrubé PII — un rebranchement futur contournerait
+   silencieusement le masquage #159.
+   - Vérifier zéro référence (imports, mocks) dans src/ ET tests/ avant
+     suppression ; lister la vérification dans la PR.
+   - Cascade : command-sandbox-validation.ts et format-file-size.ts ne servent
+     qu'à ces executors → les supprimer aussi SI aucune autre référence.
+     PathResolver, path-containment, local-file-path sont VIVANTS — ne pas y
+     toucher.
+   - tests/tool-executor-*.test.ts (sandbox, unc-paths, file-ops) testent ce
+     code mort : avant suppression, vérifier que la logique vivante qu'ils
+     exercent indirectement (isPathWithinRoot, isUncPath, validation sandbox)
+     reste couverte par les tests de path-safety / local-file-path existants ;
+     sinon réécrire le cas manquant contre le module vivant, PUIS supprimer.
+     Documenter la variation du décompte de tests dans la PR.
+
+2. DÉDUP RÉSEAU (#153) : exporter normalizeHostname depuis
+   src/shared/network/loopback.ts et l'utiliser dans endpoint-location.ts
+   (supprimer la copie locale, et aligner le parsing d'URL si trivial).
+   Comportement identique — les tests endpoint-location restent verts tels
+   quels.
+
+3. DÉDUP DOSSIERS (#155) : un helper safeListChatFolders(db) (try/catch → [])
+   exporté de chat-folders-store.ts, remplaçant le bloc dupliqué ×4 dans
+   main-client-events.ts, chat-lan-server.ts, quick-ask-controller.ts,
+   ipc-chat-folders.ts.
+
+4. PIN PRÉSERVÉ AU ROLLBACK (#154) : dans installGithubSkill, quand le ref
+   effectif est DÉJÀ un SHA de commit (40 hex, cas installGithubSkillAtRef) et
+   que resolveGithubCommitSha échoue, utiliser ce SHA comme resolvedSha (il est
+   exact par définition) → contentHash calculé, pin conservé. Test : rollback
+   avec résolution API mockée à null → pinnedSha/contentHash présents.
+
+5. MICRO-FIXES :
+   a. rss-parser.ts (#158) : dans extractLink Atom, préférer réellement
+      rel="alternate" (ou un link SANS rel) et ne jamais retenir rel="self" —
+      corriger l'ordre des regex + test avec une entry contenant self puis
+      alternate.
+   b. ipc-stt.ts (#165) : refuser stt.transcribe si une transcription est déjà
+      active (garde busy simple) — erreur backend errSttBusy via catalog mt()
+      ×12 locales.
+   c. Sidebar (#155) : masquer « Déplacer vers un dossier » dans le menu
+      contextuel d'un SOUS-chat (il suit son parent ; l'assignation n'a pas
+      d'effet visible).
+
+HORS PÉRIMÈTRE : bump du SDK pi (chantier séparé), toute refonte, tout
+changement de dépendances npm.
+
+TESTS : typecheck / lint (0 erreur, warnings baseline) / vitest verts ;
+nouveaux tests pour 4, 5a, 5b ; décompte final documenté.
+```
