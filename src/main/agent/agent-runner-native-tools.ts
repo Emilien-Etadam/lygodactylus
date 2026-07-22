@@ -15,6 +15,7 @@ import {
   formatHttpRequestResult,
   parseHttpRequestOptions,
 } from './http-request';
+import { buildOcrCustomTools } from './agent-runner-ocr-tool';
 import {
   beginPiiScrubSession,
   piiMaskedDetails,
@@ -352,5 +353,6 @@ export function buildNativeCustomTools(ctx: NativeToolsContext): ToolDefinition[
     createTodoWriteTool('TodoWrite', 'Todo Write'),
     createAskUserQuestionTool(ctx, 'ask_user_question', 'Ask User Question'),
     createAskUserQuestionTool(ctx, 'AskUserQuestion', 'Ask User Question'),
+    ...buildOcrCustomTools(),
   ];
 }
