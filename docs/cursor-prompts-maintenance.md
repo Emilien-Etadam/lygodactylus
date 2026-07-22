@@ -97,3 +97,61 @@ TESTS : harnais + suite complète + audit verts. Smoke manuel recommandé
 après merge : une session chat réelle sur vLLM (stream, un appel d'outil,
 un skill).
 ```
+
+---
+
+## Prompt M3 — Réparer le keep_alive Ollama via l'API extensions  `cursor/ollama-payload-extension`
+
+```text
+LIRE D'ABORD (OBLIGATOIRE) : docs/cursor-rules-communes.md.
+PRÉREQUIS : SDK pi ≥ 0.81.1 mergé (M2) et harnais sdk-contract vert.
+
+CONTEXTE : Le harnais M1 a documenté que le wrapper Ollama keep_alive/num_ctx
+(agent-runner-pi-session.ts, bloc `_onPayload`) est inopérant : la surface
+privée `_onPayload` n'existe plus sur l'agent — l'app warn et skip à chaque
+session Ollama. Le SDK 0.81.x fournit le remplaçant OFFICIEL : le système
+d'extensions, hook `before_provider_request`.
+
+POINTS D'APPUI VÉRIFIÉS (les lire, ne pas re-découvrir) :
+- dist/core/extensions/types.d.ts : `InlineExtension` ({ name, factory,
+  hidden? }), `ExtensionAPI.on("before_provider_request", handler)`,
+  `BeforeProviderRequestEvent` / `...Result` (formes exactes à relever).
+- dist/core/resource-loader.d.ts:70 : `extensionFactories?: InlineExtension[]`
+  — MÊME surface d'options que skillsOverride/agentsFilesOverride déjà
+  utilisés par l'app (créer le loader avec ce champ en plus).
+- dist/core/sdk.js (≈l.200) : le SDK route onPayload →
+  runner.emitBeforeProviderRequest — le hook reçoit/retourne le payload.
+
+SPÉCIFICATION :
+1. Nouveau module src/main/agent/ollama-payload-extension.ts : fabrique une
+   InlineExtension `{ name: 'ollama-payload', hidden: true, factory }` dont le
+   handler before_provider_request retourne le payload étendu de
+   { num_ctx: <ref mutable>.value, keep_alive: toOllamaKeepAlivePayload(
+   normalizeOllamaKeepAlive(configStore.get('ollamaKeepAlive'))) }.
+   - keep_alive lu LIVE à CHAQUE requête (jamais figé — règle commune) ;
+   - num_ctx via la même référence mutable ollamaNumCtx que l'actuel
+     (ctx.piSessions — la compaction la met à jour) ;
+   - ne JAMAIS écraser d'autres clés du payload (spread payload d'abord).
+2. createPiSession : enregistrer cette extensionFactory dans les options du
+   resource loader UNIQUEMENT quand isOllamaEndpoint (même détection
+   qu'aujourd'hui). SUPPRIMER intégralement l'ancien bloc `_onPayload`
+   (le check, le warn, le wrapper).
+3. Non-Ollama : AUCUNE extension enregistrée, payload strictement inchangé.
+4. Harnais : remplacer private-surface.test.ts par
+   src/tests/sdk-contract/ollama-payload.test.ts :
+   - session Ollama (modèle synthétique loopback:11434) → l'extension est
+     enregistrée et un before_provider_request mocké/émis produit un payload
+     contenant num_ctx et keep_alive, autres clés préservées ;
+   - keep_alive reflète un changement de configStore ENTRE deux requêtes
+     (lecture live) ;
+   - session non-Ollama → extension absente ;
+   - plus aucun accès à `_onPayload` nulle part dans src/ (grep en test de
+     wiring, comme chat-folders-wiring).
+5. Aucun impact prompt/préfixe système (le hook ne touche que la requête
+   réseau) — le test stable-prefix doit rester intact.
+
+HORS PÉRIMÈTRE : tout autre usage des extensions, réglages UI nouveaux,
+autres providers.
+
+TESTS : harnais + suite complète verts ; documenter le décompte.
+```
