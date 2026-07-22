@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.4.0] - 2026-07-22
+
+> Inclut également le contenu de la 6.3.0 (extension Thunderbird), documentée
+> ci-dessous mais jamais publiée en release.
+
+### Added
+
+- **Dictée vocale locale (STT)** : bouton micro dans la zone de saisie — clic (toggle) ou maintien (push-to-talk), transcription 100 % locale via **whisper.cpp v1.9.1** téléchargé au premier usage (win/linux : releases officielles ; macOS : bottle Homebrew épinglé par digest), modèle `ggml-base` multilingue vérifié par sha256, texte inséré au curseur — jamais d'envoi automatique (#165)
+- **Veille automatique** : watchers dossier local / flux RSS-Atom / URL (parser XML maison, zéro dépendance) sur le moteur cron existant ; digest des nouveautés uniquement dans une session « Veille » en mode plan — premier passage silencieux, aucun message quand rien de neuf (#158)
+- **Masquage PII sortant** (opt-in, OFF) : e-mails, téléphones FR/E.164, IBAN (mod-97), cartes (Luhn) et termes personnels remplacés par des jetons réversibles `{{PII_n}}` avant tout appel sortant (web_search, web_fetch, http_request, outils MCP), restaurés dans la réponse ; **fail-closed** — une erreur du module bloque l'appel ; compteur discret dans la trace (#159)
+- **Aperçu live HTML/SVG** : bouton « Aperçu » sur les blocs de code des réponses — rendu dans une iframe sandboxée (`allow-scripts` seul, CSP `default-src 'none'` injectée en tête absolue : **aucune requête réseau possible**), versions successives par session, « ouvrir en grand » dans une fenêtre isolée sans preload (#161)
+- **Dossiers de chats + sous-chats** : sidebar organisée en dossiers repliables (créer/renommer/supprimer — les sessions ne sont jamais effacées), et sous-chats branchés depuis un message assistant avec lien de retour, indentation et anti-cycle ; recherche inchangée avec le dossier en sous-titre (#155)
+- **Quick-Ask « Sélection »** : second raccourci global (défaut `Ctrl/Cmd+Shift+Y`) qui ouvre le Quick-Ask pré-rempli du presse-papier (troncature UTF-8-safe 32 Ko), chips Résumer / Traduire / Reformuler / Corriger et bouton « Copier le résultat » — session toujours en mode plan (#157)
+- **Verrou d'intégrité des skills** : à l'installation marketplace, le commit est résolu en SHA exact et un hash sha256 du contenu est épinglé ; vérification manuelle + contrôle silencieux au démarrage (badge, jamais de blocage), mise à jour ré-épinglée et restauration à la version épinglée (#154)
+- **Badge de localisation du modèle** : « Local » / hôte LAN / distant affiché sur le chip modèle et dans le panneau contexte, dérivé de l'URL configurée (aucune requête), tooltip expurgé de tout secret (#153)
+- **Harnais « contrat SDK »** : `src/tests/sdk-contract/` verrouille chaque point de contact avec le SDK pi (exports, extension points, invariants byte-stables, patch) — les bumps deviennent une procédure outillée (`docs/cursor-prompts-maintenance.md`, M1–M4) (#174)
+
+### Changed
+
+- **SDK pi 0.80.3 → 0.81.1** (lockstep) : migration `AuthStorage`/`ModelRegistry` → singleton `ModelRuntime` (`allowModelNetwork: false` — jamais de rafraîchissement réseau des catalogues), patch DeepSeek V4 régénéré (#177)
+- **keep_alive / num_ctx Ollama réparés** : le wrapper reposait sur une surface privée du SDK disparue (inopérant silencieusement) — porté sur l'API officielle d'extensions (`before_provider_request`), keep_alive lu en direct à chaque requête (#177)
+- **Skill OfficeCLI épinglé** : l'installeur flottant amont (`curl | bash`) est remplacé dans notre copie par le téléchargement de la release GitHub **v1.0.140** avec sha256 vérifié avant toute exécution (fail-closed) ; provenance et divergence documentées dans `NOTICE.md`, resync doc+binaire ensemble via le prompt M4 (#180)
+- **Dependabot** : les bumps du SDK pi (`@earendil-works/*`) sont pilotés manuellement (harnais + patch + lockstep) et exclus des PRs automatiques
+
+### Fixed
+
+- **Audit de sécurité runtime** : overrides `brace-expansion` (par majeure), `js-yaml ^4.3.0`, `fast-uri ^3.1.4` suite aux advisories de juillet ; l'exception temporaire liée à la copie bundlée du SDK 0.80.x est supprimée — audit vert sans exception (#166, #167, #177)
+- **Parser Atom (veille)** : `rel="alternate"` réellement préféré, `rel="self"` ignoré (#171)
+- **Transcriptions STT** : une transcription à la fois (garde busy, erreur claire) (#171)
+
+### Removed
+
+- **Executors legacy pré-pi-SDK** (`tool-executor.ts`, `sandbox-tool-executor.ts` + orphelins) : code mort dont le `web_search` contournait le masquage PII s'il avait été rebranché — supprimés avec leur couverture migrée sur les modules vivants ; −1 487 lignes (#171)
+
+### Security
+
+- `isUncPath` étendu aux UNC en forward-slash (`//server/share`) — les gardes de `main-shell-reveal` et des contraintes de workspace couvrent désormais les deux formes (#171)
+- Politique générale de la série : tout téléchargement est épinglé (version/digest) et vérifié (sha256) **avant** exécution — whisper.cpp, modèles ggml, OfficeCLI
+
+
 ## [6.3.0] - 2026-07-17
 
 ### Added
