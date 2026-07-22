@@ -32,6 +32,9 @@ updates:
       # Electron major upgrades need dedicated migration branches
       - dependency-name: 'electron'
         update-types: ['version-update:semver-major']
+      # pi SDK bumps are piloted manually (lockstep pair + patch-package +
+      # sdk-contract harness) — see docs/cursor-prompts-maintenance.md
+      - dependency-name: '@earendil-works/*'
 
   # ── GitHub Actions ────────────────────────────────────────────
   - package-ecosystem: 'github-actions'
