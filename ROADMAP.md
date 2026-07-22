@@ -165,7 +165,7 @@ _Écartés volontairement par le mainteneur : RAG « chat avec mes docs » (risq
 
 - **Cleanup post-lot 2**: dédup `path-safety` (#146/#147), linkification citations hors blocs de code (#145), `void offset` (#142). — **done** (PR #151)
 
-### 3e lot veille — en cours (2026-07)
+### 3e lot veille — livré (2026-07)
 
 _Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates restantes des analyses projet (trivium, Atlantis, Bionic) et du cadrage lot 2, + la phase 2 du Quick-Ask._
 
@@ -176,11 +176,7 @@ _Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates
 - **Content Watch + Digest** — watchers dossier/RSS/URL sur le cron existant, diff #149, session Veille en mode plan. — **done** (PR #158)
 - **PII Scrub sortant** — jetons réversibles par règles (email/tél/IBAN/Luhn + termes custom), fail-closed, opt-in. — **done** (PR #159)
 - **Artifacts / Canvas** — aperçu iframe sandboxée (html/svg, CSP no-network), versions. Mermaid exclu (dépendance). — **done** (PR #161)
-<<<<<<< HEAD
-- **Local STT (dictée)** — whisper.cpp on-demand (pattern runtimes v5.3), push-to-talk, transcription au release. — _en cours — **voie A actée** (2026-07-21)_ : Win/Linux = releases officielles v1.9.1, macOS = bottle Homebrew `whisper-cpp` (pattern cliclick). Investigation : [`docs/local-stt-investigation-2026-07.md`](docs/local-stt-investigation-2026-07.md) ; implémentation : **Prompt 8-bis** (`cursor/local-stt-impl`) dans `docs/cursor-prompts-lot3-2026-07.md`.
-=======
-- **Local STT (dictée)** — whisper.cpp on-demand (pattern runtimes v5.3), push-to-talk, transcription au release. — _en cours_ (voie A : officiel win/linux + bottle Homebrew macOS pinné ; voir [`docs/local-stt-investigation-2026-07.md`](docs/local-stt-investigation-2026-07.md)).
->>>>>>> 811d19f (feat(stt): dictée locale whisper.cpp v1.9.1 (voie A))
+- **Local STT (dictée)** — whisper.cpp v1.9.1 on-demand (voie A : officiel win/linux + bottle Homebrew macOS pinné par digest), push-to-talk, insertion au curseur. — **done** (PR #165 ; étape 0 : [`docs/local-stt-investigation-2026-07.md`](docs/local-stt-investigation-2026-07.md))
 
 ### Mid-term (v3.5.0+)
 
@@ -198,4 +194,4 @@ _Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates
 
 ---
 
-_Last updated: 2026-07-21 (lot 3 : 7/8 mergés — #153–#155, #157–#159, #161 ; local-stt débloqué **voie A** (bottle Homebrew macOS, #163) — prompt 8-bis publié, implémentation en attente)_
+_Last updated: 2026-07-22 (**lot 3 livré 8/8** — #153–#155, #157–#159, #161, #165 STT ; + hygiène deps #166/#167 — overrides brace-expansion/js-yaml/fast-uri, exception documentée pi-coding-agent bundlé)_
