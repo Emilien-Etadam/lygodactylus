@@ -34,6 +34,7 @@ import { PresetVariableDialog } from './PresetVariableDialog';
 import { ThinkingLevelToggle } from './ThinkingLevelToggle';
 import { PlanActToggle } from './PlanActToggle';
 import { EndpointLocationBadge } from './EndpointLocationBadge';
+import { MicButton } from './chat/MicButton';
 import {
   Send,
   Square,
@@ -224,6 +225,24 @@ export function ChatView() {
     setSlashMenuDismissed(false);
     setSlashHighlightIndex(0);
   }, []);
+
+  /** Insert dictation text at the caret (never auto-sends). */
+  const insertDictationAtCursor = useCallback((text: string) => {
+    const el = textareaRef.current;
+    const current = el?.value ?? prompt;
+    const start = el?.selectionStart ?? current.length;
+    const end = el?.selectionEnd ?? current.length;
+    const needsSpace = start > 0 && !/\s$/.test(current.slice(0, start)) && !/^\s/.test(text);
+    const insertion = `${needsSpace ? ' ' : ''}${text}`;
+    const next = `${current.slice(0, start)}${insertion}${current.slice(end)}`;
+    setPrompt(next);
+    requestAnimationFrame(() => {
+      if (!textareaRef.current) return;
+      textareaRef.current.focus();
+      const pos = start + insertion.length;
+      textareaRef.current.setSelectionRange(pos, pos);
+    });
+  }, [prompt]);
 
   const applySelectedPreset = useCallback(
     (preset: PromptPreset) => {
@@ -1158,6 +1177,8 @@ export function ChatView() {
               >
                 <Plus className="w-5 h-5" />
               </button>
+
+              <MicButton disabled={isSubmitting} onInsertText={insertDictationAtCursor} />
 
               <textarea
                 ref={textareaRef}

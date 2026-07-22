@@ -39,6 +39,11 @@ export type BackendMessageKey =
   | 'errFetchTimeout'
   | 'errChromeNotReady'
   | 'errNodeRuntimeUnavailable'
+  | 'errSttDisabled'
+  | 'errSttCancelled'
+  | 'errSttTimeout'
+  | 'errSttTranscribeFailed'
+  | 'errSttDownloadFailed'
   | 'hintMacosScreenRecording'
   | 'hintMacosAccessibility'
   | 'hintMacosAccessibilityAutomation'
@@ -117,6 +122,11 @@ export const backendCatalog: Record<string, BackendMessages> = {
     errChromeNotReady: 'Chrome 浏览器未就绪，无法执行此操作: {{detail}}',
     errNodeRuntimeUnavailable:
       'Node.js 运行时暂不可用，首次使用 MCP 时将自动下载。\n\n请连接网络后重试启动 MCP 服务器。',
+    errSttDisabled: '听写已在设置中禁用。',
+    errSttCancelled: '听写已取消。',
+    errSttTimeout: '听写超时。',
+    errSttTranscribeFailed: '本地转写失败。',
+    errSttDownloadFailed: '无法下载语音转文字运行时。',
     hintMacosScreenRecording:
       '\n\nmacOS 权限提示：\n- 系统设置 → 隐私与安全性 → 屏幕录制：允许 Lygodactylus\n- 重新启动应用后再试\n',
     hintMacosAccessibility:
@@ -183,6 +193,11 @@ export const backendCatalog: Record<string, BackendMessages> = {
     errChromeNotReady: 'Chrome browser is not ready, cannot perform this action: {{detail}}',
     errNodeRuntimeUnavailable:
       'Node.js runtime is not available yet. The app will download it on first MCP use.\n\nConnect to the internet and retry opening MCP servers.',
+    errSttDisabled: 'Dictation is disabled in Settings.',
+    errSttCancelled: 'Dictation cancelled.',
+    errSttTimeout: 'Dictation timed out.',
+    errSttTranscribeFailed: 'Local transcription failed.',
+    errSttDownloadFailed: 'Could not download the speech-to-text runtime.',
     hintMacosScreenRecording:
       '\n\nmacOS permissions hint:\n- System Settings → Privacy & Security → Screen Recording: allow Lygodactylus\n- Restart the app and try again\n',
     hintMacosAccessibility:
@@ -249,6 +264,11 @@ export const backendCatalog: Record<string, BackendMessages> = {
     errChromeNotReady: 'El navegador Chrome no está listo; no se puede realizar esta acción: {{detail}}',
     errNodeRuntimeUnavailable:
       'El runtime de Node.js aún no está disponible. La aplicación lo descargará en el primer uso de MCP.\n\nConéctate a Internet e intenta abrir de nuevo los servidores MCP.',
+    errSttDisabled: 'El dictado está desactivado en Ajustes.',
+    errSttCancelled: 'Dictado cancelado.',
+    errSttTimeout: 'El dictado agotó el tiempo de espera.',
+    errSttTranscribeFailed: 'Falló la transcripción local.',
+    errSttDownloadFailed: 'No se pudo descargar el runtime de voz a texto.',
     hintMacosScreenRecording:
       '\n\nAviso de permisos de macOS:\n- Ajustes del Sistema → Privacidad y seguridad → Grabación de pantalla: permitir Lygodactylus\n- Reinicia la aplicación e inténtalo de nuevo\n',
     hintMacosAccessibility:
@@ -315,6 +335,11 @@ export const backendCatalog: Record<string, BackendMessages> = {
     errChromeNotReady: "Le navigateur Chrome n'est pas prêt, impossible d'effectuer cette opération : {{detail}}",
     errNodeRuntimeUnavailable:
       "Le runtime Node.js n'est pas encore disponible. L'application le téléchargera lors de la première utilisation de MCP.\n\nConnectez-vous à Internet puis réessayez d'ouvrir les serveurs MCP.",
+    errSttDisabled: 'La dictée est désactivée dans les Réglages.',
+    errSttCancelled: 'Dictée annulée.',
+    errSttTimeout: 'La dictée a expiré.',
+    errSttTranscribeFailed: 'Échec de la transcription locale.',
+    errSttDownloadFailed: 'Impossible de télécharger le runtime de reconnaissance vocale.',
     hintMacosScreenRecording:
       '\n\nConseil permissions macOS :\n- Réglages Système → Confidentialité et sécurité → Enregistrement de l’écran : autoriser Lygodactylus\n- Redémarrez l’application puis réessayez\n',
     hintMacosAccessibility:
@@ -381,6 +406,11 @@ export const backendCatalog: Record<string, BackendMessages> = {
     errChromeNotReady: 'Chrome-Browser ist nicht bereit, Vorgang nicht möglich: {{detail}}',
     errNodeRuntimeUnavailable:
       'Die Node.js-Laufzeitumgebung ist noch nicht verfügbar. Die App lädt sie beim ersten MCP-Einsatz herunter.\n\nBitte mit dem Internet verbinden und das Öffnen der MCP-Server erneut versuchen.',
+    errSttDisabled: 'Diktat ist in den Einstellungen deaktiviert.',
+    errSttCancelled: 'Diktat abgebrochen.',
+    errSttTimeout: 'Diktat zeitüberschritten.',
+    errSttTranscribeFailed: 'Lokale Transkription fehlgeschlagen.',
+    errSttDownloadFailed: 'Spracherkennungs-Runtime konnte nicht heruntergeladen werden.',
     hintMacosScreenRecording:
       '\n\nmacOS-Berechtigungshinweis:\n- Systemeinstellungen → Datenschutz & Sicherheit → Bildschirmaufnahme: Lygodactylus erlauben\n- App neu starten und erneut versuchen\n',
     hintMacosAccessibility:
@@ -448,6 +478,11 @@ export const backendCatalog: Record<string, BackendMessages> = {
     errChromeNotReady: 'Il browser Chrome non è pronto, impossibile eseguire questa operazione: {{detail}}',
     errNodeRuntimeUnavailable:
       'Il runtime Node.js non è ancora disponibile. L’app lo scaricherà al primo utilizzo di MCP.\n\nConnettiti a Internet e riprova ad aprire i server MCP.',
+    errSttDisabled: 'La dettatura è disattivata nelle Impostazioni.',
+    errSttCancelled: 'Dettatura annullata.',
+    errSttTimeout: 'Dettatura scaduta.',
+    errSttTranscribeFailed: 'Trascrizione locale non riuscita.',
+    errSttDownloadFailed: 'Impossibile scaricare il runtime di riconoscimento vocale.',
     hintMacosScreenRecording:
       '\n\nSuggerimento autorizzazioni macOS:\n- Impostazioni di Sistema → Privacy e sicurezza → Registrazione schermo: consenti Lygodactylus\n- Riavvia l’app e riprova\n',
     hintMacosAccessibility:
@@ -515,6 +550,11 @@ export const backendCatalog: Record<string, BackendMessages> = {
     errChromeNotReady: 'Браузер Chrome не готовий, неможливо виконати цю дію: {{detail}}',
     errNodeRuntimeUnavailable:
       'Середовище виконання Node.js ще недоступне. Програма завантажить його під час першого використання MCP.\n\nПідключіться до Інтернету та спробуйте знову відкрити сервери MCP.',
+    errSttDisabled: 'Диктування вимкнено в Параметрах.',
+    errSttCancelled: 'Диктування скасовано.',
+    errSttTimeout: 'Час очікування диктування минув.',
+    errSttTranscribeFailed: 'Локальне транскрибування не вдалося.',
+    errSttDownloadFailed: 'Не вдалося завантажити середовище розпізнавання мовлення.',
     hintMacosScreenRecording:
       '\n\nПідказка щодо дозволів macOS:\n- Системні параметри → Конфіденційність і безпека → Запис екрана: дозволити Lygodactylus\n- Перезапустіть програму та спробуйте знову\n',
     hintMacosAccessibility:
@@ -581,6 +621,11 @@ export const backendCatalog: Record<string, BackendMessages> = {
     errChromeNotReady: 'Przeglądarka Chrome nie jest gotowa, nie można wykonać tej operacji: {{detail}}',
     errNodeRuntimeUnavailable:
       'Środowisko uruchomieniowe Node.js nie jest jeszcze dostępne. Aplikacja pobierze je przy pierwszym użyciu MCP.\n\nPołącz się z internetem i ponownie spróbuj otworzyć serwery MCP.',
+    errSttDisabled: 'Dyktowanie jest wyłączone w Ustawieniach.',
+    errSttCancelled: 'Dyktowanie anulowane.',
+    errSttTimeout: 'Przekroczono limit czasu dyktowania.',
+    errSttTranscribeFailed: 'Lokalna transkrypcja nie powiodła się.',
+    errSttDownloadFailed: 'Nie udało się pobrać środowiska zamiany mowy na tekst.',
     hintMacosScreenRecording:
       '\n\nWskazówka dotycząca uprawnień macOS:\n- Ustawienia systemowe → Prywatność i bezpieczeństwo → Nagrywanie ekranu: zezwól Lygodactylus\n- Uruchom ponownie aplikację i spróbuj jeszcze raz\n',
     hintMacosAccessibility:
@@ -647,6 +692,11 @@ export const backendCatalog: Record<string, BackendMessages> = {
     errChromeNotReady: 'Chrome-webbläsaren är inte redo, åtgärden kan inte utföras: {{detail}}',
     errNodeRuntimeUnavailable:
       'Node.js-körningsmiljön är ännu inte tillgänglig. Appen laddar ner den vid första MCP-användningen.\n\nAnslut till internet och försök öppna MCP-servrarna igen.',
+    errSttDisabled: 'Diktering är inaktiverad i Inställningar.',
+    errSttCancelled: 'Diktering avbruten.',
+    errSttTimeout: 'Diktering tog för lång tid.',
+    errSttTranscribeFailed: 'Lokal transkribering misslyckades.',
+    errSttDownloadFailed: 'Kunde inte ladda ner tal-till-text-runtimen.',
     hintMacosScreenRecording:
       '\n\nTips om macOS-behörigheter:\n- Systeminställningar → Integritet och säkerhet → Skärminspelning: tillåt Lygodactylus\n- Starta om appen och försök igen\n',
     hintMacosAccessibility:
@@ -713,6 +763,11 @@ export const backendCatalog: Record<string, BackendMessages> = {
     errChromeNotReady: 'Chrome-nettleseren er ikke klar, kan ikke utføre denne handlingen: {{detail}}',
     errNodeRuntimeUnavailable:
       'Node.js-kjøretiden er ikke tilgjengelig ennå. Appen laster den ned ved første MCP-bruk.\n\nKoble til internett og prøv å åpne MCP-serverne på nytt.',
+    errSttDisabled: 'Diktering er deaktivert i Innstillinger.',
+    errSttCancelled: 'Diktering avbrutt.',
+    errSttTimeout: 'Diktering tidsavbrutt.',
+    errSttTranscribeFailed: 'Lokal transkribering mislyktes.',
+    errSttDownloadFailed: 'Kunne ikke laste ned tale-til-tekst-kjøretiden.',
     hintMacosScreenRecording:
       '\n\nTips om macOS-tillatelser:\n- Systeminnstillinger → Personvern og sikkerhet → Skjermopptak: tillat Lygodactylus\n- Start appen på nytt og prøv igjen\n',
     hintMacosAccessibility:
@@ -779,6 +834,11 @@ export const backendCatalog: Record<string, BackendMessages> = {
     errChromeNotReady: 'Chrome-browser is niet gereed, deze actie kan niet worden uitgevoerd: {{detail}}',
     errNodeRuntimeUnavailable:
       'De Node.js-runtime is nog niet beschikbaar. De app downloadt deze bij het eerste MCP-gebruik.\n\nMaak verbinding met internet en probeer de MCP-servers opnieuw te openen.',
+    errSttDisabled: 'Dicteren is uitgeschakeld in Instellingen.',
+    errSttCancelled: 'Dicteren geannuleerd.',
+    errSttTimeout: 'Dicteren is verlopen.',
+    errSttTranscribeFailed: 'Lokale transcriptie mislukt.',
+    errSttDownloadFailed: 'Kon de spraak-naar-tekst-runtime niet downloaden.',
     hintMacosScreenRecording:
       '\n\nHint voor macOS-machtigingen:\n- Systeeminstellingen → Privacy en beveiliging → Schermopname: Lygodactylus toestaan\n- Herstart de app en probeer het opnieuw\n',
     hintMacosAccessibility:
@@ -845,6 +905,11 @@ export const backendCatalog: Record<string, BackendMessages> = {
     errChromeNotReady: 'Browserul Chrome nu este gata, această acțiune nu poate fi efectuată: {{detail}}',
     errNodeRuntimeUnavailable:
       'Runtime-ul Node.js nu este încă disponibil. Aplicația îl va descărca la prima utilizare MCP.\n\nConectează-te la internet și încearcă din nou să deschizi serverele MCP.',
+    errSttDisabled: 'Dicteul este dezactivat în Setări.',
+    errSttCancelled: 'Dicteu anulat.',
+    errSttTimeout: 'Dicteul a expirat.',
+    errSttTranscribeFailed: 'Transcrierea locală a eșuat.',
+    errSttDownloadFailed: 'Nu s-a putut descărca runtime-ul de conversie voce-text.',
     hintMacosScreenRecording:
       '\n\nSugestie pentru permisiunile macOS:\n- Setări sistem → Confidențialitate și securitate → Înregistrare ecran: permite Lygodactylus\n- Repornește aplicația și încearcă din nou\n',
     hintMacosAccessibility:

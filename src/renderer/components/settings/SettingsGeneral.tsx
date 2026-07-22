@@ -20,10 +20,19 @@ export function SettingsGeneral() {
   const setAppConfig = useAppStore((s) => s.setAppConfig);
   const appConfig = useAppConfig();
   const speechEnabled = appConfig?.speechSynthesisEnabled === true;
+  const speechToTextEnabled = appConfig?.speechToTextEnabled === true;
+  const speechToTextModel = appConfig?.speechToTextModel === 'small' ? 'small' : 'base';
+  const speechToTextLanguage = appConfig?.speechToTextLanguage === 'auto' ? 'auto' : 'ui';
   const modelStatsEnabled = appConfig?.modelStatsEnabled !== false;
   const checkpointsEnabled = appConfig?.checkpointsEnabled !== false;
   const workingDir = useAppStore((s) => s.workingDir);
   const [isSavingSpeech, setIsSavingSpeech] = useState(false);
+  const [isSavingStt, setIsSavingStt] = useState(false);
+  const [sttStatus, setSttStatus] = useState<Awaited<
+    ReturnType<NonNullable<typeof window.electronAPI>['stt']['getStatus']>
+  > | null>(null);
+  const [sttProgress, setSttProgress] = useState<number | null>(null);
+  const [isSttBusy, setIsSttBusy] = useState(false);
   const [isSavingModelStats, setIsSavingModelStats] = useState(false);
   const [isSavingCheckpoints, setIsSavingCheckpoints] = useState(false);
   const [lintCmdDraft, setLintCmdDraft] = useState('');
@@ -140,6 +149,29 @@ export function SettingsGeneral() {
     );
   }, []);
 
+  const refreshSttStatus = useCallback(async () => {
+    if (!isElectron || !window.electronAPI?.stt?.getStatus) return;
+    try {
+      setSttStatus(await window.electronAPI.stt.getStatus());
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshSttStatus();
+  }, [refreshSttStatus]);
+
+  useEffect(() => {
+    if (!window.electronAPI?.on) return;
+    return window.electronAPI.on((event) => {
+      if (event.type !== 'stt.progress') return;
+      if (typeof event.payload.percent === 'number') {
+        setSttProgress(event.payload.percent);
+      }
+    });
+  }, []);
+
   const handleToggleSpeech = useCallback(async () => {
     if (!isElectron || isSavingSpeech || !window.electronAPI?.config?.save) {
       return;
@@ -163,6 +195,71 @@ export function SettingsGeneral() {
       setIsSavingSpeech(false);
     }
   }, [isSavingSpeech, setAppConfig, speechEnabled]);
+
+  const handleToggleStt = useCallback(async () => {
+    if (!isElectron || isSavingStt || !window.electronAPI?.config?.save) return;
+    const nextEnabled = !speechToTextEnabled;
+    setIsSavingStt(true);
+    try {
+      const result = await window.electronAPI.config.save({
+        speechToTextEnabled: nextEnabled,
+      });
+      if (result?.config) setAppConfig(result.config);
+    } catch {
+      // keep previous
+    } finally {
+      setIsSavingStt(false);
+    }
+  }, [isSavingStt, setAppConfig, speechToTextEnabled]);
+
+  const handleSttModelChange = useCallback(
+    async (model: 'base' | 'small') => {
+      if (!isElectron || !window.electronAPI?.config?.save) return;
+      const result = await window.electronAPI.config.save({ speechToTextModel: model });
+      if (result?.config) setAppConfig(result.config);
+    },
+    [setAppConfig]
+  );
+
+  const handleSttLanguageChange = useCallback(
+    async (mode: 'auto' | 'ui') => {
+      if (!isElectron || !window.electronAPI?.config?.save) return;
+      const result = await window.electronAPI.config.save({ speechToTextLanguage: mode });
+      if (result?.config) setAppConfig(result.config);
+    },
+    [setAppConfig]
+  );
+
+  const handleSttDownload = useCallback(async () => {
+    if (!isElectron || !window.electronAPI?.stt?.ensure || isSttBusy) return;
+    setIsSttBusy(true);
+    setSttProgress(0);
+    try {
+      await window.electronAPI.stt.ensure(speechToTextModel);
+      await refreshSttStatus();
+    } finally {
+      setIsSttBusy(false);
+      setSttProgress(null);
+    }
+  }, [isSttBusy, refreshSttStatus, speechToTextModel]);
+
+  const handleSttCancelDownload = useCallback(async () => {
+    await window.electronAPI?.stt?.cancelDownload?.();
+    setIsSttBusy(false);
+    setSttProgress(null);
+  }, []);
+
+  const handleSttRemove = useCallback(async () => {
+    if (!isElectron || !window.electronAPI?.stt?.remove || isSttBusy) return;
+    if (!window.confirm(t('general.speechToTextRemove'))) return;
+    setIsSttBusy(true);
+    try {
+      await window.electronAPI.stt.remove();
+      await refreshSttStatus();
+    } finally {
+      setIsSttBusy(false);
+    }
+  }, [isSttBusy, refreshSttStatus, t]);
 
   const handleToggleModelStats = useCallback(async () => {
     if (!isElectron || isSavingModelStats || !window.electronAPI?.config?.save) {
@@ -325,12 +422,12 @@ export function SettingsGeneral() {
         </div>
       </div>
 
-      <section className="rounded-lg border border-border-subtle bg-background px-4 py-4">
+      <section className="rounded-lg border border-border-subtle bg-background px-4 py-4 space-y-4">
+        <h4 className="text-sm font-semibold text-text-primary">{t('general.voiceSection')}</h4>
+
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <h4 className="text-sm font-semibold text-text-primary">
-              {t('general.speechSynthesis')}
-            </h4>
+            <p className="text-sm font-medium text-text-primary">{t('general.speechSynthesis')}</p>
             <p className="mt-1 text-xs leading-5 text-text-muted">
               {t('general.speechSynthesisDesc')}
             </p>
@@ -351,6 +448,144 @@ export function SettingsGeneral() {
               }`}
             />
           </button>
+        </div>
+
+        <div className="border-t border-border-subtle pt-4 space-y-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-text-primary">{t('general.speechToText')}</p>
+              <p className="mt-1 text-xs leading-5 text-text-muted">
+                {t('general.speechToTextDesc')}
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={speechToTextEnabled}
+              onClick={() => void handleToggleStt()}
+              disabled={isSavingStt}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 disabled:opacity-50 flex-shrink-0 ${
+                speechToTextEnabled ? 'bg-accent' : 'bg-surface-muted'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-text-primary transition-transform ${
+                  speechToTextEnabled ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
+          {speechToTextEnabled && (
+            <>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-text-secondary">
+                  {t('general.speechToTextModel')}
+                </label>
+                <div className="flex gap-2">
+                  {(
+                    [
+                      ['base', 'general.speechToTextModelBase'],
+                      ['small', 'general.speechToTextModelSmall'],
+                    ] as const
+                  ).map(([value, labelKey]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => void handleSttModelChange(value)}
+                      className={`flex-1 px-3 py-2 rounded-lg border text-xs font-medium transition-all ${
+                        speechToTextModel === value
+                          ? 'border-accent bg-accent/5 text-text-primary'
+                          : 'border-border bg-surface hover:border-accent/50 text-text-secondary'
+                      }`}
+                    >
+                      {t(labelKey)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-text-secondary">
+                  {t('general.speechToTextLanguage')}
+                </label>
+                <div className="flex gap-2">
+                  {(
+                    [
+                      ['ui', 'general.speechToTextLanguageUi'],
+                      ['auto', 'general.speechToTextLanguageAuto'],
+                    ] as const
+                  ).map(([value, labelKey]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => void handleSttLanguageChange(value)}
+                      className={`flex-1 px-3 py-2 rounded-lg border text-xs font-medium transition-all ${
+                        speechToTextLanguage === value
+                          ? 'border-accent bg-accent/5 text-text-primary'
+                          : 'border-border bg-surface hover:border-accent/50 text-text-secondary'
+                      }`}
+                    >
+                      {t(labelKey)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-md border border-border-subtle bg-surface/40 px-3 py-2.5 space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-text-primary">
+                      {t('general.speechToTextRuntime')}
+                    </p>
+                    <p className="text-[11px] text-text-muted mt-0.5">
+                      {sttStatus?.binaryReady &&
+                      sttStatus.models[speechToTextModel]?.ready
+                        ? t('general.speechToTextRuntimeReady', {
+                            version: sttStatus.version,
+                          })
+                        : t('general.speechToTextRuntimeMissing')}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {isSttBusy ? (
+                      <button
+                        type="button"
+                        onClick={() => void handleSttCancelDownload()}
+                        className="text-xs px-2.5 py-1.5 rounded-md border border-border text-text-secondary hover:bg-surface-hover"
+                      >
+                        {t('general.speechToTextCancelDownload')}
+                      </button>
+                    ) : sttStatus?.binaryReady ? (
+                      <button
+                        type="button"
+                        onClick={() => void handleSttRemove()}
+                        className="text-xs px-2.5 py-1.5 rounded-md border border-border text-text-secondary hover:bg-surface-hover"
+                      >
+                        {t('general.speechToTextRemove')}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => void handleSttDownload()}
+                        className="text-xs px-2.5 py-1.5 rounded-md bg-accent text-background hover:bg-accent-hover"
+                      >
+                        {t('general.speechToTextDownload')}
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {isSttBusy && (
+                  <p className="text-[11px] text-text-muted flex items-center gap-1.5">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    {t('general.speechToTextDownloading', {
+                      percent: sttProgress ?? 0,
+                    })}
+                  </p>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </section>
 

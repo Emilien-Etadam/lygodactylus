@@ -18,6 +18,7 @@ files:
   - scripts/lib/node-runtime.mjs
   - scripts/lib/python-runtime.mjs
   - scripts/lib/gui-tools-runtime.mjs
+  - scripts/lib/stt-runtime.mjs
   - node_modules/better-sqlite3/**/*
   - node_modules/@modelcontextprotocol/**/*
   - node_modules/electron-updater/**/*
@@ -92,6 +93,8 @@ mac:
     LSApplicationCategoryType: public.app-category.developer-tools
     NSScreenCaptureUsageDescription: 'Lygodactylus needs screen recording access for GUI automation.'
     NSAccessibilityUsageDescription: 'Lygodactylus needs accessibility access for GUI automation.'
+    # Local STT (dictation): Chromium getUserMedia microphone prompt on macOS.
+    NSMicrophoneUsageDescription: 'Lygodactylus needs microphone access for offline speech-to-text dictation.'
   extraResources:
     - from: resources/icon.icns
       to: icon.icns

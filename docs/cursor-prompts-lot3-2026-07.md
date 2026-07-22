@@ -303,12 +303,19 @@ construction du srcdoc avec CSP (snapshot) ; versions ordonnées par arrivée.
 
 ## Prompt 8 — Dictée vocale locale (STT)  `cursor/local-stt`
 
+<<<<<<< HEAD
 > **État 2026-07-21 — DÉBLOQUÉ, voie A actée.** L'étape 0 (rapport :
 > [`local-stt-investigation-2026-07.md`](./local-stt-investigation-2026-07.md))
 > a montré l'absence de CLI mac dans les releases officielles. Décision :
 > **A — bottle Homebrew macOS** + releases officielles Win/Linux.
 > L'implémentation suit le **Prompt 8-bis** ci-dessous (qui REMPLACE la
 > spécification du prompt 8 original — l'étape 0 n'est plus à refaire).
+=======
+> **État 2026-07-21 — voie A en cours d’implémentation** sur `cursor/local-stt`.
+> win/linux = assets officiels v1.9.1 ; macOS = bottles Homebrew `whisper-cpp`
+> 1.9.1 pinnés par digest. Rapport :
+> [`local-stt-investigation-2026-07.md`](./local-stt-investigation-2026-07.md).
+>>>>>>> 811d19f (feat(stt): dictée locale whisper.cpp v1.9.1 (voie A))
 
 ```text
 [Règles communes du lot 1]

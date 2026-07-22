@@ -638,6 +638,16 @@ export type ServerEvent =
     }
   | { type: 'sandbox.progress'; payload: SandboxSetupProgress }
   | { type: 'sandbox.sync'; payload: SandboxSyncStatus }
+  | {
+      type: 'stt.progress';
+      payload: {
+        phase: 'download' | 'verify' | 'extract' | 'done' | 'error';
+        percent?: number;
+        bytesReceived?: number;
+        bytesTotal?: number;
+        label?: string;
+      };
+    }
   | { type: 'skills.storageChanged'; payload: SkillsStorageChangeEvent }
   | {
       type: 'plugins.runtimeApplied';
@@ -881,6 +891,9 @@ export interface AppConfig {
   enableThinking?: boolean;
   thinkingLevel?: ThinkingLevel;
   speechSynthesisEnabled?: boolean;
+  speechToTextEnabled?: boolean;
+  speechToTextModel?: 'base' | 'small';
+  speechToTextLanguage?: 'auto' | 'ui';
   /** Show model stats (tok/s, context %, params/quant). On by default. */
   modelStatsEnabled?: boolean;
   /**

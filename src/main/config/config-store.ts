@@ -159,6 +159,7 @@ export class ConfigStore {
             key === 'memoryEnabled' ||
             key === 'enableThinking' ||
             key === 'speechSynthesisEnabled' ||
+            key === 'speechToTextEnabled' ||
             key === 'modelStatsEnabled' ||
             key === 'checkpointsEnabled' ||
             key === 'quickAskEnabled' ||
@@ -467,6 +468,18 @@ export class ConfigStore {
         updates.speechSynthesisEnabled !== undefined
           ? updates.speechSynthesisEnabled
           : current.speechSynthesisEnabled,
+      speechToTextEnabled:
+        updates.speechToTextEnabled !== undefined
+          ? updates.speechToTextEnabled
+          : current.speechToTextEnabled,
+      speechToTextModel:
+        updates.speechToTextModel === 'small' || updates.speechToTextModel === 'base'
+          ? updates.speechToTextModel
+          : current.speechToTextModel,
+      speechToTextLanguage:
+        updates.speechToTextLanguage === 'auto' || updates.speechToTextLanguage === 'ui'
+          ? updates.speechToTextLanguage
+          : current.speechToTextLanguage,
       modelStatsEnabled:
         updates.modelStatsEnabled !== undefined
           ? updates.modelStatsEnabled
