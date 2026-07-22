@@ -266,4 +266,50 @@ describe('marketplace skill integrity pinning', () => {
 
     expect(downloadGithubSubdir).toHaveBeenCalledWith('acme/skills', 'skills/demo', pinnedSha);
   });
+
+  it('rollback keeps pin when SHA resolution fails but ref is already a commit SHA', async () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pin-rollback-offline-'));
+    writeSkillDir(tempDir);
+    const expectedHash = hashDirectoryContents(tempDir);
+
+    const pinnedSha = 'dddddddddddddddddddddddddddddddddddddddd';
+    resolveGithubCommitSha.mockResolvedValue(null);
+    downloadGithubSubdir.mockResolvedValue(tempDir);
+
+    const { InstallResolver } = await import('../../main/catalog/install-resolver');
+    const installSkill = vi.fn(async () => ({
+      id: 'global-Pinned Demo',
+      name: 'Pinned Demo',
+    }));
+
+    const resolver = new InstallResolver(
+      {
+        installSkill,
+        listSkills: vi.fn(async () => []),
+        setSkillEnabled: vi.fn(),
+        uninstallSkill: vi.fn(),
+        getGlobalSkillsPath: vi.fn(() => tempDir),
+      } as unknown as import('../../main/skills/skills-manager').SkillsManager,
+      {
+        installFromDirectory: vi.fn(),
+        listInstalled: vi.fn(() => []),
+        setEnabled: vi.fn(),
+        uninstall: vi.fn(),
+      } as unknown as import('../../main/skills/plugin-runtime-service').PluginRuntimeService
+    );
+
+    const result = await resolver.installGithubSkillAtRef(githubSkillEntry, pinnedSha);
+
+    expect(resolveGithubCommitSha).toHaveBeenCalledWith('acme/skills', pinnedSha);
+    expect(downloadGithubSubdir).toHaveBeenCalledWith('acme/skills', 'skills/demo', pinnedSha);
+    expect(marketplaceSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        catalogId: 'pinned-demo-skill',
+        pinnedSha,
+        contentHash: expectedHash,
+        pinnedAt: expect.any(Number),
+      })
+    );
+    expect(result.pinnedSha).toBe(pinnedSha);
+  });
 });

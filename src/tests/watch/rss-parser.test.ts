@@ -53,6 +53,21 @@ describe('parseRssOrAtom', () => {
     expect(items[1]?.guid).toBe('post-2');
   });
 
+  it('parses Atom entry links preferring rel="alternate" over rel="self"', () => {
+    const xml = `<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <entry>
+    <title>Dual links</title>
+    <id>urn:uuid:self-then-alt</id>
+    <link href="https://example.org/self" rel="self"/>
+    <link href="https://example.org/article" rel="alternate"/>
+  </entry>
+</feed>`;
+    const items = parseRssOrAtom(xml);
+    expect(items).toHaveLength(1);
+    expect(items[0]?.link).toBe('https://example.org/article');
+  });
+
   it('parses a real Atom fixture', () => {
     const items = parseRssOrAtom(ATOM_FIXTURE);
     expect(items).toHaveLength(2);

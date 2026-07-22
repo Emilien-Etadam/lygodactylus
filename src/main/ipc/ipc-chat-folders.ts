@@ -16,6 +16,7 @@ import {
   createChatFolder,
   deleteChatFolder,
   listChatFolders,
+  safeListChatFolders,
   updateChatFolder,
 } from '../session/chat-folders-store';
 import { mainAppState } from '../main-app-state';
@@ -26,7 +27,7 @@ function emitSessionListRefresh(): void {
   const sm = mainAppState.sessionManager;
   if (!sm) return;
   const sessions = sm.listSessions();
-  const folders = listChatFolders(getDatabase());
+  const folders = safeListChatFolders(getDatabase());
   sendToRenderer({
     type: 'session.list',
     payload: { sessions, folders },

@@ -25,7 +25,7 @@ describe('chat folders wiring', () => {
     expect(allowlist).not.toContain('folder.create');
     expect(allowlist).not.toContain('folder.assign');
     expect(allowlist).toContain('session.list');
-    expect(clientEvents).toContain('listChatFolders');
+    expect(clientEvents).toContain('safeListChatFolders');
     expect(clientEvents).toContain('folders');
   });
 });

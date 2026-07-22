@@ -1,4 +1,4 @@
-import { isLoopbackHostname } from './loopback';
+import { isLoopbackHostname, normalizeHostname } from './loopback';
 
 export type EndpointLocationKind = 'local' | 'lan' | 'remote';
 
@@ -9,14 +9,6 @@ export interface EndpointLocation {
 }
 
 const DEFAULT_HOST_LABEL_MAX = 18;
-
-function normalizeHostname(hostname: string): string {
-  const trimmed = hostname.trim().toLowerCase();
-  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
-    return trimmed.slice(1, -1);
-  }
-  return trimmed;
-}
 
 function parseBaseUrl(baseUrl: string): URL | null {
   const value = baseUrl.trim();

@@ -902,7 +902,10 @@ export function Sidebar() {
         )}
       </div>
 
-      {sessionMenu && isElectron && window.electronAPI?.folders && (
+      {sessionMenu &&
+        isElectron &&
+        window.electronAPI?.folders &&
+        !sessions.find((s) => s.id === sessionMenu.sessionId)?.parentSessionId && (
         <div
           className="fixed z-50 min-w-[11rem] rounded-lg border border-border bg-surface shadow-lg py-1"
           style={{ left: sessionMenu.x, top: sessionMenu.y }}

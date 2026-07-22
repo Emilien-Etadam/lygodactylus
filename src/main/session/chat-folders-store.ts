@@ -32,6 +32,15 @@ export function listChatFolders(db: DatabaseInstance): ChatFolder[] {
   return db.folders.getAll().map(mapFolderRow);
 }
 
+/** List folders; returns [] on DB errors (session list must not fail). */
+export function safeListChatFolders(db: DatabaseInstance): ChatFolder[] {
+  try {
+    return listChatFolders(db);
+  } catch {
+    return [];
+  }
+}
+
 export function createChatFolder(
   db: DatabaseInstance,
   input: ChatFolderCreateInput

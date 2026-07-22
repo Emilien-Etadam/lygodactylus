@@ -12,6 +12,12 @@ import { ensureHeavySkill } from '../runtime/skills-bundle-runtime';
 import { isBuiltinHeavySkill, resolveBuiltinSkillPath } from '../skills/builtin-skills-paths';
 import { logWarn } from '../utils/logger';
 
+const GITHUB_COMMIT_SHA_RE = /^[0-9a-f]{40}$/i;
+
+function isGithubCommitSha(ref: string): boolean {
+  return GITHUB_COMMIT_SHA_RE.test(ref.trim());
+}
+
 export class InstallResolver {
   constructor(
     private readonly skillsManager: SkillsManager,
@@ -282,8 +288,11 @@ export class InstallResolver {
 
     const catalogRef = overrideRef ?? entry.resolve.ref;
     // Best-effort pin: if the API is unavailable, install from the catalog ref
-    // without writing pin metadata (legacy behaviour).
-    const resolvedSha = await resolveGithubCommitSha(entry.resolve.repo, catalogRef);
+    // without writing pin metadata (legacy behaviour) — except when the ref is
+    // already an exact commit SHA (rollback at pinnedSha).
+    const apiSha = await resolveGithubCommitSha(entry.resolve.repo, catalogRef);
+    const resolvedSha =
+      apiSha ?? (isGithubCommitSha(catalogRef) ? catalogRef.trim().toLowerCase() : undefined);
     const downloadRef = resolvedSha ?? catalogRef;
 
     const dir = await downloadGithubSubdir(
