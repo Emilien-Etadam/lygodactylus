@@ -1,5 +1,6 @@
 const windowsDrivePathPattern = /^[A-Za-z]:[\\/]/;
-const uncPathPattern = /^\\\\[^\\]/;
+const windowsUncPathPattern = /^\\\\[^\\]/;
+const posixUncPathPattern = /^\/\/[^/]+\//;
 
 export function decodePathSafely(value: string): string {
   try {
@@ -14,7 +15,7 @@ export function isWindowsDrivePath(value: string): boolean {
 }
 
 export function isUncPath(value: string): boolean {
-  return uncPathPattern.test(value);
+  return windowsUncPathPattern.test(value) || posixUncPathPattern.test(value);
 }
 
 function detectPlatform(platform?: NodeJS.Platform): NodeJS.Platform {
