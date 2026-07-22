@@ -5,16 +5,15 @@
  */
 import { afterEach, describe, expect, it } from 'vitest';
 import {
-  AuthStorage,
   createAgentSession,
   DefaultResourceLoader,
-  ModelRegistry,
   SessionManager,
   SettingsManager,
 } from '@earendil-works/pi-coding-agent';
 import { sortSkillsForStablePrefix } from '../../main/agent/stable-system-prefix';
 import { buildPiSessionRuntimeSignature } from '../../main/agent/pi-session-runtime';
 import {
+  createHarnessModelRuntime,
   createHarnessWorkspace,
   createSyntheticPiModel,
   writeMinimalSkill,
@@ -86,7 +85,7 @@ describe('sdk-contract stable prefix — assembled system prompt', () => {
     writeMinimalSkill(skillRoot, 'stable-skill');
 
     async function buildSystemPrompt(): Promise<string> {
-      const authStorage = AuthStorage.inMemory();
+      const modelRuntime = await createHarnessModelRuntime();
       const resourceLoader = new DefaultResourceLoader({
         cwd,
         agentDir,
@@ -105,8 +104,7 @@ describe('sdk-contract stable prefix — assembled system prompt', () => {
       const { session } = await createAgentSession({
         model: createSyntheticPiModel(),
         thinkingLevel: 'off',
-        authStorage,
-        modelRegistry: ModelRegistry.create(authStorage),
+        modelRuntime,
         sessionManager: SessionManager.inMemory(),
         settingsManager: SettingsManager.inMemory({}),
         resourceLoader,

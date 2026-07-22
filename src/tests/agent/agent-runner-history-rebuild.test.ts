@@ -25,8 +25,8 @@ vi.mock('@earendil-works/pi-ai/compat', () => ({
 }));
 
 vi.mock('../../main/agent/shared-auth', () => ({
-  getSharedAuthStorage: () => ({ setRuntimeApiKey: vi.fn() }),
-  ModelRegistry: vi.fn(),
+  getSharedModelRuntime: async () => ({ setRuntimeApiKey: vi.fn(async () => undefined) }),
+  ModelRuntime: vi.fn(),
 }));
 
 import type { ContentBlock } from '../../renderer/types';

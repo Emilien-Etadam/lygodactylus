@@ -5,6 +5,8 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { Model } from '@earendil-works/pi-ai';
+import { InMemoryCredentialStore } from '@earendil-works/pi-ai';
+import { ModelRuntime } from '@earendil-works/pi-coding-agent';
 
 export interface HarnessWorkspace {
   cwd: string;
@@ -44,10 +46,22 @@ export function createSyntheticPiModel(
   };
 }
 
-export function writeMinimalSkill(skillRoot: string, name: string, description = 'harness skill'): void {
+export function writeMinimalSkill(
+  skillRoot: string,
+  name: string,
+  description = 'harness skill'
+): void {
   mkdirSync(skillRoot, { recursive: true });
   writeFileSync(
     join(skillRoot, 'SKILL.md'),
     `---\nname: ${name}\ndescription: ${description}\n---\n# ${name}\n`
   );
+}
+
+/** Offline ModelRuntime for harness sessions (no file auth, no network catalogs). */
+export async function createHarnessModelRuntime(): Promise<ModelRuntime> {
+  return ModelRuntime.create({
+    credentials: new InMemoryCredentialStore(),
+    allowModelNetwork: false,
+  });
 }

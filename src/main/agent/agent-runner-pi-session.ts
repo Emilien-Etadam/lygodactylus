@@ -13,11 +13,6 @@ import {
   type ToolDefinition,
 } from '@earendil-works/pi-coding-agent';
 import { detectCommonProviderSetup } from '../../shared/api-provider-guidance';
-import { configStore } from '../config/config-store';
-import {
-  normalizeOllamaKeepAlive,
-  toOllamaKeepAlivePayload,
-} from '../config/ollama-api';
 import { decidePermission, rememberAlwaysAllow } from '../config/permission-rules-store';
 import type { MCPManager } from '../mcp/mcp-manager';
 import { logCtx } from '../utils/logger';
@@ -26,11 +21,15 @@ import { withAsyncTimeout } from '../utils/async-timeout';
 import { buildCompactionSettings, estimateTokensFromText } from './context-budget';
 import type { AgentRunnerRunContext } from './agent-runner-run-context';
 import {
+  createOllamaPayloadExtension,
+  type OllamaNumCtxRef,
+} from './ollama-payload-extension';
+import {
   applyProjectRulesAgentsFilesOverride,
   resolveProjectRulesFile,
   type ProjectRulesFile,
 } from './project-rules-file';
-import { ModelRegistry } from './shared-auth';
+import { type ModelRuntime } from './shared-auth';
 import { sortSkillsForStablePrefix } from './stable-system-prefix';
 
 export interface CachedPiSession {
@@ -325,7 +324,6 @@ export function wrapBashToolWithDefaultTimeout(tools: ToolDefinition[]): ToolDef
 
 type PiSessionModel = Parameters<PiAgentSession['setModel']>[0];
 type PiThinkingLevel = NonNullable<Parameters<PiAgentSession['setThinkingLevel']>[0]>;
-type PiAuthStorage = Parameters<typeof ModelRegistry.create>[0];
 
 interface ReuseCachedPiSessionOptions {
   cachedSession?: CachedPiSession;
@@ -419,7 +417,7 @@ interface CreatePiSessionOptions {
   provider: string;
   piModel: PiSessionModel;
   thinkingLevel: PiThinkingLevel;
-  authStorage: PiAuthStorage;
+  modelRuntime: ModelRuntime;
   customTools: ToolDefinition[];
   /** Built-in tools to disable (e.g. bash/edit/write in plan mode). */
   excludeTools?: string[];
@@ -444,7 +442,7 @@ export async function createPiSession({
   provider,
   piModel,
   thinkingLevel,
-  authStorage,
+  modelRuntime,
   customTools,
   excludeTools,
   skillPaths,
@@ -469,6 +467,17 @@ export async function createPiSession({
     );
   }
 
+  // Ollama was migrated to provider "openai"; detect by endpoint URL instead.
+  const modelBaseUrl =
+    typeof piModel === 'object' && piModel && 'baseUrl' in piModel
+      ? String((piModel as { baseUrl?: string }).baseUrl || '')
+      : '';
+  const isOllamaEndpoint =
+    provider === 'ollama' || detectCommonProviderSetup(modelBaseUrl)?.id === 'ollama';
+  const ollamaNumCtx: OllamaNumCtxRef | undefined = isOllamaEndpoint
+    ? { value: piModel.contextWindow || 128000 }
+    : undefined;
+
   const resourceLoader = new DefaultResourceLoader({
     cwd: effectiveCwd,
     agentDir: getAgentDir(),
@@ -487,6 +496,9 @@ export async function createPiSession({
         resolvedProjectRules
       ),
     }),
+    ...(ollamaNumCtx
+      ? { extensionFactories: [createOllamaPayloadExtension(ollamaNumCtx)] }
+      : {}),
   });
   const reloadSucceeded = await reloadResourceLoaderWithTimeout(resourceLoader, promptTemplatePaths);
   if (!reloadSucceeded) {
@@ -514,8 +526,7 @@ export async function createPiSession({
       createAgentSession({
         model: piModel,
         thinkingLevel,
-        authStorage,
-        modelRegistry: ModelRegistry.create(authStorage),
+        modelRuntime,
         customTools,
         ...(excludeTools && excludeTools.length > 0 ? { excludeTools } : {}),
         sessionManager: PiSessionManager.inMemory(),
@@ -543,52 +554,14 @@ export async function createPiSession({
     runtimeSignature: sessionRuntimeSignature,
     skillsSignature,
     compactionEnabled: compactionSettings.enabled,
+    ...(ollamaNumCtx ? { ollamaNumCtx } : {}),
   });
 
-  // Ollama was migrated to provider "openai"; detect by endpoint URL instead.
-  const modelBaseUrl =
-    typeof piModel === 'object' && piModel && 'baseUrl' in piModel
-      ? String((piModel as { baseUrl?: string }).baseUrl || '')
-      : '';
-  const isOllamaEndpoint =
-    provider === 'ollama' || detectCommonProviderSetup(modelBaseUrl)?.id === 'ollama';
-  if (isOllamaEndpoint) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const agent = piSession.agent as any;
-    if (!('_onPayload' in agent)) {
-      logWarn(
-        '[AgentRunner] SDK agent does not expose _onPayload — skipping Ollama keep_alive/num_ctx patch'
-      );
-    } else {
-      const originalOnPayload = agent._onPayload as
-        | ((
-            payload: Record<string, unknown>,
-            modelArg: unknown
-          ) => Promise<Record<string, unknown>>)
-        | undefined;
-      const ollamaNumCtx = { value: piModel.contextWindow || 128000 };
-      agent._onPayload = async (payload: Record<string, unknown>, modelArg: unknown) => {
-        let result = originalOnPayload
-          ? await originalOnPayload.call(agent, payload, modelArg)
-          : payload;
-        if (result === undefined) {
-          result = payload;
-        }
-        const keepAlive = normalizeOllamaKeepAlive(configStore.get('ollamaKeepAlive'));
-        return {
-          ...result,
-          num_ctx: ollamaNumCtx.value,
-          keep_alive: toOllamaKeepAlivePayload(keepAlive),
-        };
-      };
-      ctx.piSessions.get(sessionId)!.ollamaNumCtx = ollamaNumCtx;
-      log(
-        '[AgentRunner] Ollama _onPayload wrapper installed, num_ctx:',
-        ollamaNumCtx.value,
-        'keep_alive:',
-        normalizeOllamaKeepAlive(configStore.get('ollamaKeepAlive'))
-      );
-    }
+  if (ollamaNumCtx) {
+    log(
+      '[AgentRunner] Ollama before_provider_request extension installed, num_ctx:',
+      ollamaNumCtx.value
+    );
   }
 
   return { piSession, compactionEnabled: compactionSettings.enabled };
