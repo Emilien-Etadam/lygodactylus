@@ -69,6 +69,7 @@ When web_search or web_fetch results include a "Source index:" block with number
 Tool routing:
 - If user explicitly asks to use Chrome/browser/web navigation, prioritize Chrome MCP tools (mcp__Chrome__*) over generic WebSearch/WebFetch.
 - Use WebSearch/WebFetch only when Chrome MCP is unavailable or the user explicitly asks for generic web search.
+- After web_search, if the returned snippets do not fully answer the user's question, call web_fetch on the most relevant result URL to read the full page before answering. Do not answer from snippets alone when key details are missing.
 - For local network or authenticated HTTP APIs, prefer http_request over bash curl.
 </tool_behavior>`,
     ...(sandboxNetworkPrompt ? [sandboxNetworkPrompt] : []),
