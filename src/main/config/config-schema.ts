@@ -101,6 +101,12 @@ export interface AppConfig {
   uiLanguage?: string;
   sandboxEnabled: boolean;
   sandboxLanNetworkEnabled: boolean;
+  /**
+   * Reuse a per-workspace baseline copy inside the sandbox VM to seed new
+   * sessions with a fast VM-local clone instead of a full cross-boundary sync.
+   * Falls back to the direct per-session sync on any failure.
+   */
+  sandboxBaselineCacheEnabled: boolean;
   memoryEnabled: boolean;
   memoryRuntime: MemoryRuntimeConfig;
   webSearch: WebSearchConfig;
@@ -233,6 +239,7 @@ export const DIRECT_READ_KEYS = new Set<keyof AppConfig>([
   'theme',
   'sandboxEnabled',
   'sandboxLanNetworkEnabled',
+  'sandboxBaselineCacheEnabled',
   'memoryEnabled',
   'webSearch',
   'piiScrub',
@@ -322,6 +329,7 @@ export const defaultConfig: AppConfig = {
   uiLanguage: DEFAULT_BACKEND_LANGUAGE,
   sandboxEnabled: getDefaultSandboxEnabled(),
   sandboxLanNetworkEnabled: false,
+  sandboxBaselineCacheEnabled: true,
   memoryEnabled: true,
   memoryRuntime: {
     llm: {

@@ -17,6 +17,7 @@
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { log, logError } from '../utils/logger';
+import { configStore } from '../config/config-store';
 import { pathConverter } from './wsl-bridge';
 import { isPathWithinRoot } from '../tools/path-containment';
 import {
@@ -28,8 +29,16 @@ import {
   type SandboxSyncManifest,
 } from './sandbox-sync-manifest';
 import {
+  DEFAULT_BASELINE_CACHE_POLICY,
+  isValidFingerprint,
+  runBaselineGc,
+  type SandboxExecFn,
+} from './sandbox-baseline-cache';
+import {
   LEGACY_SANDBOX_SKILLS_DIR,
   SANDBOX_SKILLS_DIR,
+  buildSandboxBaselinePath,
+  buildSandboxCacheRoot,
   listSandboxPathCandidates,
 } from '../paths/sandbox-paths';
 
@@ -168,6 +177,27 @@ export class SandboxSync {
         return restored;
       }
 
+      // Fast path: seed the per-session dir from a per-workspace baseline
+      // (default-on). Any failure falls through to the direct sync below.
+      try {
+        const seeded = await this.seedSessionFromBaseline(
+          windowsPath,
+          sessionId,
+          distro,
+          homeDir,
+          sandboxPath
+        );
+        if (seeded) {
+          return seeded;
+        }
+      } catch (error) {
+        logError(
+          '[SandboxSync] Baseline cache seed failed, falling back to direct sync:',
+          error
+        );
+      }
+
+      // Fallback / cache disabled: direct cross-boundary sync.
       // Create sandbox directory
       await this.wslExec(distro, `mkdir -p '${this.shellEscapePath(sandboxPath)}'`);
 
@@ -646,6 +676,119 @@ export class SandboxSync {
       fileCount,
       totalSize,
     };
+  }
+
+  /** Bind wslExec to a distro so the baseline-cache module stays VM-agnostic. */
+  private static wslExecutor(distro: string): SandboxExecFn {
+    return (command: string, timeoutMs?: number) => this.wslExec(distro, command, timeoutMs);
+  }
+
+  /**
+   * Fast-path seed: refresh a per-workspace baseline inside the VM (the one
+   * cross-boundary sync), then clone it into the isolated per-session dir with a
+   * VM-local copy. Returns null when the cache is disabled; throws on failure so
+   * initSync falls back to a direct sync. The per-session dir remains the sole
+   * execution root — isolation is unchanged.
+   */
+  private static async seedSessionFromBaseline(
+    windowsPath: string,
+    sessionId: string,
+    distro: string,
+    homeDir: string,
+    sandboxPath: string
+  ): Promise<SyncResult | null> {
+    if (configStore.get('sandboxBaselineCacheEnabled') === false) {
+      return null;
+    }
+    const fingerprint = buildWorkspaceFingerprint(windowsPath);
+    if (!isValidFingerprint(fingerprint)) {
+      return null;
+    }
+
+    const baselinePath = buildSandboxBaselinePath(homeDir, fingerprint);
+    const wslSourcePath = pathConverter.toWSL(windowsPath);
+    const excludeArgs = this.buildExcludeArgs([
+      SYNC_MANIFEST_FILE,
+      ...listSyncManifestFilenames().slice(1),
+      SANDBOX_SKILLS_DIR,
+      LEGACY_SANDBOX_SKILLS_DIR,
+    ]);
+
+    // 1) Refresh the baseline from the host (delta after the first time).
+    await this.wslExec(distro, `mkdir -p '${this.shellEscapePath(baselinePath)}'`);
+    const refreshCmd = `rsync -a --delete ${excludeArgs} '${this.shellEscapePath(wslSourcePath)}/' '${this.shellEscapePath(baselinePath)}/'`;
+    await this.wslExec(distro, refreshCmd, 300000);
+    // Touch for LRU accounting (rsync leaves the dir mtime untouched on no-op syncs).
+    await this.wslExec(distro, `touch '${this.shellEscapePath(baselinePath)}'`);
+
+    // 2) Clone the baseline into the isolated per-session dir (VM-local, fast).
+    await this.wslExec(distro, `mkdir -p '${this.shellEscapePath(sandboxPath)}'`);
+    const cloneCmd = `rsync -a --delete '${this.shellEscapePath(baselinePath)}/' '${this.shellEscapePath(sandboxPath)}/'`;
+    await this.wslExec(distro, cloneCmd, 300000);
+
+    const countResult = await this.wslExec(
+      distro,
+      `find '${this.shellEscapePath(sandboxPath)}' -type f | wc -l`
+    );
+    const sizeResult = await this.wslExec(
+      distro,
+      `du -sb '${this.shellEscapePath(sandboxPath)}' | cut -f1`
+    );
+    const fileCount = parseInt(countResult.stdout.trim()) || 0;
+    const totalSize = parseInt(sizeResult.stdout.trim()) || 0;
+
+    await this.writeManifest(distro, sandboxPath, windowsPath);
+
+    const session: SyncSession = {
+      sessionId,
+      windowsPath,
+      sandboxPath,
+      distro,
+      initialized: true,
+      fileCount,
+      totalSize,
+      lastSyncTime: Date.now(),
+    };
+    sessions.set(sessionId, session);
+
+    log(
+      `[SandboxSync] Seeded session ${sessionId} from workspace baseline: ${fileCount} files, ${this.formatSize(totalSize)}`
+    );
+
+    // Best-effort GC — must never fail the run.
+    await this.runBaselineGcSafely(distro, homeDir, fingerprint);
+
+    return { success: true, sandboxPath, fileCount, totalSize };
+  }
+
+  /**
+   * Evict stale/oversized baselines. Never touches a baseline referenced by a
+   * live session (including the one just seeded). Fully swallowed on error.
+   */
+  private static async runBaselineGcSafely(
+    distro: string,
+    homeDir: string,
+    justUsedFingerprint: string
+  ): Promise<void> {
+    try {
+      const cacheRoot = buildSandboxCacheRoot(homeDir);
+      const protectedFingerprints = new Set<string>([justUsedFingerprint]);
+      for (const active of sessions.values()) {
+        protectedFingerprints.add(buildWorkspaceFingerprint(active.windowsPath));
+      }
+      const evicted = await runBaselineGc(
+        this.wslExecutor(distro),
+        cacheRoot,
+        DEFAULT_BASELINE_CACHE_POLICY,
+        protectedFingerprints,
+        Date.now()
+      );
+      if (evicted.length > 0) {
+        log(`[SandboxSync] Baseline GC evicted ${evicted.length} workspace baseline(s)`);
+      }
+    } catch (error) {
+      logError('[SandboxSync] Baseline GC failed (non-fatal):', error);
+    }
   }
 
   private static async resolveSandboxPath(
