@@ -107,6 +107,12 @@ export interface AppConfig {
    * Falls back to the direct per-session sync on any failure.
    */
   sandboxBaselineCacheEnabled: boolean;
+  /**
+   * Keep the sandbox VM (WSL2) warm with a low-frequency heartbeat while the app
+   * runs, so the first command — or a scheduled task firing later — does not pay
+   * a cold-VM start. Trades a little idle RAM for no cold-start latency.
+   */
+  sandboxKeepWarmEnabled: boolean;
   memoryEnabled: boolean;
   memoryRuntime: MemoryRuntimeConfig;
   webSearch: WebSearchConfig;
@@ -240,6 +246,7 @@ export const DIRECT_READ_KEYS = new Set<keyof AppConfig>([
   'sandboxEnabled',
   'sandboxLanNetworkEnabled',
   'sandboxBaselineCacheEnabled',
+  'sandboxKeepWarmEnabled',
   'memoryEnabled',
   'webSearch',
   'piiScrub',
@@ -330,6 +337,7 @@ export const defaultConfig: AppConfig = {
   sandboxEnabled: getDefaultSandboxEnabled(),
   sandboxLanNetworkEnabled: false,
   sandboxBaselineCacheEnabled: true,
+  sandboxKeepWarmEnabled: true,
   memoryEnabled: true,
   memoryRuntime: {
     llm: {

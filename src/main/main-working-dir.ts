@@ -9,6 +9,7 @@ import * as fs from 'fs';
 import { configStore } from './config/config-store';
 import { SandboxSync } from './sandbox/sandbox-sync';
 import { getSandboxBootstrap } from './sandbox/sandbox-bootstrap';
+import { createWslWarmFn, startSandboxKeepWarm } from './sandbox/sandbox-keepwarm';
 import { getUnsupportedWorkspacePathReason } from './workspace-path-constraints';
 import { log, logError } from './utils/logger';
 import { mainAppState } from './main-app-state';
@@ -102,7 +103,25 @@ export async function startSandboxBootstrap(): Promise<void> {
   try {
     const result = await bootstrap.bootstrap();
     log('[App] Sandbox bootstrap complete:', result.mode);
+    maybeStartSandboxKeepWarm(result.mode, result.wslStatus?.distro);
   } catch (error) {
     logError('[App] Sandbox bootstrap error:', error);
+  }
+}
+
+/**
+ * Start the WSL keep-warm heartbeat when the sandbox resolved to WSL and the
+ * feature is enabled. No-op on native/Lima or when disabled.
+ */
+function maybeStartSandboxKeepWarm(mode: string, distro?: string): void {
+  if (mode !== 'wsl' || !distro) {
+    return;
+  }
+  if (configStore.get('sandboxKeepWarmEnabled') === false) {
+    return;
+  }
+  const warmFn = createWslWarmFn(distro);
+  if (warmFn) {
+    startSandboxKeepWarm(warmFn);
   }
 }

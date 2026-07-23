@@ -40,6 +40,7 @@ function makeConfig(): AppConfig {
     sandboxEnabled: false,
     sandboxLanNetworkEnabled: false,
     sandboxBaselineCacheEnabled: true,
+    sandboxKeepWarmEnabled: true,
     memoryEnabled: true,
     memoryRuntime: {
       llm: {

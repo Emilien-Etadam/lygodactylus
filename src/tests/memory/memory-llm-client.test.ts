@@ -45,6 +45,7 @@ function makeConfig(timeoutMs: number, overrides: Partial<AppConfig> = {}): AppC
     sandboxEnabled: false,
     sandboxLanNetworkEnabled: false,
     sandboxBaselineCacheEnabled: true,
+    sandboxKeepWarmEnabled: true,
     memoryEnabled: true,
     memoryRuntime: {
       llm: {

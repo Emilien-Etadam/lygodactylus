@@ -7,6 +7,7 @@ import { app } from 'electron';
 import { closeDatabase } from './db/database';
 import { SandboxSync } from './sandbox/sandbox-sync';
 import { shutdownSandbox } from './sandbox/sandbox-adapter';
+import { stopSandboxKeepWarm } from './sandbox/sandbox-keepwarm';
 import { stopNavServer } from './nav-server';
 import { stopChatLanServer } from './chat-lan-server';
 import { shutdownQuickAsk } from './quick-ask/quick-ask-controller';
@@ -42,6 +43,7 @@ async function cleanupSandboxResources(): Promise<void> {
   mainAppState.skillsManager?.stopStorageMonitoring();
   mainAppState.scheduledTaskManager?.stop();
   mainAppState.watchManager?.stop();
+  stopSandboxKeepWarm();
   mainAppState.tray?.destroy();
   mainAppState.tray = null;
 

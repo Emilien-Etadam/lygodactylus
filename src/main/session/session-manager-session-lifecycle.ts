@@ -19,6 +19,11 @@ import {
   initializeSandbox,
   reinitializeSandbox,
 } from '../sandbox/sandbox-adapter';
+import {
+  createWslWarmFn,
+  startSandboxKeepWarm,
+  stopSandboxKeepWarm,
+} from '../sandbox/sandbox-keepwarm';
 import { SandboxSync } from '../sandbox/sandbox-sync';
 import { log, logError, logWarn } from '../utils/logger';
 import type { SessionManagerFacadeSupportDeps } from './session-manager-facade-support';
@@ -30,8 +35,23 @@ export async function reloadSandbox(deps: SessionManagerFacadeSupportDeps): Prom
   try {
     log('[SessionManager] Reinitializing sandbox adapter...');
     await reinitializeSandbox();
-    deps.setSandboxAdapter(getSandboxAdapter());
-    log('[SessionManager] Sandbox adapter reinitialized, mode:', deps.getSandboxAdapter().mode);
+    const adapter = getSandboxAdapter();
+    deps.setSandboxAdapter(adapter);
+    log('[SessionManager] Sandbox adapter reinitialized, mode:', adapter.mode);
+    // Track the keep-warm heartbeat with the sandbox state: start it when WSL is
+    // active and enabled, stop it when the sandbox is turned off or unavailable.
+    if (
+      adapter.isWSL &&
+      adapter.wslStatus?.distro &&
+      configStore.get('sandboxKeepWarmEnabled') !== false
+    ) {
+      const warmFn = createWslWarmFn(adapter.wslStatus.distro);
+      if (warmFn) {
+        startSandboxKeepWarm(warmFn);
+      }
+    } else {
+      stopSandboxKeepWarm();
+    }
   } catch (error) {
     logError('[SessionManager] Failed to reinitialize sandbox:', error);
   }
