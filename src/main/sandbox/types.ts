@@ -40,8 +40,17 @@ export interface JSONRPCResponse {
   };
 }
 
+/**
+ * Why WSL2 is unavailable. Distinguishes a genuinely missing install from a
+ * transient cold-start (e.g. right after a reboot) where the WSL service or the
+ * distro has not finished starting yet. The two need very different user advice.
+ */
+export type WSLUnavailableReason = 'not-installed' | 'no-distro' | 'not-ready';
+
 export interface WSLStatus {
   available: boolean;
+  /** Populated when available is false, to explain why. */
+  reason?: WSLUnavailableReason;
   distro?: string;
   nodeAvailable?: boolean;
   pythonAvailable?: boolean;

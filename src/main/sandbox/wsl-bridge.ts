@@ -17,6 +17,7 @@ import { app } from 'electron';
 import { log, logError, logWarn } from '../utils/logger';
 import type {
   WSLStatus,
+  WSLUnavailableReason,
   SandboxConfig,
   SandboxExecutor,
   ExecutionResult,
@@ -25,6 +26,46 @@ import type {
   JSONRPCResponse,
   PathConverter,
 } from './types';
+
+/**
+ * Classify a WSL command failure as a genuinely missing install versus a
+ * transient/not-ready state. Only a missing `wsl` executable (ENOENT / "not
+ * recognized") is treated as "not installed"; timeouts and service errors
+ * (common during a cold start after reboot) are "not ready" so callers can
+ * retry instead of telling the user to reinstall WSL2.
+ */
+export function classifyWslError(error: unknown): WSLUnavailableReason {
+  const err = error as { code?: string | number; message?: string } | undefined;
+  const code = typeof err?.code === 'string' ? err.code : '';
+  const message = (err?.message || '').toLowerCase();
+  if (
+    code === 'ENOENT' ||
+    message.includes('enoent') ||
+    message.includes('not recognized') ||
+    message.includes('cannot find') ||
+    message.includes('no such file')
+  ) {
+    return 'not-installed';
+  }
+  return 'not-ready';
+}
+
+/**
+ * User-facing explanation for an unavailable WSL2 sandbox, tailored to the
+ * reason. Crucially, a "not-ready" (cold start) status must NOT tell the user
+ * to reinstall WSL2 — it just needs a moment or a sandbox re-check.
+ */
+export function describeWslUnavailableReason(status: Pick<WSLStatus, 'reason'>): string {
+  switch (status.reason) {
+    case 'not-ready':
+      return 'The WSL2 sandbox is not responding yet — it may still be starting up (e.g. right after a reboot). Wait a few seconds and try again. If it persists, open Settings → Sandbox and toggle sandbox off then on to force a re-check.';
+    case 'no-distro':
+      return 'WSL2 is installed but no Linux distribution is registered. Run "wsl --install -d Ubuntu" in PowerShell, restart, then relaunch Lygodactylus.';
+    case 'not-installed':
+    default:
+      return 'WSL2 is not installed. Run "wsl --install" in PowerShell as Administrator, restart, then relaunch Lygodactylus.';
+  }
+}
 
 // Import lazily to avoid circular dependency
 let getSandboxBootstrap: (() => { getCachedWSLStatus(): WSLStatus | null }) | null = null;
@@ -186,7 +227,8 @@ export class WSLBridge implements SandboxExecutor {
       log('[WSL] Parsed distros:', distros);
 
       if (distros.length === 0) {
-        return { available: false };
+        // WSL responds but no distro is registered — installed, not usable.
+        return { available: false, reason: 'no-distro' };
       }
 
       // Prefer Ubuntu, otherwise use first available
@@ -200,7 +242,9 @@ export class WSLBridge implements SandboxExecutor {
       if (!distroWorks) {
         log('[WSL] Selected distro is not responding. WSL service may need restart.');
         log('[WSL] Try: wsl --shutdown (in PowerShell as Admin), then restart the app');
-        return { available: false };
+        // Distro exists but did not answer — typically a cold/slow start, not a
+        // missing install.
+        return { available: false, reason: 'not-ready' };
       }
       log('[WSL] Distro is responding');
 
@@ -324,8 +368,9 @@ export class WSLBridge implements SandboxExecutor {
       log('[WSL] Status check complete:', JSON.stringify(status));
       return status;
     } catch (error) {
-      log('[WSL] WSL not available:', (error as Error).message);
-      return { available: false };
+      const reason = classifyWslError(error);
+      log('[WSL] WSL not available:', (error as Error).message, `(reason: ${reason})`);
+      return { available: false, reason };
     }
   }
 
