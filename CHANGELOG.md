@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.5.0] - 2026-07-23
+
+> Série « sandbox plus rapide, isolation-first » : le mode isolé (WSL) reste la
+> frontière de sécurité ; on attaque uniquement la latence de démarrage à froid.
+
+### Added
+
+- **Cache de baseline sandbox par workspace** : les nouvelles sessions sur un projet déjà vu sont amorcées par une copie **VM-locale rapide** d'une baseline rafraîchie en delta, au lieu d'une resynchronisation complète à travers la frontière hôte↔VM (drvfs sur WSL). Le dossier **par session** reste l'unique racine d'exécution isolée — seule la façon de l'amorcer change, jamais le modèle d'isolation. **Repli automatique** sur le sync direct en cas d'échec. GC **LRU** (5 workspaces / 5 Gio, purge des baselines inutilisées > 30 j) qui ne purge jamais une baseline référencée par une session vivante ; suppressions gardées par containment `realpath`. Flag `sandboxBaselineCacheEnabled` (défaut ON, opt-out)
+- **Maintien à chaud du VM WSL2** : heartbeat basse fréquence (`wsl -d <distro> -e true`, ~45 s) tant que l'app tourne, pour qu'une commande — ou une **tâche planifiée déclenchée bien après le lancement** — ne paie pas le démarrage à froid du VM. Pings non chevauchants, erreurs avalées, timer `unref` (ne retient jamais la fermeture). Flag `sandboxKeepWarmEnabled` (défaut ON, opt-out) ; échange un peu de RAM au repos contre zéro latence de cold-start. WSL uniquement (Lima inchangé)
+
+### Fixed
+
+- **Sandbox WSL figé après un démarrage à froid** : la sonde unique au lancement pouvait mettre en cache « WSL2 indisponible » alors que le VM était seulement **froid** (typiquement juste après un reboot), bloquant toute la session avec un faux message « WSL2 n'est pas installé » jusqu'à un toggle manuel du sandbox — le panneau Réglages affichait pourtant « OK » (détection en direct). Les runs re-sondent désormais WSL **en direct** avant d'échouer et réinitialisent l'adapter s'il répond (**auto-heal**), et `checkWSLStatus` distingue « pas installé » / « pas de distro » / « pas prêt » pour ne plus inviter à réinstaller WSL2 lors d'un simple démarrage à froid
+
 ## [6.4.0] - 2026-07-22
 
 > Inclut également le contenu de la 6.3.0 (extension Thunderbird), documentée
