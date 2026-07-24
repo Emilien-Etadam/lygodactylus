@@ -101,6 +101,18 @@ export interface AppConfig {
   uiLanguage?: string;
   sandboxEnabled: boolean;
   sandboxLanNetworkEnabled: boolean;
+  /**
+   * Reuse a per-workspace baseline copy inside the sandbox VM to seed new
+   * sessions with a fast VM-local clone instead of a full cross-boundary sync.
+   * Falls back to the direct per-session sync on any failure.
+   */
+  sandboxBaselineCacheEnabled: boolean;
+  /**
+   * Keep the sandbox VM (WSL2) warm with a low-frequency heartbeat while the app
+   * runs, so the first command — or a scheduled task firing later — does not pay
+   * a cold-VM start. Trades a little idle RAM for no cold-start latency.
+   */
+  sandboxKeepWarmEnabled: boolean;
   memoryEnabled: boolean;
   memoryRuntime: MemoryRuntimeConfig;
   webSearch: WebSearchConfig;
@@ -233,6 +245,8 @@ export const DIRECT_READ_KEYS = new Set<keyof AppConfig>([
   'theme',
   'sandboxEnabled',
   'sandboxLanNetworkEnabled',
+  'sandboxBaselineCacheEnabled',
+  'sandboxKeepWarmEnabled',
   'memoryEnabled',
   'webSearch',
   'piiScrub',
@@ -322,6 +336,8 @@ export const defaultConfig: AppConfig = {
   uiLanguage: DEFAULT_BACKEND_LANGUAGE,
   sandboxEnabled: getDefaultSandboxEnabled(),
   sandboxLanNetworkEnabled: false,
+  sandboxBaselineCacheEnabled: true,
+  sandboxKeepWarmEnabled: true,
   memoryEnabled: true,
   memoryRuntime: {
     llm: {

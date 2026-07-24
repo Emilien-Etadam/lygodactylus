@@ -376,6 +376,14 @@ export function normalizeConfig(rawConfig: Partial<AppConfig> | undefined): AppC
       raw.sandboxLanNetworkEnabled,
       defaultConfig.sandboxLanNetworkEnabled
     ),
+    sandboxBaselineCacheEnabled: toBoolean(
+      raw.sandboxBaselineCacheEnabled,
+      defaultConfig.sandboxBaselineCacheEnabled
+    ),
+    sandboxKeepWarmEnabled: toBoolean(
+      raw.sandboxKeepWarmEnabled,
+      defaultConfig.sandboxKeepWarmEnabled
+    ),
     memoryEnabled: toBoolean(raw.memoryEnabled, defaultConfig.memoryEnabled),
     memoryRuntime: normalizeMemoryRuntimeConfig(raw.memoryRuntime),
     webSearch: normalizeWebSearchConfig(raw.webSearch),

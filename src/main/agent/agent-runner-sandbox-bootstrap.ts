@@ -6,9 +6,9 @@ import { execFileSync } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
 import type { Message, ServerEvent, TraceStep } from '../../renderer/types';
 import { getSandboxExecutionBlockReason } from '../sandbox/sandbox-execution-guard';
-import type { SandboxAdapter } from '../sandbox/sandbox-adapter';
+import { reinitializeSandbox, type SandboxAdapter } from '../sandbox/sandbox-adapter';
 import { SandboxSync } from '../sandbox/sandbox-sync';
-import { pathConverter } from '../sandbox/wsl-bridge';
+import { pathConverter, WSLBridge, describeWslUnavailableReason } from '../sandbox/wsl-bridge';
 import { log, logError } from '../utils/logger';
 import { getCachedLimaInstanceName, SANDBOX_SKILLS_DIR } from '../paths/sandbox-paths';
 
@@ -389,6 +389,68 @@ async function bootstrapLimaSandbox(
 }
 
 /**
+ * A one-shot WSL probe at app startup can freeze the sandbox adapter in a
+ * blocked state ("WSL2 is not installed") even though WSL2 is installed and
+ * became responsive moments later — the classic case is launching right after a
+ * reboot, while the WSL service/distro is still cold. The blocked state then
+ * persists for the whole session and only a manual sandbox toggle clears it.
+ *
+ * Before failing an agent run on a Windows block reason, re-probe WSL live once.
+ * If it now responds, reinitialize the adapter so the run self-heals. If it is
+ * still down, replace the (possibly stale) reason with an accurate one so we
+ * never tell the user to reinstall WSL2 when it is merely still starting up.
+ *
+ * Returns the block reason to use (null once healed, so the run proceeds).
+ */
+async function selfHealWslBlockReason(
+  deps: SandboxBootstrapDeps,
+  currentReason: string
+): Promise<string | null> {
+  if (process.platform !== 'win32' || !deps.sandboxEnabled || !deps.sandbox.isBlocked) {
+    return currentReason;
+  }
+
+  log('[AgentRunner] Sandbox blocked; re-checking WSL availability before failing the run...');
+  let liveStatus: Awaited<ReturnType<typeof WSLBridge.checkWSLStatus>>;
+  try {
+    liveStatus = await WSLBridge.checkWSLStatus();
+  } catch (error) {
+    logError('[AgentRunner] Live WSL re-check failed:', error);
+    return currentReason;
+  }
+
+  if (liveStatus.available) {
+    log('[AgentRunner] WSL is now responsive; reinitializing sandbox to clear stale block');
+    try {
+      await reinitializeSandbox();
+    } catch (error) {
+      logError('[AgentRunner] Sandbox reinitialize failed:', error);
+      return currentReason;
+    }
+    // reinitializeSandbox mutates the shared singleton in place, so deps.sandbox
+    // now reflects the healed state — re-evaluate against it.
+    const reevaluated = getSandboxExecutionBlockReason({
+      sandboxEnabled: deps.sandboxEnabled,
+      platform: process.platform,
+      sandbox: deps.sandbox,
+    });
+    if (reevaluated) {
+      logError('[AgentRunner] Sandbox still blocked after reinitialize:', reevaluated);
+    } else {
+      log('[AgentRunner] Sandbox self-healed; mode is now', deps.sandbox.mode);
+    }
+    return reevaluated;
+  }
+
+  logError(
+    '[AgentRunner] WSL still unavailable after re-check (reason:',
+    liveStatus.reason ?? 'unknown',
+    ')'
+  );
+  return describeWslUnavailableReason(liveStatus);
+}
+
+/**
  * Initialize sandbox isolation (WSL or Lima) before an agent run.
  */
 export async function bootstrapSandboxEnvironment(
@@ -400,11 +462,14 @@ export async function bootstrapSandboxEnvironment(
     aborted: false,
   };
 
-  const initialSandboxBlock = getSandboxExecutionBlockReason({
+  let initialSandboxBlock = getSandboxExecutionBlockReason({
     sandboxEnabled: deps.sandboxEnabled,
     platform: process.platform,
     sandbox: deps.sandbox,
   });
+  if (initialSandboxBlock) {
+    initialSandboxBlock = await selfHealWslBlockReason(deps, initialSandboxBlock);
+  }
   if (initialSandboxBlock) {
     logError('[AgentRunner] Sandbox execution blocked:', initialSandboxBlock);
     sendSandboxUnavailable(deps, initialSandboxBlock, 'Sandbox unavailable');

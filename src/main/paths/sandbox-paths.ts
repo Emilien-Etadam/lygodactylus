@@ -17,6 +17,14 @@ export const LEGACY_SYNC_MANIFEST_FILES = ['.opencowork-sync.json'] as const;
 export const SANDBOX_DIR_REL = '.lygodactylus/sandbox';
 export const LEGACY_SANDBOX_DIR_REL = '.claude/sandbox';
 
+/**
+ * Per-workspace baseline cache root (sibling of the per-session sandbox root).
+ * Baselines are read-only templates cloned into per-session dirs; keeping them
+ * in a separate root means the per-session cleanup guard never touches them and
+ * baseline GC has its own containment root.
+ */
+export const SANDBOX_CACHE_DIR_REL = '.lygodactylus/sandbox-cache';
+
 /** Skills directory inside an isolated sandbox workspace. */
 export const SANDBOX_SKILLS_DIR = 'skills';
 
@@ -37,6 +45,16 @@ export function listSandboxPathCandidates(homeDir: string, sessionId: string): s
     buildSandboxPath(homeDir, sessionId, false),
     buildSandboxPath(homeDir, sessionId, true),
   ];
+}
+
+/** Root holding all per-workspace baseline caches. */
+export function buildSandboxCacheRoot(homeDir: string): string {
+  return `${homeDir}/${SANDBOX_CACHE_DIR_REL}`;
+}
+
+/** Baseline cache path for a workspace fingerprint (sha256 hex). */
+export function buildSandboxBaselinePath(homeDir: string, fingerprint: string): string {
+  return `${buildSandboxCacheRoot(homeDir)}/${fingerprint}`;
 }
 
 export function resolveLimaInstanceName(limactlListOutput: string): string {

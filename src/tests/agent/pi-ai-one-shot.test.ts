@@ -39,6 +39,8 @@ function makeConfig(): AppConfig {
     theme: 'light',
     sandboxEnabled: false,
     sandboxLanNetworkEnabled: false,
+    sandboxBaselineCacheEnabled: true,
+    sandboxKeepWarmEnabled: true,
     memoryEnabled: true,
     memoryRuntime: {
       llm: {

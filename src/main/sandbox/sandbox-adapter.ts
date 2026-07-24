@@ -13,7 +13,7 @@
 
 import { dialog, BrowserWindow } from 'electron';
 import { log, logWarn, logError } from '../utils/logger';
-import { WSLBridge, pathConverter } from './wsl-bridge';
+import { WSLBridge, pathConverter, describeWslUnavailableReason } from './wsl-bridge';
 import { LimaBridge, limaPathConverter } from './lima-bridge';
 import { NativeExecutor } from './native-executor';
 import { getSandboxBootstrap } from './sandbox-bootstrap';
@@ -188,11 +188,10 @@ export class SandboxAdapter implements SandboxExecutor {
     log('[SandboxAdapter] WSL Status:', JSON.stringify(wslStatus, null, 2));
 
     if (!wslStatus.available) {
-      log('[SandboxAdapter] [X] WSL2 not available');
-      await this.initializeBlocked(
-        config,
-        'WSL2 is not installed. Run "wsl --install" in PowerShell as Administrator, restart, then relaunch Lygodactylus.'
-      );
+      log('[SandboxAdapter] [X] WSL2 not available (reason:', wslStatus.reason ?? 'unknown', ')');
+      // Use a reason-aware message: a transient cold start must not be reported
+      // as "WSL2 is not installed" (which wrongly sends users to `wsl --install`).
+      await this.initializeBlocked(config, describeWslUnavailableReason(wslStatus));
       return;
     }
 
