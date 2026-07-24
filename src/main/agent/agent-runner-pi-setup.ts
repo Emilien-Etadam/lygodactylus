@@ -28,6 +28,8 @@ import { buildColdStartContextualPrompt } from './agent-runner-history';
 import { buildMcpServers } from './agent-runner-mcp-servers';
 import { buildMcpCustomTools, safeStringify } from './agent-runner-mcp-bridge';
 import { enrichProcessPathForBuild } from './agent-runner-path-env';
+import { extractPromptImages } from './prompt-images';
+import type { ImageContent as PiImageContent } from '@earendil-works/pi-ai/compat';
 import {
   type CachedPiSession,
   createPiSession,
@@ -83,6 +85,8 @@ export interface PreparedPiSessionRun {
   usedSyntheticModel: boolean;
   piModel: PiModel;
   contextualPrompt: string;
+  /** Image attachments from the current user turn, forwarded to prompt(). */
+  promptImages: PiImageContent[];
   modelContextWindow: number;
   modelMaxTokens: number;
   thinkingLevel: 'off' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh';
@@ -117,8 +121,9 @@ export async function preparePiSessionRun({
 }: PreparePiSessionRunOptions): Promise<PreparedPiSessionRun> {
   const lastUserMessage = existingMessages.at(-1) ?? null;
   logCtx('[AgentRunner] Total messages:', existingMessages.length);
-  if (lastUserMessage?.content.some((content) => (content as { type?: string }).type === 'image')) {
-    log('[AgentRunner] User message contains images');
+  const promptImages = extractPromptImages(lastUserMessage?.content);
+  if (promptImages.length > 0) {
+    log(`[AgentRunner] User message contains ${promptImages.length} image(s), forwarding to prompt()`);
   }
 
   logTiming('before pi-ai model resolution', runStartTime);
@@ -564,6 +569,7 @@ export async function preparePiSessionRun({
     usedSyntheticModel,
     piModel,
     contextualPrompt,
+    promptImages,
     modelContextWindow,
     modelMaxTokens,
     thinkingLevel,

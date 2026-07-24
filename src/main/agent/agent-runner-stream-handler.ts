@@ -96,6 +96,7 @@ export async function runPromptWithStreamHandling({
     runtimeConfig,
     piModel,
     contextualPrompt,
+    promptImages,
     modelContextWindow,
     modelMaxTokens,
     thinkingLevel,
@@ -250,7 +251,10 @@ export async function runPromptWithStreamHandling({
         })
       );
     }
-    const promptResult = await piSession.prompt(contextualPrompt);
+    const promptResult = await piSession.prompt(
+      contextualPrompt,
+      promptImages.length > 0 ? { images: promptImages } : undefined
+    );
     log(
       '[AgentRunner] prompt() returned:',
       JSON.stringify(promptResult ?? 'void').substring(0, 1000)
