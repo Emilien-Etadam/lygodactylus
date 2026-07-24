@@ -487,6 +487,21 @@ export class SandboxSync {
   }
 
   /**
+   * Distro of any active sandbox session. All sessions share the single
+   * configured WSL distro, so this is a session-independent accessor for
+   * consumers (e.g. reveal-in-folder) that have no sessionId. Null when no
+   * sandbox session is active.
+   */
+  static getActiveDistro(): string | null {
+    for (const session of sessions.values()) {
+      if (session.distro) {
+        return session.distro;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Cleanup all active sandbox sessions
    * Called on app shutdown
    */

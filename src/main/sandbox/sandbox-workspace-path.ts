@@ -17,6 +17,36 @@ export function wslUnixPathToWindowsUnc(distro: string, unixPath: string): strin
   return `\\\\wsl.localhost\\${distro}\\${withoutLeadingSlash.replace(/\//g, '\\')}`;
 }
 
+/** Extract the distro name from a `\\wsl.localhost\Distro\...` (or `\\wsl$\...`) UNC path. */
+export function extractWslDistro(path: string): string | null {
+  const match = path.match(/^\\\\wsl(?:\.localhost|\$)\\([^\\]+)/i);
+  return match ? match[1] : null;
+}
+
+/**
+ * On Windows, a bare POSIX absolute path (e.g. `/home/pc/x`) emitted by the agent
+ * running inside the WSL sandbox is NOT reachable via `path.resolve()` — Node maps
+ * it to the current drive root (`C:\home\pc\x`), a different filesystem. Rewrite it
+ * to `\\wsl.localhost\<distro>\...` so Explorer / shell.openPath can find it.
+ *
+ * Returns the input unchanged when translation does not apply: off-Windows, no
+ * distro known (sandbox off), or the path is already relative / a Windows drive /
+ * a UNC path.
+ */
+export function toWindowsReachablePath(
+  inputPath: string,
+  distro: string | null | undefined,
+  platform: NodeJS.Platform = process.platform
+): string {
+  if (platform !== 'win32' || !distro) {
+    return inputPath;
+  }
+  if (!inputPath.startsWith('/') || inputPath.startsWith('//')) {
+    return inputPath;
+  }
+  return wslUnixPathToWindowsUnc(distro, inputPath);
+}
+
 /** Convert a `\\wsl.localhost\Distro\...` UNC path back to a Unix path. */
 export function wslUncPathToUnix(uncPath: string): string | null {
   const match = uncPath.match(/^\\\\wsl(?:\.localhost|\$)\\([^\\]+)\\(.+)$/i);
