@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Thinking auto-désactivé sur les tours à outils (Qwen3.x / vLLM)** : en agentique, Qwen3.5/3.6 en mode raisonnement peut terminer un tour dans un `<think>` non fermé pile là où il voulait émettre un tool call — le reasoning-parser avale l'appel, `tool_calls` ressort vide et l'agent se bloque sans rien exécuter (le modèle « annonce » l'appel dans son raisonnement puis s'arrête ; pire avec beaucoup d'outils et un contexte profond). Un garde-fou `before_provider_request` force désormais `chat_template_kwargs.enable_thinking=false` sur toute requête portant des outils, **uniquement pour le rail Qwen chat-template (vLLM/SGLang)** — les autres rails (Anthropic, Ollama, DeepSeek) ne sont pas touchés, et le raisonnement reste actif en chat sans outils. Voir [docs/qwen-local-reliability.md](docs/qwen-local-reliability.md)
+
 ## [6.5.1] - 2026-07-24
 
 > Première release **publique** de la série 6.5 : embarque aussi le contenu de la

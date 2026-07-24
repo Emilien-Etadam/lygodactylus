@@ -6,9 +6,15 @@
 > **sain** — testé à **64 107 tokens** de contexte, thinking activé,
 > `temperature 1.0` : **5/5 appels structurés** (`finish_reason=tool_calls`).
 > Le bug historique « tool call émis en texte / piégé dans le raisonnement » est
-> **corrigé côté serveur** depuis vLLM 0.25.0. Le
-> [tool-call guard](../src/main/agent/hallucinated-toolcall-guard.ts) côté app
-> reste en place comme **assurance**, plus comme pièce maîtresse.
+> **corrigé côté serveur** depuis vLLM 0.25.0 **pour le cas simple**.
+>
+> **⚠️ Mise à jour (2026-07-24)** : ce verdict « sain » ne vaut que pour un test
+> simple (1 outil, contexte court). **En agentique réel** — beaucoup d'outils MCP
+> + contexte profond (~70K+) + thinking activé — le stall **se reproduit** : le
+> modèle annonce l'appel dans son raisonnement puis s'arrête sans l'émettre. Le
+> [tool-call guard](../src/main/agent/hallucinated-toolcall-guard.ts) ne rattrape
+> **pas** ce cas (aucun texte en forme de tool call à détecter). Mitigation livrée
+> côté app : **thinking auto-désactivé sur les tours portant des outils** (voir §7).
 
 ---
 
@@ -165,6 +171,32 @@ rm -f "$BF"
 - Si le **guard** se met à logger des `steersIssued > 0` récurrents.
 - Avant d'incriminer l'app : le tool-calling local est d'abord un problème de
   **serving** (parser + chat template + version), pas d'architecture agent.
+
+## 7. Mitigation applicative : thinking auto-désactivé sur les tours à outils
+
+Le test de non-régression du §5 (1 outil, contexte court) passait 5/5 — mais **en
+agentique réel** (beaucoup d'outils MCP + contexte profond + thinking activé) le
+stall se reproduit : le modèle annonce l'appel dans son raisonnement puis s'arrête
+sans jamais l'émettre. Le tool-call guard ne le voit pas (pas de texte en forme de
+tool call à détecter).
+
+Puisque le raisonnement n'apporte rien à la **sélection** d'outil et que le bug
+n'existe **que** s'il y a un bloc `<think>`, l'app désactive désormais le thinking
+sur toute requête portant des outils, via le hook `before_provider_request` :
+
+- Fichier : [`src/main/agent/thinking-tool-guard.ts`](../src/main/agent/thinking-tool-guard.ts)
+  — force `chat_template_kwargs.enable_thinking=false` dès que `payload.tools` est
+  non vide (fusion, sans écraser `preserve_thinking`). Cela **prime aussi** un
+  `--default-chat-template-kwargs {"enable_thinking": true}` côté serveur.
+- **Portée** : uniquement le rail Qwen chat-template (vLLM/SGLang), détecté par
+  `modelUsesQwenChatTemplateThinking` (`pi-model-resolution.ts`). Anthropic, Ollama
+  (`reasoning_effort`) et DeepSeek ne sont jamais touchés.
+- **Conséquence** : le raisonnement reste actif en chat **sans** outils ; il est
+  coupé sur les tours agentiques (où il est de toute façon un risque, pas un gain).
+
+Alternative si tu veux garder thinking **et** outils ensemble : le `--chat-template`
+corrigé qui auto-ferme `<think>` avant `<tool_call>` (§3, défense côté serveur).
+Les deux sont compatibles.
 
 ## Références
 
