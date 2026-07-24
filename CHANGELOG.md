@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.5.1] - 2026-07-24
+
+> Première release **publique** de la série 6.5 : embarque aussi le contenu de la
+> 6.5.0 (cold-start sandbox), documenté ci-dessous mais jamais publié en binaire.
+
+### Documentation
+
+- **Fiabilité du tool-calling local (Qwen3.x / vLLM)** : nouveau guide `docs/qwen-local-reliability.md` — cause racine du bug thinking↔tool de Qwen3.6 (`<tool_call>` émis dans un `<think>` non fermé, avalé par le reasoning-parser → `tool_calls` vide), correctif serveur (vLLM 0.25.0 / PR #35687 « implicit reasoning end »), config vLLM validée et test de non-régression reproductible (vérifié : 5/5 appels structurés à 64K de contexte, thinking activé). Répare le lien mort référencé dans `readme.md` et `README_en.md` (#186)
+
 ## [6.5.0] - 2026-07-23
 
 > Série « sandbox plus rapide, isolation-first » : le mode isolé (WSL) reste la
