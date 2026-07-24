@@ -68,7 +68,8 @@
 
 | Tag             | Date       | Highlights                                                                    |
 | --------------- | ---------- | ----------------------------------------------------------------------------- |
-| `v6.5.0`        | 2026-07-23 | **Latest** — sandbox « plus rapide, isolation-first » : cache de baseline par workspace (seed VM-local, GC LRU) + keep-warm du VM WSL2 ; fix du blocage WSL figé après cold-start (auto-heal + message pas-prêt / pas-installé) |
+| `v6.5.1`        | 2026-07-24 | **Latest** — première release publique de la série 6.5 : guide de fiabilité du tool-calling local (Qwen3.x/vLLM — cause racine, correctif serveur vLLM 0.25.0, test de non-régression) ; embarque le contenu de la 6.5.0 ci-dessous |
+| `v6.5.0`        | 2026-07-23 | jamais publiée en binaire — son contenu est inclus dans la 6.5.1 ; sandbox « plus rapide, isolation-first » : cache de baseline par workspace (seed VM-local, GC LRU) + keep-warm du VM WSL2 ; fix du blocage WSL figé après cold-start (auto-heal + message pas-prêt / pas-installé) |
 | `v6.4.0`        | 2026-07-22 | lot 3 (dictée STT, veille, masquage PII, aperçu canvas, dossiers/sous-chats, Quick-Ask sélection, verrou skills, badge localisation) ; maintenance SDK pi 0.81.1 + OfficeCLI épinglé ; audit sans exception |
 | `v6.3.0`…`v6.0.3` | 2026-07-08→17 | tranche intermédiaire (extension Thunderbird, forks Firefox, correctifs) — détail dans `CHANGELOG.md` ; la 6.3.0 n'a jamais été publiée en binaire, son contenu est inclus dans la 6.4.0 |
 | `v6.0.2`        | 2026-07-08 | fix bash WSL timeout (CRLF + proxy non bloquant) |
@@ -200,4 +201,4 @@ _Prompts Cursor : `docs/cursor-prompts-lot3-2026-07.md`. Regroupe les candidates
 
 ---
 
-_Last updated: 2026-07-23 (**v6.5.0** — sandbox plus rapide, isolation-first : cache de baseline par workspace + keep-warm du VM WSL2 ; auto-heal du blocage WSL figé après un démarrage à froid, message pas-prêt / pas-installé ; défaut ON avec repli)_
+_Last updated: 2026-07-24 (**v6.5.1** — première release publique de la série 6.5 : guide de fiabilité du tool-calling local Qwen3.x/vLLM ; embarque le contenu de la 6.5.0 jamais publié en binaire)_
