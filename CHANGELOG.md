@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Clic sur un lien de fichier écrit par l'agent en sandbox WSL → « fichier introuvable »** : l'agent, qui tourne dans le sandbox WSL, rapporte des chemins Unix (ex. `/home/pc/x.html`). Sous Windows, « Révéler dans le dossier » faisait `path.resolve('/home/pc/x.html')` → `C:\home\pc\x.html` (le mauvais système de fichiers), donc le fichier — pourtant bien écrit dans le WSL — semblait manquant. Ces chemins sont désormais réécrits en `\\wsl.localhost\<distro>\…` (distro dérivé du cwd s'il est déjà un chemin UNC WSL, sinon d'une session sandbox active) avant ouverture
 - **Images ignorées avec les endpoints OpenAI-compatibles (vLLM/Ollama)** : une image jointe au message était **silencieusement perdue** — le tour partait en texte (`piSession.prompt(string)`) sans le champ `images`, donc le modèle recevait un message sans contenu visuel et répondait « Bonjour, comment puis-je vous aider ? » comme si le message était vide. Les images du tour courant sont désormais extraites et transmises via `prompt(text, { images })`. Vérifié : la vision fonctionnait déjà côté serveur — c'était un drop côté app
 
 ### Added

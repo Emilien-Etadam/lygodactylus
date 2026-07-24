@@ -10,6 +10,8 @@ import {
 } from '../shared/local-file-path';
 import { log, logWarn, logError } from './utils/logger';
 import { getWorkingDir } from './main-working-dir';
+import { extractWslDistro, toWindowsReachablePath } from './sandbox/sandbox-workspace-path';
+import { SandboxSync } from './sandbox/sandbox-sync';
 
 export function sanitizeDiagnosticBaseUrl(value: string | undefined): string | null {
   if (!value) {
@@ -64,6 +66,14 @@ export async function revealFileInFolder(filePath: string, cwd?: string): Promis
       : normalizedPath.replace(/^[A-Za-z]:[/\\]workspace[/\\]/i, '');
     normalizedPath = resolve(baseDir, relativePart);
   }
+
+  // WSL sandbox: the agent reports Unix paths (e.g. /home/pc/x.html). On Windows,
+  // resolve() would map those to the current drive (C:\home\pc\x.html) — a
+  // different filesystem — so the file "doesn't exist". Rewrite to
+  // \\wsl.localhost\<distro>\... using the distro from the cwd (if it is a WSL UNC)
+  // or any active sandbox session.
+  const wslDistro = (cwd ? extractWslDistro(cwd) : null) ?? SandboxSync.getActiveDistro();
+  normalizedPath = toWindowsReachablePath(normalizedPath, wslDistro);
 
   if (!isUncPath(normalizedPath)) {
     normalizedPath = resolve(normalizedPath);
