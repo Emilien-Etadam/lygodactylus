@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Images ignorées avec les endpoints OpenAI-compatibles (vLLM/Ollama)** : une image jointe au message était **silencieusement perdue** — le tour partait en texte (`piSession.prompt(string)`) sans le champ `images`, donc le modèle recevait un message sans contenu visuel et répondait « Bonjour, comment puis-je vous aider ? » comme si le message était vide. Les images du tour courant sont désormais extraites et transmises via `prompt(text, { images })`. Vérifié : la vision fonctionnait déjà côté serveur — c'était un drop côté app
+
 ### Added
 
 - **Thinking auto-désactivé sur les tours à outils (Qwen3.x / vLLM)** : en agentique, Qwen3.5/3.6 en mode raisonnement peut terminer un tour dans un `<think>` non fermé pile là où il voulait émettre un tool call — le reasoning-parser avale l'appel, `tool_calls` ressort vide et l'agent se bloque sans rien exécuter (le modèle « annonce » l'appel dans son raisonnement puis s'arrête ; pire avec beaucoup d'outils et un contexte profond). Un garde-fou `before_provider_request` force désormais `chat_template_kwargs.enable_thinking=false` sur toute requête portant des outils, **uniquement pour le rail Qwen chat-template (vLLM/SGLang)** — les autres rails (Anthropic, Ollama, DeepSeek) ne sont pas touchés, et le raisonnement reste actif en chat sans outils. Voir [docs/qwen-local-reliability.md](docs/qwen-local-reliability.md)

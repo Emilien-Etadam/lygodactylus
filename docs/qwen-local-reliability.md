@@ -198,6 +198,31 @@ Alternative si tu veux garder thinking **et** outils ensemble : le `--chat-templ
 corrigé qui auto-ferme `<think>` avant `<tool_call>` (§3, défense côté serveur).
 Les deux sont compatibles.
 
+## 8. Vision / images (drop côté app, corrigé)
+
+Symptôme : envoyer une image → « Bonjour, comment puis-je vous aider ? », comme si
+le message était vide.
+
+**Ce n'était pas le serveur.** Test décisif (thinking off, on compare
+`prompt_tokens`) :
+
+```bash
+# image rouge 96x96 en data-URI, question "de quelle couleur ?"
+# AVEC image  : content="Rouge"       prompt_tokens=89
+# SANS image  : content="Impossible"  prompt_tokens=23
+```
+
+Les +66 tokens = les tokens visuels → l'image **est** ingérée, la vision marche
+côté vLLM. Le drop était **côté app** : le tour partait en texte via
+`piSession.prompt(contextualPrompt)` (une string), sans le champ `images` du SDK.
+Corrigé dans [`prompt-images.ts`](../src/main/agent/prompt-images.ts) +
+`agent-runner-stream-handler.ts` — les blocs `type:'image'` du tour courant sont
+mappés vers `{ data, mimeType }` et passés à `prompt(text, { images })`.
+
+> [!NOTE]
+> Reste non couvert (tour suivant en cours de stream) : les chemins `steer()` /
+> `followUp()` acceptent aussi `images?` mais ne les reçoivent pas encore.
+
 ## Références
 
 - [vLLM PR #35687 — implicit reasoning end (fix)](https://github.com/vllm-project/vllm/pull/35687)
