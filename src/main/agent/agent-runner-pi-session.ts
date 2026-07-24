@@ -10,6 +10,7 @@ import {
   SessionManager as PiSessionManager,
   SettingsManager as PiSettingsManager,
   type AgentSession as PiAgentSession,
+  type InlineExtension,
   type ToolDefinition,
 } from '@earendil-works/pi-coding-agent';
 import { detectCommonProviderSetup } from '../../shared/api-provider-guidance';
@@ -24,6 +25,8 @@ import {
   createOllamaPayloadExtension,
   type OllamaNumCtxRef,
 } from './ollama-payload-extension';
+import { modelUsesQwenChatTemplateThinking } from './pi-model-resolution';
+import { createThinkingToolGuardExtension } from './thinking-tool-guard';
 import {
   applyProjectRulesAgentsFilesOverride,
   resolveProjectRulesFile,
@@ -478,6 +481,18 @@ export async function createPiSession({
     ? { value: piModel.contextWindow || 128000 }
     : undefined;
 
+  // Qwen3.x on vLLM/SGLang stalls when it emits a tool call inside an unclosed
+  // <think> block (docs/qwen-local-reliability.md). Auto-disable reasoning on
+  // any tool-bearing request for that rail only.
+  const usesQwenChatTemplateThinking = modelUsesQwenChatTemplateThinking(piModel, isOllamaEndpoint);
+  const extensionFactories: InlineExtension[] = [];
+  if (ollamaNumCtx) {
+    extensionFactories.push(createOllamaPayloadExtension(ollamaNumCtx));
+  }
+  if (usesQwenChatTemplateThinking) {
+    extensionFactories.push(createThinkingToolGuardExtension());
+  }
+
   const resourceLoader = new DefaultResourceLoader({
     cwd: effectiveCwd,
     agentDir: getAgentDir(),
@@ -496,9 +511,7 @@ export async function createPiSession({
         resolvedProjectRules
       ),
     }),
-    ...(ollamaNumCtx
-      ? { extensionFactories: [createOllamaPayloadExtension(ollamaNumCtx)] }
-      : {}),
+    ...(extensionFactories.length > 0 ? { extensionFactories } : {}),
   });
   const reloadSucceeded = await reloadResourceLoaderWithTimeout(resourceLoader, promptTemplatePaths);
   if (!reloadSucceeded) {
@@ -561,6 +574,11 @@ export async function createPiSession({
     log(
       '[AgentRunner] Ollama before_provider_request extension installed, num_ctx:',
       ollamaNumCtx.value
+    );
+  }
+  if (usesQwenChatTemplateThinking) {
+    log(
+      '[AgentRunner] Thinking-tool guard installed: reasoning auto-disabled on tool-bearing requests (Qwen chat-template rail)'
     );
   }
 

@@ -348,6 +348,27 @@ export function applyPiModelRuntimeOverrides(
   return nextModel;
 }
 
+/**
+ * Whether a resolved model toggles reasoning through
+ * `chat_template_kwargs.enable_thinking` — Qwen3 hybrid-thinking on a jinja
+ * chat-template server (vLLM / SGLang) — as opposed to reasoning_effort (Ollama)
+ * or native thinking blocks (Anthropic / DeepSeek). Matches both registry models
+ * (compat.thinkingFormat set by applyPiModelRuntimeOverrides) and synthetic
+ * fallbacks (id pattern), so the thinking-tool guard is scoped correctly.
+ */
+export function modelUsesQwenChatTemplateThinking(
+  model: Model<Api>,
+  isOllamaEndpoint: boolean
+): boolean {
+  if (isOllamaEndpoint || model.api !== 'openai-completions') {
+    return false;
+  }
+  const compat = (model.compat || {}) as { thinkingFormat?: string };
+  return (
+    compat.thinkingFormat === 'qwen-chat-template' || QWEN_HYBRID_THINKING_PATTERN.test(model.id)
+  );
+}
+
 export function resolvePiRegistryModel(
   modelString: string,
   options: PiModelLookupOptions = {}
